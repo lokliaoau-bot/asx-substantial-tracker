@@ -1,0 +1,47 @@
+name: debug-pdfs   # 临时诊断用：下载解析不出申报方的 PDF 样本，推到 debug 分支。修复后删除。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  grab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Download sample PDFs
+        run: |
+          mkdir -p debug
+          python - <<'EOF'
+          import json, sys, time
+          sys.path.insert(0, "scraper")
+          import scrape
+          entries = json.load(open("data/all_notices.json"))["entries"].values()
+          parsed = [e for e in entries if e.get("status") == "parsed" and e.get("pdf_url")]
+          bad = [e for e in parsed if not e.get("holder_name") or not e.get("voting_power")]
+          good = [e for e in parsed if e.get("holder_name") and e.get("voting_power")]
+          picks = bad[:14] + good[:4]
+          for e in picks:
+              try:
+                  data, _ = scrape.download_pdf(e["pdf_url"])
+                  open(f"debug/{e['code']}_{e['id']}.pdf", "wb").write(data)
+                  print("ok", e["code"], e["id"])
+              except Exception as ex:
+                  print("fail", e["code"], ex)
+              time.sleep(1)
+          EOF
+      - name: Push to debug branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b debug
+          git add -f debug
+          git commit -m "debug: sample PDFs"
+          git push -f origin debug

@@ -1,10 +1,7 @@
 name: scrape-substantial
 
 on:
-  workflow_dispatch:            # 网页上的“抓取最新公告”按钮触发这里
-  schedule:
-    - cron: "40 9 * * 1-5"      # 悉尼交易日晚上（夏令时 20:40 / 冬令时 19:40）
-    - cron: "30 21 * * 0-4"     # 悉尼次日早上，补抓前一天晚些发布的公告
+  workflow_dispatch:            # 只在网页上点“抓取最新公告”时运行（按用户要求去掉了定时任务）
 
 permissions:
   contents: write

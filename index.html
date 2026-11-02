@@ -554,7 +554,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     const missing = weekdaysBetween(from, end) - covered.length;
     if (missing >= 2) {
       cov.hidden = false;
-      cov.textContent = `这段时间里约有 ${missing} 个交易日还没有数据。ASX 公开的全市场列表只提供当天和上一交易日，脚本每个交易日自动抓取并累积，连续运行两周后就是完整的近两周数据。`;
+      cov.textContent = `这段时间里约有 ${missing} 个交易日还没有数据。ASX 公开的全市场列表只提供当天和上一交易日，每次点“抓取最新公告”会补上这两天。想要连续的近两周数据，每隔一两个交易日点一次就行。`;
     } else {
       cov.hidden = true;
     }

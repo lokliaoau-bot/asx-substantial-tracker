@@ -8,7 +8,7 @@
 
 - **抓取**：GitHub Actions 运行 `scraper/scrape.py`，从 ASX 公开页面抓取大股东公告（Form 603/604/605），解析 PDF，筛出关注名单（10 家主动型投资者）的记录，写入 `data/notices.json` 并提交回仓库。
 - **网页**：GitHub Pages 托管 `index.html`。点“抓取最新公告”按钮，网页用用户自己的 GitHub 令牌调用 `workflow_dispatch` 触发抓取，轮询运行状态，完成后在下方表格显示结果。网页支持“添加到主屏幕”。
-- **定时**：每个交易日自动运行两次，累积数据。
+- **触发方式**：只在网页上点按钮时运行（用户 2026-11-02 要求去掉定时任务），每次补当天和上一交易日。
 
 不需要服务器、数据库或任何付费服务。仓库里不存放任何密钥。
 
@@ -42,7 +42,7 @@
 | `scraper/watchlist.json` | 关注名单：`holders[].name/aliases/hints`，以及 `noise_hints`。 |
 | `data/notices.json` | 网页读取的数据。初始是空结构，首次运行后由脚本覆盖。 |
 | `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
-| `.github/workflows/scrape.yml` | 抓取工作流：手动触发 + 定时。需要 `contents: write`。 |
+| `.github/workflows/scrape.yml` | 抓取工作流：只有手动触发（网页按钮）。需要 `contents: write`。 |
 | `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
 | `tests/test_scrape.py` | 33 个离线测试（模拟 ASX 列表页和 PDF + 真实公告 PDF 样本，不联网）。 |
 | `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |

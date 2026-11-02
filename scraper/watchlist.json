@@ -1,0 +1,156 @@
+{
+  "_note": "aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。改完后，保留期内的旧公告会在下次运行时按新名单重新匹配。",
+  "holders": [
+    {
+      "name": "Paradice Investment Management",
+      "aliases": [
+        "Paradice Investment Management",
+        "Paradice Investment"
+      ],
+      "hints": [
+        "PIM",
+        "Paradice"
+      ]
+    },
+    {
+      "name": "Wilson Asset Management",
+      "aliases": [
+        "Wilson Asset Management",
+        "WAM Capital",
+        "WAM Microcap",
+        "WAM Research",
+        "WAM Leaders",
+        "WAM Global",
+        "WAM Strategic Value",
+        "WAM Alternative Assets"
+      ],
+      "hints": [
+        "WAM",
+        "Wilson"
+      ]
+    },
+    {
+      "name": "Regal Funds Management",
+      "aliases": [
+        "Regal Funds Management",
+        "Regal Partners",
+        "Regal Investment Fund"
+      ],
+      "hints": [
+        "Regal",
+        "RPL",
+        "RFM"
+      ]
+    },
+    {
+      "name": "L1 Capital",
+      "aliases": [
+        "L1 Capital"
+      ],
+      "hints": [
+        "L1",
+        "L1C"
+      ]
+    },
+    {
+      "name": "Perennial",
+      "aliases": [
+        "Perennial Value Management",
+        "Perennial Investment Partners",
+        "Perennial Partners"
+      ],
+      "hints": [
+        "Perennial",
+        "PVM"
+      ]
+    },
+    {
+      "name": "Celeste Funds Management",
+      "aliases": [
+        "Celeste Funds Management"
+      ],
+      "hints": [
+        "Celeste"
+      ]
+    },
+    {
+      "name": "Ellerston Capital",
+      "aliases": [
+        "Ellerston Capital"
+      ],
+      "hints": [
+        "Ellerston"
+      ]
+    },
+    {
+      "name": "Thorney / Tiga Trading",
+      "aliases": [
+        "Thorney Investment",
+        "Thorney Opportunities",
+        "Thorney Technologies",
+        "Thorney Holdings",
+        "Tiga Trading"
+      ],
+      "hints": [
+        "Thorney",
+        "Tiga",
+        "TOP",
+        "TEK"
+      ]
+    },
+    {
+      "name": "Washington H. Soul Pattinson",
+      "aliases": [
+        "Washington H. Soul Pattinson",
+        "Washington H Soul Pattinson",
+        "Soul Pattinson"
+      ],
+      "hints": [
+        "WHSP",
+        "SOL",
+        "Soul Patts"
+      ]
+    },
+    {
+      "name": "Tattarang (Andrew Forrest)",
+      "aliases": [
+        "Tattarang",
+        "Squadron Resources"
+      ],
+      "hints": [
+        "Tattarang",
+        "Squadron"
+      ]
+    }
+  ],
+  "noise_hints": [
+    "MUFG",
+    "Mitsubishi",
+    "CBA",
+    "Commonwealth Bank",
+    "MS",
+    "Morgan Stanley",
+    "UBS",
+    "Citi",
+    "CITI",
+    "Citigroup",
+    "JPM",
+    "JPMorgan",
+    "J.P. Morgan",
+    "GS",
+    "Goldman",
+    "Goldman Sachs",
+    "BlackRock",
+    "BLK",
+    "Vanguard",
+    "SSGA",
+    "State Street",
+    "HSBC",
+    "Merrill",
+    "BofA",
+    "BAML",
+    "Barclays",
+    "Nomura",
+    "Credit Suisse"
+  ]
+}

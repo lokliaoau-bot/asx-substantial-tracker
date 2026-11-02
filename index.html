@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>大股东公告雷达</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#F2F4F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10161B" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="大股东雷达">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper: #F2F4F1;
+  --surface: #FFFFFF;
+  --ink: #18222B;
+  --muted: #5B6873;
+  --rule: #D3DAD6;
+  --primary: #1F5C50;
+  --primary-ink: #FFFFFF;
+  --becoming: #2D7A46;
+  --change: #2B5C8A;
+  --ceasing: #A3423A;
+  --warn-bg: #FFF4D6;
+  --warn-ink: #6B4E00;
+  --row-hover: #F7F9F7;
+  --font: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #10161B;
+    --surface: #172028;
+    --ink: #E3E9EC;
+    --muted: #93A1AB;
+    --rule: #2A3640;
+    --primary: #5FB39C;
+    --primary-ink: #0C1714;
+    --becoming: #6CC58A;
+    --change: #7FB2E5;
+    --ceasing: #E58A80;
+    --warn-bg: #3A3014;
+    --warn-ink: #F2D88A;
+    --row-hover: #1C2731;
+  }
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+a { color: var(--change); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+header.top {
+  display: flex; flex-wrap: wrap; gap: 16px 28px;
+  align-items: flex-end; justify-content: space-between;
+  padding-bottom: 20px; border-bottom: 2px solid var(--ink);
+}
+h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.01em; }
+.lede { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.run {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+#runBtn {
+  background: var(--primary); color: var(--primary-ink);
+  border: 0; border-radius: 6px; padding: 14px 26px;
+  font-size: 17px; font-weight: 600; cursor: pointer;
+  min-width: 200px;
+}
+#runBtn[disabled] { opacity: .65; cursor: progress; }
+#status { font-size: 13px; color: var(--muted); min-height: 1.4em; text-align: right; }
+#status.err { color: var(--ceasing); }
+
+.notice {
+  margin: 18px 0 0; padding: 10px 14px; border-radius: 6px;
+  background: var(--warn-bg); color: var(--warn-ink); font-size: 14px;
+}
+
+/* 申报方计数条：页面的主角 */
+.holders {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0; margin: 26px 0 8px;
+  border-top: 1px solid var(--rule); border-left: 1px solid var(--rule);
+}
+.holder {
+  appearance: none; text-align: left; background: var(--surface);
+  border: 0; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  padding: 12px 14px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+}
+.holder .n { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.holder .name { font-size: 13px; color: var(--muted); line-height: 1.3; }
+.holder.zero .n { color: var(--rule); }
+.holder[aria-pressed="true"] { box-shadow: inset 0 -4px 0 var(--primary); }
+.holder[aria-pressed="true"] .name { color: var(--ink); }
+
+.filters {
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+  margin: 18px 0 12px;
+}
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 7px 12px; cursor: pointer; font-size: 14px; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+#q {
+  flex: 1 1 200px; min-width: 160px; padding: 7px 10px;
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--surface);
+}
+.count { font-size: 13px; color: var(--muted); }
+
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; font-size: 13px; color: var(--muted); white-space: nowrap; background: var(--surface); position: sticky; top: 0; }
+th[data-sort] { cursor: pointer; }
+th[data-sort]::after { content: ""; }
+th.sorted-desc::after { content: " ↓"; }
+th.sorted-asc::after { content: " ↑"; }
+tbody tr:hover { background: var(--row-hover); }
+td.num, .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.code a { font-weight: 600; text-decoration: none; color: var(--ink); }
+.code a:hover { text-decoration: underline; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; }
+.t-becoming { color: var(--becoming); }
+.t-change { color: var(--change); }
+.t-ceasing { color: var(--ceasing); }
+.t-other { color: var(--muted); }
+.up { color: var(--becoming); }
+.down { color: var(--ceasing); }
+.conf { font-size: 12px; color: var(--muted); }
+.company { font-size: 12px; color: var(--muted); font-weight: 400; max-width: 16em; }
+.notice.bad { background: transparent; border: 1px solid var(--ceasing); color: var(--ceasing); }
+.headline a { color: var(--ink); }
+.empty { padding: 36px 16px; text-align: center; color: var(--muted); }
+
+details.settings { margin-top: 30px; border-top: 1px solid var(--rule); padding-top: 14px; }
+details.settings summary { cursor: pointer; font-weight: 600; }
+.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 14px; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.form input { padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.form .actions { display: flex; gap: 10px; align-items: end; }
+.btn2 { padding: 8px 14px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); cursor: pointer; }
+.help { font-size: 13px; color: var(--muted); max-width: 75ch; }
+footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch; }
+
+@media (max-width: 900px) { .holders { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px) {
+  h1 { font-size: 24px; }
+  .tablewrap { overflow: visible; border: 0; background: transparent; }
+  table, tbody, tr, td { display: block; width: 100%; min-width: 0; }
+  thead { display: none; }
+  tbody tr { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+  tbody tr:hover { background: var(--surface); }
+  td { border: 0; padding: 3px 0; display: flex; gap: 12px; align-items: baseline; }
+  td::before { content: attr(data-label); flex: 0 0 4.8em; color: var(--muted); font-size: 13px; }
+  td.empty { display: block; }
+  td.empty::before { content: none; }
+  .company { max-width: none; }
+  .run { align-items: stretch; width: 100%; }
+  #runBtn { width: 100%; }
+  #status { text-align: left; }
+  .holders { grid-template-columns: repeat(2, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1>大股东公告雷达</h1>
+      <p class="lede">追踪 10 个主动型投资者在 ASX 的大股东公告：谁新进、谁加仓、谁退出。</p>
+    </div>
+    <div class="run">
+      <button id="runBtn" type="button">抓取最新公告</button>
+      <div id="status" role="status" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <div id="issues" class="notice bad" hidden></div>
+  <div id="coverage" class="notice" hidden></div>
+
+  <section class="holders" id="holders" aria-label="按申报方筛选"></section>
+
+  <div class="filters">
+    <div class="seg" id="typeSeg" role="group" aria-label="公告类型">
+      <button type="button" data-type="all" aria-pressed="true">全部</button>
+      <button type="button" data-type="becoming" aria-pressed="false">新进</button>
+      <button type="button" data-type="change" aria-pressed="false">变动</button>
+      <button type="button" data-type="ceasing" aria-pressed="false">退出</button>
+    </div>
+    <div class="seg" id="daysSeg" role="group" aria-label="时间范围">
+      <button type="button" data-days="14" aria-pressed="true">近 14 天</button>
+      <button type="button" data-days="30" aria-pressed="false">近 30 天</button>
+    </div>
+    <input id="q" type="search" placeholder="搜索代码或标题，例如 SLC" aria-label="搜索">
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="date" class="sorted-desc">公告日期</th>
+          <th data-sort="code">代码</th>
+          <th data-sort="holder">申报方</th>
+          <th>类型</th>
+          <th>持股比例</th>
+          <th>变动日</th>
+          <th>公告</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <details class="settings" id="settings">
+    <summary>GitHub 设置</summary>
+    <p class="help">按钮通过 GitHub Actions 运行抓取脚本，需要一个只对本仓库有效的 Fine-grained token（权限：Actions 读写、Contents 只读）。令牌只保存在这台设备的浏览器里，不会写进仓库。</p>
+    <div class="form">
+      <label>仓库所有者<input id="owner" autocomplete="off" placeholder="你的 GitHub 用户名"></label>
+      <label>仓库名<input id="repo" autocomplete="off" placeholder="asx-substantial-tracker"></label>
+      <label>分支<input id="branch" autocomplete="off" placeholder="main"></label>
+      <label>Token<input id="token" type="password" autocomplete="off" placeholder="github_pat_..."></label>
+      <div class="actions">
+        <button class="btn2" id="saveCfg" type="button">保存设置</button>
+        <button class="btn2" id="clearCfg" type="button">清除令牌</button>
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。本工具只做信息整理，不构成投资建议。
+  </footer>
+</main>
+
+<script>
+(() => {
+  const WORKFLOW = "scrape.yml";
+  const TYPE_LABEL = { becoming: "新进大股东", change: "持股变动", ceasing: "退出大股东", other: "其他" };
+  const RUN_STATUS = { queued: "排队中", pending: "排队中", waiting: "排队中", requested: "排队中", in_progress: "正在抓取并读取公告 PDF" };
+  const DEFAULT_WATCHLIST = ["Paradice Investment Management", "Wilson Asset Management", "Regal Funds Management", "L1 Capital", "Perennial",
+    "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading", "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)"];
+  const $ = (id) => document.getElementById(id);
+
+  const store = {
+    get(k) { try { return localStorage.getItem("ssr_" + k) || ""; } catch { return ""; } },
+    set(k, v) { try { v ? localStorage.setItem("ssr_" + k, v) : localStorage.removeItem("ssr_" + k); } catch {} },
+  };
+
+  // 在 GitHub Pages 上自动识别仓库
+  function detectRepo() {
+    const host = location.hostname;
+    if (!host.endsWith(".github.io")) return { owner: "", repo: "" };
+    const owner = host.split(".")[0];
+    const seg = location.pathname.split("/").filter(Boolean)[0] || "";
+    return { owner, repo: seg && !/\.html?$/i.test(seg) ? seg : host };
+  }
+  const auto = detectRepo();
+  const cfg = {
+    owner: store.get("owner") || auto.owner,
+    repo: store.get("repo") || auto.repo,
+    branch: store.get("branch") || "main",
+    token: store.get("token"),
+  };
+
+  const state = { data: null, holder: null, type: "all", days: 14, q: "", sort: "date", dir: -1, busy: false };
+
+  function setStatus(msg, isErr = false) {
+    const el = $("status");
+    el.textContent = msg;
+    el.classList.toggle("err", isErr);
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : "");
+
+  function sydneyToday() {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney" }).format(new Date());
+  }
+  function addDays(iso, n) {
+    const d = new Date(iso + "T00:00:00Z");
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+  function weekdaysBetween(fromIso, toIso) {
+    let n = 0;
+    for (let d = fromIso; d <= toIso; d = addDays(d, 1)) {
+      const wd = new Date(d + "T00:00:00Z").getUTCDay();
+      if (wd !== 0 && wd !== 6) n++;
+    }
+    return n;
+  }
+  function fmtDate(v) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || "");
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : (v || "");
+  }
+  function fmtStamp(iso) {
+    return new Date(iso).toLocaleString("zh-CN", { hour12: false, timeZone: "Australia/Sydney" }) + "（悉尼时间）";
+  }
+  const fmtPct = (v) => (Math.round(v * 100) / 100).toFixed(2) + "%";
+
+  // ---------- GitHub API
+  function api(path, opts = {}) {
+    const headers = { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.headers || {}) };
+    if (cfg.token) headers.Authorization = "Bearer " + cfg.token;
+    return fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}${path}`, { ...opts, headers });
+  }
+  function apiError(res, action) {
+    if (res.status === 401) return `${action}失败：令牌无效或已过期，请在下方 GitHub 设置里换一个。`;
+    if (res.status === 403) return `${action}失败：令牌权限不足（需要本仓库的 Actions 读写权限），或触发了 GitHub 频率限制。`;
+    if (res.status === 404) return `${action}失败：找不到仓库或工作流，请检查仓库所有者、仓库名，以及 .github/workflows/${WORKFLOW} 是否存在。`;
+    if (res.status === 422) return `${action}失败：分支“${cfg.branch}”不对，或工作流没有开启手动触发。`;
+    return `${action}失败：GitHub 返回 ${res.status}。`;
+  }
+
+  // ---------- 读取数据：优先 GitHub API（最新），失败再读 Pages 上的文件
+  async function fromApi() {
+    const res = await api(`/contents/data/notices.json?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`,
+      { headers: { Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+    if (!res.ok) throw new Error(apiError(res, "读取数据"));
+    return res.json();
+  }
+  async function fromPages() {
+    const res = await fetch(`data/notices.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`读取 data/notices.json 失败（${res.status}）。`);
+    return res.json();
+  }
+
+  async function loadData({ quiet = false } = {}) {
+    let apiErr = "";
+    const sources = cfg.owner && cfg.repo ? [fromApi, fromPages] : [fromPages];
+    for (const src of sources) {
+      try {
+        const d = await src();
+        if (!d || !Array.isArray(d.notices)) throw new Error("数据文件格式不对。");
+        state.data = d;
+        render();
+        if (!quiet) showFreshness(apiErr && cfg.token ? apiErr + "（下面显示的是网页上的缓存数据）" : "");
+        return true;
+      } catch (e) {
+        if (src === fromApi) apiErr = e.message;
+        else if (!quiet) setStatus(apiErr || (location.protocol === "file:"
+          ? "直接打开本地文件读不到数据，请用 GitHub Pages 的地址访问。" : e.message), true);
+      }
+    }
+    render();
+    return false;
+  }
+
+  function showFreshness(warn) {
+    const d = state.data;
+    if (warn) return setStatus(warn, true);
+    if (d.last_success_at) return setStatus("数据更新于 " + fmtStamp(d.last_success_at));
+    setStatus("还没有数据，点“抓取最新公告”开始第一次抓取。");
+  }
+
+  // ---------- 触发抓取
+  async function latestRunId() {
+    const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=1`, { cache: "no-store" });
+    if (!r.ok) throw new Error(apiError(r, "查询运行记录"));
+    const runs = (await r.json()).workflow_runs || [];
+    return runs.length ? runs[0].id : 0;
+  }
+
+  async function runScrape() {
+    if (state.busy) return;
+    if (!cfg.owner || !cfg.repo || !cfg.token) {
+      $("settings").open = true;
+      setStatus("先在下方 GitHub 设置里填好仓库和 Token，再点抓取。", true);
+      $(cfg.owner ? (cfg.repo ? "token" : "repo") : "owner").focus();
+      return;
+    }
+    const btn = $("runBtn");
+    state.busy = true;
+    btn.disabled = true;
+    btn.textContent = "抓取中…";
+    const started = Date.now();
+    try {
+      setStatus("正在请求 GitHub 启动抓取…");
+      const before = await latestRunId();
+      const res = await api(`/actions/workflows/${WORKFLOW}/dispatches`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: cfg.branch }),
+      });
+      if (res.status !== 204) return setStatus(apiError(res, "启动抓取"), true);
+
+      while (Date.now() - started < 20 * 60 * 1000) {
+        await sleep(Date.now() - started < 30000 ? 4000 : 8000);
+        const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`, { cache: "no-store" });
+        if (!r.ok) return setStatus(apiError(r, "查询进度"), true);
+        const runs = (await r.json()).workflow_runs || [];
+        const run = runs.filter((x) => x.id > before).sort((a, b) => a.id - b.id)[0];
+        const secs = Math.round((Date.now() - started) / 1000);
+        if (!run) { setStatus(`已提交，等待 GitHub 分配机器…（${secs} 秒）`); continue; }
+        if (run.status !== "completed") { setStatus(`${RUN_STATUS[run.status] || "运行中"}…（${secs} 秒）`); continue; }
+
+        await sleep(2000);
+        if (!(await loadData({ quiet: true }))) {
+          return setStatus("抓取已经完成，但读取结果失败，请稍后刷新页面。", true);
+        }
+        const lr = state.data && state.data.last_run;
+        if (run.conclusion === "success") {
+          if (lr && lr.errors && lr.errors.length) setStatus(`抓取完成，有 ${lr.errors.length} 个提醒：${lr.errors[0]}`, true);
+          else showFreshness("");
+        } else {
+          const why = lr && lr.ok === false && lr.errors && lr.errors[0] ? lr.errors[0] : `运行结果为 ${run.conclusion}`;
+          setStatus(`抓取没有成功：${why}。日志：${run.html_url}`, true);
+        }
+        return;
+      }
+      setStatus("等了 20 分钟还没完成，请到 GitHub 的 Actions 页面查看。", true);
+    } catch (e) {
+      setStatus(e.message || "网络出错，请稍后再试。", true);
+    } finally {
+      state.busy = false;
+      btn.disabled = false;
+      btn.textContent = "抓取最新公告";
+    }
+  }
+
+  // ---------- 渲染
+  const windowStart = () => addDays(sydneyToday(), -state.days);
+  const inWindow = (n) => (n.date || "") >= windowStart();
+
+  function filtered() {
+    const all = (state.data && state.data.notices) || [];
+    const q = state.q.trim().toLowerCase();
+    let list = all.filter(inWindow);
+    if (state.holder) list = list.filter((n) => n.holder === state.holder);
+    if (state.type !== "all") list = list.filter((n) => n.type === state.type);
+    if (q) list = list.filter((n) => [n.code, n.company, n.headline, n.holder].join(" ").toLowerCase().includes(q));
+    const k = state.sort, dir = state.dir;
+    const key = (n) => (k === "date" ? (n.date || "") + (n.time || "") : String(n[k] || "").toLowerCase());
+    return list.sort((a, b) => (key(a) < key(b) ? -dir : key(a) > key(b) ? dir : 0));
+  }
+
+  function renderHolders() {
+    const names = state.data && Array.isArray(state.data.watchlist) && state.data.watchlist.length ? state.data.watchlist : DEFAULT_WATCHLIST;
+    if (state.holder && !names.includes(state.holder)) state.holder = null;
+    const counts = {};
+    ((state.data && state.data.notices) || []).filter(inWindow).forEach((n) => { counts[n.holder] = (counts[n.holder] || 0) + 1; });
+    $("holders").replaceChildren(...names.map((name) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "holder" + (counts[name] ? "" : " zero");
+      b.setAttribute("aria-pressed", String(state.holder === name));
+      const n = document.createElement("span"); n.className = "n"; n.textContent = counts[name] || 0;
+      const t = document.createElement("span"); t.className = "name"; t.textContent = name;
+      b.append(n, t);
+      b.addEventListener("click", () => { state.holder = state.holder === name ? null : name; render(); });
+      return b;
+    }));
+  }
+
+  function el(tag, cls, content, label) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (label) node.dataset.label = label;
+    if (content instanceof Node) node.append(content);
+    else if (content != null) node.textContent = content;
+    return node;
+  }
+  function link(href, text) {
+    const url = safeUrl(href);
+    if (!url) return el("span", "", text);
+    const a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener"; a.textContent = text;
+    return a;
+  }
+
+  function renderPct(n) {
+    const v = Array.isArray(n.voting_power) ? n.voting_power.filter((x) => typeof x === "number") : [];
+    const span = document.createElement("span");
+    if (!v.length) { span.textContent = "—"; return span; }
+    if (n.type === "change" && v.length >= 2) {
+      span.textContent = `${fmtPct(v[0])} → `;
+      span.append(el("strong", v[1] > v[0] ? "up" : v[1] < v[0] ? "down" : "", fmtPct(v[1])));
+      return span;
+    }
+    span.textContent = fmtPct(v[v.length - 1]);
+    return span;
+  }
+
+  function renderRows() {
+    const tbody = $("rows");
+    const list = filtered();
+    $("count").textContent = state.data ? `共 ${list.length} 条` : "";
+    if (!list.length) {
+      const has = state.data && state.data.notices && state.data.notices.length;
+      const td = el("td", "empty", has ? "当前筛选条件下没有记录。换个申报方或时间范围试试。"
+        : "这段时间里还没有关注名单里的公告。点右上角“抓取最新公告”更新数据。");
+      td.colSpan = 7;
+      const tr = document.createElement("tr");
+      tr.append(td);
+      return tbody.replaceChildren(tr);
+    }
+    tbody.replaceChildren(...list.map((n) => {
+      const tr = document.createElement("tr");
+      const codeBox = el("div", "", link(`https://www.asx.com.au/markets/company/${encodeURIComponent(n.code || "")}`, n.code || "?"));
+      if (n.company) codeBox.append(el("div", "company", n.company));
+      const code = el("td", "code", codeBox, "代码");
+      const holderBox = el("div", "", n.holder);
+      if (n.confidence && n.confidence !== "高") holderBox.append(el("div", "conf", "可信度：" + n.confidence));
+      const holder = el("td", "", holderBox, "申报方");
+      tr.append(
+        el("td", "nowrap", fmtDate(n.date) + (n.time ? " " + n.time : ""), "公告日期"),
+        code,
+        holder,
+        el("td", "", el("span", `tag t-${TYPE_LABEL[n.type] ? n.type : "other"}`, TYPE_LABEL[n.type] || "其他"), "类型"),
+        el("td", "num", renderPct(n), "持股比例"),
+        el("td", "nowrap", fmtDate(n.change_date) || "—", "变动日"),
+        el("td", "headline", link(n.pdf_url || n.url, n.headline || "打开公告"), "公告"),
+      );
+      return tr;
+    }));
+  }
+
+  function renderBanners() {
+    const issues = $("issues"), cov = $("coverage");
+    const d = state.data;
+    const lr = d && d.last_run;
+    if (lr && lr.ok === false) {
+      issues.hidden = false;
+      issues.textContent = "最近一次抓取没有读到 ASX 公告列表：" + ((lr.errors && lr.errors[0]) || "原因未知") + "。表格里是之前的数据。";
+    } else {
+      issues.hidden = true;
+    }
+    const days = (d && d.scanned_days) || [];
+    if (!d || !d.last_success_at) { cov.hidden = true; return; }
+    const from = windowStart();
+    const covered = days.filter((x) => x >= from);
+    const end = covered.length ? covered[covered.length - 1] : sydneyToday();
+    const missing = weekdaysBetween(from, end) - covered.length;
+    if (missing >= 2) {
+      cov.hidden = false;
+      cov.textContent = `这段时间里约有 ${missing} 个交易日还没有数据。ASX 公开的全市场列表只提供当天和上一交易日，脚本每个交易日自动抓取并累积，连续运行两周后就是完整的近两周数据。`;
+    } else {
+      cov.hidden = true;
+    }
+  }
+
+  function render() {
+    renderHolders();
+    renderRows();
+    renderBanners();
+    document.querySelectorAll("th[data-sort]").forEach((th) => {
+      th.classList.toggle("sorted-desc", th.dataset.sort === state.sort && state.dir === -1);
+      th.classList.toggle("sorted-asc", th.dataset.sort === state.sort && state.dir === 1);
+    });
+  }
+
+  // ---------- 事件
+  function bindSeg(id, attr, key, parse = (x) => x) {
+    $(id).addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      state[key] = parse(b.dataset[attr]);
+      $(id).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      render();
+    });
+  }
+  bindSeg("typeSeg", "type", "type");
+  bindSeg("daysSeg", "days", "days", Number);
+  $("q").addEventListener("input", (e) => { state.q = e.target.value; renderRows(); });
+  document.querySelectorAll("th[data-sort]").forEach((th) => th.addEventListener("click", () => {
+    const k = th.dataset.sort;
+    if (state.sort === k) state.dir *= -1;
+    else { state.sort = k; state.dir = k === "date" ? -1 : 1; }
+    render();
+  }));
+  $("runBtn").addEventListener("click", runScrape);
+
+  $("owner").value = cfg.owner; $("repo").value = cfg.repo; $("branch").value = cfg.branch; $("token").value = cfg.token;
+  $("saveCfg").addEventListener("click", () => {
+    cfg.owner = $("owner").value.trim();
+    cfg.repo = $("repo").value.trim();
+    cfg.branch = $("branch").value.trim() || "main";
+    cfg.token = $("token").value.trim();
+    ["owner", "repo", "branch", "token"].forEach((k) => store.set(k, cfg[k]));
+    setStatus("设置已保存。");
+    loadData();
+  });
+  $("clearCfg").addEventListener("click", () => {
+    cfg.token = "";
+    store.set("token", "");
+    $("token").value = "";
+    setStatus("令牌已从这台设备清除。");
+  });
+
+  render();
+  loadData();
+})();
+</script>
+</body>
+</html>

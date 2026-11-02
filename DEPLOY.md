@@ -1,0 +1,283 @@
+# 部署交接文档：大股东公告雷达（ASX Substantial Holder Tracker）
+
+> 本文写给负责部署的 AI 或工程师。请完整读完第 1–6 节再动手。用户是个人投资者，母语中文，跟用户沟通请用中文。
+
+## 1. 要交付什么
+
+一个部署在 GitHub 上的个人工具：
+
+- **抓取**：GitHub Actions 运行 `scraper/scrape.py`，从 ASX 公开页面抓取大股东公告（Form 603/604/605），解析 PDF，筛出关注名单（10 家主动型投资者）的记录，写入 `data/notices.json` 并提交回仓库。
+- **网页**：GitHub Pages 托管 `index.html`。点“抓取最新公告”按钮，网页用用户自己的 GitHub 令牌调用 `workflow_dispatch` 触发抓取，轮询运行状态，完成后在下方表格显示结果。网页支持“添加到主屏幕”。
+- **定时**：每个交易日自动运行两次，累积数据。
+
+不需要服务器、数据库或任何付费服务。仓库里不存放任何密钥。
+
+## 2. 架构
+
+```
+[手机/电脑上的网页 index.html @ GitHub Pages]
+   │  ① POST /repos/{o}/{r}/actions/workflows/scrape.yml/dispatches   （用户的 fine-grained PAT）
+   │  ② 轮询 /actions/workflows/scrape.yml/runs，按 run id 找到这次运行
+   │  ③ GET /contents/data/notices.json（raw）读取结果；失败再读 Pages 上的 data/notices.json
+   ▼
+[GitHub Actions: scrape.yml]
+   python scraper/scrape.py
+     ├─ GET https://www.asx.com.au/asx/v2/statistics/todayAnns.do
+     ├─ GET https://www.asx.com.au/asx/v2/statistics/prevBusDayAnns.do
+     ├─ 新的大股东公告 → 下载 PDF（可能经过“同意条款”中间页）→ pypdf 读前 2 页
+     ├─ data/all_notices.json   全部大股东公告及解析结果（内部存储，保留 35 天）
+     └─ data/notices.json       按 watchlist.json 匹配后的结果（网页读取）
+   git commit + pull --rebase + push（用 GITHUB_TOKEN）
+```
+
+浏览器不能直接请求 ASX（跨域），claude.ai 的 Artifact 也不能访问外部网站，所以采用这个架构。不要改成纯前端抓取。
+
+## 3. 文件清单
+
+| 路径 | 作用 |
+| --- | --- |
+| `index.html` | 网页（单文件，含 CSS/JS）。自动从 `*.github.io/<repo>` 识别仓库。令牌存在浏览器 localStorage，键名前缀 `ssr_`。 |
+| `manifest.webmanifest`、`icon-192.png`、`icon-512.png`、`apple-touch-icon.png` | 添加到手机桌面用的清单和图标。 |
+| `scraper/scrape.py` | 抓取脚本。只依赖 requests、beautifulsoup4、pypdf、tzdata。 |
+| `scraper/watchlist.json` | 关注名单：`holders[].name/aliases/hints`，以及 `noise_hints`。 |
+| `data/notices.json` | 网页读取的数据。初始是空结构，首次运行后由脚本覆盖。 |
+| `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
+| `.github/workflows/scrape.yml` | 抓取工作流：手动触发 + 定时。需要 `contents: write`。 |
+| `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
+| `tests/test_scrape.py` | 25 个离线测试（模拟 ASX 列表页和 PDF，不联网）。 |
+| `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |
+| `requirements.txt` / `requirements-dev.txt` | 运行依赖 / 测试依赖（版本已锁定，已在 Python 3.12 干净环境验证可安装）。 |
+| `README.md` | 给用户看的使用说明。 |
+
+## 4. 部署前提
+
+- 用户的 GitHub 账户。仓库必须是 **公开** 的：免费账户的 GitHub Pages 只支持公开仓库，而且网页在没有令牌时也靠公开仓库的 API 读取最新数据。数据都是 ASX 公开信息，令牌不进仓库，公开没有隐私问题。
+- 建议单独建一个仓库（例如 `asx-substantial-tracker`），不要并入用户已有的“澳股雷达”仓库，避免工作流和 Pages 配置冲突。
+- **只有用户本人能做的事**（AI 无法代劳，请明确告诉用户）：
+  1. 创建 fine-grained personal access token（见第 5.6 步）。
+  2. 在网页“GitHub 设置”里填入令牌；手机桌面图标打开的页面需要再填一次。
+
+## 5. 部署步骤
+
+下面给出 `gh` 命令行写法；没有命令行权限时，括号里是网页操作。把 `OWNER` 换成用户的 GitHub 用户名。
+
+### 5.1 建仓库并推送全部文件
+
+```bash
+cd asx-substantial-tracker
+git init -b main
+git add -A            # 一定要包含 .github/ 和 .gitignore
+git commit -m "Initial commit: ASX substantial holder tracker"
+gh repo create OWNER/asx-substantial-tracker --public --source . --push
+```
+
+（网页操作：新建公开仓库 → 上传全部文件。网页拖拽上传可能漏掉 `.github` 隐藏目录，需要用 Add file → Create new file 按原路径逐个创建两个 workflow 文件。）
+
+### 5.2 允许工作流写入仓库
+
+```bash
+gh api -X PUT repos/OWNER/asx-substantial-tracker/actions/permissions/workflow \
+  -f default_workflow_permissions=write -F can_approve_pull_request_reviews=false
+```
+
+（网页：Settings → Actions → General → Workflow permissions → Read and write permissions。）
+
+工作流文件里已经声明了 `permissions: contents: write`，这一步是保险。
+
+### 5.3 开启 GitHub Pages
+
+```bash
+gh api -X POST repos/OWNER/asx-substantial-tracker/pages \
+  -f "source[branch]=main" -f "source[path]=/"
+```
+
+（网页：Settings → Pages → Source: Deploy from a branch → main → / (root)。）
+
+网址是 `https://OWNER.github.io/asx-substantial-tracker/`，第一次构建需要 1–2 分钟。
+
+### 5.4 确认测试通过
+
+推送后 `tests` 工作流会自动运行：
+
+```bash
+gh run list --workflow tests --limit 1
+gh run watch          # 选择对应的运行
+```
+
+本地也可以跑：
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest -q   # 期望：25 passed
+```
+
+### 5.5 第一次真实抓取（关键）
+
+```bash
+gh workflow run scrape.yml --ref main
+gh run watch          # 或 gh run list --workflow scrape-substantial
+git pull && python -c "import json;d=json.load(open('data/notices.json'));print(d['last_run'])"
+```
+
+验收要点：
+
+- `last_run.ok == true` 且 `list_pages_ok == 2`
+- `substantial_found` > 0（交易日一般有几十条）
+- `pdf_checked` > 0 且 `errors` 为空，或只有少量“下载失败，下次重试”
+- `data/all_notices.json` 已生成。抽查几条 `status == "parsed"` 的记录，`holder_name` 应该是像样的公司名。
+- 关注名单命中 0 条是正常的，那两天可能这 10 家都没有申报。
+
+如果不满足，按第 7 节排错。
+
+### 5.6 用户创建令牌并在网页上配置
+
+请用户操作：GitHub 头像 → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token：
+
+- Repository access：Only select repositories → 只选这个仓库
+- Permissions：**Actions: Read and write**，**Contents: Read-only**（Metadata 只读会自动带上）
+- Expiration：建议 90 天，到期后重新生成
+
+然后打开网页 → 展开底部“GitHub 设置”→ 仓库所有者和仓库名通常已自动填好 → 粘贴令牌 → 保存设置 → 点“抓取最新公告”。看到“数据更新于 …（悉尼时间）”即成功。
+
+### 5.7 添加到手机桌面
+
+iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrome → 菜单 → 添加到主屏幕或安装应用。打开后在设置里再填一次令牌。
+
+## 6. 验收标准
+
+1. `tests` 工作流通过（25 个测试）。
+2. 手动触发的 `scrape-substantial` 成功，`data/notices.json` 的 `last_run.ok` 为 true。
+3. 网页能打开，按钮能触发运行，状态栏会依次显示“排队中 / 正在抓取”，结束后显示“数据更新于 …”。
+4. 手机宽度下表格变成卡片，没有横向滚动。
+5. 第二天确认定时任务自动运行过（Actions 页面有 schedule 触发的记录）。
+
+## 7. 排错指南（脚本还没有对真实 ASX 网站跑过）
+
+开发环境无法访问 asx.com.au，所以解析逻辑是按 ASX 页面的已知结构、用模拟数据测试的。第一次真实运行若出问题，最可能在以下三处。修复时请顺手把真实 HTML 或 PDF 片段加进 `tests/test_scrape.py` 作为回归测试。
+
+| 症状（看 Actions 日志或 `last_run.errors`） | 可能原因 | 处理 |
+| --- | --- | --- |
+| `读取 todayAnns.do 失败：HTTP 403` | ASX 拦截了 GitHub Actions 的 IP 或请求头 | 先在本地用 `curl -A "<HEADERS 里的 UA>" <url>` 对比。可调整 `HEADERS`，在 `fetch()` 里先请求一次 ASX 首页拿 cookie。不要用第三方代理绕过，请遵守 ASX 使用条款。 |
+| `页面结构认不出来` 或 `0 条公告` | ASX 改版 | 下载 HTML 查看表格结构，调整 `parse_listing()`：行是 `<tr>`，第 1 列代码，第 2 列日期和时间，公告链接含 `idsId=`。 |
+| 大量 `中间页里找不到 PDF 地址` | “同意条款”页结构变了 | 查看 `displayAnnouncement.do?display=pdf&idsId=…` 返回的 HTML，调整 `resolve_pdf_link()`，目前依次找 `input[name=pdfURL]`、`/asxpdf/…pdf`、任意 `.pdf` 链接。 |
+| `status=parsed` 但很多 `holder_name` 为空或像标签 | PDF 文本排版和预期不同 | 用 `scrape.pdf_text(open(f,'rb').read())` 打印真实文本，调整 `parse_holder_section()` 和 `LABEL_RE`。 |
+| 推送失败（403 / non-fast-forward） | 写权限没开，或并发 | 检查 5.2；工作流已带 `pull --rebase` 和 3 次重试。 |
+| 定时任务不再运行 | 公开仓库长期没有活动时，GitHub 会停用定时工作流 | Actions 页面重新 Enable。 |
+
+可以调整的环境变量（在 `scrape.yml` 的 Scrape 步骤下加 `env:`）：
+
+- `KEEP_DAYS`：数据保留天数，默认 35
+- `MAX_PDFS`：单次最多下载的 PDF 数，默认 300
+- `PAUSE_SECONDS`：两次下载的间隔，默认 0.6
+
+## 8. 数据格式
+
+`data/notices.json`（网页读取）：
+
+```json
+{
+  "schema": 2,
+  "updated_at": "2026-11-02T20:41:05+11:00",
+  "last_success_at": "2026-11-02T20:40:12+11:00",
+  "scanned_days": ["2026-10-30", "2026-11-02"],
+  "last_run": {"ok": true, "list_pages_ok": 2, "substantial_found": 57, "pdf_checked": 41,
+               "skipped_noise": 16, "deferred": 0, "errors": []},
+  "watchlist": ["Paradice Investment Management", "..."],
+  "notices": [{
+    "id": "03142997", "code": "SLC", "company": "Superloop Limited",
+    "date": "2026-10-30", "time": "16:10",
+    "headline": "Becoming a substantial holder",
+    "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03142997",
+    "pdf_url": "https://www.asx.com.au/asxpdf/20261030/pdf/xxxx.pdf",
+    "price_sensitive": false, "type": "becoming",
+    "change_date": "2026-10-28", "voting_power": [5.12],
+    "holder": "Paradice Investment Management", "confidence": "高"
+  }]
+}
+```
+
+- `type` 取值：`becoming` / `change` / `ceasing` / `other`
+- `voting_power`：变动类为 `[之前, 现在]`，新进类为 `[现在]`，退出类为 `[]`
+- `confidence` 取值：
+  - `高`：PDF 第一节解析出的申报方名称命中
+  - `中`：名称没解析出来，但第一节原文命中
+  - `低`：PDF 无文字，仅凭标题 “from XXX” 命中
+
+`data/all_notices.json`（内部存储）：`{"schema":2,"entries":{id: entry},"scanned_days":[…],"last_success_at":…}`。
+
+- `entry.status` 取值：
+  - `new`：刚发现，还没处理
+  - `parsed`：已解析
+  - `unreadable`：PDF 读不出文字
+  - `noise`：标题显示是噪音申报方，未下载
+  - `skipped`：404 或文件过大
+  - `error`：下载或解析失败，会重试，`attempts` 最多 3 次
+
+第一版的 `data/notices.json` 和 `data/seen.json` 会自动迁移，迁移后 `seen.json` 会被删除。
+
+## 9. 已知限制
+
+- ASX 公开的全市场列表只有当天和上一交易日，首次部署后要连续运行约两周才有完整的“近两周”数据，网页会提示还缺几天。
+- 持股比例和变动日来自 PDF 文本解析，表格排版特殊的 PDF 可能识别错，网页上都附有原文链接。
+- 只覆盖持股 5% 以上的申报。5% 以上每次小于 1% 的变动不需要申报，所以看不到。
+- 只用于个人研究，请求频率很低（每天两次，下载之间有间隔）。
+
+## 10. 代码审查记录
+
+本版本做了两轮查错。每个问题都先写复现或测试确认，再修复并保留回归测试。
+
+### 第一轮
+
+| 级别 | 问题 | 修复 |
+| --- | --- | --- |
+| 高 | 目标公司名字和关注名单同名时误判。例如 BlackRock 申报持有 Soul Pattinson（SOL）的股份，被算成 Soul Pattinson 在申报；关于 WAM Capital 的公告被算成 Wilson。原因是全文兜底匹配。 | 只用 PDF 第一节解析出的申报方名称匹配，去掉全文兜底，剔除 “To Company Name/Scheme” 行。 |
+| 高 | 排队中的工作流基于旧提交运行，推送时 non-fast-forward 失败。 | checkout 时取分支最新提交；推送前 `pull --rebase`，最多重试 3 次。 |
+| 高 | 网页用设备时钟判断哪次运行是自己触发的，手机时钟偏差超过 1 分钟就会白等 20 分钟。 | 触发前记录最新的 run id，之后找 id 更大的那次运行。 |
+| 中 | 同一天内按时间排序错误（“4:10PM”排在“10:05AM”前）。 | 统一用 24 小时制 `HH:MM`。 |
+| 中 | 变动前后比例相同（6.00% → 6.00%）时被去重，只剩一个值。 | 去掉去重。 |
+| 中 | `class="pricesens"` 写在图标上时，价格敏感标记漏判。 | 同时判断单元格和图标。 |
+| 中 | 中间页给的是 announcements.asx.com.au 绝对地址时，被拼成 www.asx.com.au。 | 正确处理绝对地址。 |
+| 中 | `load_watchlist` 的默认参数在函数定义时就固定了（测试中发现）。 | 改为运行时取值。 |
+| 中 | 改了关注名单后，旧公告不会重新匹配，删掉的申报方记录还留着。 | 保存全部大股东公告的解析结果，每次运行按当前名单重建 `notices.json`。 |
+| 中 | 下载失败的公告没有重试上限；扫描版 PDF 被静默漏掉。 | 加上 `status` 和 `attempts`（最多 3 次）；读不出文字时，按标题 “from XXX” 做低可信度匹配。 |
+| 中 | 列表页全部失败时，仍然更新“数据更新于”，工作流也显示成功。 | 新增 `last_success_at` 和 `last_run.ok`；失败时退出码为 2，工作流标红，GitHub 会发邮件；错误信息仍然提交，供网页显示。 |
+| 中 | 网页没有令牌时读 Pages 上的文件，可能比仓库里的旧。 | 先用 GitHub API（公开仓库不需要令牌）读最新文件，失败再读 Pages。 |
+| 中 | “数据覆盖”提示把 10 个交易日写死，有公众假期时提示永远不会消失。 | 按工作日计算，允许 1 天误差。 |
+| 中 | 手机上表格要横向拖动。 | 小屏幕改为卡片布局。 |
+| 中 | 只有 `queued` 显示“排队中”，`pending` 和 `waiting` 被显示成“正在抓取”。 | 补全状态映射。 |
+| 低 | 文字日期（例如 28 October 2026）识别不了。 | 支持文字月份，统一输出 ISO 日期。 |
+| 低 | 当天没有公告（例如假期）被误报为“页面结构变了”。 | 区分“认出结构但为空”和“认不出结构”。 |
+| 低 | 加密 PDF 读不出来；超大 PDF 没有下载上限。 | 先用空密码解密；流式下载，上限 25MB；单次最多 300 份，标题含关注名单缩写的优先。 |
+| 低 | 写文件时中途崩溃可能留下半个 JSON。 | 先写临时文件，再原子替换。 |
+| 低 | 链接没有限制协议（可能出现 `javascript:`）。 | 前后端都只允许 http/https。 |
+| 低 | manifest 图标 purpose 写成 “any maskable” 组合，Chrome 会警告。 | 拆成两条。 |
+
+### 第二轮
+
+| 级别 | 问题 | 修复 |
+| --- | --- | --- |
+| 严重 | 单份公告解析时抛出非网络异常，会让整次运行崩溃；而且这份公告下次还会再触发，导致永久停摆。 | 每份公告单独捕获异常，记为 `error` 并限次重试；日志里打印 traceback。 |
+| 高 | PDF 按列排版时，“Name”标签和值分开，会把 “The holder became…” 这类标签当成申报方名称，导致真实申报方漏判。 | 名称候选必须通过标签过滤，最多往后看 4 行；解析不出时退回第一节原文匹配。 |
+| 中 | 中等可信度匹配用的原文可能延伸到第二节，而第二节可能提到目标公司。 | 原文截到第二节标题为止。 |
+| 中 | 变动日只看事件短语后 40 个字符，按列排版时取不到。 | 扩大到 250 个字符，取最先出现的日期。 |
+| 中 | 中间页如果还有条款类 PDF 链接，可能下载错文件。 | 优先用 `pdfURL` 和 `/asxpdf/` 路径。 |
+| 中 | 手机卡片里，“可信度”和公司名被挤到右侧一列。 | 合并为一个内容块。 |
+| 低 | 标签过滤误伤 “The Vanguard Group” 这类以 The 开头的名称。 | 收窄过滤规则。 |
+| 低 | “To: Company Name / Scheme” 这种写法识别不了。 | 放宽正则。 |
+| 低 | 大股东公告数量统计包含两个列表页的重复。 | 按 id 去重计数。 |
+| 低 | 旧版迁移来的记录，可信度会被标题匹配覆盖。 | 调整匹配顺序。 |
+| 低 | 请求缺少 Accept 头，可能被防火墙判为机器人。 | 补上 Accept 头。 |
+| 低 | 中途崩溃留下的 `.tmp` 文件可能被提交。 | 加 `.gitignore`。 |
+| 低 | 抓取成功但读取结果失败时，状态栏仍显示旧数据的时间。 | 明确提示读取失败。 |
+| 低 | 深色模式下手机状态栏颜色不对。 | 分别设置浅色和深色的 theme-color。 |
+| 工具 | 没有自动测试。 | 新增 `tests.yml`，推送代码时自动跑 pytest。 |
+
+### 测试结果（交付时）
+
+- `python -m pytest -q`：25 passed。已在 Python 3.12 干净虚拟环境中，按 `requirements-dev.txt` 锁定的版本验证。
+- `python tests/frontend_check.py`：19 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退。
+- 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
+
+### 开发依赖里的一条无害警告
+
+在开发环境跑测试时，可能出现 `RequestsDependencyWarning: ... chardet (7.x) doesn't match`。这是 reportlab 带进来的 chardet 引起的，只在测试环境出现。只装 `requirements.txt` 的生产环境没有这个警告，不影响功能。

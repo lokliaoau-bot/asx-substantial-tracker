@@ -56,6 +56,7 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
+PARSER_VERSION = 2   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -258,22 +259,50 @@ def download_pdf(url: str) -> tuple[bytes, str]:
     return r2.content, r2.url
 
 
-def pdf_text(data: bytes, pages: int = PDF_PAGES) -> str:
+WATERMARK_RE = re.compile(r"^for\s+personal\s+use\s+only$", re.I)   # ASX 给每页加的水印；扫描件只剩这行
+
+
+def pdf_texts(data: bytes, pages: int = PDF_PAGES) -> list[str]:
+    """同一份 PDF 用两种方式提取文字：[按版面位置, 默认顺序]，去掉空的和重复的。
+
+    ASX 很多 603/604 是在模板上“填”出来的：默认提取会先吐出模板标签，再把填写的内容
+    乱序堆在后面，“Name”和申报方名称就分家了；按版面位置提取能让同一行的标签和内容排在一起。
+    但版面模式有时会把字拆开（“Nam e M ercer”），或者名称排在标签上一行，这时默认模式反而读得对。
+    所以两种都读，每个字段取第一个解析得出的结果（真实样本见 tests/fixtures）。
+    """
     try:
         reader = PdfReader(io.BytesIO(data))
         if reader.is_encrypted:
             try:
                 reader.decrypt("")
             except Exception:  # noqa: BLE001
-                return ""
-        parts = [(p.extract_text() or "") for p in reader.pages[:pages]]
+                return []
+        plist = list(reader.pages[:pages])
     except Exception as e:  # noqa: BLE001
         log(f"    PDF 解析失败: {e}")
-        return ""
-    return re.sub(r"[ \t\u00a0]+", " ", "\n".join(parts))
+        return []
+    out = []
+    for mode in ("layout", "plain"):
+        parts = []
+        for p in plist:
+            try:
+                parts.append((p.extract_text(extraction_mode=mode) if mode == "layout" else p.extract_text()) or "")
+            except Exception as e:  # noqa: BLE001
+                log(f"    PDF {mode} 模式提取失败: {e}")
+        text = re.sub(r"[ \t\u00a0]+", " ", "\n".join(parts))
+        text = "\n".join(ln.strip() for ln in text.split("\n") if ln.strip() and not WATERMARK_RE.match(ln.strip()))
+        if text and text not in out:
+            out.append(text)
+    return out
 
 
-SECTION1_RE = re.compile(r"Details\s+of\s+substantial\s+holder|substantial\s+holder\s*\(\s*1\s*\)", re.I)
+def pdf_text(data: bytes, pages: int = PDF_PAGES) -> str:
+    """调试用：返回第一种读得出来的文字。"""
+    texts = pdf_texts(data, pages)
+    return texts[0] if texts else ""
+
+
+SECTION1_RE = re.compile(r"Details\s+of\s+substantial\s+(?:share)?holder|substantial\s+holder\s*\(\s*1\s*\)", re.I)
 COMPANY_RE = re.compile(r"To\s*:?\s*Company\s+Name\s*/\s*Scheme\s*[:\-]?[ \t]*(.*)", re.I)
 SECTION2_RE = re.compile(r"\n\s*2\s*\.\s+\S")
 LABEL_RE = re.compile(
@@ -305,7 +334,7 @@ def looks_like_name(s: str) -> bool:
     return 3 <= len(s) <= 150 and len(re.findall(r"[A-Za-z]", s)) >= 3 and not LABEL_RE.search(s)
 
 
-def parse_holder_section(text: str) -> tuple[str, str]:
+def parse_holder_section(text: str, first_line: bool = True) -> tuple[str, str]:
     """返回 (申报方名称, 第一节原文)。名称解析不出来时，靠第一节原文做中等可信度匹配。"""
     m = SECTION1_RE.search(text)
     if not m:
@@ -326,6 +355,11 @@ def parse_holder_section(text: str) -> tuple[str, str]:
             if looks_like_name(val):
                 return val[:200], region
         return "", region
+    # 没有“Name”标签的自定义格式（例如花旗）：名称直接写在第一节标题下的第一行
+    if first_line and lines:
+        val = clean_name(lines[0])
+        if looks_like_name(val):
+            return val[:200], region
     return "", region
 
 
@@ -333,11 +367,12 @@ VP_RE = re.compile(r"voting\s+power", re.I)
 PCT_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,4})?)\s?%")
 EVENT_RE = re.compile(
     r"(?:became|ceased\s+to\s+be)\s+a\s+substantial\s+holder\s+on"
+    r"|change\s+in\s+the\s+interests\s+of\s+the"      # 604 常见排版：日期夹在“of the”和“substantial holder on”之间
     r"|interests\s+of\s+the\s+substantial\s+holder\s+on"
     r"|substantial\s+holder\s+on",
     re.I,
 )
-DATE_NUM_RE = re.compile(r"(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})")
+DATE_NUM_RE = re.compile(r"(?<!\d)(\d{1,2})\s?[/.\-]\s?(\d{1,2})\s?[/.\-]\s?(\d{4}|\d{2})(?!\d)")   # 兼容“29 /10/2026”这种多了空格的写法
 DATE_TXT_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?[\s\-]+([A-Za-z]{3,9})[\s,\-]+(\d{4})")
 
 
@@ -504,19 +539,42 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
 
 # ---------------------------------------------------------------- 主流程
 
+def analyse_texts(texts: list[str], ntype: str) -> dict:
+    """在多种提取结果里，每个字段取第一个解析得出的值。"""
+    out = {"company": "", "holder_name": "", "region": "", "change_date": "", "voting_power": []}
+    regions = []
+    want_vp = 2 if ntype == "change" else 1
+    for t in texts:
+        name, region = parse_holder_section(t, first_line=False)   # 第一轮只认“Name”标签
+        if region:
+            regions.append(region[:500])
+        out["holder_name"] = out["holder_name"] or name
+        out["company"] = out["company"] or parse_company(t)
+        d = parse_details(t, ntype)
+        out["change_date"] = out["change_date"] or d["change_date"]
+        if len(d["voting_power"]) > len(out["voting_power"]) and len(out["voting_power"]) < want_vp:
+            out["voting_power"] = d["voting_power"]
+    if not out["holder_name"]:
+        # 第二轮：没有“Name”标签的自定义格式，取第一节标题下的第一行。
+        # 放在第二轮，是因为版面模式偶尔把“Name”拆成“Nam e”，首行会是一行乱码，不能抢在正确结果前面。
+        for t in texts:
+            out["holder_name"] = parse_holder_section(t)[0]
+            if out["holder_name"]:
+                break
+    if not out["holder_name"]:
+        out["region"] = "\n".join(regions)[:1000]   # 名称解析不出来时，留原文做中等可信度匹配
+    return out
+
+
 def process_entry(e: dict) -> None:
     data, pdf_url = download_pdf(e["url"])
     e["pdf_url"] = safe_url(pdf_url)
-    text = pdf_text(data)
-    if not text.strip():
-        e["status"] = "unreadable"
+    texts = pdf_texts(data)
+    if not texts:
+        e["status"], e["parser"] = "unreadable", PARSER_VERSION
         return
-    name, region = parse_holder_section(text)
-    e["company"] = parse_company(text)
-    e["holder_name"] = name
-    e["region"] = "" if name else region[:500]
-    e.update(parse_details(text, e.get("type", "other")))
-    e["status"] = "parsed"
+    e.update(analyse_texts(texts, e.get("type", "other")))
+    e["status"], e["parser"] = "parsed", PARSER_VERSION
 
 
 def hinted(e: dict, holders: list[Holder]) -> bool:
@@ -565,6 +623,9 @@ def main() -> int:
     found = len(found_ids)
     log(f"大股东相关公告 {found} 条")
 
+    for e in entries.values():
+        if e.get("status") in ("parsed", "unreadable") and e.get("parser", 1) < PARSER_VERSION:
+            e["status"], e["attempts"] = "new", 0      # 用新的解析规则重读一次
     todo = [e for e in entries.values()
             if e.get("status") in ("new", "error") and e.get("attempts", 0) < MAX_ATTEMPTS]
     todo.sort(key=lambda e: (e.get("date", ""), e.get("time", "")), reverse=True)   # 新的优先

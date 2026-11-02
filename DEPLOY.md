@@ -44,7 +44,7 @@
 | `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
 | `.github/workflows/scrape.yml` | 抓取工作流：手动触发 + 定时。需要 `contents: write`。 |
 | `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
-| `tests/test_scrape.py` | 25 个离线测试（模拟 ASX 列表页和 PDF，不联网）。 |
+| `tests/test_scrape.py` | 33 个离线测试（模拟 ASX 列表页和 PDF + 真实公告 PDF 样本，不联网）。 |
 | `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |
 | `requirements.txt` / `requirements-dev.txt` | 运行依赖 / 测试依赖（版本已锁定，已在 Python 3.12 干净环境验证可安装）。 |
 | `README.md` | 给用户看的使用说明。 |
@@ -108,7 +108,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：25 passed
+python -m pytest -q   # 期望：33 passed
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -145,7 +145,7 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 
 ## 6. 验收标准
 
-1. `tests` 工作流通过（25 个测试）。
+1. `tests` 工作流通过（33 个测试）。
 2. 手动触发的 `scrape-substantial` 成功，`data/notices.json` 的 `last_run.ok` 为 true。
 3. 网页能打开，按钮能触发运行，状态栏会依次显示“排队中 / 正在抓取”，结束后显示“数据更新于 …”。
 4. 手机宽度下表格变成卡片，没有横向滚动。

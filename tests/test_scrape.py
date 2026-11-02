@@ -360,3 +360,76 @@ def test_substantial_count_is_unique(sandbox, monkeypatch):
 def test_names_starting_with_the_are_kept():
     t = text_of(["1. Details of substantial holder (1)", "Name The Vanguard Group, Inc."])
     assert scrape.parse_holder_section(t)[0] == "The Vanguard Group, Inc."
+
+
+# ---------------------------------------------------------------- 真实 ASX PDF 回归测试
+# 2026-11-02 第一次真实运行时，约 4 成公告解析不出申报方，变动日也有取错的。
+# 下面的样本取自当天真实公告（只保留前两页），每个对应一种排版问题。
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
+
+def real(name: str, ntype: str) -> dict:
+    texts = scrape.pdf_texts((FIXTURES / name).read_bytes())
+    return scrape.analyse_texts(texts, ntype)
+
+
+def test_real_template_form_name_and_values():
+    # 模板填写式 604：默认提取时“Name”和名称分家，变动日曾被取成上一次申报的日期
+    r = real("604_template_jbh.pdf", "change")
+    assert r["holder_name"].startswith("State Street Corporation")
+    assert r["voting_power"] == [8.78, 7.75]
+    assert r["change_date"] == "2026-10-29"
+    assert r["company"] == "JB HI-FI LIMITED"
+
+
+def test_real_template_form_603():
+    r = real("603_template_sgm.pdf", "becoming")
+    assert r["holder_name"].startswith("State Street Corporation")
+    assert r["voting_power"] == [5.1] and r["change_date"] == "2026-10-29"
+
+
+def test_real_split_letters_falls_back_to_plain_text():
+    # 版面模式把字拆开（“Nam e M ercer”），要靠默认模式拿到正确名称，不能被乱码抢先
+    r = real("604_split_letters_ppe.pdf", "change")
+    assert r["holder_name"].startswith("Mercer Investments (Australia) Limited")
+    assert r["voting_power"] == [6.546, 7.562] and r["change_date"] == "2026-10-29"
+
+
+def test_real_name_above_label():
+    r = real("605_name_above_label_ael.pdf", "ceasing")
+    assert r["holder_name"].startswith("Pinnacle Investment Management Group Limited")
+    assert r["change_date"] == "2026-10-29" and r["voting_power"] == []
+
+
+def test_real_spaced_date():
+    # “29 /10/2026”多了空格，曾被跳过而取到上一次申报的 27/10
+    r = real("604_spaced_date_bap.pdf", "change")
+    assert r["change_date"] == "2026-10-29"
+    assert r["holder_name"].startswith("Tanarra Capital Australia Pty Ltd")
+    assert r["voting_power"] == [12.98, 10.34]
+
+
+def test_real_custom_format_without_name_label():
+    r = real("604_no_name_label_elv.pdf", "change")
+    assert r["holder_name"].startswith("Citigroup Global Markets Australia Pty Limited")
+    assert r["voting_power"] == [8.227, 9.6699]
+
+
+def test_real_scanned_pdf_is_unreadable():
+    # 扫描件只剩 ASX 水印，应判为读不出文字，交给标题兜底匹配
+    assert scrape.pdf_texts((FIXTURES / "603_scanned_bry.pdf").read_bytes()) == []
+
+
+def test_old_parser_entries_are_reparsed(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    store = read(sandbox / "data" / "all_notices.json")
+    e = store["entries"]["1001"]
+    assert e["status"] == "parsed" and e["parser"] == scrape.PARSER_VERSION
+    e["parser"] = 1                                   # 模拟旧版解析器留下的记录
+    e["holder_name"] = ""
+    (sandbox / "data" / "all_notices.json").write_text(json.dumps(store), encoding="utf-8")
+    scrape.main()
+    e2 = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e2["parser"] == scrape.PARSER_VERSION and e2["holder_name"]

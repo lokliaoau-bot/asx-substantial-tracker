@@ -1,1 +1,82 @@
-{"schema": 2, "updated_at": null, "last_success_at": null, "scanned_days": [], "last_run": null, "watchlist": [], "notices": []}
+{
+ "schema": 2,
+ "updated_at": "2026-11-02T21:48:37+11:00",
+ "last_success_at": "2026-11-02T21:46:42+11:00",
+ "scanned_days": [
+  "2026-10-30",
+  "2026-11-02"
+ ],
+ "last_run": {
+  "ok": true,
+  "list_pages_ok": 2,
+  "substantial_found": 80,
+  "pdf_checked": 76,
+  "skipped_noise": 4,
+  "deferred": 0,
+  "errors": []
+ },
+ "watchlist": [
+  "Paradice Investment Management",
+  "Wilson Asset Management",
+  "Regal Funds Management",
+  "L1 Capital",
+  "Perennial",
+  "Celeste Funds Management",
+  "Ellerston Capital",
+  "Thorney / Tiga Trading",
+  "Washington H. Soul Pattinson",
+  "Tattarang (Andrew Forrest)"
+ ],
+ "notices": [
+  {
+   "id": "03161275",
+   "code": "WGX",
+   "company": "Westgold Resources Limited",
+   "date": "2026-11-02",
+   "time": "18:07",
+   "headline": "Change in substantial holding",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03161275",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261102/pdf/0764vmmy969t0p.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "",
+   "voting_power": [],
+   "holder": "L1 Capital",
+   "confidence": "高"
+  },
+  {
+   "id": "03161271",
+   "code": "PPC",
+   "company": "Peet Limited",
+   "date": "2026-11-02",
+   "time": "18:05",
+   "headline": "Change in substantial holding",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03161271",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261102/pdf/0764vbw87r4bhz.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "",
+   "voting_power": [
+    8.52
+   ],
+   "holder": "L1 Capital",
+   "confidence": "高"
+  },
+  {
+   "id": "03160606",
+   "code": "LIN",
+   "company": "LINDIAN RESOURCES LIMITED",
+   "date": "2026-10-30",
+   "time": "18:05",
+   "headline": "Change in substantial holding",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03160606",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261030/pdf/0762d7y89c29dx.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "",
+   "voting_power": [],
+   "holder": "L1 Capital",
+   "confidence": "高"
+  }
+ ]
+}

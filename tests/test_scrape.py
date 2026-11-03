@@ -575,3 +575,13 @@ def test_previous_business_day_page_completes_a_partial_day(sandbox, monkeypatch
     scrape.main()
     out = read(sandbox / "data" / "notices.json")
     assert out["partial_days"] == {} and "2026-10-30" in out["scanned_days"]
+
+
+def test_2018_form_labels_are_not_names():
+    # 2018 版表格多了 “NFPFRN (if applicable)” 一栏，曾被当成申报方名称（TVL 公告），挡住了后面的匹配
+    t = text_of(["1. Details of substantial holder (1)", "Name", "ACN/ARSN/APFRN (if applicable)",
+                 "NFPFRN (if applicable) Not applicable", "The holder became a substantial holder on 28/10/2026"])
+    assert scrape.parse_holder_section(t)[0] == ""
+    t = text_of(["1. Details of substantial holder (1)", "Name UDN Eden Management LTD and persons listed in Annexure A",
+                 "ACN/ARSN/APFRN (if applicable) Not applicable", "NFPFRN (if applicable) Not applicable"])
+    assert scrape.parse_holder_section(t)[0] == "UDN Eden Management LTD and persons listed in Annexure A"

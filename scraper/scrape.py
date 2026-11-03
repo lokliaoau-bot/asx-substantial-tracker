@@ -56,7 +56,7 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
-PARSER_VERSION = 3   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+PARSER_VERSION = 4   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
 DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告，这之后读到的“今日公告”才算完整
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -323,8 +323,8 @@ COMPANY_RE = re.compile(
 TO_LINE_RE = re.compile(r"^To\s*:\s*(\S.*)$", re.I | re.M)      # 自制表格：“To: HELLOWORLD TRAVEL LIMITED”
 SECTION2_RE = re.compile(r"\n\s*2\s*\.\s+\S")
 LABEL_RE = re.compile(
-    r"^(?:the\s+(?:holder|previous)\b|there\s+was\b|acn\b|arsn\b|abn\b|name\b|details\b|previous\b|holder\b|[(\d])"
-    r"|substantial\s+holder|if\s+applicable|notice\s+was",
+    r"^(?:the\s+(?:holder|previous)\b|there\s+was\b|acn\b|arsn\b|abn\b|nfpfrn\b|apfrn\b|name\b|details\b|previous\b|holder\b|[(\d])"
+    r"|substantial\s+holder|if\s+applicable|notice\s+was|^not\s+applicable$",   # NFPFRN：2018 版表格的栏目名
     re.I,
 )
 NAME_LINE_RE = re.compile(r"^(?:\(\s*1\s*\)\s*)?Name\b\s*(?:\(if applicable\))?\s*[:\-]?\s*(.*)$", re.I)

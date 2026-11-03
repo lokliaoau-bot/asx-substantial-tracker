@@ -108,7 +108,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：47 passed
+python -m pytest -q   # 期望：48 passed
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -299,10 +299,11 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 | 低 | 标题看不出类型（“Substantial Holder Notice”）时比例只读一个值。 | 按 PDF 里的表格编号判断类型。 |
 | 低 | 公司名带 “(ASX: EOL)”、“NWH.AX” 等尾巴；“To: XXX”、没有 “To” 的公司名读不出。 | 显示前清理，支持更多写法。 |
 | 低 | 网页标题写死“10 个主动型投资者”。 | 按名单人数显示。 |
+| 中 | 2018 版表格的栏目名 “NFPFRN” 被当成申报方名称（TVL），名称读错后不会再用第一节原文匹配。 | 加入标签过滤。 |
 
 ### 测试结果（交付时）
 
-- `python -m pytest -q`：47 passed（其中 15 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页）。
+- `python -m pytest -q`：48 passed（其中 15 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页）。
 - `python tests/frontend_check.py`：25 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
 - 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
 

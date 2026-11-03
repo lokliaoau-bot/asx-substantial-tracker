@@ -56,7 +56,8 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
-PARSER_VERSION = 2   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+PARSER_VERSION = 3   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告，这之后读到的“今日公告”才算完整
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -80,6 +81,10 @@ class FetchError(RuntimeError):
 
 class PermanentFetchError(FetchError):
     """重试也没用的失败（404、文件过大），不再重试。"""
+
+
+class BadPDF(FetchError):
+    """PDF 打不开，多半是下载不完整，下次运行重试。"""
 
 
 @dataclass
@@ -224,6 +229,16 @@ def headline_hint(headline: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+TARGET_RE = re.compile(r"\bfor\s+([A-Z0-9]{3,6})\b")   # 区分大小写，避免把 “for the” 当成代码
+
+
+def headline_target(headline: str, code: str) -> str:
+    """上市公司自己申报时，ASX 会把公告挂在申报方自己的代码下，标题写成 “... for EOL”。
+    返回真正的标的代码；标题里没有、或者就是本身代码时返回空串。"""
+    m = TARGET_RE.search(headline or "")
+    return m.group(1) if m and m.group(1) != code else ""
+
+
 # ---------------------------------------------------------------- PDF
 
 def resolve_pdf_link(html: str, base_url: str) -> str:
@@ -279,8 +294,7 @@ def pdf_texts(data: bytes, pages: int = PDF_PAGES) -> list[str]:
                 return []
         plist = list(reader.pages[:pages])
     except Exception as e:  # noqa: BLE001
-        log(f"    PDF 解析失败: {e}")
-        return []
+        raise BadPDF(f"PDF 打不开（{type(e).__name__}: {e}）") from e
     out = []
     for mode in ("layout", "plain"):
         parts = []
@@ -303,7 +317,10 @@ def pdf_text(data: bytes, pages: int = PDF_PAGES) -> str:
 
 
 SECTION1_RE = re.compile(r"Details\s+of\s+substantial\s+(?:share)?holder|substantial\s+holder\s*\(\s*1\s*\)", re.I)
-COMPANY_RE = re.compile(r"To\s*:?\s*Company\s+Name\s*/\s*Scheme\s*[:\-]?[ \t]*(.*)", re.I)
+COMPANY_RE = re.compile(
+    r"(?:To\s*:?\s*)?Company(?:\s+Name)?\s*/\s*(?:registered\s+scheme\s*/\s*notified\s+foreign\s+passport|Scheme)"
+    r"\s*[:\-]?[ \t]*(.*)", re.I)
+TO_LINE_RE = re.compile(r"^To\s*:\s*(\S.*)$", re.I | re.M)      # 自制表格：“To: HELLOWORLD TRAVEL LIMITED”
 SECTION2_RE = re.compile(r"\n\s*2\s*\.\s+\S")
 LABEL_RE = re.compile(
     r"^(?:the\s+(?:holder|previous)\b|there\s+was\b|acn\b|arsn\b|abn\b|name\b|details\b|previous\b|holder\b|[(\d])"
@@ -316,12 +333,25 @@ ID_TAIL_RE = re.compile(r"\s*(?:\b(?:ACN|ARSN|ABN)\b|\(if applicable\)).*$", re.
 
 def parse_company(text: str) -> str:
     m = COMPANY_RE.search(text)
-    if not m:
-        return ""
-    val = m.group(1).strip()
-    if len(val) < 2:
-        val = text[m.end():].lstrip("\n").split("\n", 1)[0].strip()
+    if m:
+        val = m.group(1).strip()
+        if len(val) < 2:
+            val = text[m.end():].lstrip("\n").split("\n", 1)[0].strip()
+    else:
+        s1 = SECTION1_RE.search(text)
+        m = TO_LINE_RE.search(text, 0, s1.start() if s1 else len(text))
+        if not m:
+            return ""
+        val = m.group(1)
     return ID_TAIL_RE.sub("", val).strip(" :-")[:120]
+
+
+def clean_company(s: str) -> str:
+    """网页显示用：去掉 “(ASX: EOL)”、“(Zenith)”、“NWH.AX” 这类尾巴。"""
+    s = (s or "").strip()
+    s = re.sub(r"\s+[A-Z0-9]{3,6}\.AX\.?$", "", s)
+    s = re.sub(r"\s*\([^()]*\)?\s*$", "", s)        # 末尾括号（包括被截断、没有右括号的）
+    return s.strip(" ,;:-") or (s or "")
 
 
 def clean_name(s: str) -> str:
@@ -364,7 +394,11 @@ def parse_holder_section(text: str, first_line: bool = True) -> tuple[str, str]:
 
 
 VP_RE = re.compile(r"voting\s+power", re.I)
-PCT_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,4})?)\s?%")
+SEC2_RE = re.compile(r"(?:^|\n)\s*2\s*\.?\s*(?:Details\s+of\s+voting\s+power|Previous\s+and\s+present\s+voting\s+power)", re.I)
+SEC3_RE = re.compile(r"\n\s*3\s*\.\s*[A-Za-z]")
+PCT_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,8})?)\s?%")              # 有的写到小数点后 6 位：5.298524%
+BARE_PCT_RE = re.compile(r"(?<![\d.,$])(\d{1,3}\.\d{1,8})(?![\d,%]|\.\d)")  # 表头写 “Voting power (%)”，数字不带 %
+TOTAL_RE = re.compile(r"\btotal\b", re.I)
 EVENT_RE = re.compile(
     r"(?:became|ceased\s+to\s+be)\s+a\s+substantial\s+holder\s+on"
     r"|change\s+in\s+the\s+interests\s+of\s+the"      # 604 常见排版：日期夹在“of the”和“substantial holder on”之间
@@ -397,17 +431,111 @@ def parse_date(seg: str) -> str:
     return min(found)[1].isoformat() if found else ""
 
 
+def voting_section(text: str) -> tuple[str, bool]:
+    """返回 (第二节“持股比例”原文, 是否确定截到了第三节之前)。"""
+    m = SEC2_RE.search(text) or VP_RE.search(text)
+    if not m:
+        return "", False
+    seg = text[m.start(): m.start() + 2500]
+    s3 = SEC3_RE.search(seg, 1)
+    return (seg[: s3.start()], True) if s3 else (seg[:1500], False)
+
+
+def pct_rows(seg: str) -> list[tuple[str, list[float]]]:
+    bare = not PCT_RE.search(seg)
+    rows = []
+    for ln in seg.split("\n"):
+        vals = [float(x) for x in (BARE_PCT_RE if bare else PCT_RE).findall(ln)]
+        vals = [v for v in vals if 0 < v <= 100]
+        if vals:
+            rows.append((ln, vals))
+    return rows
+
+
+def pick_voting_power(seg: str, ntype: str, bounded: bool) -> list[float]:
+    """持股比例表可能分好几行（不同实体或类别）再加一行合计，例如
+    0.06% / 4.94% / GRAND TOTAL 5.00%。优先用合计行；没有合计行时：
+    变动类取比例最大的那一行（前后两个值），新进类取最大值。"""
+    rows = pct_rows(seg)
+    if not rows:
+        return []
+    totals = [v for ln, v in rows if TOTAL_RE.search(ln)]
+    flat = [x for _, v in rows for x in v]
+    if ntype == "change":
+        if totals and len(totals[-1]) >= 2:
+            return totals[-1][:2]
+        pairs = [v for _, v in rows if len(v) >= 2]
+        return max(pairs, key=lambda v: max(v[:2]))[:2] if pairs else flat[:2]
+    if totals:
+        return [totals[-1][-1]]
+    return [max(flat)] if bounded else flat[:1]   # 没截到第三节时不取最大值，免得读到后面的 “100%”
+
+
 def parse_details(text: str, ntype: str) -> dict:
     out = {"change_date": "", "voting_power": []}
     m = EVENT_RE.search(text)
     if m:
         out["change_date"] = parse_date(text[m.end(): m.end() + 250])
     if ntype != "ceasing":
-        vm = VP_RE.search(text)
-        seg = text[vm.start(): vm.start() + 1500] if vm else ""
-        vals = [float(x) for x in PCT_RE.findall(seg) if 0 < float(x) <= 100]
-        out["voting_power"] = vals[:2] if ntype == "change" else vals[:1]
+        seg, bounded = voting_section(text)
+        out["voting_power"] = pick_voting_power(seg, ntype, bounded)
     return out
+
+
+# 其他格式：新西兰双重上市公司用 FMC Act 表格，爱尔兰公司（James Hardie）用 TR-1 表格
+NZ_RE = re.compile(r"Substantial\s+product\s+holder\(s\)\s+giving\s+disclosure", re.I)
+NZ_NAME_RE = re.compile(r"Full\s+name\(s\)\s*:\s*(.+)", re.I)
+NZ_PCT_RE = re.compile(r"total\s+percentage\s+held\s+in\s+class\s*:\s*(\d{1,3}(?:\.\d+)?)\s*%", re.I)
+NZ_DATE_RE = re.compile(r"Date\s+of\s+relevant\s+event\s*:\s*([^\n]+)", re.I)
+NZ_COMPANY_RE = re.compile(r"\nand\s*\nTo\s+(.+)", re.I)
+TR1_RE = re.compile(r"NOTIFICATION\s+OF\s+MAJOR\s+HOLDINGS", re.I)
+TR1_NAME_RE = re.compile(r"person\s+subject\s+to\s+the\s+notification\s+obligation\w*\s*:?\s*\n?\s*Name\s*:\s*(.+?)"
+                         r"(?:\s+City\s+and\s+country.*)?$", re.I | re.M)
+TR1_RESULT_RE = re.compile(r"Resulting\s+situation[\s\S]{0,200}?(\d{1,3}(?:\.\d+)?)\s*%", re.I)
+TR1_PREV_RE = re.compile(r"Position\s+of\s+previous[\s\S]{0,200}?(\d{1,3}(?:\.\d+)?)\s*%", re.I)
+TR1_DATE_RE = re.compile(r"threshold\s+was\s+crossed\s+or\s+reached\w*\s*:?\s*([^\n]*\n?[^\n]*)", re.I)
+TR1_COMPANY_RE = re.compile(r"Identity\s+of\s+the\s+issuer.*?:\s*\n?\s*([^\n]+)", re.I | re.S)
+
+
+def parse_other_forms(text: str, ntype: str) -> dict:
+    """解析非澳洲 603/604/605 格式。认不出时返回空 dict。"""
+    def vp(cur, prev):
+        if ntype == "ceasing" or cur is None:
+            return []
+        return [prev, cur] if ntype == "change" and prev is not None else [cur]
+
+    if NZ_RE.search(text):
+        name = NZ_NAME_RE.search(text)
+        pcts = [float(x) for x in NZ_PCT_RE.findall(text)]
+        date = NZ_DATE_RE.search(text)
+        comp = NZ_COMPANY_RE.search(text)
+        return {"holder_name": clean_name(name.group(1))[:200] if name else "",
+                "voting_power": vp(pcts[0] if pcts else None, pcts[1] if len(pcts) > 1 else None),
+                "change_date": parse_date(date.group(1)) if date else "",
+                "company": comp.group(1).strip()[:120] if comp else ""}
+    if TR1_RE.search(text):
+        name = TR1_NAME_RE.search(text)
+        cur, prev = TR1_RESULT_RE.search(text), TR1_PREV_RE.search(text)
+        date = TR1_DATE_RE.search(text)
+        comp = TR1_COMPANY_RE.search(text)
+        return {"holder_name": clean_name(name.group(1))[:200] if name else "",
+                "voting_power": vp(float(cur.group(1)) if cur else None, float(prev.group(1)) if prev else None),
+                "change_date": parse_date(date.group(1)) if date else "",
+                "company": comp.group(1).strip()[:120] if comp else ""}
+    return {}
+
+
+FORM_TYPES = (
+    (re.compile(r"\bForm\s*605\b|Notice\s+of\s+ceasing\s+to\s+be|ceasing\s+to\s+have\s+substantial\s+holding", re.I), "ceasing"),
+    (re.compile(r"\bForm\s*604\b|Notice\s+of\s+change\s+of\s+interests|Movement\s+of\s+1%\s+or\s+more", re.I), "change"),
+    (re.compile(r"\bForm\s*603\b|Notice\s+of\s+initial\s+substantial|beginning\s+to\s+have\s+substantial\s+holding", re.I), "becoming"),
+)
+
+
+def infer_type(text: str) -> str:
+    """标题看不出类型（例如 “Substantial Holder Notice”）时，按 PDF 里最先出现的表格编号判断。"""
+    hits = [(m.start(), t) for rx, t in FORM_TYPES for m in [rx.search(text)] if m]
+    return min(hits)[1] if hits else ""
 
 
 # ---------------------------------------------------------------- 关注名单与匹配
@@ -419,8 +547,16 @@ class Holder:
     hints: list
 
 
-def word_re(s: str) -> re.Pattern:
-    return re.compile(r"(?<![A-Za-z0-9])" + re.escape(s.strip()) + r"(?![A-Za-z0-9])", re.I)
+def is_abbrev(s: str) -> bool:
+    return len(s) <= 6 and s.upper() == s and any(c.isalpha() for c in s)
+
+
+def word_re(s: str, abbrev_case: bool = False) -> re.Pattern:
+    """整词匹配。abbrev_case=True 时，全大写的缩写（MS、TOP、SOL）区分大小写，
+    免得 “from Ms J Smith” 被当成 Morgan Stanley、“Top End Pty Ltd” 被当成 Thorney。"""
+    s = s.strip()
+    flags = 0 if abbrev_case and is_abbrev(s) else re.I
+    return re.compile(r"(?<![A-Za-z0-9])" + re.escape(s) + r"(?![A-Za-z0-9])", flags)
 
 
 def load_watchlist(path: Path | None = None) -> tuple[list[Holder], list[re.Pattern]]:
@@ -433,8 +569,8 @@ def load_watchlist(path: Path | None = None) -> tuple[list[Holder], list[re.Patt
         aliases = [word_re(a) for a in h.get("aliases", []) if a and a.strip()]
         if not h.get("name") or not aliases:
             raise SystemExit(f"watchlist.json 里有一项缺少 name 或 aliases：{h}")
-        holders.append(Holder(h["name"], aliases, [word_re(x) for x in h.get("hints", []) if x and x.strip()]))
-    noise = [word_re(x) for x in raw.get("noise_hints", []) if x and x.strip()]
+        holders.append(Holder(h["name"], aliases, [word_re(x, True) for x in h.get("hints", []) if x and x.strip()]))
+    noise = [word_re(x, True) for x in raw.get("noise_hints", []) if x and x.strip()]
     return holders, noise
 
 
@@ -461,15 +597,19 @@ def match_entry(e: dict, holders: list[Holder]) -> tuple[str | None, str]:
         return legacy, e.get("legacy_confidence") or "中"
     hint = e.get("hint") or ""
     for h in holders:
-        if any_hit(h.hints, hint) or any_hit(h.aliases, hint):
+        if hint_hit(h, hint):
             return h.name, "低"
     return None, ""
+
+
+def hint_hit(h: Holder, hint: str) -> bool:
+    return any_hit(h.hints, hint) or any_hit(h.aliases, hint)
 
 
 def is_noise(hint: str, holders: list[Holder], noise: list[re.Pattern]) -> bool:
     if not any_hit(noise, hint):
         return False
-    return not any(any_hit(h.hints, hint) or any_hit(h.aliases, hint) for h in holders)
+    return not any(hint_hit(h, hint) for h in holders)
 
 
 # ---------------------------------------------------------------- 存储
@@ -521,6 +661,7 @@ def load_store() -> dict:
 
 PUBLIC_FIELDS = ("id", "code", "company", "date", "time", "headline", "url", "pdf_url",
                  "price_sensitive", "type", "change_date", "voting_power")
+# code：公告涉及的股票；lodged_code：公告实际挂在哪个代码下（申报方自己是上市公司时才有）
 
 
 def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
@@ -529,6 +670,9 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
         holder, conf = match_entry(e, holders)
         if holder:
             item = {k: e.get(k) for k in PUBLIC_FIELDS}
+            target = headline_target(e.get("headline", ""), e.get("code", ""))
+            item["code"], item["lodged_code"] = (target, e.get("code", "")) if target else (e.get("code", ""), "")
+            item["company"] = clean_company(item.get("company") or "")
             item["url"] = safe_url(item.get("url") or "")
             item["pdf_url"] = safe_url(item.get("pdf_url") or "") or item["url"]
             item.update(holder=holder, confidence=conf)
@@ -561,6 +705,13 @@ def analyse_texts(texts: list[str], ntype: str) -> dict:
             out["holder_name"] = parse_holder_section(t)[0]
             if out["holder_name"]:
                 break
+    if not out["holder_name"] and not regions:
+        for t in texts:                                  # 新西兰 / TR-1 等其他格式
+            alt = parse_other_forms(t, ntype)
+            if alt:
+                for k, v in alt.items():
+                    out[k] = out[k] or v
+                break
     if not out["holder_name"]:
         out["region"] = "\n".join(regions)[:1000]   # 名称解析不出来时，留原文做中等可信度匹配
     return out
@@ -573,22 +724,29 @@ def process_entry(e: dict) -> None:
     if not texts:
         e["status"], e["parser"] = "unreadable", PARSER_VERSION
         return
+    if e.get("type", "other") == "other":
+        e["type"] = infer_type(texts[0]) or "other"
     e.update(analyse_texts(texts, e.get("type", "other")))
     e["status"], e["parser"] = "parsed", PARSER_VERSION
 
 
 def hinted(e: dict, holders: list[Holder]) -> bool:
-    hint = e.get("hint", "")
-    return any(any_hit(h.hints, hint) or any_hit(h.aliases, hint) for h in holders)
+    return any(hint_hit(h, e.get("hint", "")) for h in holders)
+
+
+def now_syd() -> dt.datetime:
+    return dt.datetime.now(SYD)
 
 
 def main() -> int:
-    now = dt.datetime.now(SYD)
+    now = now_syd()
     today = now.date()
     holders, noise = load_watchlist()
     store = load_store()
     entries: dict = store["entries"]
-    scanned = set(store.get("scanned_days", []))
+    scanned = set(store.get("scanned_days", []))           # 完整抓到的日子
+    partial = dict(store.get("partial_days", {}) or {})    # 只抓到一部分的日子：{日期: 抓取时间}
+    hhmm = now.strftime("%H:%M")
     errors: list[str] = []
     pages_ok = 0
 
@@ -607,7 +765,12 @@ def main() -> int:
             continue
         pages_ok += 1
         rows.extend(got)
-        scanned.update(r["date"] for r in got)
+        days = {r["date"] for r in got}
+        if url.endswith("todayAnns.do") and hhmm < DAY_COMPLETE_AT:
+            partial.update({d: hhmm for d in days if d not in scanned})   # 当天还没结束，之后的公告这次读不到
+        else:
+            scanned.update(days)
+    partial = {d: t for d, t in partial.items() if d not in scanned}
 
     found_ids = set()
     for r in rows:
@@ -626,6 +789,8 @@ def main() -> int:
     for e in entries.values():
         if e.get("status") in ("parsed", "unreadable") and e.get("parser", 1) < PARSER_VERSION:
             e["status"], e["attempts"] = "new", 0      # 用新的解析规则重读一次
+        elif e.get("status") == "noise" and not is_noise(e.get("hint", ""), holders, noise):
+            e["status"], e["attempts"] = "new", 0      # 改了名单后不再算噪音的，补下载
     todo = [e for e in entries.values()
             if e.get("status") in ("new", "error") and e.get("attempts", 0) < MAX_ATTEMPTS]
     todo.sort(key=lambda e: (e.get("date", ""), e.get("time", "")), reverse=True)   # 新的优先
@@ -668,6 +833,7 @@ def main() -> int:
         schema=SCHEMA,
         entries=entries,
         scanned_days=sorted(d for d in scanned if d >= cutoff),
+        partial_days={d: t for d, t in sorted(partial.items()) if d >= cutoff},
     )
     if pages_ok:
         store["last_success_at"] = now.isoformat(timespec="seconds")
@@ -677,7 +843,8 @@ def main() -> int:
         "schema": SCHEMA,
         "updated_at": dt.datetime.now(SYD).isoformat(timespec="seconds"),
         "last_success_at": store.get("last_success_at"),
-        "scanned_days": store["scanned_days"],
+        "scanned_days": sorted(set(store["scanned_days"]) | set(store["partial_days"])),
+        "partial_days": store["partial_days"],
         "last_run": {
             "ok": pages_ok > 0,
             "list_pages_ok": pages_ok,

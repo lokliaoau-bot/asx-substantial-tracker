@@ -13,11 +13,12 @@ import sys
 import tempfile
 import threading
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
-TODAY = dt.datetime.now(dt.timezone(dt.timedelta(hours=11))).date()
+TODAY = dt.datetime.now(ZoneInfo("Australia/Sydney")).date()
 
 
 def day(n):
@@ -27,6 +28,7 @@ def day(n):
 SAMPLE = {
     "schema": 2, "updated_at": f"{day(0)}T20:41:00+11:00", "last_success_at": f"{day(0)}T20:41:00+11:00",
     "scanned_days": [day(1), day(0)],
+    "partial_days": {day(0): "14:05"},
     "last_run": {"ok": True, "list_pages_ok": 2, "substantial_found": 40, "pdf_checked": 30, "skipped_noise": 10, "deferred": 0, "errors": []},
     "watchlist": ["Paradice Investment Management", "Wilson Asset Management", "Regal Funds Management", "L1 Capital", "Perennial",
                   "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading", "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)"],
@@ -37,6 +39,10 @@ SAMPLE = {
         {"id": "2", "code": "XYZ", "company": "", "date": day(1), "time": "09:05", "headline": "<img src=x onerror=alert(1)>",
          "url": "javascript:alert(1)", "pdf_url": "javascript:alert(1)", "price_sensitive": True, "type": "change",
          "change_date": "", "voting_power": [6.2, 7.4], "holder": "Regal Funds Management", "confidence": "中"},
+        {"id": "4", "code": "EOL", "lodged_code": "WMI", "company": "Energy One Limited", "date": day(1), "time": "17:00",
+         "headline": "Change in substantial holding for EOL", "url": "https://www.asx.com.au/d", "pdf_url": "https://www.asx.com.au/d.pdf",
+         "price_sensitive": False, "type": "change", "change_date": day(4), "voting_power": [9.76, 7.68],
+         "holder": "Wilson Asset Management", "confidence": "高"},
         {"id": "3", "code": "OLD", "company": "Old Co", "date": day(25), "time": "10:00", "headline": "Ceasing to be a substantial holder",
          "url": "https://www.asx.com.au/c", "pdf_url": "", "price_sensitive": False, "type": "ceasing",
          "change_date": day(26), "voting_power": [], "holder": "Regal Funds Management", "confidence": "低"},
@@ -58,8 +64,9 @@ def serve(directory):
 
 
 class GitHubMock:
-    def __init__(self, data, conclusion="success", token_ok=True):
+    def __init__(self, data, conclusion="success", token_ok=True, dispatch_error=None):
         self.data, self.conclusion, self.token_ok = data, conclusion, token_ok
+        self.dispatch_error = dispatch_error      # (status, message, headers)
         self.polls = 0
         self.dispatched = False
 
@@ -68,6 +75,9 @@ class GitHubMock:
         auth = req.headers.get("authorization")
         if auth and not self.token_ok:
             return route.fulfill(status=401, body="{}")
+        if u.endswith("/dispatches") and self.dispatch_error:
+            st, msg, hdrs = self.dispatch_error
+            return route.fulfill(status=st, content_type="application/json", headers=hdrs, body=json.dumps({"message": msg}))
         if u.endswith("/dispatches"):
             self.dispatched = True
             return route.fulfill(status=204, body="")
@@ -111,14 +121,21 @@ def main():
         pg.on("dialog", lambda d: (errs.append("dialog: " + d.message), d.dismiss()))
         pg.goto(url)
         pg.wait_for_timeout(800)
-        check(pg.locator("#rows tr").count() == 2, "近 14 天显示 2 条（25 天前的那条被过滤）")
+        check(pg.locator("#rows tr").count() == 3, "近 14 天显示 3 条（25 天前的那条被过滤）")
+        check("10 个投资者" in pg.inner_text("#lede"), "标题里的人数按关注名单计算")
+        check("挂在 WMI 名下发布" in pg.inner_text("#rows") and "EOL" in pg.inner_text("#rows"),
+              "挂在申报方代码下的公告显示真正的标的代码，并注明挂在哪个代码下")
+        check(not pg.locator("#partial").is_hidden() and "14:05" in pg.inner_text("#partial"), "今天只抓到一部分时提示")
+        pg.fill("#q", "WMI")
+        check(pg.locator("#rows tr").count() == 1, "按挂靠代码也能搜到")
+        pg.fill("#q", "")
         check("Superloop Limited" in pg.inner_text("#rows"), "代码下面显示公司名")
         check(pg.locator("#rows a[href^='javascript']").count() == 0, "javascript: 链接不会被渲染成可点击链接")
         check("<img src=x" in pg.inner_text("#rows"), "标题里的 HTML 按纯文本显示")
         check(not pg.locator("#coverage").is_hidden(), "数据天数不足时显示覆盖提示")
         check("悉尼时间" in pg.inner_text("#status"), "状态栏显示数据时间")
         pg.click("#daysSeg button[data-days='30']")
-        check(pg.locator("#rows tr").count() == 3, "切到近 30 天后显示 3 条")
+        check(pg.locator("#rows tr").count() == 4, "切到近 30 天后显示 4 条")
         pg.screenshot(path=str(shots / "fe_desktop.png"), full_page=True)
         check(not errs, f"没有脚本错误 {errs}")
 
@@ -173,8 +190,22 @@ def main():
         pg.evaluate("localStorage.setItem('ssr_owner','me');localStorage.setItem('ssr_repo','repo');localStorage.setItem('ssr_token','bad')")
         pg.reload()
         pg.wait_for_timeout(800)
-        check(pg.locator("#rows tr").count() == 2, "仍然显示缓存数据")
+        check(pg.locator("#rows tr").count() == 3, "仍然显示缓存数据")
         check("令牌无效" in pg.inner_text("#status"), "提示令牌无效")
+
+        print("6. 令牌缺 Actions 权限 / 请求次数用完时，给出不同的提示")
+        for err, want in (((403, "Resource not accessible by personal access token", {}), "Actions 设为 Read and write"),
+                          ((403, "API rate limit exceeded", {"x-ratelimit-remaining": "0"}), "请求次数")):
+            gh = GitHubMock(SAMPLE, dispatch_error=err)
+            pg = b.new_page()
+            pg.route("https://api.github.com/**", gh)
+            pg.goto(url)
+            pg.evaluate("localStorage.setItem('ssr_owner','me');localStorage.setItem('ssr_repo','repo');localStorage.setItem('ssr_token','t')")
+            pg.reload()
+            pg.wait_for_timeout(500)
+            pg.click("#runBtn")
+            pg.wait_for_function("document.querySelector('#runBtn').disabled === false", timeout=30000)
+            check(want in pg.inner_text("#status"), f"{err[1]} → 提示里有“{want}”")
         b.close()
     httpd.shutdown()
     print("ALL FRONTEND CHECKS PASSED")

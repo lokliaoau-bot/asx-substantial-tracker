@@ -170,6 +170,9 @@ PDFS = {
     "1003": ["Form 604", "To Company Name/Scheme XYZ Limited", "1. Details of substantial holder (1)",
              "Name Celeste Funds Management Limited", "There was a change in the interests of the substantial holder on 29/10/2026",
              "2. Previous and present voting power", "Ordinary 1 6.20% 2 7.40%"],
+    "1004": ["Form 603", "To Company Name/Scheme GMD Limited", "1. Details of substantial holder (1)",
+             "Name Mitsubishi UFJ Financial Group, Inc.", "The holder became a substantial holder on 28/10/2026",
+             "2. Details of voting power", "Ordinary 1 5.30%"],
     "1005": ["Form 604", "1. Details of substantial holder (1)", "Name WAM Capital Limited",
              "There was a change in the interests of the substantial holder on 29/10/2026",
              "2. Previous and present voting power", "Ordinary 1 8.00% 2 9.10%"],
@@ -177,20 +180,24 @@ PDFS = {
 
 
 class FakeASX:
-    def __init__(self, listing=LISTING, fail_ids=(), lists_down=False):
+    def __init__(self, listing=LISTING, fail_ids=(), lists_down=False, prev_listing=None, broken_ids=()):
         self.listing, self.fail_ids, self.lists_down = listing, set(fail_ids), lists_down
+        self.prev_listing, self.broken_ids = prev_listing, set(broken_ids)
         self.pdf_downloads = []
 
     def __call__(self, url, *, max_bytes=None, tries=3, timeout=60):
         if url.endswith("Anns.do"):
             if self.lists_down:
                 raise scrape.FetchError("HTTP 503")
-            return scrape.Fetched(url, self.listing.encode(), "text/html; charset=utf-8")
+            page = self.prev_listing if url.endswith("prevBusDayAnns.do") and self.prev_listing is not None else self.listing
+            return scrape.Fetched(url, page.encode(), "text/html; charset=utf-8")
         if "idsId=" in url:
             i = url.split("idsId=")[1]
             self.pdf_downloads.append(i)
             if i in self.fail_ids:
                 raise scrape.FetchError("HTTP 500")
+            if i in self.broken_ids:   # 模拟下载不完整的 PDF
+                return scrape.Fetched(url, b"%PDF-1.4\n1 0 obj <<", "application/pdf")
             if i == "1003":   # 模拟“同意条款”中间页
                 return scrape.Fetched(url, f'<input name="pdfURL" value="/asxpdf/20261030/pdf/{i}.pdf">'.encode(), "text/html")
             return scrape.Fetched(url, make_pdf(PDFS[i]), "application/pdf")
@@ -433,3 +440,138 @@ def test_old_parser_entries_are_reparsed(sandbox, monkeypatch):
     scrape.main()
     e2 = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
     assert e2["parser"] == scrape.PARSER_VERSION and e2["holder_name"]
+
+
+# ---------------------------------------------------------------- 第四轮审查（2026-11-03）补充的测试
+
+def test_multi_row_table_uses_grand_total():
+    # CFS 母公司新进 Karoon：0.05% / 4.95% 两个分项 + GRAND TOTAL 5.00%，以前取成了 0.05%
+    r = real("603_grand_total_cfs.pdf", "becoming")
+    assert r["holder_name"].startswith("Superannuation and Investments HoldCo Pty Ltd")
+    assert r["voting_power"] == [5.0] and r["change_date"] == "2026-11-02"
+
+
+def test_percent_sign_only_in_header():
+    # 表头写 “Voting Power (%)”，数字 17.57 / 18.58 不带 % 号，以前一个都读不出来
+    r = real("604_bare_percent_amx.pdf", "change")
+    assert r["voting_power"] == [17.57, 18.58] and r["change_date"] == "2026-11-02"
+    assert scrape.match_entry({"holder_name": r["holder_name"]}, HOLDERS) == ("Perennial", "高")
+
+
+def test_six_decimal_percentages_and_2018_form():
+    r = real("604_six_decimals_ctt.pdf", "change")
+    assert r["voting_power"] == [5.298524, 6.323057]
+    assert r["company"] == "Cettire Limited" and r["change_date"] == "2026-11-02"
+
+
+def test_nz_fmc_act_form():
+    r = real("nz_fmc_gtk.pdf", "change")
+    assert r["holder_name"].startswith("Mitsubishi UFJ Financial Group")
+    assert r["voting_power"] == [6.584, 5.368] and r["change_date"] == "2026-10-29"
+    assert r["company"] == "Gentrack Group Ltd"
+
+
+def test_irish_tr1_form():
+    r = real("tr1_jhx.pdf", "change")
+    assert r["holder_name"] == "D1 Capital Partners L.P."
+    assert r["voting_power"] == [5.0161, 4.3083] and r["change_date"] == "2026-10-27"
+    assert scrape.clean_company(r["company"]) == "James Hardie Industries plc"
+
+
+def test_company_line_variants_real():
+    assert real("604_to_colon_hlo.pdf", "change")["company"] == "HELLOWORLD TRAVEL LIMITED"
+    r = real("604_australiansuper_pwh.pdf", "change")     # 没有 “To” 的写法；也是养老金申报的真实样本
+    assert r["company"] == "PWR Holdings Limited" and r["holder_name"] == "AustralianSuper Pty Ltd"
+    assert r["voting_power"] == [7.07, 5.98] and r["change_date"] == "2026-10-28"
+
+
+def test_clean_company():
+    assert scrape.clean_company("Energy One Limited (ASX: EOL)") == "Energy One Limited"
+    assert scrape.clean_company("NRW Holdings Limited NWH.AX") == "NRW Holdings Limited"
+    assert scrape.clean_company("Elevra Lithium Ltd (“ELV”, Ordinary Fu") == "Elevra Lithium Ltd"
+    assert scrape.clean_company("Superloop Limited") == "Superloop Limited"
+
+
+def test_infer_type_from_form():
+    assert scrape.infer_type("Form 604\nCorporations Act 2001\nNotice of change of interests") == "change"
+    assert scrape.infer_type("Form 603 Notice of initial substantial holder") == "becoming"
+    assert scrape.infer_type("Disclosure of movement of 1% or more in substantial holding") == "change"
+    assert scrape.infer_type("Annual Report") == ""
+
+
+def test_abbreviation_hints_are_case_sensitive():
+    assert scrape.is_noise("MS", HOLDERS, NOISE)
+    assert not scrape.is_noise("Ms J Smith", HOLDERS, NOISE)          # 以前被当成 Morgan Stanley 跳过
+    assert scrape.match_entry({"hint": "TOP"}, HOLDERS) == ("Thorney / Tiga Trading", "低")
+    assert scrape.match_entry({"hint": "Top End Holdings Pty Ltd"}, HOLDERS) == (None, "")
+    assert scrape.is_noise("Citigroup Global Markets", HOLDERS, NOISE)  # 非缩写仍然不分大小写
+
+
+def test_target_code_for_notices_lodged_under_holder_code():
+    base = {"status": "parsed", "holder_name": "Wilson Asset Management Group", "date": "2026-11-02", "type": "change"}
+    out = scrape.build_notices({
+        "a": {**base, "id": "a", "code": "WMI", "headline": "Change in substantial holding for EOL",
+              "company": "Energy One Limited (ASX: EOL)"},
+        "b": {**base, "id": "b", "code": "DXN", "headline": "Ceasing to be a substantial holder for DXN from WAM/WAA/WMI"},
+    }, HOLDERS)
+    by = {n["id"]: n for n in out}
+    assert by["a"]["code"] == "EOL" and by["a"]["lodged_code"] == "WMI" and by["a"]["company"] == "Energy One Limited"
+    assert by["b"]["code"] == "DXN" and by["b"]["lodged_code"] == ""
+
+
+def test_noise_entries_are_reconsidered_after_list_change(sandbox, monkeypatch):
+    fake = FakeASX()
+    monkeypatch.setattr(scrape, "fetch", fake)
+    scrape.main()
+    assert "1004" not in fake.pdf_downloads
+    w = read(sandbox / "scraper" / "watchlist.json")
+    w["noise_hints"] = [x for x in w["noise_hints"] if x not in ("MUFG", "Mitsubishi")]
+    w["holders"].append({"name": "MUFG", "aliases": ["Mitsubishi UFJ Financial Group"], "hints": ["MUFG"]})
+    (sandbox / "scraper" / "watchlist.json").write_text(json.dumps(w), encoding="utf-8")
+    fake.pdf_downloads.clear()
+    scrape.main()
+    assert fake.pdf_downloads == ["1004"]
+    got = {n["code"]: n for n in read(sandbox / "data" / "notices.json")["notices"]}
+    assert got["GMD"]["holder"] == "MUFG" and got["GMD"]["confidence"] == "高"
+
+
+def test_broken_pdf_is_retried_not_marked_unreadable(sandbox, monkeypatch):
+    fake = FakeASX(broken_ids={"1001"})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["status"] == "error" and "PDF 打不开" in e["error"]
+    fake.broken_ids.clear()
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["status"] == "parsed" and e["holder_name"].startswith("Paradice")
+
+
+EMPTY_LISTING = "<table><tr><th>ASX Code</th></tr></table>"
+
+
+def test_today_fetched_before_close_is_partial(sandbox, monkeypatch):
+    fake = FakeASX(prev_listing=EMPTY_LISTING)          # 只有“今日公告”有数据
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 14, 5, tzinfo=scrape.SYD))
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["partial_days"] == {"2026-10-30": "14:05"}
+    assert "2026-10-30" in out["scanned_days"]           # 覆盖天数照算，另外单独提示“只抓到 14:05”
+    # 当天晚上 9 点后再抓一次就算完整
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["partial_days"] == {} and out["scanned_days"] == ["2026-10-30"]
+
+
+def test_previous_business_day_page_completes_a_partial_day(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", FakeASX(prev_listing=EMPTY_LISTING))
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 11, 0, tzinfo=scrape.SYD))
+    scrape.main()
+    # 下一个交易日：上一交易日列表里是 30 日的全部公告
+    monkeypatch.setattr(scrape, "fetch", FakeASX(listing=EMPTY_LISTING, prev_listing=LISTING))
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 11, 2, 9, 0, tzinfo=scrape.SYD))
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["partial_days"] == {} and "2026-10-30" in out["scanned_days"]

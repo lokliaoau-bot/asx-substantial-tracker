@@ -108,7 +108,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：33 passed
+python -m pytest -q   # 期望：47 passed
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -180,11 +180,12 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
   "updated_at": "2026-11-02T20:41:05+11:00",
   "last_success_at": "2026-11-02T20:40:12+11:00",
   "scanned_days": ["2026-10-30", "2026-11-02"],
+  "partial_days": {"2026-11-02": "14:05"},
   "last_run": {"ok": true, "list_pages_ok": 2, "substantial_found": 57, "pdf_checked": 41,
                "skipped_noise": 16, "deferred": 0, "errors": []},
   "watchlist": ["Paradice Investment Management", "..."],
   "notices": [{
-    "id": "03142997", "code": "SLC", "company": "Superloop Limited",
+    "id": "03142997", "code": "SLC", "lodged_code": "", "company": "Superloop Limited",
     "date": "2026-10-30", "time": "16:10",
     "headline": "Becoming a substantial holder",
     "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03142997",
@@ -196,31 +197,35 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 }
 ```
 
-- `type` 取值：`becoming` / `change` / `ceasing` / `other`
+- `code`：公告涉及的股票。申报方自己是上市公司时，ASX 会把公告挂在申报方的代码下（标题 “... for EOL”），这时 `code` 是标的 EOL，`lodged_code` 是挂靠的代码（例如 WMI）；其他情况 `lodged_code` 为空
+- `scanned_days`：抓到过公告列表的日子；`partial_days`：其中只抓到一部分的日子和抓取时间（悉尼时间晚上 9 点前读的“今日公告”）。下一个交易日再抓一次，上一交易日列表会把它补全
+- `type` 取值：`becoming` / `change` / `ceasing` / `other`（标题看不出类型时，按 PDF 里的表格编号 603/604/605 判断）
 - `voting_power`：变动类为 `[之前, 现在]`，新进类为 `[现在]`，退出类为 `[]`
 - `confidence` 取值：
   - `高`：PDF 第一节解析出的申报方名称命中
   - `中`：名称没解析出来，但第一节原文命中
   - `低`：PDF 无文字，仅凭标题 “from XXX” 命中
 
-`data/all_notices.json`（内部存储）：`{"schema":2,"entries":{id: entry},"scanned_days":[…],"last_success_at":…}`。
+`data/all_notices.json`（内部存储）：`{"schema":2,"entries":{id: entry},"scanned_days":[…],"partial_days":{…},"last_success_at":…}`。`entry.parser` 记录解析规则版本，`PARSER_VERSION` 升级后旧记录会自动重读一次。
 
 - `entry.status` 取值：
   - `new`：刚发现，还没处理
   - `parsed`：已解析
-  - `unreadable`：PDF 读不出文字
+  - `unreadable`：PDF 读不出文字（基本都是扫描件）
   - `noise`：标题显示是噪音申报方，未下载
   - `skipped`：404 或文件过大
-  - `error`：下载或解析失败，会重试，`attempts` 最多 3 次
+  - `error`：下载或解析失败（包括 PDF 打不开、多半是下载不完整），会重试，`attempts` 最多 3 次
 
 第一版的 `data/notices.json` 和 `data/seen.json` 会自动迁移，迁移后 `seen.json` 会被删除。
 
 ## 9. 已知限制
 
-- ASX 公开的全市场列表只有当天和上一交易日，首次部署后要连续运行约两周才有完整的“近两周”数据，网页会提示还缺几天。
+- ASX 公开的全市场列表只有当天和上一交易日，要每隔一两个交易日点一次抓取才能攒出完整的“近两周”，网页会提示还缺几天、哪天只抓到一部分。
+- 扫描件 PDF（约一成，多是小公司和个人申报）没有文字层，只能靠标题里的 “from XXX” 低可信度匹配。要读出来需要加 OCR。
+- 除了澳洲 603/604/605，还能读新西兰双重上市公司的 FMC Act 表格和 James Hardie 的爱尔兰 TR-1 表格；其他自制格式可能读不出名称或比例。
 - 持股比例和变动日来自 PDF 文本解析，表格排版特殊的 PDF 可能识别错，网页上都附有原文链接。
 - 只覆盖持股 5% 以上的申报。5% 以上每次小于 1% 的变动不需要申报，所以看不到。
-- 只用于个人研究，请求频率很低（每天两次，下载之间有间隔）。
+- 只用于个人研究，请求频率很低（只在点按钮时运行，下载之间有间隔）。
 
 ## 10. 代码审查记录
 
@@ -272,10 +277,33 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 | 低 | 深色模式下手机状态栏颜色不对。 | 分别设置浅色和深色的 theme-color。 |
 | 工具 | 没有自动测试。 | 新增 `tests.yml`，推送代码时自动跑 pytest。 |
 
+### 第三轮（2026-11-02，第一次真实运行后）
+
+| 级别 | 问题 | 修复 |
+| --- | --- | --- |
+| 高 | 真实 603/604 多为模板填写式，默认提取时“Name”和名称分家，约 4 成公告读不出申报方，变动日取成上一次申报的日期。 | 版面模式和默认模式都读，每个字段取先解析出的；支持 “29 /10/2026” 和没有 Name 标签的格式；识别 ASX 水印；加 `PARSER_VERSION`。 |
+
+### 第四轮（2026-11-03，3 个交易日、119 条真实公告）
+
+| 级别 | 问题 | 修复 |
+| --- | --- | --- |
+| 高 | 持股比例表分多行加合计时取了第一行，例如 CFS 母公司新进 Karoon 显示 0.05%（实际合计 5.00%）。 | 只看第二节；优先合计行，否则新进取最大值、变动取比例最大的一行。 |
+| 高 | 表头写 “Voting power (%)”、数字不带 % 时一个都读不出（Perennial 的 AMX 公告）；小数点后超过 4 位（5.298524%）也读不出。 | 支持不带 % 的小数和最多 8 位小数。 |
+| 高 | 申报方自己上市时，公告挂在申报方代码下（“... for EOL”），网页把 WAM 减持 Energy One 显示成 WMI。3 天里有 9 条这样的公告。 | 从标题取真正的标的代码，网页注明挂在哪个代码下；搜索两个代码都能搜到。 |
+| 中 | 噪音缩写不分大小写：“from Ms J Smith” 会被当成 Morgan Stanley 跳过；“Top End Pty Ltd” 会低可信度匹配到 Thorney（TOP）。 | 全大写缩写区分大小写。 |
+| 中 | 改了名单后，之前被判为噪音的公告永远不会补下载。 | 每次运行重新判断噪音记录。 |
+| 中 | 改成手动抓取后，白天点一次会把当天记为“已覆盖”，之后发的公告漏掉也不提示。 | 记录只抓到一部分的日子，网页提示什么时候再点能补全。 |
+| 中 | PDF 下载不完整时被永久记为“读不出文字”。 | 改为下次重试。 |
+| 中 | 新西兰 FMC Act 表格（Gentrack 等双重上市公司）和爱尔兰 TR-1 表格（James Hardie）完全读不出。 | 新增两种格式的名称、比例、日期解析。 |
+| 中 | 网页 403 报错不区分“令牌缺权限”和“请求次数用完”，用户照着改也不知道改哪里。 | 读取 GitHub 返回的原因，分别给出具体操作步骤。 |
+| 低 | 标题看不出类型（“Substantial Holder Notice”）时比例只读一个值。 | 按 PDF 里的表格编号判断类型。 |
+| 低 | 公司名带 “(ASX: EOL)”、“NWH.AX” 等尾巴；“To: XXX”、没有 “To” 的公司名读不出。 | 显示前清理，支持更多写法。 |
+| 低 | 网页标题写死“10 个主动型投资者”。 | 按名单人数显示。 |
+
 ### 测试结果（交付时）
 
-- `python -m pytest -q`：25 passed。已在 Python 3.12 干净虚拟环境中，按 `requirements-dev.txt` 锁定的版本验证。
-- `python tests/frontend_check.py`：19 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退。
+- `python -m pytest -q`：47 passed（其中 15 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页）。
+- `python tests/frontend_check.py`：25 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
 - 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
 
 ### 开发依赖里的一条无害警告

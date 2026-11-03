@@ -149,6 +149,7 @@ td.num, .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .down { color: var(--ceasing); }
 .conf { font-size: 12px; color: var(--muted); }
 .company { font-size: 12px; color: var(--muted); font-weight: 400; max-width: 16em; }
+.via { font-size: 12px; color: var(--muted); }
 .notice.bad { background: transparent; border: 1px solid var(--ceasing); color: var(--ceasing); }
 .headline a { color: var(--ink); }
 .empty { padding: 36px 16px; text-align: center; color: var(--muted); }
@@ -189,7 +190,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   <header class="top">
     <div>
       <h1>大股东公告雷达</h1>
-      <p class="lede">追踪 10 个主动型投资者在 ASX 的大股东公告：谁新进、谁加仓、谁退出。</p>
+      <p class="lede" id="lede">追踪关注名单里的投资者在 ASX 的大股东公告：谁新进、谁加仓、谁退出。</p>
     </div>
     <div class="run">
       <button id="runBtn" type="button">抓取最新公告</button>
@@ -199,6 +200,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
 
   <div id="issues" class="notice bad" hidden></div>
   <div id="coverage" class="notice" hidden></div>
+  <div id="partial" class="notice" hidden></div>
 
   <section class="holders" id="holders" aria-label="按申报方筛选"></section>
 
@@ -325,9 +327,16 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     if (cfg.token) headers.Authorization = "Bearer " + cfg.token;
     return fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}${path}`, { ...opts, headers });
   }
-  function apiError(res, action) {
+  const FIX_TOKEN = "到 GitHub 头像 → Settings → Developer settings → Fine-grained tokens，点开这个令牌 → Edit："
+    + "Repository access 要勾选本仓库，下面 Permissions 里把 Actions 设为 Read and write、Contents 设为 Read-only，再点 Update。网页里的令牌不用重新粘贴。";
+  async function apiError(res, action) {
+    let msg = "";
+    try { msg = String(((await res.clone().json()) || {}).message || ""); } catch {}
+    const limited = res.headers.get("x-ratelimit-remaining") === "0" || /rate limit/i.test(msg);
     if (res.status === 401) return `${action}失败：令牌无效或已过期，请在下方 GitHub 设置里换一个。`;
-    if (res.status === 403) return `${action}失败：令牌权限不足（需要本仓库的 Actions 读写权限），或触发了 GitHub 频率限制。`;
+    if ((res.status === 403 || res.status === 429) && limited) return `${action}失败：GitHub 的请求次数暂时用完了，过半小时左右再试。`;
+    if (res.status === 403) return `${action}失败：令牌没有本仓库的 Actions 读写权限。${FIX_TOKEN}`;
+    if (res.status === 404 && cfg.token) return `${action}失败：GitHub 说找不到（${cfg.owner}/${cfg.repo}）。可能是仓库名填错，或者令牌没有勾选这个仓库。${FIX_TOKEN}`;
     if (res.status === 404) return `${action}失败：找不到仓库或工作流，请检查仓库所有者、仓库名，以及 .github/workflows/${WORKFLOW} 是否存在。`;
     if (res.status === 422) return `${action}失败：分支“${cfg.branch}”不对，或工作流没有开启手动触发。`;
     return `${action}失败：GitHub 返回 ${res.status}。`;
@@ -337,7 +346,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   async function fromApi() {
     const res = await api(`/contents/data/notices.json?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`,
       { headers: { Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
-    if (!res.ok) throw new Error(apiError(res, "读取数据"));
+    if (!res.ok) throw new Error(await apiError(res, "读取数据"));
     return res.json();
   }
   async function fromPages() {
@@ -377,7 +386,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   // ---------- 触发抓取
   async function latestRunId() {
     const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=1`, { cache: "no-store" });
-    if (!r.ok) throw new Error(apiError(r, "查询运行记录"));
+    if (!r.ok) throw new Error(await apiError(r, "查询运行记录"));
     const runs = (await r.json()).workflow_runs || [];
     return runs.length ? runs[0].id : 0;
   }
@@ -403,12 +412,12 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ref: cfg.branch }),
       });
-      if (res.status !== 204) return setStatus(apiError(res, "启动抓取"), true);
+      if (res.status !== 204) return setStatus(await apiError(res, "启动抓取"), true);
 
       while (Date.now() - started < 20 * 60 * 1000) {
         await sleep(Date.now() - started < 30000 ? 4000 : 8000);
         const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`, { cache: "no-store" });
-        if (!r.ok) return setStatus(apiError(r, "查询进度"), true);
+        if (!r.ok) return setStatus(await apiError(r, "查询进度"), true);
         const runs = (await r.json()).workflow_runs || [];
         const run = runs.filter((x) => x.id > before).sort((a, b) => a.id - b.id)[0];
         const secs = Math.round((Date.now() - started) / 1000);
@@ -449,7 +458,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     let list = all.filter(inWindow);
     if (state.holder) list = list.filter((n) => n.holder === state.holder);
     if (state.type !== "all") list = list.filter((n) => n.type === state.type);
-    if (q) list = list.filter((n) => [n.code, n.company, n.headline, n.holder].join(" ").toLowerCase().includes(q));
+    if (q) list = list.filter((n) => [n.code, n.lodged_code, n.company, n.headline, n.holder].join(" ").toLowerCase().includes(q));
     const k = state.sort, dir = state.dir;
     const key = (n) => (k === "date" ? (n.date || "") + (n.time || "") : String(n[k] || "").toLowerCase());
     return list.sort((a, b) => (key(a) < key(b) ? -dir : key(a) > key(b) ? dir : 0));
@@ -458,6 +467,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   function renderHolders() {
     const names = state.data && Array.isArray(state.data.watchlist) && state.data.watchlist.length ? state.data.watchlist : DEFAULT_WATCHLIST;
     if (state.holder && !names.includes(state.holder)) state.holder = null;
+    $("lede").textContent = `追踪关注名单里 ${names.length} 个投资者在 ASX 的大股东公告：谁新进、谁加仓、谁退出。`;
     const counts = {};
     ((state.data && state.data.notices) || []).filter(inWindow).forEach((n) => { counts[n.holder] = (counts[n.holder] || 0) + 1; });
     $("holders").replaceChildren(...names.map((name) => {
@@ -519,6 +529,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       const tr = document.createElement("tr");
       const codeBox = el("div", "", link(`https://www.asx.com.au/markets/company/${encodeURIComponent(n.code || "")}`, n.code || "?"));
       if (n.company) codeBox.append(el("div", "company", n.company));
+      if (n.lodged_code) codeBox.append(el("div", "via", `挂在 ${n.lodged_code} 名下发布`));
       const code = el("td", "code", codeBox, "代码");
       const holderBox = el("div", "", n.holder);
       if (n.confidence && n.confidence !== "高") holderBox.append(el("div", "conf", "可信度：" + n.confidence));
@@ -536,7 +547,29 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     }));
   }
 
+  function prevWeekday(iso) {
+    let d = addDays(iso, -1);
+    while ([0, 6].includes(new Date(d + "T00:00:00Z").getUTCDay())) d = addDays(d, -1);
+    return d;
+  }
+
+  function renderPartial() {
+    const box = $("partial");
+    const partial = (state.data && state.data.partial_days) || {};
+    const today = sydneyToday(), prev = prevWeekday(today);
+    if (partial[today]) {
+      box.textContent = `今天的公告只抓到 ${partial[today]}。ASX 晚上 8 点多还会发公告，晚上 9 点以后或下一个交易日再点一次“抓取最新公告”，就能把今天补全。`;
+    } else if (partial[prev]) {
+      box.textContent = `${fmtDate(prev)} 的公告只抓到 ${partial[prev]}。今天点一次“抓取最新公告”就能补全；过了今天，那天后来发的公告就补不回来了。`;
+    } else {
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+  }
+
   function renderBanners() {
+    renderPartial();
     const issues = $("issues"), cov = $("coverage");
     const d = state.data;
     const lr = d && d.last_run;

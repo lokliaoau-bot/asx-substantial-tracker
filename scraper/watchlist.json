@@ -1,5 +1,5 @@
 {
-  "_note": "aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。改完后，保留期内的旧公告会在下次运行时按新名单重新匹配。",
+  "_note": "aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。hints 和 noise_hints 里全大写的缩写（如 MS、TOP）区分大小写，其他不分。改完后，保留期内的旧公告（包括之前被当成噪音跳过的）会在下次运行时按新名单重新匹配。",
   "holders": [
     {
       "name": "Paradice Investment Management",

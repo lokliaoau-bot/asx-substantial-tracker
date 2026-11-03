@@ -56,6 +56,7 @@
   }
 }
 *, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
 html { height: 100%; }
 body {
   margin: 0;
@@ -98,9 +99,11 @@ h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; font-weight: 700; lett
 }
 
 /* 申报方计数条：页面的主角 */
-.holders {
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  gap: 0; margin: 26px 0 8px;
+.holders { margin: 26px 0 8px; }
+.group-title { font-size: 13px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
+.group-title:first-child { margin-top: 0; }
+.cards {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
   border-top: 1px solid var(--rule); border-left: 1px solid var(--rule);
 }
 .holder {
@@ -164,7 +167,7 @@ details.settings summary { cursor: pointer; font-weight: 600; }
 .help { font-size: 13px; color: var(--muted); max-width: 75ch; }
 footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch; }
 
-@media (max-width: 900px) { .holders { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px) { .cards { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 640px) {
   h1 { font-size: 24px; }
   .tablewrap { overflow: visible; border: 0; background: transparent; }
@@ -180,7 +183,9 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   .run { align-items: stretch; width: 100%; }
   #runBtn { width: 100%; }
   #status { text-align: left; }
-  .holders { grid-template-columns: repeat(2, 1fr); }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .holder { padding: 8px 12px 10px; }
+  .holder .n { font-size: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -205,6 +210,11 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   <section class="holders" id="holders" aria-label="按申报方筛选"></section>
 
   <div class="filters">
+    <div class="seg" id="groupSeg" role="group" aria-label="申报方分组">
+      <button type="button" data-group="all" aria-pressed="true">全部</button>
+      <button type="button" data-group="主动基金" aria-pressed="false">主动基金</button>
+      <button type="button" data-group="养老金" aria-pressed="false">养老金</button>
+    </div>
     <div class="seg" id="typeSeg" role="group" aria-label="公告类型">
       <button type="button" data-type="all" aria-pressed="true">全部</button>
       <button type="button" data-type="becoming" aria-pressed="false">新进</button>
@@ -252,7 +262,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   </details>
 
   <footer>
-    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。本工具只做信息整理，不构成投资建议。
+    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。标着“扫描件·文字识别”的，是把扫描的图片 PDF 用 OCR 识别出来的，数字可能认错，请以原文为准。养老金只看得到它们自己操盘的部分；交给外部基金经理管理的钱，会以基金经理的名义申报。本工具只做信息整理，不构成投资建议。
   </footer>
 </main>
 
@@ -286,7 +296,8 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     token: store.get("token"),
   };
 
-  const state = { data: null, holder: null, type: "all", days: 14, q: "", sort: "date", dir: -1, busy: false };
+  const state = { data: null, holder: null, group: "all", type: "all", days: 14, q: "", sort: "date", dir: -1, busy: false };
+  const GROUP_ORDER = ["主动基金", "养老金"];
 
   function setStatus(msg, isErr = false) {
     const el = $("status");
@@ -457,6 +468,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     const q = state.q.trim().toLowerCase();
     let list = all.filter(inWindow);
     if (state.holder) list = list.filter((n) => n.holder === state.holder);
+    if (state.group !== "all") list = list.filter((n) => groupOf(n.holder) === state.group);
     if (state.type !== "all") list = list.filter((n) => n.type === state.type);
     if (q) list = list.filter((n) => [n.code, n.lodged_code, n.company, n.headline, n.holder].join(" ").toLowerCase().includes(q));
     const k = state.sort, dir = state.dir;
@@ -464,13 +476,31 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     return list.sort((a, b) => (key(a) < key(b) ? -dir : key(a) > key(b) ? dir : 0));
   }
 
+  function groupOf(name) {
+    const g = state.data && state.data.groups;
+    return (g && g[name]) || "主动基金";
+  }
+
   function renderHolders() {
     const names = state.data && Array.isArray(state.data.watchlist) && state.data.watchlist.length ? state.data.watchlist : DEFAULT_WATCHLIST;
     if (state.holder && !names.includes(state.holder)) state.holder = null;
-    $("lede").textContent = `追踪关注名单里 ${names.length} 个投资者在 ASX 的大股东公告：谁新进、谁加仓、谁退出。`;
+    if (state.holder && state.group !== "all" && groupOf(state.holder) !== state.group) state.holder = null;
+    const groups = [...new Set(names.map(groupOf))].sort((a, b) => (GROUP_ORDER.indexOf(a) + 99) % 99 - (GROUP_ORDER.indexOf(b) + 99) % 99);
+    const parts = groups.map((g) => `${names.filter((n) => groupOf(n) === g).length} 家${g}`);
+    $("lede").textContent = `追踪关注名单里 ${names.length} 个投资者（${parts.join("、")}）在 ASX 的大股东公告：谁新进、谁加仓、谁退出。`;
+    $("groupSeg").hidden = groups.length < 2;
     const counts = {};
     ((state.data && state.data.notices) || []).filter(inWindow).forEach((n) => { counts[n.holder] = (counts[n.holder] || 0) + 1; });
-    $("holders").replaceChildren(...names.map((name) => {
+    const shown = groups.filter((g) => state.group === "all" || g === state.group);
+    $("holders").replaceChildren(...shown.flatMap((g) => {
+      const box = document.createElement("div");
+      box.className = "cards";
+      box.setAttribute("aria-label", g);
+      box.append(...names.filter((n) => groupOf(n) === g).map(card));
+      return groups.length > 1 ? [el("div", "group-title", g), box] : [box];
+    }));
+
+    function card(name) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "holder" + (counts[name] ? "" : " zero");
@@ -480,7 +510,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       b.append(n, t);
       b.addEventListener("click", () => { state.holder = state.holder === name ? null : name; render(); });
       return b;
-    }));
+    }
   }
 
   function el(tag, cls, content, label) {
@@ -532,7 +562,10 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       if (n.lodged_code) codeBox.append(el("div", "via", `挂在 ${n.lodged_code} 名下发布`));
       const code = el("td", "code", codeBox, "代码");
       const holderBox = el("div", "", n.holder);
-      if (n.confidence && n.confidence !== "高") holderBox.append(el("div", "conf", "可信度：" + n.confidence));
+      const notes = [];
+      if (n.confidence && n.confidence !== "高") notes.push("可信度：" + n.confidence);
+      if (n.ocr) notes.push("扫描件·文字识别，数字请核对原文");
+      if (notes.length) holderBox.append(el("div", "conf", notes.join("；")));
       const holder = el("td", "", holderBox, "申报方");
       tr.append(
         el("td", "nowrap", fmtDate(n.date) + (n.time ? " " + n.time : ""), "公告日期"),
@@ -613,6 +646,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       render();
     });
   }
+  bindSeg("groupSeg", "group", "group");
   bindSeg("typeSeg", "type", "type");
   bindSeg("daysSeg", "days", "days", Number);
   $("q").addEventListener("input", (e) => { state.q = e.target.value; renderRows(); });

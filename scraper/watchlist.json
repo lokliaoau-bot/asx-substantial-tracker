@@ -1,5 +1,5 @@
 {
-  "_note": "aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。hints 和 noise_hints 里全大写的缩写（如 MS、TOP）区分大小写，其他不分。改完后，保留期内的旧公告（包括之前被当成噪音跳过的）会在下次运行时按新名单重新匹配。",
+  "_note": "group：网页上的分组（主动基金 / 养老金）；aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。hints 和 noise_hints 里全大写的缩写（如 MS、TOP）区分大小写，其他不分。改完后，保留期内的旧公告（包括之前被当成噪音跳过的）会在下次运行时按新名单重新匹配。",
   "holders": [
     {
       "name": "Paradice Investment Management",
@@ -10,7 +10,8 @@
       "hints": [
         "PIM",
         "Paradice"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Wilson Asset Management",
@@ -27,7 +28,8 @@
       "hints": [
         "WAM",
         "Wilson"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Regal Funds Management",
@@ -40,7 +42,8 @@
         "Regal",
         "RPL",
         "RFM"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "L1 Capital",
@@ -50,7 +53,8 @@
       "hints": [
         "L1",
         "L1C"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Perennial",
@@ -62,7 +66,8 @@
       "hints": [
         "Perennial",
         "PVM"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Celeste Funds Management",
@@ -71,7 +76,8 @@
       ],
       "hints": [
         "Celeste"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Ellerston Capital",
@@ -80,7 +86,8 @@
       ],
       "hints": [
         "Ellerston"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Thorney / Tiga Trading",
@@ -96,7 +103,8 @@
         "Tiga",
         "TOP",
         "TEK"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Washington H. Soul Pattinson",
@@ -109,7 +117,8 @@
         "WHSP",
         "SOL",
         "Soul Patts"
-      ]
+      ],
+      "group": "主动基金"
     },
     {
       "name": "Tattarang (Andrew Forrest)",
@@ -120,6 +129,159 @@
       "hints": [
         "Tattarang",
         "Squadron"
+      ],
+      "group": "主动基金"
+    },
+    {
+      "name": "AustralianSuper",
+      "group": "养老金",
+      "aliases": [
+        "AustralianSuper"
+      ],
+      "hints": [
+        "AustralianSuper",
+        "AusSuper",
+        "Australian Super"
+      ]
+    },
+    {
+      "name": "Australian Retirement Trust",
+      "group": "养老金",
+      "aliases": [
+        "Australian Retirement Trust"
+      ],
+      "hints": [
+        "ART",
+        "Australian Retirement Trust"
+      ]
+    },
+    {
+      "name": "Aware Super",
+      "group": "养老金",
+      "aliases": [
+        "Aware Super"
+      ],
+      "hints": [
+        "Aware Super",
+        "Aware"
+      ]
+    },
+    {
+      "name": "UniSuper",
+      "group": "养老金",
+      "aliases": [
+        "UniSuper"
+      ],
+      "hints": [
+        "UniSuper"
+      ]
+    },
+    {
+      "name": "Hostplus",
+      "group": "养老金",
+      "aliases": [
+        "Host-Plus",
+        "Hostplus",
+        "Host Plus"
+      ],
+      "hints": [
+        "Hostplus",
+        "Host-Plus"
+      ]
+    },
+    {
+      "name": "Cbus",
+      "group": "养老金",
+      "aliases": [
+        "United Super Pty",
+        "Cbus",
+        "Construction and Building Unions Superannuation"
+      ],
+      "hints": [
+        "Cbus"
+      ]
+    },
+    {
+      "name": "HESTA",
+      "group": "养老金",
+      "aliases": [
+        "H.E.S.T. Australia",
+        "HEST Australia",
+        "HESTA"
+      ],
+      "hints": [
+        "HESTA"
+      ]
+    },
+    {
+      "name": "Rest",
+      "group": "养老金",
+      "aliases": [
+        "Retail Employees Superannuation",
+        "Rest Super"
+      ],
+      "hints": [
+        "REST",
+        "Rest Super"
+      ]
+    },
+    {
+      "name": "Colonial First State (CFS)",
+      "group": "养老金",
+      "aliases": [
+        "Colonial First State",
+        "Superannuation and Investments HoldCo",
+        "Avanteos Investments"
+      ],
+      "hints": [
+        "CFS",
+        "Colonial First State"
+      ]
+    },
+    {
+      "name": "CSC（公务员和军人养老金）",
+      "group": "养老金",
+      "aliases": [
+        "Commonwealth Superannuation Corporation"
+      ],
+      "hints": [
+        "CSC"
+      ]
+    },
+    {
+      "name": "Insignia / MLC",
+      "group": "养老金",
+      "aliases": [
+        "NULIS Nominees",
+        "Insignia Financial",
+        "MLC Investments"
+      ],
+      "hints": [
+        "Insignia",
+        "MLC",
+        "IFL"
+      ]
+    },
+    {
+      "name": "Mercer",
+      "group": "养老金",
+      "aliases": [
+        "Mercer Investments (Australia)",
+        "Mercer Superannuation"
+      ],
+      "hints": [
+        "Mercer"
+      ]
+    },
+    {
+      "name": "Future Fund",
+      "group": "养老金",
+      "aliases": [
+        "Future Fund Board of Guardians",
+        "Future Fund Investment Company"
+      ],
+      "hints": [
+        "Future Fund"
       ]
     }
   ],

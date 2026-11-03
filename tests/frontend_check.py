@@ -31,7 +31,12 @@ SAMPLE = {
     "partial_days": {day(0): "14:05"},
     "last_run": {"ok": True, "list_pages_ok": 2, "substantial_found": 40, "pdf_checked": 30, "skipped_noise": 10, "deferred": 0, "errors": []},
     "watchlist": ["Paradice Investment Management", "Wilson Asset Management", "Regal Funds Management", "L1 Capital", "Perennial",
-                  "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading", "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)"],
+                  "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading", "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)",
+                  "AustralianSuper", "UniSuper"],
+    "groups": {**{n: "主动基金" for n in ["Paradice Investment Management", "Wilson Asset Management", "Regal Funds Management", "L1 Capital",
+                                        "Perennial", "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading",
+                                        "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)"]},
+               "AustralianSuper": "养老金", "UniSuper": "养老金"},
     "notices": [
         {"id": "1", "code": "SLC", "company": "Superloop Limited", "date": day(0), "time": "16:10", "headline": "Becoming a substantial holder",
          "url": "https://www.asx.com.au/a", "pdf_url": "https://www.asx.com.au/a.pdf", "price_sensitive": False, "type": "becoming",
@@ -43,6 +48,10 @@ SAMPLE = {
          "headline": "Change in substantial holding for EOL", "url": "https://www.asx.com.au/d", "pdf_url": "https://www.asx.com.au/d.pdf",
          "price_sensitive": False, "type": "change", "change_date": day(4), "voting_power": [9.76, 7.68],
          "holder": "Wilson Asset Management", "confidence": "高"},
+        {"id": "5", "code": "SGH", "lodged_code": "", "company": "SGH Ltd", "date": day(0), "time": "18:00",
+         "headline": "Change in substantial holding", "url": "https://www.asx.com.au/e", "pdf_url": "https://www.asx.com.au/e.pdf",
+         "price_sensitive": False, "type": "change", "change_date": day(3), "voting_power": [6.06, 7.11],
+         "holder": "AustralianSuper", "group": "养老金", "confidence": "高", "ocr": True},
         {"id": "3", "code": "OLD", "company": "Old Co", "date": day(25), "time": "10:00", "headline": "Ceasing to be a substantial holder",
          "url": "https://www.asx.com.au/c", "pdf_url": "", "price_sensitive": False, "type": "ceasing",
          "change_date": day(26), "voting_power": [], "holder": "Regal Funds Management", "confidence": "低"},
@@ -121,8 +130,16 @@ def main():
         pg.on("dialog", lambda d: (errs.append("dialog: " + d.message), d.dismiss()))
         pg.goto(url)
         pg.wait_for_timeout(800)
-        check(pg.locator("#rows tr").count() == 3, "近 14 天显示 3 条（25 天前的那条被过滤）")
-        check("10 个投资者" in pg.inner_text("#lede"), "标题里的人数按关注名单计算")
+        check(pg.locator("#rows tr").count() == 4, "近 14 天显示 4 条（25 天前的那条被过滤）")
+        check("12 个投资者（10 家主动基金、2 家养老金）" in pg.inner_text("#lede"), "标题里的人数按关注名单和分组计算")
+        check(pg.locator("#holders .group-title").count() == 2, "申报方卡片按主动基金 / 养老金分两组")
+        check("扫描件·文字识别" in pg.inner_text("#rows"), "扫描件识别出来的记录有标注")
+        pg.click("#groupSeg button[data-group='养老金']")
+        check(pg.locator("#rows tr").count() == 1 and "AustralianSuper" in pg.inner_text("#rows"), "只看养老金")
+        check(pg.locator("#holders .holder").count() == 2, "只看养老金时只显示养老金的卡片")
+        pg.click("#groupSeg button[data-group='主动基金']")
+        check(pg.locator("#rows tr").count() == 3, "只看主动基金")
+        pg.click("#groupSeg button[data-group='all']")
         check("挂在 WMI 名下发布" in pg.inner_text("#rows") and "EOL" in pg.inner_text("#rows"),
               "挂在申报方代码下的公告显示真正的标的代码，并注明挂在哪个代码下")
         check(not pg.locator("#partial").is_hidden() and "14:05" in pg.inner_text("#partial"), "今天只抓到一部分时提示")
@@ -135,7 +152,7 @@ def main():
         check(not pg.locator("#coverage").is_hidden(), "数据天数不足时显示覆盖提示")
         check("悉尼时间" in pg.inner_text("#status"), "状态栏显示数据时间")
         pg.click("#daysSeg button[data-days='30']")
-        check(pg.locator("#rows tr").count() == 4, "切到近 30 天后显示 4 条")
+        check(pg.locator("#rows tr").count() == 5, "切到近 30 天后显示 5 条")
         pg.screenshot(path=str(shots / "fe_desktop.png"), full_page=True)
         check(not errs, f"没有脚本错误 {errs}")
 
@@ -190,7 +207,7 @@ def main():
         pg.evaluate("localStorage.setItem('ssr_owner','me');localStorage.setItem('ssr_repo','repo');localStorage.setItem('ssr_token','bad')")
         pg.reload()
         pg.wait_for_timeout(800)
-        check(pg.locator("#rows tr").count() == 3, "仍然显示缓存数据")
+        check(pg.locator("#rows tr").count() == 4, "仍然显示缓存数据")
         check("令牌无效" in pg.inner_text("#status"), "提示令牌无效")
 
         print("6. 令牌缺 Actions 权限 / 请求次数用完时，给出不同的提示")

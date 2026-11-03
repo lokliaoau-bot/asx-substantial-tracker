@@ -20,6 +20,8 @@ import json
 import logging
 import os
 import re
+import shutil
+import subprocess
 import sys
 import time
 import traceback
@@ -56,7 +58,12 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
-PARSER_VERSION = 4   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+PARSER_VERSION = 5   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+OCR_DPI = 400                                             # 扫描件按 400dpi 渲染再识别（300dpi 会把 Name 认成 tame）
+OCR_PAGES = 3                                             # 扫描件可能第一页是封面信，多看一页
+OCR_TIMEOUT = 90                                          # 单页识别超时（秒）
+OCR_MAX_SIDE = 5000                                       # 渲染图片最长边像素上限，防止页面尺寸异常的 PDF 撑爆内存
+MAX_OCR = int(os.environ.get("MAX_OCR", "60"))            # 单次运行最多识别多少份扫描件，其余留到下次
 DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告，这之后读到的“今日公告”才算完整
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -85,6 +92,10 @@ class PermanentFetchError(FetchError):
 
 class BadPDF(FetchError):
     """PDF 打不开，多半是下载不完整，下次运行重试。"""
+
+
+class Deferred(Exception):
+    """本次运行的 OCR 名额用完，留到下次，不算失败。"""
 
 
 @dataclass
@@ -303,11 +314,65 @@ def pdf_texts(data: bytes, pages: int = PDF_PAGES) -> list[str]:
                 parts.append((p.extract_text(extraction_mode=mode) if mode == "layout" else p.extract_text()) or "")
             except Exception as e:  # noqa: BLE001
                 log(f"    PDF {mode} 模式提取失败: {e}")
-        text = re.sub(r"[ \t\u00a0]+", " ", "\n".join(parts))
-        text = "\n".join(ln.strip() for ln in text.split("\n") if ln.strip() and not WATERMARK_RE.match(ln.strip()))
+        text = clean_text("\n".join(parts))
         if text and text not in out:
             out.append(text)
     return out
+
+
+def clean_text(text: str) -> str:
+    text = re.sub(r"[ \t\u00a0]+", " ", text)
+    return "\n".join(ln.strip() for ln in text.split("\n") if ln.strip() and not WATERMARK_RE.match(ln.strip()))
+
+
+_ocr_ok = None
+
+
+def ocr_available() -> bool:
+    """需要 tesseract 程序、pypdfium2 和 Pillow（GitHub Actions 里由工作流安装）。缺了就跳过 OCR，不报错。"""
+    global _ocr_ok
+    if _ocr_ok is None:
+        try:
+            import PIL  # noqa: F401  pypdfium2 渲染成图片要用
+            import pypdfium2  # noqa: F401
+            _ocr_ok = shutil.which("tesseract") is not None
+        except ImportError:
+            _ocr_ok = False
+        if not _ocr_ok:
+            log("提示：没有找到 tesseract、pypdfium2 或 Pillow，扫描件不做文字识别")
+    return _ocr_ok
+
+
+def ocr_texts(data: bytes, pages: int = OCR_PAGES) -> list[str]:
+    """扫描件：把前几页渲染成图片，用 tesseract 识别文字。返回 [文字] 或 []。"""
+    import pypdfium2 as pdfium
+    try:
+        doc = pdfium.PdfDocument(data)
+    except Exception as e:  # noqa: BLE001
+        raise BadPDF(f"PDF 打不开（{type(e).__name__}: {e}）") from e
+    parts = []
+    try:
+        for i in range(min(pages, len(doc))):
+            page = doc[i]
+            w, h = page.get_size()                                   # 单位：点（1/72 英寸）
+            scale = min(OCR_DPI / 72, OCR_MAX_SIDE / max(w, h, 1))
+            img = page.render(scale=scale).to_pil().convert("L")
+            buf = io.BytesIO()
+            img.save(buf, "PNG")
+            try:
+                r = subprocess.run(["tesseract", "stdin", "stdout", "--psm", "6", "-l", "eng"],
+                                   input=buf.getvalue(), capture_output=True, timeout=OCR_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                log(f"    第 {i + 1} 页文字识别超时，跳过")
+                continue
+            if r.returncode != 0:
+                log(f"    第 {i + 1} 页文字识别失败：{r.stderr.decode('utf-8', 'replace')[:200]}")
+                continue
+            parts.append(r.stdout.decode("utf-8", "replace"))
+    finally:
+        doc.close()
+    text = clean_text("\n".join(parts))
+    return [text] if len(re.findall(r"[A-Za-z]", text)) >= 40 else []
 
 
 def pdf_text(data: bytes, pages: int = PDF_PAGES) -> str:
@@ -316,18 +381,25 @@ def pdf_text(data: bytes, pages: int = PDF_PAGES) -> str:
     return texts[0] if texts else ""
 
 
-SECTION1_RE = re.compile(r"Details\s+of\s+substantial\s+(?:share)?holder|substantial\s+holder\s*\(\s*1\s*\)", re.I)
+SECTION1_RE = re.compile(
+    r"Details\s+of\s+substantial\s+(?:share)?holder(?:\s*\(\s*1\s*\))?"
+    r"|substantial\s+holder\s*\(\s*1\s*\)"
+    # 扫描件常把 “holder” 识别到下一行或认错；这一支也要吃掉 shareholder/holder，否则会把它当成名称
+    r"|(?:^|\n)\s*1\s*\.\s*Details\s+of\s+substantial(?!\s+holding)(?:\s+(?:share)?holder\b)?(?:\s*\(\s*1\s*\))?",
+    re.I)
 COMPANY_RE = re.compile(
-    r"(?:To\s*:?\s*)?Company(?:\s+Name)?\s*/\s*(?:registered\s+scheme\s*/\s*notified\s+foreign\s+passport|Scheme)"
+    r"(?:To\s*:?\s*)?Company(?:\s+Name)?\s*/\s*(?:regi\w*\s*scheme\s*/\s*notified\s*foreign\s*passport(?:\s+fund\s*n\s*ame)?|Scheme)"
     r"\s*[:\-]?[ \t]*(.*)", re.I)
 TO_LINE_RE = re.compile(r"^To\s*:\s*(\S.*)$", re.I | re.M)      # 自制表格：“To: HELLOWORLD TRAVEL LIMITED”
 SECTION2_RE = re.compile(r"\n\s*2\s*\.\s+\S")
 LABEL_RE = re.compile(
-    r"^(?:the\s+(?:holder|previous)\b|there\s+was\b|acn\b|arsn\b|abn\b|nfpfrn\b|apfrn\b|name\b|details\b|previous\b|holder\b|[(\d])"
+    r"^(?:the\s+(?:holder|previous)\b|there\s+was\b|acn\b|arsn\b|abn\b|nfpfrn\b|apfrn\b|name\b|details\b|previous\b|(?:share)?holder\b|[(\d])"
     r"|substantial\s+holder|if\s+applicable|notice\s+was|^not\s+applicable$",   # NFPFRN：2018 版表格的栏目名
     re.I,
 )
 NAME_LINE_RE = re.compile(r"^(?:\(\s*1\s*\)\s*)?Name\b\s*(?:\(if applicable\))?\s*[:\-]?\s*(.*)$", re.I)
+# OCR 常把扫描件左边缘的 “Name” 认成 “tame”“Narne”“m==Name”
+NAME_LINE_OCR_RE = re.compile(r"^\W{0,4}(?:[A-Za-z]{0,2}\W{0,2})?(?:[NnTt]a(?:m|rn)e|Nome)\b\s*[:\-]?\s*(.*)$")
 ID_TAIL_RE = re.compile(r"\s*(?:\b(?:ACN|ARSN|ABN)\b|\(if applicable\)).*$", re.I)
 
 
@@ -347,8 +419,8 @@ def parse_company(text: str) -> str:
 
 
 def clean_company(s: str) -> str:
-    """网页显示用：去掉 “(ASX: EOL)”、“(Zenith)”、“NWH.AX” 这类尾巴。"""
-    s = (s or "").strip()
+    """网页显示用：去掉 “(ASX: EOL)”、“(Zenith)”、“NWH.AX” 这类尾巴，以及扫描件识别出的开头杂字符。"""
+    s = re.sub(r"^[^A-Za-z0-9]+", "", (s or "").strip())
     s = re.sub(r"\s+[A-Z0-9]{3,6}\.AX\.?$", "", s)
     s = re.sub(r"\s*\([^()]*\)?\s*$", "", s)        # 末尾括号（包括被截断、没有右括号的）
     return s.strip(" ,;:-") or (s or "")
@@ -364,11 +436,12 @@ def looks_like_name(s: str) -> bool:
     return 3 <= len(s) <= 150 and len(re.findall(r"[A-Za-z]", s)) >= 3 and not LABEL_RE.search(s)
 
 
-def parse_holder_section(text: str, first_line: bool = True) -> tuple[str, str]:
+def parse_holder_section(text: str, first_line: bool = True, ocr: bool = False) -> tuple[str, str]:
     """返回 (申报方名称, 第一节原文)。名称解析不出来时，靠第一节原文做中等可信度匹配。"""
     m = SECTION1_RE.search(text)
     if not m:
         return "", ""
+    head_rest = text[m.end():].split("\n", 1)[0].strip()   # 扫描件常把名称识别到标题同一行
     region = text[m.end(): m.end() + 700]
     s2 = SECTION2_RE.search(region)
     if s2:
@@ -376,11 +449,11 @@ def parse_holder_section(text: str, first_line: bool = True) -> tuple[str, str]:
     lines = [ln.strip() for ln in region.split("\n") if ln.strip() and not COMPANY_RE.search(ln)]
     region = "\n".join(lines)
     for i, line in enumerate(lines):
-        nm = NAME_LINE_RE.match(line)
+        nm = NAME_LINE_RE.match(line) or (NAME_LINE_OCR_RE.match(line) if ocr else None)
         if not nm:
             continue
-        # 名称可能在同一行，也可能因为 PDF 按列排版被挤到后面几行
-        for cand in [nm.group(1)] + lines[i + 1: i + 5]:
+        # 名称可能在同一行，也可能因为 PDF 按列排版被挤到后面几行，或者被识别到标题那一行
+        for cand in [nm.group(1)] + lines[i + 1: i + 5] + [head_rest]:
             val = clean_name(cand)
             if looks_like_name(val):
                 return val[:200], region
@@ -399,35 +472,44 @@ SEC3_RE = re.compile(r"\n\s*3\s*\.\s*[A-Za-z]")
 PCT_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,8})?)\s?%")              # 有的写到小数点后 6 位：5.298524%
 BARE_PCT_RE = re.compile(r"(?<![\d.,$])(\d{1,3}\.\d{1,8})(?![\d,%]|\.\d)")  # 表头写 “Voting power (%)”，数字不带 %
 TOTAL_RE = re.compile(r"\btotal\b", re.I)
-EVENT_RE = re.compile(
-    r"(?:became|ceased\s+to\s+be)\s+a\s+substantial\s+holder\s+on"
-    r"|change\s+in\s+the\s+interests\s+of\s+the"      # 604 常见排版：日期夹在“of the”和“substantial holder on”之间
-    r"|interests\s+of\s+the\s+substantial\s+holder\s+on"
-    r"|substantial\s+holder\s+on",
+EVENT_RE = re.compile(                                  # 词间用 \s*：扫描件识别常丢空格（“ofthe”）
+    r"(?:became|ceased\s*to\s*be)\s*a\s*substantial\s*holder\s*on"
+    r"|change\s*in\s*the\s*interests?\s*of\s*the"      # 604 常见排版：日期夹在“of the”和“substantial holder on”之间
+    r"|interests?\s*of\s*the\s*substantial\s*holder\s*on"
+    r"|substantial\s*holder\s*on",
     re.I,
 )
 DATE_NUM_RE = re.compile(r"(?<!\d)(\d{1,2})\s?[/.\-]\s?(\d{1,2})\s?[/.\-]\s?(\d{4}|\d{2})(?!\d)")   # 兼容“29 /10/2026”这种多了空格的写法
 DATE_TXT_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?[\s\-]+([A-Za-z]{3,9})[\s,\-]+(\d{4})")
 
 
+def plausible(d: dt.date) -> bool:
+    """扫描件会把 2026 认成 2626；离谱的年份不要。"""
+    return 2000 <= d.year <= dt.date.today().year + 1
+
+
 def parse_date(seg: str) -> str:
     found = []
-    m = DATE_NUM_RE.search(seg)
-    if m:
+    for m in DATE_NUM_RE.finditer(seg):
         d, mo, y = (int(x) for x in m.groups())
         y = y + 2000 if y < 100 else y
         try:
-            found.append((m.start(), dt.date(y, mo, d)))
+            if plausible(dt.date(y, mo, d)):
+                found.append((m.start(), dt.date(y, mo, d)))
+                break
         except ValueError:
-            pass
-    m = DATE_TXT_RE.search(seg)
-    if m:
+            continue
+    for m in DATE_TXT_RE.finditer(seg):
+        got = None
         for fmt in ("%d %B %Y", "%d %b %Y"):
             try:
-                found.append((m.start(), dt.datetime.strptime(f"{m.group(1)} {m.group(2)} {m.group(3)}", fmt).date()))
+                got = dt.datetime.strptime(f"{m.group(1)} {m.group(2)} {m.group(3)}", fmt).date()
                 break
             except ValueError:
                 continue
+        if got and plausible(got):
+            found.append((m.start(), got))
+            break
     return min(found)[1].isoformat() if found else ""
 
 
@@ -441,8 +523,8 @@ def voting_section(text: str) -> tuple[str, bool]:
     return (seg[: s3.start()], True) if s3 else (seg[:1500], False)
 
 
-def pct_rows(seg: str) -> list[tuple[str, list[float]]]:
-    bare = not PCT_RE.search(seg)
+def pct_rows(seg: str, allow_bare: bool = True) -> list[tuple[str, list[float]]]:
+    bare = allow_bare and not PCT_RE.search(seg)
     rows = []
     for ln in seg.split("\n"):
         vals = [float(x) for x in (BARE_PCT_RE if bare else PCT_RE).findall(ln)]
@@ -452,11 +534,20 @@ def pct_rows(seg: str) -> list[tuple[str, list[float]]]:
     return rows
 
 
-def pick_voting_power(seg: str, ntype: str, bounded: bool) -> list[float]:
+def pick_voting_power(seg: str, ntype: str, bounded: bool, ocr: bool = False) -> list[float]:
     """持股比例表可能分好几行（不同实体或类别）再加一行合计，例如
     0.06% / 4.94% / GRAND TOTAL 5.00%。优先用合计行；没有合计行时：
-    变动类取比例最大的那一行（前后两个值），新进类取最大值。"""
-    rows = pct_rows(seg)
+    变动类取比例最大的那一行（前后两个值），新进类取最大值。
+    扫描件（ocr=True）的数字容易认错：只认带 % 的数字，且低于 5% 的整组不要（宁缺毋错）。"""
+    vp = _pick(pct_rows(seg, allow_bare=not ocr), ntype, bounded)
+    if ntype == "becoming" and vp and vp[0] < 4.95:
+        return []              # 新进大股东必然 ≥5%，低于这个数一定是读错了行
+    if ocr and any(v < 4.95 for v in vp):
+        return []
+    return vp
+
+
+def _pick(rows: list[tuple[str, list[float]]], ntype: str, bounded: bool) -> list[float]:
     if not rows:
         return []
     totals = [v for ln, v in rows if TOTAL_RE.search(ln)]
@@ -471,14 +562,14 @@ def pick_voting_power(seg: str, ntype: str, bounded: bool) -> list[float]:
     return [max(flat)] if bounded else flat[:1]   # 没截到第三节时不取最大值，免得读到后面的 “100%”
 
 
-def parse_details(text: str, ntype: str) -> dict:
+def parse_details(text: str, ntype: str, ocr: bool = False) -> dict:
     out = {"change_date": "", "voting_power": []}
     m = EVENT_RE.search(text)
     if m:
         out["change_date"] = parse_date(text[m.end(): m.end() + 250])
     if ntype != "ceasing":
         seg, bounded = voting_section(text)
-        out["voting_power"] = pick_voting_power(seg, ntype, bounded)
+        out["voting_power"] = pick_voting_power(seg, ntype, bounded, ocr)
     return out
 
 
@@ -545,6 +636,7 @@ class Holder:
     name: str
     aliases: list
     hints: list
+    group: str = "主动基金"
 
 
 def is_abbrev(s: str) -> bool:
@@ -569,7 +661,8 @@ def load_watchlist(path: Path | None = None) -> tuple[list[Holder], list[re.Patt
         aliases = [word_re(a) for a in h.get("aliases", []) if a and a.strip()]
         if not h.get("name") or not aliases:
             raise SystemExit(f"watchlist.json 里有一项缺少 name 或 aliases：{h}")
-        holders.append(Holder(h["name"], aliases, [word_re(x, True) for x in h.get("hints", []) if x and x.strip()]))
+        holders.append(Holder(h["name"], aliases, [word_re(x, True) for x in h.get("hints", []) if x and x.strip()],
+                              h.get("group") or "主动基金"))
     noise = [word_re(x, True) for x in raw.get("noise_hints", []) if x and x.strip()]
     return holders, noise
 
@@ -586,7 +679,8 @@ def match_entry(e: dict, holders: list[Holder]) -> tuple[str | None, str]:
         for h in holders:
             if any_hit(h.aliases, name):
                 return h.name, "高"
-        return None, ""          # 名称解析出来了但不在名单里，不再用其他线索猜
+        if not e.get("ocr"):
+            return None, ""      # 名称解析出来了但不在名单里，不再用其他线索猜（扫描件的名称可能认错，继续往下看）
     region = e.get("region") or ""
     if region:
         for h in holders:
@@ -666,6 +760,7 @@ PUBLIC_FIELDS = ("id", "code", "company", "date", "time", "headline", "url", "pd
 
 def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
     out = []
+    group_of = {h.name: h.group for h in holders}
     for e in entries.values():
         holder, conf = match_entry(e, holders)
         if holder:
@@ -675,7 +770,7 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
             item["company"] = clean_company(item.get("company") or "")
             item["url"] = safe_url(item.get("url") or "")
             item["pdf_url"] = safe_url(item.get("pdf_url") or "") or item["url"]
-            item.update(holder=holder, confidence=conf)
+            item.update(holder=holder, group=group_of.get(holder, ""), confidence=conf, ocr=bool(e.get("ocr")))
             out.append(item)
     out.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
     return out
@@ -683,18 +778,18 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
 
 # ---------------------------------------------------------------- 主流程
 
-def analyse_texts(texts: list[str], ntype: str) -> dict:
+def analyse_texts(texts: list[str], ntype: str, ocr: bool = False) -> dict:
     """在多种提取结果里，每个字段取第一个解析得出的值。"""
     out = {"company": "", "holder_name": "", "region": "", "change_date": "", "voting_power": []}
     regions = []
     want_vp = 2 if ntype == "change" else 1
     for t in texts:
-        name, region = parse_holder_section(t, first_line=False)   # 第一轮只认“Name”标签
+        name, region = parse_holder_section(t, first_line=False, ocr=ocr)   # 第一轮只认“Name”标签
         if region:
             regions.append(region[:500])
         out["holder_name"] = out["holder_name"] or name
         out["company"] = out["company"] or parse_company(t)
-        d = parse_details(t, ntype)
+        d = parse_details(t, ntype, ocr)
         out["change_date"] = out["change_date"] or d["change_date"]
         if len(d["voting_power"]) > len(out["voting_power"]) and len(out["voting_power"]) < want_vp:
             out["voting_power"] = d["voting_power"]
@@ -702,7 +797,7 @@ def analyse_texts(texts: list[str], ntype: str) -> dict:
         # 第二轮：没有“Name”标签的自定义格式，取第一节标题下的第一行。
         # 放在第二轮，是因为版面模式偶尔把“Name”拆成“Nam e”，首行会是一行乱码，不能抢在正确结果前面。
         for t in texts:
-            out["holder_name"] = parse_holder_section(t)[0]
+            out["holder_name"] = parse_holder_section(t, ocr=ocr)[0]
             if out["holder_name"]:
                 break
     if not out["holder_name"] and not regions:
@@ -712,21 +807,29 @@ def analyse_texts(texts: list[str], ntype: str) -> dict:
                 for k, v in alt.items():
                     out[k] = out[k] or v
                 break
-    if not out["holder_name"]:
-        out["region"] = "\n".join(regions)[:1000]   # 名称解析不出来时，留原文做中等可信度匹配
+    if not out["holder_name"] or ocr:
+        out["region"] = "\n".join(regions)[:1000]   # 名称解析不出来（或是扫描件、名称可能认错）时，留原文做中等可信度匹配
     return out
 
 
-def process_entry(e: dict) -> None:
+def process_entry(e: dict, ocr_budget: list[int] | None = None) -> None:
+    """ocr_budget：[剩余 OCR 名额]，用完时抛 Deferred。None 表示不做 OCR。"""
     data, pdf_url = download_pdf(e["url"])
     e["pdf_url"] = safe_url(pdf_url)
     texts = pdf_texts(data)
+    used_ocr = False
+    if not texts and ocr_budget is not None and ocr_available():
+        if ocr_budget[0] <= 0:
+            raise Deferred()
+        ocr_budget[0] -= 1
+        texts, used_ocr = ocr_texts(data), True
+    e["ocr"] = used_ocr
     if not texts:
         e["status"], e["parser"] = "unreadable", PARSER_VERSION
         return
     if e.get("type", "other") == "other":
         e["type"] = infer_type(texts[0]) or "other"
-    e.update(analyse_texts(texts, e.get("type", "other")))
+    e.update(analyse_texts(texts, e.get("type", "other"), ocr=used_ocr))
     e["status"], e["parser"] = "parsed", PARSER_VERSION
 
 
@@ -797,6 +900,7 @@ def main() -> int:
     todo.sort(key=lambda e: not hinted(e, holders))                                   # 标题带关注名单缩写的更优先
 
     checked = skipped = deferred = failed = 0
+    ocr_budget = [MAX_OCR]
     for e in todo:
         if is_noise(e.get("hint", ""), holders, noise):
             e["status"] = "noise"
@@ -808,7 +912,12 @@ def main() -> int:
         checked += 1
         e["attempts"] = e.get("attempts", 0) + 1
         try:
-            process_entry(e)
+            process_entry(e, ocr_budget)
+        except Deferred:
+            e["attempts"] -= 1                   # 不算一次失败，下次运行再识别
+            checked -= 1
+            deferred += 1
+            continue
         except PermanentFetchError as ex:
             e["status"], e["error"] = "skipped", str(ex)
         except FetchError as ex:
@@ -825,7 +934,8 @@ def main() -> int:
     if failed:
         errors.append(f"{failed} 份公告 PDF 下载失败，下次运行会自动重试（每份最多 {MAX_ATTEMPTS} 次）")
     if deferred:
-        log(f"本次已达 {MAX_PDFS} 份上限，剩余 {deferred} 份留到下次运行")
+        log(f"本次已达下载或文字识别上限，剩余 {deferred} 份留到下次运行")
+    log(f"文字识别（OCR）{MAX_OCR - ocr_budget[0]} 份扫描件")
 
     cutoff = (today - dt.timedelta(days=KEEP_DAYS)).isoformat()
     entries = {k: v for k, v in entries.items() if (v.get("date") or "") >= cutoff}
@@ -855,6 +965,7 @@ def main() -> int:
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],
+        "groups": {h.name: h.group for h in holders},
         "notices": notices,
     }
     write_json(STORE_FILE, store)

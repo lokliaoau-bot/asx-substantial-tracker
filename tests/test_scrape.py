@@ -585,3 +585,177 @@ def test_2018_form_labels_are_not_names():
     t = text_of(["1. Details of substantial holder (1)", "Name UDN Eden Management LTD and persons listed in Annexure A",
                  "ACN/ARSN/APFRN (if applicable) Not applicable", "NFPFRN (if applicable) Not applicable"])
     assert scrape.parse_holder_section(t)[0] == "UDN Eden Management LTD and persons listed in Annexure A"
+
+
+# ---------------------------------------------------------------- 养老金（2026-11-03 加入）
+
+SUPER_NAMES = {
+    "AustralianSuper Pty Ltd": "AustralianSuper",
+    "Australian Retirement Trust Pty Ltd as trustee for the Australian Retirement Trust": "Australian Retirement Trust",
+    "Aware Super Pty Ltd as trustee of Aware Super": "Aware Super",
+    "UniSuper Limited as trustee for UniSuper and UniSuper Management Pty Limited": "UniSuper",
+    "Host-Plus Pty Limited": "Hostplus",
+    "United Super Pty Ltd as trustee for the Construction and Building Unions Superannuation Fund": "Cbus",
+    "H.E.S.T. Australia Ltd as trustee for HESTA": "HESTA",
+    "Retail Employees Superannuation Pty Limited": "Rest",
+    "Superannuation and Investments HoldCo Pty Ltd and its related bodies corporate": "Colonial First State (CFS)",
+    "Commonwealth Superannuation Corporation": "CSC（公务员和军人养老金）",
+    "NULIS Nominees (Australia) Limited": "Insignia / MLC",
+    "Mercer Investments (Australia) Limited as Trustee of WSSP Australian Equities Trust": "Mercer",
+    "Future Fund Board of Guardians": "Future Fund",
+}
+
+
+def test_super_funds_match_their_trustee_names():
+    groups = {h.name: h.group for h in HOLDERS}
+    assert sum(g == "养老金" for g in groups.values()) == 13 and sum(g == "主动基金" for g in groups.values()) == 10
+    for name, want in SUPER_NAMES.items():
+        assert scrape.match_entry({"holder_name": name}, HOLDERS) == (want, "高"), name
+        assert groups[want] == "养老金"
+
+
+def test_super_funds_no_false_positives():
+    for name in ("GZ FAMILY HOLDINGS PTY LTD ATF GZ FAMILY TRUST and GZ SUPER", "Commonwealth Bank of Australia",
+                 "Kefford Holdings Pty Ltd ATF The Kefford Family Super Fund", "Rest Easy Holdings Pty Ltd",
+                 "Superloop Limited", "Art Gallery Investments Pty Ltd", "Awareness Capital Pty Ltd"):
+        assert scrape.match_entry({"holder_name": name}, HOLDERS) == (None, ""), name
+    assert scrape.match_entry({"hint": "ART"}, HOLDERS) == ("Australian Retirement Trust", "低")
+    assert scrape.match_entry({"hint": "Art Smith"}, HOLDERS) == (None, "")
+    assert scrape.match_entry({"hint": "Restaurant Group"}, HOLDERS) == (None, "")
+
+
+def test_super_funds_real_pdfs_and_group_in_output():
+    pwh = real("604_australiansuper_pwh.pdf", "change")
+    cfs = real("603_grand_total_cfs.pdf", "becoming")
+    out = scrape.build_notices({
+        "1": {"id": "1", "code": "PWH", "date": "2026-10-30", "headline": "Change in substantial holding", "status": "parsed", **pwh},
+        "2": {"id": "2", "code": "KAR", "date": "2026-11-03", "headline": "Becoming a substantial holder", "status": "parsed", **cfs},
+    }, HOLDERS)
+    by = {n["code"]: n for n in out}
+    assert by["PWH"]["holder"] == "AustralianSuper" and by["PWH"]["group"] == "养老金" and by["PWH"]["voting_power"] == [7.07, 5.98]
+    assert by["KAR"]["holder"] == "Colonial First State (CFS)" and by["KAR"]["voting_power"] == [5.0]
+
+
+def test_groups_written_to_notices_json(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["groups"]["AustralianSuper"] == "养老金" and out["groups"]["L1 Capital"] == "主动基金"
+    assert all(n["group"] == "主动基金" for n in out["notices"])
+
+
+# ---------------------------------------------------------------- OCR（扫描件文字识别）
+
+needs_ocr = pytest.mark.skipif(not scrape.ocr_available(), reason="没有安装 tesseract / pypdfium2")
+SCANNED = (FIXTURES / "604_scanned_fgr.pdf").read_bytes()
+
+
+@needs_ocr
+def test_ocr_reads_real_scanned_form():
+    assert scrape.pdf_texts(SCANNED) == []                 # 没有文字层
+    texts = scrape.ocr_texts(SCANNED)
+    r = scrape.analyse_texts(texts, "change", ocr=True)
+    assert r["holder_name"].startswith("Specialty Materials Investments")
+    assert r["voting_power"] == [7.39, 6.38] and r["change_date"] == "2026-10-30"
+    assert r["company"] == "First Graphene Limited"
+
+
+@needs_ocr
+def test_scanned_notice_end_to_end(sandbox, monkeypatch):
+    fake = FakeASX()
+    real_call = fake.__call__
+
+    def serve(url, **kw):
+        if url.endswith("idsId=1002"):
+            fake.pdf_downloads.append("1002")
+            return scrape.Fetched(url, SCANNED, "application/pdf")
+        return real_call(url, **kw)
+
+    monkeypatch.setattr(scrape, "fetch", serve)
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1002"]
+    assert e["status"] == "parsed" and e["ocr"] is True and e["holder_name"].startswith("Specialty Materials")
+
+
+def fake_ocr(monkeypatch, text_lines):
+    monkeypatch.setattr(scrape, "ocr_available", lambda: True)
+    monkeypatch.setattr(scrape, "ocr_texts", lambda data, pages=3: [scrape.clean_text("\n".join(text_lines))])
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=2: [])          # 全部当成扫描件
+
+
+SCAN_TEXT = ["To Company Name/Scheme Superloop Limited", "1. Details of substantial holder (1)",
+             "tame Paradice Investment Management Pty Ltd", "There was a change in the interests ofthe 29/10/2026",
+             "substantial holder on", "The previous notice was dated 01/09/2026", "2. Previous and present voting power",
+             "Ordinary 1,000 6.10% 2,000 7.20%", "3. Changes in relevant interests"]
+
+
+def test_ocr_budget_defers_rest_without_counting_attempts(sandbox, monkeypatch):
+    fake_ocr(monkeypatch, SCAN_TEXT)
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    monkeypatch.setattr(scrape, "MAX_OCR", 1)
+    scrape.main()
+    entries = read(sandbox / "data" / "all_notices.json")["entries"]
+    st = sorted(e["status"] for k, e in entries.items() if k != "1004")
+    assert st == ["new", "new", "new", "parsed"]
+    assert all(e["attempts"] == 0 for e in entries.values() if e["status"] == "new" and e["id"] != "1004")
+    assert read(sandbox / "data" / "notices.json")["last_run"]["deferred"] == 3
+    monkeypatch.setattr(scrape, "MAX_OCR", 60)
+    scrape.main()
+    entries = read(sandbox / "data" / "all_notices.json")["entries"]
+    assert all(e["status"] in ("parsed", "noise") for e in entries.values())
+    assert all(e.get("ocr") for e in entries.values() if e["status"] == "parsed")
+
+
+def test_ocr_tolerant_parsing(sandbox, monkeypatch):
+    fake_ocr(monkeypatch, SCAN_TEXT)
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    got = {n["code"]: n for n in read(sandbox / "data" / "notices.json")["notices"]}
+    slc = got["SLC"]                                       # “tame” = 认错的 “Name”；“ofthe” 少了空格
+    assert slc["holder"] == "Paradice Investment Management" and slc["ocr"] is True
+    assert slc["change_date"] == "2026-10-29"
+
+
+def test_without_tesseract_scans_stay_unreadable(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "ocr_available", lambda: False)
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=2: [])
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    assert scrape.main() == 0
+    entries = read(sandbox / "data" / "all_notices.json")["entries"]
+    assert {e["status"] for k, e in entries.items() if k != "1004"} == {"unreadable"}
+    # 低可信度：标题带 “from WAM” 的仍然能匹配
+    got = {n["code"]: n for n in read(sandbox / "data" / "notices.json")["notices"]}
+    assert got["WAX"]["confidence"] == "低"
+
+
+def test_ocr_garbled_name_does_not_block_other_clues():
+    assert scrape.match_entry({"holder_name": "Ra int Fer eased ios", "ocr": True, "hint": "WAM"}, HOLDERS) == ("Wilson Asset Management", "低")
+    assert scrape.match_entry({"holder_name": "Ra int Fer eased ios", "hint": "WAM"}, HOLDERS) == (None, "")
+    assert scrape.match_entry({"holder_name": "Ra int Fer", "ocr": True, "region": "Name Regal Funds Management Pty"}, HOLDERS) \
+        == ("Regal Funds Management", "中")
+
+
+def test_name_on_section_header_line_and_missing_spaces():
+    t = text_of(["1. Details of substantial holder (1) MR ANGELO KOTSES", "Name", "ACN/ARSN/APEFRN (if applicable)",
+                 "NFPFRN (if applicable)", "There was a change in the interests ofthe 30/10/2026", "substantial holder on",
+                 "The previous notice was dated 24/03/2026"])
+    assert scrape.parse_holder_section(t)[0] == "MR ANGELO KOTSES"
+    assert scrape.parse_details(t, "change")["change_date"] == "2026-10-30"
+
+
+def test_section_header_split_by_ocr():
+    t = "1. Details of substantial\nSet\ntame Specialty Materials Investments, LLC\nACN/ARSN (if applicable) N/A"
+    assert scrape.parse_holder_section(t, first_line=False, ocr=True)[0] == "Specialty Materials Investments, LLC"
+    # 正常文字版里，“details of substantial holding” 这类封面信措辞不能当成第一节
+    letter = "Please find attached details of substantial holding.\nRegards\nJohn"
+    assert scrape.parse_holder_section(letter) == ("", "")
+
+
+def test_ocr_number_safeguards():
+    assert scrape.parse_date("on 03/04/2626 and 3 April 2626") == ""          # 2026 被认成 2626
+    assert scrape.parse_date("03/04/2626 then 01/04/2026") == "2026-04-01"
+    seg = "2. Details of voting power\nOrdinary 31,181,215 te1.215\n"
+    assert scrape.pick_voting_power(seg, "becoming", True, ocr=True) == []      # 扫描件不认不带 % 的数字
+    assert scrape.pick_voting_power("2. Details of voting power\nOrdinary 1 1.21%\n", "becoming", True) == []   # 新进必然 ≥5%
+    assert scrape.pick_voting_power("x\nOrdinary 1 73.54% 2 3.1%\n", "change", True, ocr=True) == []
+    assert scrape.pick_voting_power("x\nOrdinary 1 73.54% 2 50.59%\n", "change", True, ocr=True) == [73.54, 50.59]

@@ -759,3 +759,83 @@ def test_ocr_number_safeguards():
     assert scrape.pick_voting_power("2. Details of voting power\nOrdinary 1 1.21%\n", "becoming", True) == []   # 新进必然 ≥5%
     assert scrape.pick_voting_power("x\nOrdinary 1 73.54% 2 3.1%\n", "change", True, ocr=True) == []
     assert scrape.pick_voting_power("x\nOrdinary 1 73.54% 2 50.59%\n", "change", True, ocr=True) == [73.54, 50.59]
+
+
+# ---------------------------------------------------------------- 第 2 轮审查：OCR 的异常情况
+
+def test_ocr_env_failure_is_retried_when_ocr_works_again(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "ocr_available", lambda: True)
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=2: [])
+
+    def broken(data, pages=3):
+        raise scrape.OCREnvError("tesseract 每一页都报错")
+
+    monkeypatch.setattr(scrape, "ocr_texts", broken)
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["status"] == "unreadable" and e["ocr_tried"] is False
+    fake_ocr(monkeypatch, SCAN_TEXT)                       # 下一次运行 OCR 正常了
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["status"] == "parsed" and e["ocr"] is True and e["holder_name"].startswith("Paradice")
+
+
+def test_pdf_that_pdfium_cannot_open_is_unreadable_not_retried(sandbox, monkeypatch):
+    import pypdfium2
+
+    def locked(*a, **k):
+        raise pypdfium2.PdfiumError("Incorrect password error")
+
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=2: [])
+    monkeypatch.setattr(pypdfium2, "PdfDocument", locked)
+    monkeypatch.setattr(scrape, "ocr_available", lambda: True)
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["status"] == "unreadable" and e["ocr_tried"] is True
+    assert out["last_run"]["errors"] == []                # 不会每次都报“下载失败”
+
+
+def test_ocr_time_budget_defers(sandbox, monkeypatch):
+    fake_ocr(monkeypatch, SCAN_TEXT)
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    monkeypatch.setattr(scrape, "OCR_TIME_BUDGET", -1)    # 时间已经用完
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["deferred"] == 4 and out["last_run"]["pdf_checked"] == 0
+    assert all(e["status"] in ("new", "noise") for e in read(sandbox / "data" / "all_notices.json")["entries"].values())
+
+
+def test_typed_cover_letter_with_scanned_form_uses_ocr(sandbox, monkeypatch):
+    letter = "Dear Sir/Madam\nPlease find attached a notice of change of interests of substantial holder.\nYours faithfully"
+    fake_ocr(monkeypatch, SCAN_TEXT)
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=2: [letter])
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1002"]
+    assert e["ocr"] is True and e["holder_name"].startswith("Paradice") and e["voting_power"] == [6.1, 7.2]
+
+
+def test_text_pdf_with_form_does_not_trigger_ocr(sandbox, monkeypatch):
+    calls = []
+    monkeypatch.setattr(scrape, "ocr_available", lambda: True)
+    monkeypatch.setattr(scrape, "ocr_texts", lambda data, pages=3: calls.append(1) or [])
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    assert calls == []                                    # 有文字层、认得出第一节，就不浪费时间做 OCR
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["ocr"] is False and e["status"] == "parsed"
+
+
+def test_ocr_result_without_anything_keeps_text_result(sandbox, monkeypatch):
+    letter = "Dear Sir/Madam\nPlease find attached a notice.\nYours faithfully, The Company Secretary of Something"
+    fake_ocr(monkeypatch, ["Illegible scan " * 5])
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=2: [letter])
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["status"] == "parsed" and e["ocr"] is False and e["ocr_tried"] is True
+    scrape.main()                                         # 已经试过 OCR 的不会每次重读
+    assert read(sandbox / "data" / "notices.json")["last_run"]["pdf_checked"] == 0

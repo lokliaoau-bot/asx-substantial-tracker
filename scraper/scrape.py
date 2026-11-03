@@ -64,6 +64,7 @@ OCR_PAGES = 3                                             # 扫描件可能第�
 OCR_TIMEOUT = 90                                          # 单页识别超时（秒）
 OCR_MAX_SIDE = 5000                                       # 渲染图片最长边像素上限，防止页面尺寸异常的 PDF 撑爆内存
 MAX_OCR = int(os.environ.get("MAX_OCR", "60"))            # 单次运行最多识别多少份扫描件，其余留到下次
+OCR_TIME_BUDGET = float(os.environ.get("OCR_TIME_BUDGET", "720"))   # 单次运行文字识别总时长上限（秒），工作流 30 分钟超时
 DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告，这之后读到的“今日公告”才算完整
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -95,7 +96,11 @@ class BadPDF(FetchError):
 
 
 class Deferred(Exception):
-    """本次运行的 OCR 名额用完，留到下次，不算失败。"""
+    """本次运行的 OCR 名额或时间用完，留到下次，不算失败。"""
+
+
+class OCREnvError(Exception):
+    """tesseract 本身出错（多半是没装好），不是这份 PDF 的问题；OCR 恢复后会重读。"""
 
 
 @dataclass
@@ -344,13 +349,15 @@ def ocr_available() -> bool:
 
 
 def ocr_texts(data: bytes, pages: int = OCR_PAGES) -> list[str]:
-    """扫描件：把前几页渲染成图片，用 tesseract 识别文字。返回 [文字] 或 []。"""
+    """扫描件：把前几页渲染成图片，用 tesseract 识别文字。返回 [文字] 或 []。
+    每一页 tesseract 都报错时抛 OCREnvError（环境问题，不是这份 PDF 的问题）。"""
     import pypdfium2 as pdfium
     try:
         doc = pdfium.PdfDocument(data)
-    except Exception as e:  # noqa: BLE001
-        raise BadPDF(f"PDF 打不开（{type(e).__name__}: {e}）") from e
-    parts = []
+    except Exception as e:  # noqa: BLE001  pypdf 能打开而这里打不开：多半是加了密码，重试也没用
+        log(f"    扫描件渲染失败（{type(e).__name__}: {e}），按读不出处理")
+        return []
+    parts, failed, tried = [], 0, 0
     try:
         for i in range(min(pages, len(doc))):
             page = doc[i]
@@ -359,18 +366,26 @@ def ocr_texts(data: bytes, pages: int = OCR_PAGES) -> list[str]:
             img = page.render(scale=scale).to_pil().convert("L")
             buf = io.BytesIO()
             img.save(buf, "PNG")
+            tried += 1
             try:
                 r = subprocess.run(["tesseract", "stdin", "stdout", "--psm", "6", "-l", "eng"],
                                    input=buf.getvalue(), capture_output=True, timeout=OCR_TIMEOUT)
             except subprocess.TimeoutExpired:
                 log(f"    第 {i + 1} 页文字识别超时，跳过")
                 continue
+            except OSError as e:
+                failed += 1
+                log(f"    第 {i + 1} 页文字识别失败：{e}")
+                continue
             if r.returncode != 0:
+                failed += 1
                 log(f"    第 {i + 1} 页文字识别失败：{r.stderr.decode('utf-8', 'replace')[:200]}")
                 continue
             parts.append(r.stdout.decode("utf-8", "replace"))
     finally:
         doc.close()
+    if tried and failed == tried:
+        raise OCREnvError("tesseract 每一页都报错")
     text = clean_text("\n".join(parts))
     return [text] if len(re.findall(r"[A-Za-z]", text)) >= 40 else []
 
@@ -812,24 +827,55 @@ def analyse_texts(texts: list[str], ntype: str, ocr: bool = False) -> dict:
     return out
 
 
-def process_entry(e: dict, ocr_budget: list[int] | None = None) -> None:
-    """ocr_budget：[剩余 OCR 名额]，用完时抛 Deferred。None 表示不做 OCR。"""
+class OCRBudget:
+    """单次运行的 OCR 名额和总时长。"""
+
+    def __init__(self, count: int = None, seconds: float = None):
+        self.left = MAX_OCR if count is None else count
+        self.deadline = time.monotonic() + (OCR_TIME_BUDGET if seconds is None else seconds)
+        self.used = 0
+
+    def take(self) -> None:
+        if self.left <= 0 or time.monotonic() > self.deadline:
+            raise Deferred()
+        self.left -= 1
+        self.used += 1
+
+
+def blank(result: dict | None) -> bool:
+    """什么都没认出来：没有申报方名称，也没找到第一节。"""
+    return result is None or not (result.get("holder_name") or result.get("region"))
+
+
+def process_entry(e: dict, ocr_budget: OCRBudget | None = None) -> None:
+    """下载并解析一份公告。文字层什么都认不出来时（扫描件，或“打字封面信 + 扫描表格”），
+    用 OCR 再读一遍。ocr_budget 为 None 时不做 OCR；名额或时间用完时抛 Deferred。"""
     data, pdf_url = download_pdf(e["url"])
     e["pdf_url"] = safe_url(pdf_url)
     texts = pdf_texts(data)
-    used_ocr = False
-    if not texts and ocr_budget is not None and ocr_available():
-        if ocr_budget[0] <= 0:
-            raise Deferred()
-        ocr_budget[0] -= 1
-        texts, used_ocr = ocr_texts(data), True
-    e["ocr"] = used_ocr
-    if not texts:
+    ntype = e.get("type", "other")
+    if texts and ntype == "other":
+        ntype = infer_type(texts[0]) or "other"
+    result = analyse_texts(texts, ntype) if texts else None
+    e["ocr"] = e["ocr_tried"] = False
+    if blank(result) and ocr_budget is not None and ocr_available():
+        ocr_budget.take()
+        try:
+            otexts = ocr_texts(data)
+            e["ocr_tried"] = True
+        except OCREnvError as ex:
+            log(f"    文字识别环境出错（{ex}），OCR 恢复后会重读")
+            otexts = []
+        if otexts:
+            otype = ntype if ntype != "other" else (infer_type(otexts[0]) or "other")
+            oresult = analyse_texts(otexts, otype, ocr=True)
+            if result is None or not blank(oresult):
+                result, ntype, e["ocr"] = oresult, otype, True
+    e["type"] = ntype
+    if result is None:
         e["status"], e["parser"] = "unreadable", PARSER_VERSION
         return
-    if e.get("type", "other") == "other":
-        e["type"] = infer_type(texts[0]) or "other"
-    e.update(analyse_texts(texts, e.get("type", "other"), ocr=used_ocr))
+    e.update(result)
     e["status"], e["parser"] = "parsed", PARSER_VERSION
 
 
@@ -894,13 +940,16 @@ def main() -> int:
             e["status"], e["attempts"] = "new", 0      # 用新的解析规则重读一次
         elif e.get("status") == "noise" and not is_noise(e.get("hint", ""), holders, noise):
             e["status"], e["attempts"] = "new", 0      # 改了名单后不再算噪音的，补下载
+        elif (e.get("status") in ("parsed", "unreadable") and not e.get("ocr_tried")
+              and (e.get("status") == "unreadable" or blank(e)) and ocr_available()):
+            e["status"], e["attempts"] = "new", 0      # 之前没做成 OCR（例如那次 tesseract 没装上），现在补上
     todo = [e for e in entries.values()
             if e.get("status") in ("new", "error") and e.get("attempts", 0) < MAX_ATTEMPTS]
     todo.sort(key=lambda e: (e.get("date", ""), e.get("time", "")), reverse=True)   # 新的优先
     todo.sort(key=lambda e: not hinted(e, holders))                                   # 标题带关注名单缩写的更优先
 
     checked = skipped = deferred = failed = 0
-    ocr_budget = [MAX_OCR]
+    ocr_budget = OCRBudget()
     for e in todo:
         if is_noise(e.get("hint", ""), holders, noise):
             e["status"] = "noise"
@@ -935,7 +984,7 @@ def main() -> int:
         errors.append(f"{failed} 份公告 PDF 下载失败，下次运行会自动重试（每份最多 {MAX_ATTEMPTS} 次）")
     if deferred:
         log(f"本次已达下载或文字识别上限，剩余 {deferred} 份留到下次运行")
-    log(f"文字识别（OCR）{MAX_OCR - ocr_budget[0]} 份扫描件")
+    log(f"文字识别（OCR）{ocr_budget.used} 份扫描件")
 
     cutoff = (today - dt.timedelta(days=KEEP_DAYS)).isoformat()
     entries = {k: v for k, v in entries.items() if (v.get("date") or "") >= cutoff}

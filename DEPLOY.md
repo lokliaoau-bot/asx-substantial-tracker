@@ -38,13 +38,13 @@
 | --- | --- |
 | `index.html` | 网页（单文件，含 CSS/JS）。自动从 `*.github.io/<repo>` 识别仓库。令牌存在浏览器 localStorage，键名前缀 `ssr_`。 |
 | `manifest.webmanifest`、`icon-192.png`、`icon-512.png`、`apple-touch-icon.png` | 添加到手机桌面用的清单和图标。 |
-| `scraper/scrape.py` | 抓取脚本。只依赖 requests、beautifulsoup4、pypdf、tzdata。 |
+| `scraper/scrape.py` | 抓取脚本。依赖 requests、beautifulsoup4、pypdf、tzdata；扫描件 OCR 另需 pypdfium2、Pillow 和系统里的 tesseract（工作流用 apt 安装，装不上时自动跳过 OCR）。 |
 | `scraper/watchlist.json` | 关注名单：`holders[].name/aliases/hints`，以及 `noise_hints`。 |
 | `data/notices.json` | 网页读取的数据。初始是空结构，首次运行后由脚本覆盖。 |
 | `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
 | `.github/workflows/scrape.yml` | 抓取工作流：只有手动触发（网页按钮）。需要 `contents: write`。 |
 | `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
-| `tests/test_scrape.py` | 33 个离线测试（模拟 ASX 列表页和 PDF + 真实公告 PDF 样本，不联网）。 |
+| `tests/test_scrape.py` | 67 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
 | `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |
 | `requirements.txt` / `requirements-dev.txt` | 运行依赖 / 测试依赖（版本已锁定，已在 Python 3.12 干净环境验证可安装）。 |
 | `README.md` | 给用户看的使用说明。 |
@@ -108,7 +108,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：48 passed
+python -m pytest -q   # 期望：67 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -221,7 +221,8 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 ## 9. 已知限制
 
 - ASX 公开的全市场列表只有当天和上一交易日，要每隔一两个交易日点一次抓取才能攒出完整的“近两周”，网页会提示还缺几天、哪天只抓到一部分。
-- 扫描件 PDF（约一成，多是小公司和个人申报）没有文字层，只能靠标题里的 “from XXX” 低可信度匹配。要读出来需要加 OCR。
+- 扫描件 PDF（约一成，多是小公司和个人申报）用 OCR 识别（400dpi、tesseract --psm 6，最多前 3 页；单次运行最多 60 份、总共 12 分钟，超出的留到下次）。字迹模糊或手写的仍读不出，识别出的数字可能有错，所以扫描件只认带 % 的比例，低于 5% 的整组丢弃。
+- 养老金只看得到自己操盘的部分；外包给基金经理的仓位以基金经理名义申报。
 - 除了澳洲 603/604/605，还能读新西兰双重上市公司的 FMC Act 表格和 James Hardie 的爱尔兰 TR-1 表格；其他自制格式可能读不出名称或比例。
 - 持股比例和变动日来自 PDF 文本解析，表格排版特殊的 PDF 可能识别错，网页上都附有原文链接。
 - 只覆盖持股 5% 以上的申报。5% 以上每次小于 1% 的变动不需要申报，所以看不到。
@@ -301,9 +302,22 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 | 低 | 网页标题写死“10 个主动型投资者”。 | 按名单人数显示。 |
 | 中 | 2018 版表格的栏目名 “NFPFRN” 被当成申报方名称（TVL），名称读错后不会再用第一节原文匹配。 | 加入标签过滤。 |
 
+### 第五轮（2026-11-03，加入养老金和 OCR，合并前审查三次）
+
+| 轮次 | 发现的问题 | 处理 |
+| --- | --- | --- |
+| 1 正确性 | Pillow 只在测试依赖里（reportlab 顺带装的），正式环境 OCR 每份都会报错，测试也发现不了。 | 加进 `requirements.txt`；`ocr_available()` 检查 Pillow；用只装正式依赖的干净环境验证。 |
+| 1 正确性 | 新的第一节标题规则在 “substantial” 处截断，把 “shareholder” 当成名称（花旗格式）。 | 规则吃掉 holder / shareholder，并加入标签过滤；31 份文字版真实样本和正式版逐一比对，结果完全一致。 |
+| 1 正确性 | 页面尺寸异常的 PDF 按 400dpi 渲染会撑爆内存；OCR 名额用完时被计入下载数。 | 图片最长边限 5000 像素；改正计数。 |
+| 2 异常 | tesseract 某次没装上时，那次的扫描件永久标成“读不出”。 | 记录是否真正做过 OCR，OCR 恢复后自动重读。 |
+| 2 异常 | 加密 PDF 渲染失败被当成下载失败，重试 3 次并一直报错。 | 改为直接“读不出”。 |
+| 2 异常 | 扫描件识别没有总时长上限，可能超过工作流 30 分钟被强杀、整次数据丢失。 | 单次运行 OCR 总时长 12 分钟，超出的留到下次。 |
+| 2 异常 | “打字封面信 + 扫描表格”的 PDF 有文字层，不会触发 OCR，什么都读不出。 | 文字层既没有名称也找不到第一节时，再用 OCR 读一遍。 |
+| 2 异常 | OCR 把 “of the” 认成 “ofthe”、2026 认成 2626、比例栏糊成 “te1.215”，导致日期和比例读错。 | 词间允许缺空格；丢弃离谱年份；扫描件只认带 % 的数字，低于 5% 的丢弃；新进类低于 5% 一律丢弃。 |
+
 ### 测试结果（交付时）
 
-- `python -m pytest -q`：48 passed（其中 15 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页）。
+- `python -m pytest -q`：67 passed（其中 19 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
 - `python tests/frontend_check.py`：25 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
 - 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
 

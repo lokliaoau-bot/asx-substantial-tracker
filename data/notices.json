@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-03T22:08:41+11:00",
- "last_success_at": "2026-11-03T22:04:06+11:00",
+ "updated_at": "2026-11-03T22:10:15+11:00",
+ "last_success_at": "2026-11-03T22:10:13+11:00",
  "scanned_days": [
   "2026-10-30",
   "2026-11-02",
@@ -12,7 +12,7 @@
   "ok": true,
   "list_pages_ok": 2,
   "substantial_found": 80,
-  "pdf_checked": 115,
+  "pdf_checked": 0,
   "skipped_noise": 0,
   "deferred": 0,
   "errors": []

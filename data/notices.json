@@ -1,17 +1,18 @@
 {
  "schema": 2,
- "updated_at": "2026-11-03T21:00:13+11:00",
- "last_success_at": "2026-11-03T20:59:09+11:00",
+ "updated_at": "2026-11-03T21:26:46+11:00",
+ "last_success_at": "2026-11-03T21:23:40+11:00",
  "scanned_days": [
   "2026-10-30",
   "2026-11-02",
   "2026-11-03"
  ],
+ "partial_days": {},
  "last_run": {
   "ok": true,
   "list_pages_ok": 2,
   "substantial_found": 80,
-  "pdf_checked": 39,
+  "pdf_checked": 115,
   "skipped_noise": 0,
   "deferred": 0,
   "errors": []
@@ -44,13 +45,14 @@
    "voting_power": [
     11.1
    ],
+   "lodged_code": "",
    "holder": "Ellerston Capital",
    "confidence": "高"
   },
   {
    "id": "03161640",
    "code": "DXN",
-   "company": "DXN Limited (ASX: DXN)",
+   "company": "DXN Limited",
    "date": "2026-11-03",
    "time": "18:09",
    "headline": "Ceasing to be a substantial holder for DXN from WAM/WAA/WMI",
@@ -60,6 +62,7 @@
    "type": "ceasing",
    "change_date": "2026-10-30",
    "voting_power": [],
+   "lodged_code": "",
    "holder": "Wilson Asset Management",
    "confidence": "高"
   },
@@ -75,14 +78,18 @@
    "price_sensitive": false,
    "type": "change",
    "change_date": "2026-11-02",
-   "voting_power": [],
+   "voting_power": [
+    17.57,
+    18.58
+   ],
+   "lodged_code": "",
    "holder": "Perennial",
    "confidence": "高"
   },
   {
    "id": "03161621",
    "code": "EOL",
-   "company": "Energy One Ltd (EOL)",
+   "company": "Energy One Ltd",
    "date": "2026-11-03",
    "time": "17:08",
    "headline": "Change in substantial holding",
@@ -95,13 +102,14 @@
     9.4,
     8.15
    ],
+   "lodged_code": "",
    "holder": "Regal Funds Management",
    "confidence": "高"
   },
   {
    "id": "03161619",
    "code": "RIV",
-   "company": "Rivco Australia Ltd (RIV)",
+   "company": "Rivco Australia Ltd",
    "date": "2026-11-03",
    "time": "17:06",
    "headline": "Change in substantial holding",
@@ -114,6 +122,7 @@
     7.39,
     6.38
    ],
+   "lodged_code": "",
    "holder": "Regal Funds Management",
    "confidence": "高"
   },
@@ -133,6 +142,7 @@
     10.68,
     11.86
    ],
+   "lodged_code": "",
    "holder": "L1 Capital",
    "confidence": "高"
   },
@@ -152,13 +162,14 @@
     5.61,
     8.52
    ],
+   "lodged_code": "",
    "holder": "L1 Capital",
    "confidence": "高"
   },
   {
    "id": "03161266",
-   "code": "WMI",
-   "company": "Energy One Limited (ASX: EOL)",
+   "code": "EOL",
+   "company": "Energy One Limited",
    "date": "2026-11-02",
    "time": "17:55",
    "headline": "Change in substantial holding for EOL",
@@ -171,6 +182,7 @@
     9.76,
     7.68
    ],
+   "lodged_code": "WMI",
    "holder": "Wilson Asset Management",
    "confidence": "高"
   },
@@ -190,6 +202,7 @@
     12.56,
     13.74
    ],
+   "lodged_code": "",
    "holder": "L1 Capital",
    "confidence": "高"
   }

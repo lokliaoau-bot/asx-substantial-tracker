@@ -1,6 +1,7 @@
 requests==2.32.3
 beautifulsoup4==4.12.3
 pypdf==5.1.0
+cryptography==43.0.3
 pypdfium2==4.30.0
 pillow==11.0.0
 tzdata==2024.2

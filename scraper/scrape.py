@@ -375,13 +375,15 @@ def pdf_texts(data: bytes, pages: int = PDF_PAGES) -> list[str]:
     """
     try:
         reader = PdfReader(io.BytesIO(data))
-        if reader.is_encrypted:
-            try:
-                reader.decrypt("")
-            except Exception:  # noqa: BLE001
-                return []
+        # 接口下载的 PDF 多为 AES 加密（只限制编辑，空密码能打开），解密需要 cryptography
+        if reader.is_encrypted and not reader.decrypt(""):
+            return pdfium_texts(data, pages) or []      # 真要密码才能打开的：按读不出处理，不当成下载失败
         plist = list(reader.pages[:pages])
     except Exception as e:  # noqa: BLE001
+        alt = pdfium_texts(data, pages)          # pypdf 打不开时换 pdfium 再试
+        if alt is not None:
+            log(f"    pypdf 打不开（{type(e).__name__}），已改用 pdfium 读取")
+            return alt
         raise BadPDF(f"PDF 打不开（{type(e).__name__}: {e}）") from e
     out = []
     for mode in ("layout", "plain"):
@@ -395,6 +397,27 @@ def pdf_texts(data: bytes, pages: int = PDF_PAGES) -> list[str]:
         if text and text not in out:
             out.append(text)
     return out
+
+
+def pdfium_texts(data: bytes, pages: int = PDF_PAGES) -> list[str] | None:
+    """备用：用 pdfium 提取文字层。pdfium 打不开或没装时返回 None。"""
+    try:
+        import pypdfium2 as pdfium
+        doc = pdfium.PdfDocument(data)
+    except Exception:  # noqa: BLE001
+        return None
+    try:
+        parts = []
+        for i in range(min(pages, len(doc))):
+            tp = doc[i].get_textpage()
+            parts.append(tp.get_text_range() or "")
+            tp.close()
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        doc.close()
+    text = clean_text("\n".join(parts).replace("\r\n", "\n").replace("\r", "\n"))
+    return [text] if text else []
 
 
 def clean_text(text: str) -> str:

@@ -1115,3 +1115,42 @@ def test_same_notice_with_one_minute_difference_shown_once():
         "1003": {**base, "id": "1003", "code": "ABC", "time": "17:00", "voting_power": [], "change_date": ""},   # 缺数字的不合并
     }, HOLDERS)
     assert sorted(n["id"] for n in out) == ["1001", "1002", "1003"]
+
+
+# ---------------------------------------------------------------- 第 3 轮审查：接口下载的 PDF 是 AES 加密的
+
+def encrypted_pdf(lines, user=""):
+    from pypdf import PdfReader, PdfWriter
+    w = PdfWriter()
+    for p in PdfReader(io.BytesIO(make_pdf(lines))).pages:
+        w.add_page(p)
+    w.encrypt(user_password=user, owner_password="owner-secret", algorithm="AES-128")
+    buf = io.BytesIO()
+    w.write(buf)
+    return buf.getvalue()
+
+
+AES_LINES = ["Form 603", "To Company Name/Scheme Old Day Limited", "1. Details of substantial holder (1)",
+             "Name Regal Funds Management Pty Limited", "The holder became a substantial holder on 27/10/2026",
+             "2. Details of voting power", "Ordinary 1 6.40%"]
+
+
+def test_aes_encrypted_pdf_with_empty_password_is_read():
+    texts = scrape.pdf_texts(encrypted_pdf(AES_LINES))
+    r = scrape.analyse_texts(texts, "becoming")
+    assert r["holder_name"] == "Regal Funds Management Pty Limited" and r["voting_power"] == [6.4]
+
+
+def test_pdfium_fallback_when_pypdf_cannot_open(monkeypatch):
+    from pypdf.errors import DependencyError
+
+    def no_crypto(*a, **k):
+        raise DependencyError("cryptography>=3.1 is required for AES algorithm")
+
+    monkeypatch.setattr(scrape, "PdfReader", no_crypto)        # 模拟正式环境缺 cryptography
+    texts = scrape.pdf_texts(encrypted_pdf(AES_LINES))
+    assert scrape.analyse_texts(texts, "becoming")["holder_name"] == "Regal Funds Management Pty Limited"
+
+
+def test_pdf_needing_a_real_password_is_unreadable_not_an_error():
+    assert scrape.pdf_texts(encrypted_pdf(AES_LINES, user="secret")) == []

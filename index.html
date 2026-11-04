@@ -425,7 +425,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       });
       if (res.status !== 204) return setStatus(await apiError(res, "启动抓取"), true);
 
-      while (Date.now() - started < 20 * 60 * 1000) {
+      while (Date.now() - started < 30 * 60 * 1000) {      // 和工作流的 30 分钟超时一致（积压多、扫描件多时会比较久）
         await sleep(Date.now() - started < 30000 ? 4000 : 8000);
         const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`, { cache: "no-store" });
         if (!r.ok) return setStatus(await apiError(r, "查询进度"), true);
@@ -449,7 +449,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
         }
         return;
       }
-      setStatus("等了 20 分钟还没完成，请到 GitHub 的 Actions 页面查看。", true);
+      setStatus("等了 30 分钟还没完成，请到 GitHub 的 Actions 页面查看。", true);
     } catch (e) {
       setStatus(e.message || "网络出错，请稍后再试。", true);
     } finally {

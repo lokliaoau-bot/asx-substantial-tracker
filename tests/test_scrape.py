@@ -1163,3 +1163,15 @@ def test_real_api_pdf_is_aes_encrypted_and_readable():
     assert scrape.strict_form_type(texts[0]) == "ceasing"
     r = scrape.analyse_texts(texts, "ceasing")
     assert r["holder_name"] == "Acorn Capital Limited" and r["change_date"] == "2026-10-30"
+
+
+def test_amended_notice_hides_the_original():
+    base = {"status": "parsed", "holder_name": "Ellerston Capital Limited", "type": "change", "voting_power": [5.99, 7.12],
+            "code": "MYG", "date": "2026-10-27"}
+    out = scrape.build_notices({
+        "a": {**base, "id": "a", "time": "17:40", "headline": "Change in substantial holding", "change_date": "2026-01-14"},
+        "b": {**base, "id": "b", "time": "18:34", "headline": "Change in substantial holding - Amended", "change_date": "2026-10-23"},
+        "c": {**base, "id": "c", "time": "10:00", "date": "2026-10-20", "headline": "Change in substantial holding",
+              "change_date": "2026-10-16", "voting_power": [4.9, 5.99]},          # 之前另一份真实变动，不受影响
+    }, HOLDERS)
+    assert sorted(n["id"] for n in out) == ["b", "c"]

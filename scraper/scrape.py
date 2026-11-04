@@ -959,7 +959,33 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
         seen.add(key)
         uniq.append(n)
     uniq.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
-    return uniq
+    return drop_superseded(uniq)
+
+
+AMENDED_RE = re.compile(r"\b(?:amend\w*|correct\w*|replace\w*|revised|updated)\b", re.I)
+
+
+def drop_superseded(notices: list[dict]) -> list[dict]:
+    """更正版（标题带 Amended / Correction / Replacement）发出后，隐藏被它更正的原件：
+    同一申报方、同一股票、同一类型、比例相同，原件在更正版之前 3 天以内。"""
+    drop = set()
+    for a in notices:
+        if not AMENDED_RE.search(a.get("headline") or ""):
+            continue
+        for b in notices:
+            if b is a or b["id"] in drop or AMENDED_RE.search(b.get("headline") or ""):
+                continue
+            if (b["holder"], b.get("code"), b.get("type")) != (a["holder"], a.get("code"), a.get("type")):
+                continue
+            if (b.get("voting_power") or []) != (a.get("voting_power") or []):
+                continue
+            try:
+                gap = (dt.date.fromisoformat(a["date"]) - dt.date.fromisoformat(b["date"])).days
+            except (KeyError, TypeError, ValueError):
+                continue
+            if 0 <= gap <= 3 and (b.get("date"), b.get("time") or "") <= (a.get("date"), a.get("time") or ""):
+                drop.add(b["id"])
+    return [n for n in notices if n["id"] not in drop]
 
 
 # ---------------------------------------------------------------- 主流程

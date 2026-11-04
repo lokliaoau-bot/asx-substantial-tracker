@@ -1175,3 +1175,25 @@ def test_amended_notice_hides_the_original():
               "change_date": "2026-10-16", "voting_power": [4.9, 5.99]},          # 之前另一份真实变动，不受影响
     }, HOLDERS)
     assert sorted(n["id"] for n in out) == ["b", "c"]
+
+
+def test_real_glued_votes_and_percentage():
+    r = real("603_glued_pct_alphinity_slc.pdf", "becoming")          # “25,887,0385.02%”
+    assert r["holder_name"].startswith("Alphinity Investment Management") and r["voting_power"] == [5.02]
+
+
+def test_real_nz_beginning_to_have_substantial_holding():
+    r = real("nz_beginning_firstcape_fbu.pdf", "becoming")           # “total percentage held 5.032%” / “in class:” 在下一行
+    assert r["holder_name"] == "FirstCape Group Limited" and r["voting_power"] == [5.032] and r["change_date"] == "2026-10-19"
+
+
+def test_real_split_voting_power_header_and_date_after_in_the():
+    r = real("604_split_header_hancock_bm1.pdf", "change")           # “voting powe r”、“Votingpower”；日期在 “in the” 之后
+    assert r["holder_name"].startswith("Mrs Georgina Hope Rinehart") and r["voting_power"] == [6.19, 8.0]
+    assert r["change_date"] == "2026-10-20"
+
+
+def test_change_date_is_the_change_not_when_holder_became_aware():
+    t = ("There was a change in the interests of 2 November 2026\nthe substantial holder on (HUB became aware of the change on "
+         "4 November 2026)\nThe previous notice was given to the 29 May 2026")
+    assert scrape.parse_details(t, "change")["change_date"] == "2026-11-02"

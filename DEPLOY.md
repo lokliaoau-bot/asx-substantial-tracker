@@ -48,7 +48,7 @@
 | `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
 | `.github/workflows/scrape.yml` | 抓取工作流：只有手动触发（网页按钮）。需要 `contents: write`。 |
 | `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
-| `tests/test_scrape.py` | 93 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
+| `tests/test_scrape.py` | 97 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
 | `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |
 | `requirements.txt` / `requirements-dev.txt` | 运行依赖 / 测试依赖（版本已锁定，已在 Python 3.12 干净环境验证可安装）。 |
 | `README.md` | 给用户看的使用说明。 |
@@ -112,7 +112,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：93 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
+python -m pytest -q   # 期望：97 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -346,11 +346,12 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 | 2 异常 | 列表页和接口对同一份公告的时间若差一分钟，会显示两条。 | 再按（申报方、股票、类型、变动日、比例）去重一次，优先保留列表页那条。 |
 | 3 真实环境 | 接口下载的 PDF 都是 AES 加密（只限制编辑，空密码能打开），正式环境缺 cryptography，第一次真实运行 169 份全部打不开；本地测试的 PDF 都没加密，发现不了。 | 加入 cryptography；pypdf 打不开时改用 pdfium 读文字层；真要密码的 PDF 按“读不出”处理，不反复重试。在 GitHub 上用同一批公告的网站版和接口版 PDF 逐份对比：45 对里 44 对解析结果完全一致，另 1 对只差扫描件里识别乱码的公司名。 |
 | 3 真实环境 | 补抓后同一申报方同一天出现原件和更正版（MYG：原件变动日写成 1 月 14 日，18:34 发了 “- Amended”），两条都显示。 | 更正版发出后隐藏被它更正的原件（同申报方、股票、类型、比例，3 天以内）。 |
+| 3 真实环境 | 补抓回来的老公告里又查出几种写法：股数和比例粘在一起（“25,887,0385.02%”，Alphinity、Challenger）；比例栏标题拆成 “voting powe r”/“Votingpower”（Hancock）；变动日紧跟在 “There was a change in the” 后面（Hancock，以前读成上一次申报的日期）；新西兰 “开始持有” 表格（FirstCape）；“HUB 4 日才得知 2 日的变动” 以前读成 4 日。 | 逐一支持，加真实样本测试；`PARSER_VERSION` 升到 7，已存公告按新规则重读。 |
 | 3 真实环境 | 积压多时单次运行超过 20 分钟（实测 300 份 PDF、含约 40 份 OCR 用了 15 分钟），网页只等 20 分钟会误报。 | 网页等待上限改为与工作流一致的 30 分钟。 |
 
 ### 测试结果（交付时）
 
-- `python -m pytest -q`：93 passed（其中 29 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
+- `python -m pytest -q`：97 passed（其中 32 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
 - `python tests/frontend_check.py`：33 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
 - 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
 

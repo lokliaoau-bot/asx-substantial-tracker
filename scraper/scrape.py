@@ -65,7 +65,7 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
-PARSER_VERSION = 6   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+PARSER_VERSION = 7   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
 OCR_DPI = 400                                             # 扫描件按 400dpi 渲染再识别（300dpi 会把 Name 认成 tame）
 OCR_PAGES = 3                                             # 扫描件可能第一页是封面信，多看一页
 OCR_TIMEOUT = 90                                          # 单页识别超时（秒）
@@ -580,15 +580,17 @@ def parse_holder_section(text: str, first_line: bool = True, ocr: bool = False) 
     return "", region
 
 
-VP_RE = re.compile(r"voting\s+power", re.I)
-SEC2_RE = re.compile(r"(?:^|\n)\s*2\s*\.?\s*(?:Details\s+of\s+voting\s+power|Previous\s+and\s+present\s+voting\s+power)", re.I)
+VP_RE = re.compile(r"voting\s*pow\s*e\s*r", re.I)                 # 有的 PDF 写成 “Votingpower”“voting powe r”
+SEC2_RE = re.compile(r"(?:^|\n)\s*2\s*\.?\s*(?:Details\s+of\s+voting\s*pow\s*e\s*r|Previous\s+and\s+present\s+voting\s*pow\s*e\s*r)", re.I)
 SEC3_RE = re.compile(r"\n\s*3\s*\.\s*[A-Za-z]")
 PCT_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,8})?)\s?%")              # 有的写到小数点后 6 位：5.298524%
 BARE_PCT_RE = re.compile(r"(?<![\d.,$])(\d{1,3}\.\d{1,8})(?![\d,%]|\.\d)")  # 表头写 “Voting power (%)”，数字不带 %
 TOTAL_RE = re.compile(r"\btotal\b", re.I)
+GLUED_PCT_RE = re.compile(r"\d{1,3}(?:,\d{3})+(\d{1,2}\.\d{1,8})\s?%")   # 股数和比例粘在一起：“25,887,0385.02%”
 EVENT_RE = re.compile(                                  # 词间用 \s*：扫描件识别常丢空格（“ofthe”）
     r"(?:became|ceased\s*to\s*be)\s*a\s*substantial\s*(?:share)?holder\s*on"
     r"|date\s*of\s*becoming\s*a\s*substantial\s*(?:share)?holder"
+    r"|there\s*was\s*a\s*change\s*in\s*the"            # 日期可能紧跟在 “in the” 后（Hancock），也可能在 “of the” 后
     r"|change\s*in\s*the\s*interests?\s*of\s*the"      # 604 常见排版：日期夹在“of the”和“substantial holder on”之间
     r"|interests?\s*of\s*the\s*substantial\s*holder\s*on"
     r"|substantial\s*(?:share)?holder\s*on",
@@ -656,10 +658,12 @@ def voting_section(text: str) -> tuple[str, bool]:
 
 
 def pct_rows(seg: str, allow_bare: bool = True) -> list[tuple[str, list[float]]]:
-    bare = allow_bare and not PCT_RE.search(seg)
+    bare = allow_bare and not PCT_RE.search(seg) and not GLUED_PCT_RE.search(seg)
     rows = []
     for ln in seg.split("\n"):
         vals = [float(x) for x in (BARE_PCT_RE if bare else PCT_RE).findall(ln)]
+        if not vals and not bare:
+            vals = [float(x) for x in GLUED_PCT_RE.findall(ln)]
         vals = [v for v in vals if 0 < v <= 100]
         if vals:
             rows.append((ln, vals))
@@ -732,8 +736,8 @@ def fallback_name(text: str) -> str:
 # 其他格式：新西兰双重上市公司用 FMC Act 表格，爱尔兰公司（James Hardie）用 TR-1 表格，美国公司 CDI 用 SEC 13G/13D
 NZ_RE = re.compile(r"Substantial\s+product\s+holder\(s\)\s+giving\s+disclosure", re.I)
 NZ_NAME_RE = re.compile(r"Full\s+name\(s\)\s*:\s*(.+)", re.I)
-NZ_PCT_RE = re.compile(r"total\s+percentage\s+held\s+in\s+class\s*:\s*(\d{1,3}(?:\.\d+)?)\s*%", re.I)
-NZ_DATE_RE = re.compile(r"Date\s+of\s+relevant\s+event\s*:\s*([^\n]+)", re.I)
+NZ_PCT_RE = re.compile(r"total\s+percentage\s+held(?:\s+in\s+class)?\s*:?\s*(\d{1,3}(?:\.\d+)?)\s*%", re.I)   # “in class:” 可能被挤到下一行
+NZ_DATE_RE = re.compile(r"(?:Date\s+of\s+relevant\s+event|Date\s+on\s+which\s+substantial\s+holding(?:\s+(?:began|ceased))?)\s*:?\s*([^\n]+)", re.I)
 NZ_COMPANY_RE = re.compile(r"\nand\s*\nTo\s+(.+)", re.I)
 TR1_RE = re.compile(r"NOTIFICATION\s+OF\s+MAJOR\s+HOLDINGS", re.I)
 TR1_NAME_RE = re.compile(r"person\s+subject\s+to\s+the\s+notification\s+obligation\w*\s*:?\s*\n?\s*Name\s*:\s*(.+?)"

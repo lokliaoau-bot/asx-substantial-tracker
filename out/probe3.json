@@ -1,0 +1,7643 @@
+{
+ "pages": [
+  {
+   "page": 0,
+   "status": 200,
+   "n": 1000,
+   "bytes": 377113,
+   "secs": 0.9,
+   "first": "2026-11-04T04:49:42.000Z",
+   "last": "2026-11-01T22:57:35.000Z"
+  },
+  {
+   "page": 1,
+   "status": 200,
+   "n": 1000,
+   "bytes": 393554,
+   "secs": 0.6,
+   "first": "2026-11-01T22:57:00.000Z",
+   "last": "2026-10-29T23:20:55.000Z"
+  },
+  {
+   "page": 2,
+   "status": 200,
+   "n": 1000,
+   "bytes": 390897,
+   "secs": 0.6,
+   "first": "2026-10-29T23:19:25.000Z",
+   "last": "2026-10-28T22:30:40.000Z"
+  },
+  {
+   "page": 3,
+   "status": 200,
+   "n": 1000,
+   "bytes": 387733,
+   "secs": 0.6,
+   "first": "2026-10-28T22:30:35.000Z",
+   "last": "2026-10-27T21:12:45.000Z"
+  },
+  {
+   "page": 4,
+   "status": 200,
+   "n": 1000,
+   "bytes": 390273,
+   "secs": 0.6,
+   "first": "2026-10-27T21:12:40.000Z",
+   "last": "2026-10-25T23:30:41.000Z"
+  },
+  {
+   "page": 5,
+   "status": 200,
+   "n": 1000,
+   "bytes": 383479,
+   "secs": 0.7,
+   "first": "2026-10-25T23:30:11.000Z",
+   "last": "2026-10-22T21:27:55.000Z"
+  },
+  {
+   "page": 6,
+   "status": 200,
+   "n": 1000,
+   "bytes": 377984,
+   "secs": 0.7,
+   "first": "2026-10-22T21:27:10.000Z",
+   "last": "2026-10-20T22:33:31.000Z"
+  },
+  {
+   "page": 7,
+   "status": 200,
+   "n": 1000,
+   "bytes": 380018,
+   "secs": 0.7,
+   "first": "2026-10-20T22:31:30.000Z",
+   "last": "2026-10-19T02:44:56.000Z"
+  },
+  {
+   "page": 8,
+   "status": 200,
+   "n": 1000,
+   "bytes": 384473,
+   "secs": 0.7,
+   "first": "2026-10-19T02:40:25.000Z",
+   "last": "2026-10-15T09:10:40.000Z"
+  },
+  {
+   "page": 9,
+   "status": 200,
+   "n": 1000,
+   "bytes": 384787,
+   "secs": 0.7,
+   "first": "2026-10-15T09:00:39.000Z",
+   "last": "2026-10-13T22:06:08.000Z"
+  },
+  {
+   "page": 10,
+   "status": 200,
+   "n": 0,
+   "bytes": 31,
+   "secs": 0.0,
+   "first": null,
+   "last": null
+  }
+ ],
+ "substantial": [
+  {
+   "symbol": "EGY",
+   "headline": "Change in substantial holding from HUB",
+   "date": "2026-11-04T03:58:06.000Z",
+   "documentKey": "2924-03157951-2A1708314",
+   "isPriceSensitive": false,
+   "fileSize": "483KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MYG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-04T03:36:46.000Z",
+   "documentKey": "2924-03157941-2A1708311",
+   "isPriceSensitive": false,
+   "fileSize": "127KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NOL",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-04T01:07:06.000Z",
+   "documentKey": "2924-03157900-2A1708271",
+   "isPriceSensitive": false,
+   "fileSize": "739KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LOT",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-04T01:06:06.000Z",
+   "documentKey": "2924-03157899-6A1353571",
+   "isPriceSensitive": false,
+   "fileSize": "919KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOE",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-04T01:05:36.000Z",
+   "documentKey": "2924-03157898-6A1353570",
+   "isPriceSensitive": false,
+   "fileSize": "861KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WAF",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T23:16:50.000Z",
+   "documentKey": "2924-03157860-6A1353563",
+   "isPriceSensitive": false,
+   "fileSize": "856KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SPG",
+   "headline": "Notice of Initial Substantial Holder",
+   "date": "2026-11-03T22:52:10.000Z",
+   "documentKey": "2924-03157822-3A705776",
+   "isPriceSensitive": false,
+   "fileSize": "204KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FOS",
+   "headline": "Change in substantial holding from SKM",
+   "date": "2026-11-03T22:40:35.000Z",
+   "documentKey": "2924-03157805-3A705770",
+   "isPriceSensitive": false,
+   "fileSize": "297KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DUB",
+   "headline": "Change in substantial holding - MB",
+   "date": "2026-11-03T22:34:10.000Z",
+   "documentKey": "2924-03157792-3A705768",
+   "isPriceSensitive": false,
+   "fileSize": "4919KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T22:03:25.000Z",
+   "documentKey": "2924-03157747-2A1708194",
+   "isPriceSensitive": false,
+   "fileSize": "233KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FLT",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-03T21:21:05.000Z",
+   "documentKey": "2924-03157669-2A1708144",
+   "isPriceSensitive": false,
+   "fileSize": "1323KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DYL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T21:20:30.000Z",
+   "documentKey": "2924-03157665-6A1353497",
+   "isPriceSensitive": false,
+   "fileSize": "1809KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T21:20:25.000Z",
+   "documentKey": "2924-03157664-2A1708143",
+   "isPriceSensitive": false,
+   "fileSize": "2148KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CIA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T21:20:05.000Z",
+   "documentKey": "2924-03157662-2A1708142",
+   "isPriceSensitive": false,
+   "fileSize": "1617KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WTC",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T08:58:03.000Z",
+   "documentKey": "2924-03157616-2A1708135",
+   "isPriceSensitive": false,
+   "fileSize": "1095KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WA1",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-03T08:54:13.000Z",
+   "documentKey": "2924-03157615-6A1353470",
+   "isPriceSensitive": false,
+   "fileSize": "646KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T08:53:43.000Z",
+   "documentKey": "2924-03157614-6A1353469",
+   "isPriceSensitive": false,
+   "fileSize": "919KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T08:53:08.000Z",
+   "documentKey": "2924-03157613-2A1708134",
+   "isPriceSensitive": false,
+   "fileSize": "1899KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KCN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T08:52:13.000Z",
+   "documentKey": "2924-03157611-2A1708132",
+   "isPriceSensitive": false,
+   "fileSize": "1289KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GGP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-03T08:51:38.000Z",
+   "documentKey": "2924-03157610-6A1353468",
+   "isPriceSensitive": false,
+   "fileSize": "579KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FFM",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-03T08:43:23.000Z",
+   "documentKey": "2924-03157608-6A1353467",
+   "isPriceSensitive": false,
+   "fileSize": "567KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CWY",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T08:41:43.000Z",
+   "documentKey": "2924-03157607-3A705732",
+   "isPriceSensitive": false,
+   "fileSize": "1016KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CYL",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T08:39:08.000Z",
+   "documentKey": "2924-03157606-6A1353466",
+   "isPriceSensitive": false,
+   "fileSize": "2212KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DXN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T07:14:07.000Z",
+   "documentKey": "2924-03157583-3A705729",
+   "isPriceSensitive": false,
+   "fileSize": "368KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T07:11:22.000Z",
+   "documentKey": "2924-03157582-3A705727",
+   "isPriceSensitive": false,
+   "fileSize": "224KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DXN",
+   "headline": "Ceasing to be a substantial holder for DXN from WAM/WAA/WMI",
+   "date": "2026-11-03T07:09:27.000Z",
+   "documentKey": "2924-03157581-3A705728",
+   "isPriceSensitive": false,
+   "fileSize": "504KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DNL",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T07:01:22.000Z",
+   "documentKey": "2924-03157580-3A705726",
+   "isPriceSensitive": false,
+   "fileSize": "559KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NWL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T06:42:12.000Z",
+   "documentKey": "2924-03157576-3A705725",
+   "isPriceSensitive": false,
+   "fileSize": "296KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SIQ",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-03T06:38:02.000Z",
+   "documentKey": "2924-03157575-2A1708116",
+   "isPriceSensitive": false,
+   "fileSize": "271KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AMI",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T06:34:37.000Z",
+   "documentKey": "2924-03157574-2A1708115",
+   "isPriceSensitive": false,
+   "fileSize": "269KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AMX",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T06:21:37.000Z",
+   "documentKey": "2924-03157566-2A1708111",
+   "isPriceSensitive": false,
+   "fileSize": "213KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOL",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T06:08:22.000Z",
+   "documentKey": "2924-03157562-2A1708109",
+   "isPriceSensitive": false,
+   "fileSize": "181KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RIV",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T06:06:52.000Z",
+   "documentKey": "2924-03157560-2A1708108",
+   "isPriceSensitive": false,
+   "fileSize": "174KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HLO",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T05:47:27.000Z",
+   "documentKey": "2924-03157554-2A1708105",
+   "isPriceSensitive": false,
+   "fileSize": "638KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AT1",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T04:59:32.000Z",
+   "documentKey": "2924-03157531-2A1708081",
+   "isPriceSensitive": false,
+   "fileSize": "318KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FGR",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T04:40:42.000Z",
+   "documentKey": "2924-03157525-6A1353434",
+   "isPriceSensitive": false,
+   "fileSize": "146KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SPL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-03T03:50:27.000Z",
+   "documentKey": "2924-03157504-3A705721",
+   "isPriceSensitive": false,
+   "fileSize": "1859KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TZN",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-03T03:04:27.000Z",
+   "documentKey": "2924-03157494-2A1708065",
+   "isPriceSensitive": false,
+   "fileSize": "387KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZAG",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T02:07:41.000Z",
+   "documentKey": "2924-03157482-6A1353407",
+   "isPriceSensitive": false,
+   "fileSize": "132KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GTK",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T01:37:46.000Z",
+   "documentKey": "2924-03157467-3A705714",
+   "isPriceSensitive": false,
+   "fileSize": "4029KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ADS",
+   "headline": "Change in substantial holding - A Dyer",
+   "date": "2026-11-03T01:26:26.000Z",
+   "documentKey": "2924-03157460-3A705709",
+   "isPriceSensitive": false,
+   "fileSize": "233KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOL",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-03T01:18:11.000Z",
+   "documentKey": "2924-03157457-2A1708049",
+   "isPriceSensitive": false,
+   "fileSize": "420KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LM1",
+   "headline": "Change in substantial holding from FRS",
+   "date": "2026-11-03T00:45:51.000Z",
+   "documentKey": "2924-03157446-6A1353394",
+   "isPriceSensitive": false,
+   "fileSize": "430KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BTR",
+   "headline": "Becoming a substantial holder from GMD",
+   "date": "2026-11-03T00:23:06.000Z",
+   "documentKey": "2924-03157442-6A1353392",
+   "isPriceSensitive": false,
+   "fileSize": "241KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZNC",
+   "headline": "Change in substantial holding from FRS",
+   "date": "2026-11-03T00:03:36.000Z",
+   "documentKey": "2924-03157435-6A1353386",
+   "isPriceSensitive": false,
+   "fileSize": "221KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CTT",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T23:42:51.000Z",
+   "documentKey": "2924-03157430-3A705703",
+   "isPriceSensitive": false,
+   "fileSize": "258KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CTM",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T22:59:36.000Z",
+   "documentKey": "2924-03157402-6A1353381",
+   "isPriceSensitive": false,
+   "fileSize": "818KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPC",
+   "headline": "Form 604 - Change in substantial holding from INA",
+   "date": "2026-11-02T22:14:26.000Z",
+   "documentKey": "2924-03157353-6A1353363",
+   "isPriceSensitive": false,
+   "fileSize": "299KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELD",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-02T21:32:15.000Z",
+   "documentKey": "2924-03157317-2A1707972",
+   "isPriceSensitive": false,
+   "fileSize": "443KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JHX",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T21:24:45.000Z",
+   "documentKey": "2924-03157307-2A1707960",
+   "isPriceSensitive": false,
+   "fileSize": "267KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPC",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-02T21:24:30.000Z",
+   "documentKey": "2924-03157305-6A1353346",
+   "isPriceSensitive": false,
+   "fileSize": "257KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DNL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-02T21:21:35.000Z",
+   "documentKey": "2924-03157279-3A705683",
+   "isPriceSensitive": false,
+   "fileSize": "72KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TOR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-02T21:21:20.000Z",
+   "documentKey": "2924-03157276-6A1353329",
+   "isPriceSensitive": false,
+   "fileSize": "339KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SGM",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T08:08:03.000Z",
+   "documentKey": "2924-03157244-2A1707920",
+   "isPriceSensitive": false,
+   "fileSize": "2456KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KCN",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-02T08:05:13.000Z",
+   "documentKey": "2924-03157243-2A1707919",
+   "isPriceSensitive": false,
+   "fileSize": "751KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JBH",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T08:03:03.000Z",
+   "documentKey": "2924-03157242-3A705673",
+   "isPriceSensitive": false,
+   "fileSize": "1146KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ILU",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T08:00:43.000Z",
+   "documentKey": "2924-03157240-6A1353316",
+   "isPriceSensitive": false,
+   "fileSize": "1077KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GGP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T07:59:58.000Z",
+   "documentKey": "2924-03157239-6A1353315",
+   "isPriceSensitive": false,
+   "fileSize": "3547KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BAP",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T07:59:08.000Z",
+   "documentKey": "2924-03157238-3A705672",
+   "isPriceSensitive": false,
+   "fileSize": "259KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FFM",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T07:57:48.000Z",
+   "documentKey": "2924-03157236-6A1353313",
+   "isPriceSensitive": false,
+   "fileSize": "2237KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PCG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T07:55:18.000Z",
+   "documentKey": "2924-03157234-2A1707918",
+   "isPriceSensitive": false,
+   "fileSize": "18668KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-11-02T07:43:12.000Z",
+   "documentKey": "2924-03157230-2A1707916",
+   "isPriceSensitive": false,
+   "fileSize": "2330KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPE",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T07:31:32.000Z",
+   "documentKey": "2924-03157226-2A1707914",
+   "isPriceSensitive": false,
+   "fileSize": "242KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-11-02T07:26:57.000Z",
+   "documentKey": "2924-03157223-2A1707913",
+   "isPriceSensitive": false,
+   "fileSize": "1430KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WGX",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T07:07:07.000Z",
+   "documentKey": "2924-03157216-6A1353299",
+   "isPriceSensitive": false,
+   "fileSize": "147KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPC",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T07:05:32.000Z",
+   "documentKey": "2924-03157212-6A1353295",
+   "isPriceSensitive": false,
+   "fileSize": "137KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NWH",
+   "headline": "Change in substantial holding from MQG",
+   "date": "2026-11-02T07:03:27.000Z",
+   "documentKey": "2924-03157211-6A1353294",
+   "isPriceSensitive": false,
+   "fileSize": "1460KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BRY",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T06:55:32.000Z",
+   "documentKey": "2924-03157208-6A1353291",
+   "isPriceSensitive": false,
+   "fileSize": "245KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOL",
+   "headline": "Change in substantial holding from WAM/WMI/WAX",
+   "date": "2026-11-02T06:55:07.000Z",
+   "documentKey": "2924-03157207-2A1707904",
+   "isPriceSensitive": false,
+   "fileSize": "348KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BRY",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T06:51:12.000Z",
+   "documentKey": "2924-03157202-6A1353290",
+   "isPriceSensitive": false,
+   "fileSize": "1361KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Change in substantial holding from MS",
+   "date": "2026-11-02T06:36:12.000Z",
+   "documentKey": "2924-03157193-2A1707897",
+   "isPriceSensitive": false,
+   "fileSize": "686KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IDX",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T06:33:12.000Z",
+   "documentKey": "2924-03157191-3A705669",
+   "isPriceSensitive": false,
+   "fileSize": "621KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T06:27:07.000Z",
+   "documentKey": "2924-03157189-3A705668",
+   "isPriceSensitive": false,
+   "fileSize": "159KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KIT",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T06:14:52.000Z",
+   "documentKey": "2924-03157180-3A705667",
+   "isPriceSensitive": false,
+   "fileSize": "665KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T06:14:17.000Z",
+   "documentKey": "2924-03157179-2A1707891",
+   "isPriceSensitive": false,
+   "fileSize": "227KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CLV",
+   "headline": "Change in substantial holding from PPT",
+   "date": "2026-11-02T06:09:27.000Z",
+   "documentKey": "2924-03157176-2A1707888",
+   "isPriceSensitive": false,
+   "fileSize": "551KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T05:42:57.000Z",
+   "documentKey": "2924-03157164-2A1707880",
+   "isPriceSensitive": false,
+   "fileSize": "4013KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-11-02T05:36:42.000Z",
+   "documentKey": "2924-03157158-2A1707875",
+   "isPriceSensitive": false,
+   "fileSize": "1144KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BAP",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T05:34:12.000Z",
+   "documentKey": "2924-03157156-3A705661",
+   "isPriceSensitive": false,
+   "fileSize": "280KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AEL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-11-02T05:32:07.000Z",
+   "documentKey": "2924-03157153-2A1707873",
+   "isPriceSensitive": false,
+   "fileSize": "266KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SGH",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T05:23:02.000Z",
+   "documentKey": "2924-03157145-2A1707867",
+   "isPriceSensitive": false,
+   "fileSize": "387KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TRP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T05:13:07.000Z",
+   "documentKey": "2924-03157139-2A1707865",
+   "isPriceSensitive": false,
+   "fileSize": "269KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CNB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T05:12:17.000Z",
+   "documentKey": "2924-03157137-6A1353267",
+   "isPriceSensitive": false,
+   "fileSize": "306KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Becoming a substantial holder from CBA",
+   "date": "2026-11-02T04:21:42.000Z",
+   "documentKey": "2924-03157110-3A705655",
+   "isPriceSensitive": false,
+   "fileSize": "265KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NYR",
+   "headline": "Notice of Initial Substantial Holding - J Moore",
+   "date": "2026-11-02T04:14:52.000Z",
+   "documentKey": "2924-03157105-2A1707840",
+   "isPriceSensitive": false,
+   "fileSize": "299KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AT1",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-02T00:40:26.000Z",
+   "documentKey": "2924-03157046-2A1707793",
+   "isPriceSensitive": false,
+   "fileSize": "269KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IOV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-02T00:17:11.000Z",
+   "documentKey": "2924-03157041-6A1353242",
+   "isPriceSensitive": false,
+   "fileSize": "292KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HLO",
+   "headline": "Substantial Holder Notice",
+   "date": "2026-11-01T22:41:55.000Z",
+   "documentKey": "2924-03156946-2A1707750",
+   "isPriceSensitive": false,
+   "fileSize": "3513KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PC2",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-01T22:14:25.000Z",
+   "documentKey": "2924-03156882-6A1353187",
+   "isPriceSensitive": false,
+   "fileSize": "130KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SLX",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-01T21:21:30.000Z",
+   "documentKey": "2924-03156771-2A1707679",
+   "isPriceSensitive": false,
+   "fileSize": "1337KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AAI",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-01T21:13:50.000Z",
+   "documentKey": "2924-03156720-3A705564",
+   "isPriceSensitive": false,
+   "fileSize": "84KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IPX",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-01T21:13:40.000Z",
+   "documentKey": "2924-03156719-6A1353129",
+   "isPriceSensitive": false,
+   "fileSize": "1047KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FLT",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-11-01T21:13:30.000Z",
+   "documentKey": "2924-03156718-2A1707623",
+   "isPriceSensitive": false,
+   "fileSize": "2307KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANZ",
+   "headline": "Change in substantial holding",
+   "date": "2026-11-01T20:35:40.000Z",
+   "documentKey": "2924-03156699-3A705563",
+   "isPriceSensitive": false,
+   "fileSize": "1733KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "INA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T09:19:47.000Z",
+   "documentKey": "2924-03156677-2A1707616",
+   "isPriceSensitive": false,
+   "fileSize": "339KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WA1",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T08:51:12.000Z",
+   "documentKey": "2924-03156664-6A1353102",
+   "isPriceSensitive": false,
+   "fileSize": "1306KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SGM",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-30T08:48:12.000Z",
+   "documentKey": "2924-03156661-2A1707614",
+   "isPriceSensitive": false,
+   "fileSize": "725KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T08:46:32.000Z",
+   "documentKey": "2924-03156656-6A1353096",
+   "isPriceSensitive": false,
+   "fileSize": "894KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T08:45:17.000Z",
+   "documentKey": "2924-03156652-6A1353093",
+   "isPriceSensitive": false,
+   "fileSize": "1175KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T08:42:17.000Z",
+   "documentKey": "2924-03156648-3A705562",
+   "isPriceSensitive": false,
+   "fileSize": "1016KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DRR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-30T08:40:02.000Z",
+   "documentKey": "2924-03156647-6A1353090",
+   "isPriceSensitive": false,
+   "fileSize": "566KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BMN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T08:37:32.000Z",
+   "documentKey": "2924-03156644-6A1353089",
+   "isPriceSensitive": false,
+   "fileSize": "969KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AZJ",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T08:32:57.000Z",
+   "documentKey": "2924-03156641-2A1707607",
+   "isPriceSensitive": false,
+   "fileSize": "1002KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T08:21:17.000Z",
+   "documentKey": "2924-03156637-2A1707605",
+   "isPriceSensitive": false,
+   "fileSize": "266KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PCG",
+   "headline": "Change in substantial holding for Russel Pillemer",
+   "date": "2026-10-30T07:54:37.000Z",
+   "documentKey": "2924-03156610-2A1707596",
+   "isPriceSensitive": false,
+   "fileSize": "219KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BLZ",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T07:40:07.000Z",
+   "documentKey": "2924-03156597-6A1353061",
+   "isPriceSensitive": false,
+   "fileSize": "189KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-30T07:25:22.000Z",
+   "documentKey": "2924-03156576-2A1707566",
+   "isPriceSensitive": false,
+   "fileSize": "305KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T07:23:46.000Z",
+   "documentKey": "2924-03156570-2A1707565",
+   "isPriceSensitive": false,
+   "fileSize": "384KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T07:19:57.000Z",
+   "documentKey": "2924-03156564-2A1707560",
+   "isPriceSensitive": false,
+   "fileSize": "415KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LIN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T07:05:51.000Z",
+   "documentKey": "2924-03156547-6A1353026",
+   "isPriceSensitive": false,
+   "fileSize": "143KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZAG",
+   "headline": "Ceasing to be a substantial holder from CZR",
+   "date": "2026-10-30T06:43:41.000Z",
+   "documentKey": "2924-03156515-6A1353000",
+   "isPriceSensitive": false,
+   "fileSize": "256KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DGR",
+   "headline": "Becoming a substantial holder from AIC",
+   "date": "2026-10-30T06:06:22.000Z",
+   "documentKey": "2924-03156457-2A1707524",
+   "isPriceSensitive": false,
+   "fileSize": "2313KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MLG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T05:59:51.000Z",
+   "documentKey": "2924-03156449-6A1352966",
+   "isPriceSensitive": false,
+   "fileSize": "317KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KIT",
+   "headline": "Change in substantial holding from HUB",
+   "date": "2026-10-30T05:56:26.000Z",
+   "documentKey": "2924-03156444-3A705552",
+   "isPriceSensitive": false,
+   "fileSize": "279KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MMI",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-30T05:48:26.000Z",
+   "documentKey": "2924-03156427-2A1707507",
+   "isPriceSensitive": false,
+   "fileSize": "272KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T05:46:46.000Z",
+   "documentKey": "2924-03156420-3A705549",
+   "isPriceSensitive": false,
+   "fileSize": "173KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MGL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T05:46:21.000Z",
+   "documentKey": "2924-03156418-2A1707504",
+   "isPriceSensitive": false,
+   "fileSize": "131KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TLC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T05:41:36.000Z",
+   "documentKey": "2924-03156401-3A705547",
+   "isPriceSensitive": false,
+   "fileSize": "409KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PWH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T05:21:46.000Z",
+   "documentKey": "2924-03156364-2A1707481",
+   "isPriceSensitive": false,
+   "fileSize": "311KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SHL",
+   "headline": "Notice of change of interests of substantial holder for MAP",
+   "date": "2026-10-30T05:11:11.000Z",
+   "documentKey": "2924-03156344-2A1707471",
+   "isPriceSensitive": false,
+   "fileSize": "241KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AX1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T04:49:01.000Z",
+   "documentKey": "2924-03156317-2A1707461",
+   "isPriceSensitive": false,
+   "fileSize": "294KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TVL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T04:48:31.000Z",
+   "documentKey": "2924-03156316-3A705530",
+   "isPriceSensitive": false,
+   "fileSize": "446KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TZN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T04:16:36.000Z",
+   "documentKey": "2924-03156283-2A1707449",
+   "isPriceSensitive": false,
+   "fileSize": "515KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HLO",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T03:13:36.000Z",
+   "documentKey": "2924-03156231-2A1707435",
+   "isPriceSensitive": false,
+   "fileSize": "3640KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JAV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T02:42:11.000Z",
+   "documentKey": "2924-03156197-6A1352849",
+   "isPriceSensitive": false,
+   "fileSize": "449KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FWD",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-30T02:40:31.000Z",
+   "documentKey": "2924-03156196-6A1352852",
+   "isPriceSensitive": false,
+   "fileSize": "259KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MBH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-30T02:32:30.000Z",
+   "documentKey": "2924-03156188-3A705502",
+   "isPriceSensitive": false,
+   "fileSize": "1577KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AEI",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-30T00:19:30.000Z",
+   "documentKey": "2924-03156062-2A1707297",
+   "isPriceSensitive": false,
+   "fileSize": "258KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BAP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T23:48:40.000Z",
+   "documentKey": "2924-03156021-3A705474",
+   "isPriceSensitive": false,
+   "fileSize": "512KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T22:15:05.000Z",
+   "documentKey": "2924-03155809-2A1707197",
+   "isPriceSensitive": false,
+   "fileSize": "306KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AX1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T21:54:20.000Z",
+   "documentKey": "2924-03155745-2A1707173",
+   "isPriceSensitive": false,
+   "fileSize": "433KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WMC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-29T21:12:25.000Z",
+   "documentKey": "2924-03155609-6A1352635",
+   "isPriceSensitive": false,
+   "fileSize": "514KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T21:08:20.000Z",
+   "documentKey": "2924-03155572-6A1352605",
+   "isPriceSensitive": false,
+   "fileSize": "1771KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-10-29T08:29:37.000Z",
+   "documentKey": "2924-03155496-6A1352512",
+   "isPriceSensitive": false,
+   "fileSize": "9500KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-29T08:23:47.000Z",
+   "documentKey": "2924-03155491-2A1707096",
+   "isPriceSensitive": false,
+   "fileSize": "1213KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-29T08:06:37.000Z",
+   "documentKey": "2924-03155484-6A1352501",
+   "isPriceSensitive": false,
+   "fileSize": "704KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GGP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-29T08:03:27.000Z",
+   "documentKey": "2924-03155480-6A1352499",
+   "isPriceSensitive": false,
+   "fileSize": "676KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T08:00:52.000Z",
+   "documentKey": "2924-03155478-2A1707095",
+   "isPriceSensitive": false,
+   "fileSize": "897KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DRR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-29T07:57:27.000Z",
+   "documentKey": "2924-03155476-6A1352498",
+   "isPriceSensitive": false,
+   "fileSize": "1787KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "XPN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-29T07:21:22.000Z",
+   "documentKey": "2924-03155459-2A1707090",
+   "isPriceSensitive": false,
+   "fileSize": "694KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ARI",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T06:58:02.000Z",
+   "documentKey": "2924-03155442-6A1352472",
+   "isPriceSensitive": false,
+   "fileSize": "556KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RG1",
+   "headline": "Change in substantial holding - New Highland",
+   "date": "2026-10-29T06:34:11.000Z",
+   "documentKey": "2924-03155417-2A1707078",
+   "isPriceSensitive": false,
+   "fileSize": "299KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RG8",
+   "headline": "Change in substantial holding - New Highland",
+   "date": "2026-10-29T06:31:56.000Z",
+   "documentKey": "2924-03155415-2A1707077",
+   "isPriceSensitive": false,
+   "fileSize": "296KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TAH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T06:28:56.000Z",
+   "documentKey": "2924-03155413-3A705361",
+   "isPriceSensitive": false,
+   "fileSize": "146KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RG1",
+   "headline": "Change in substantial holding - RPL",
+   "date": "2026-10-29T06:28:36.000Z",
+   "documentKey": "2924-03155412-2A1707076",
+   "isPriceSensitive": false,
+   "fileSize": "289KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RG8",
+   "headline": "Change in substantial holding - RPL",
+   "date": "2026-10-29T06:25:46.000Z",
+   "documentKey": "2924-03155407-2A1707074",
+   "isPriceSensitive": false,
+   "fileSize": "285KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LUX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T06:25:11.000Z",
+   "documentKey": "2924-03155406-6A1352454",
+   "isPriceSensitive": false,
+   "fileSize": "217KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LUX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T06:22:41.000Z",
+   "documentKey": "2924-03155404-6A1352453",
+   "isPriceSensitive": false,
+   "fileSize": "211KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LUX",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-29T06:10:11.000Z",
+   "documentKey": "2924-03155391-6A1352448",
+   "isPriceSensitive": false,
+   "fileSize": "119KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PRN",
+   "headline": "Change in substantial holding from MQG",
+   "date": "2026-10-29T06:09:41.000Z",
+   "documentKey": "2924-03155390-6A1352450",
+   "isPriceSensitive": false,
+   "fileSize": "843KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PKD",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-29T06:06:16.000Z",
+   "documentKey": "2924-03155386-6A1352446",
+   "isPriceSensitive": false,
+   "fileSize": "314KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding from MS",
+   "date": "2026-10-29T06:03:36.000Z",
+   "documentKey": "2924-03155381-6A1352445",
+   "isPriceSensitive": false,
+   "fileSize": "3299KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BRG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-29T05:56:26.000Z",
+   "documentKey": "2924-03155371-2A1707054",
+   "isPriceSensitive": false,
+   "fileSize": "238KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-29T05:38:21.000Z",
+   "documentKey": "2924-03155350-6A1352437",
+   "isPriceSensitive": false,
+   "fileSize": "238KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SKC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T05:37:41.000Z",
+   "documentKey": "2924-03155349-2A1707022",
+   "isPriceSensitive": false,
+   "fileSize": "158KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VBC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T05:35:31.000Z",
+   "documentKey": "2924-03155345-6A1352433",
+   "isPriceSensitive": false,
+   "fileSize": "42KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VUL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T05:33:31.000Z",
+   "documentKey": "2924-03155342-6A1352434",
+   "isPriceSensitive": false,
+   "fileSize": "231KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MVP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T05:32:46.000Z",
+   "documentKey": "2924-03155341-3A705345",
+   "isPriceSensitive": false,
+   "fileSize": "147KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BRG",
+   "headline": "Ceasing to be a substantial holder from CGF",
+   "date": "2026-10-29T05:19:36.000Z",
+   "documentKey": "2924-03155327-2A1707012",
+   "isPriceSensitive": false,
+   "fileSize": "265KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OFX",
+   "headline": "Change in substantial holding from RYD",
+   "date": "2026-10-29T05:19:26.000Z",
+   "documentKey": "2924-03155326-2A1707010",
+   "isPriceSensitive": false,
+   "fileSize": "173KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FG1",
+   "headline": "Initial Substantial Shareholder Notice",
+   "date": "2026-10-29T05:07:21.000Z",
+   "documentKey": "2924-03155310-3A705338",
+   "isPriceSensitive": false,
+   "fileSize": "179KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T03:25:16.000Z",
+   "documentKey": "2924-03155251-6A1352392",
+   "isPriceSensitive": false,
+   "fileSize": "15370KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FWD",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-29T02:57:16.000Z",
+   "documentKey": "2924-03155242-6A1352388",
+   "isPriceSensitive": false,
+   "fileSize": "120KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WCN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-29T02:43:06.000Z",
+   "documentKey": "2924-03155233-6A1352384",
+   "isPriceSensitive": false,
+   "fileSize": "4234KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SKY",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T02:32:51.000Z",
+   "documentKey": "2924-03155224-2A1706971",
+   "isPriceSensitive": false,
+   "fileSize": "2541KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MMI",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-29T00:21:20.000Z",
+   "documentKey": "2924-03155105-2A1706907",
+   "isPriceSensitive": false,
+   "fileSize": "3177KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JHX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T23:32:00.000Z",
+   "documentKey": "2924-03155081-2A1706897",
+   "isPriceSensitive": false,
+   "fileSize": "309KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IGO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T23:31:30.000Z",
+   "documentKey": "2924-03155080-6A1352323",
+   "isPriceSensitive": false,
+   "fileSize": "234KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CD1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T23:24:30.000Z",
+   "documentKey": "2924-03155075-2A1706894",
+   "isPriceSensitive": false,
+   "fileSize": "155KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PWH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T23:23:45.000Z",
+   "documentKey": "2924-03155073-2A1706893",
+   "isPriceSensitive": false,
+   "fileSize": "1340KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VGL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T23:21:00.000Z",
+   "documentKey": "2924-03155071-3A705305",
+   "isPriceSensitive": false,
+   "fileSize": "363KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T22:17:35.000Z",
+   "documentKey": "2924-03154938-2A1706842",
+   "isPriceSensitive": false,
+   "fileSize": "307KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BSL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T21:18:39.000Z",
+   "documentKey": "2924-03154796-3A705255",
+   "isPriceSensitive": false,
+   "fileSize": "1688KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JRL",
+   "headline": "Initial Substantial Holder Notices",
+   "date": "2026-10-28T21:16:45.000Z",
+   "documentKey": "2924-03154783-6A1352185",
+   "isPriceSensitive": false,
+   "fileSize": "1402KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T21:13:29.000Z",
+   "documentKey": "2924-03154755-6A1352177",
+   "isPriceSensitive": false,
+   "fileSize": "1494KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T21:03:19.000Z",
+   "documentKey": "2924-03154695-3A705245",
+   "isPriceSensitive": false,
+   "fileSize": "198KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PME",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T08:46:27.000Z",
+   "documentKey": "2924-03154673-3A705244",
+   "isPriceSensitive": false,
+   "fileSize": "1435KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MMS",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-28T08:43:17.000Z",
+   "documentKey": "2924-03154672-3A705243",
+   "isPriceSensitive": false,
+   "fileSize": "598KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IEL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-28T08:41:27.000Z",
+   "documentKey": "2924-03154671-3A705242",
+   "isPriceSensitive": false,
+   "fileSize": "675KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GGP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T08:40:42.000Z",
+   "documentKey": "2924-03154670-6A1352118",
+   "isPriceSensitive": false,
+   "fileSize": "1354KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CWY",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T08:35:07.000Z",
+   "documentKey": "2924-03154668-3A705241",
+   "isPriceSensitive": false,
+   "fileSize": "845KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BGA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T08:33:42.000Z",
+   "documentKey": "2924-03154666-3A705240",
+   "isPriceSensitive": false,
+   "fileSize": "1252KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ARB",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T08:28:12.000Z",
+   "documentKey": "2924-03154663-3A705239",
+   "isPriceSensitive": false,
+   "fileSize": "3284KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-28T08:17:32.000Z",
+   "documentKey": "2924-03154659-2A1706752",
+   "isPriceSensitive": false,
+   "fileSize": "329KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BLZ",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T08:14:12.000Z",
+   "documentKey": "2924-03154656-6A1352109",
+   "isPriceSensitive": false,
+   "fileSize": "184KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T08:04:07.000Z",
+   "documentKey": "2924-03154646-6A1352103",
+   "isPriceSensitive": false,
+   "fileSize": "337KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MBH",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-28T08:03:12.000Z",
+   "documentKey": "2924-03154645-3A705236",
+   "isPriceSensitive": false,
+   "fileSize": "556KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RWC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T07:54:17.000Z",
+   "documentKey": "2924-03154643-3A705235",
+   "isPriceSensitive": false,
+   "fileSize": "151KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NHF",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-10-28T07:53:12.000Z",
+   "documentKey": "2924-03154642-2A1706748",
+   "isPriceSensitive": false,
+   "fileSize": "2397KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-10-28T07:30:02.000Z",
+   "documentKey": "2924-03154636-2A1706745",
+   "isPriceSensitive": false,
+   "fileSize": "2786KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-10-28T07:19:22.000Z",
+   "documentKey": "2924-03154634-2A1706744",
+   "isPriceSensitive": false,
+   "fileSize": "2515KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GNC",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-10-28T07:14:02.000Z",
+   "documentKey": "2924-03154631-2A1706741",
+   "isPriceSensitive": false,
+   "fileSize": "2570KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T06:38:47.000Z",
+   "documentKey": "2924-03154612-3A705233",
+   "isPriceSensitive": false,
+   "fileSize": "246KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LGI",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T06:10:36.000Z",
+   "documentKey": "2924-03154593-2A1706726",
+   "isPriceSensitive": false,
+   "fileSize": "142KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "360",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T06:07:56.000Z",
+   "documentKey": "2924-03154592-2A1706725",
+   "isPriceSensitive": false,
+   "fileSize": "281KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DUN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T06:04:41.000Z",
+   "documentKey": "2924-03154588-6A1352073",
+   "isPriceSensitive": false,
+   "fileSize": "9768KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TZN",
+   "headline": "Change in Substantial Holding",
+   "date": "2026-10-28T06:01:36.000Z",
+   "documentKey": "2924-03154584-2A1706720",
+   "isPriceSensitive": false,
+   "fileSize": "959KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BRG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-28T05:57:56.000Z",
+   "documentKey": "2924-03154579-2A1706717",
+   "isPriceSensitive": false,
+   "fileSize": "273KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T05:55:51.000Z",
+   "documentKey": "2924-03154576-3A705228",
+   "isPriceSensitive": false,
+   "fileSize": "259KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-28T05:36:16.000Z",
+   "documentKey": "2924-03154559-6A1352064",
+   "isPriceSensitive": false,
+   "fileSize": "482KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Becoming a substantial holder from CGF",
+   "date": "2026-10-28T05:25:36.000Z",
+   "documentKey": "2924-03154545-3A705224",
+   "isPriceSensitive": false,
+   "fileSize": "324KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T05:15:51.000Z",
+   "documentKey": "2924-03154539-3A705221",
+   "isPriceSensitive": false,
+   "fileSize": "705KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BAP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-28T05:12:26.000Z",
+   "documentKey": "2924-03154537-3A705220",
+   "isPriceSensitive": false,
+   "fileSize": "616KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T04:59:36.000Z",
+   "documentKey": "2924-03154527-6A1352046",
+   "isPriceSensitive": false,
+   "fileSize": "989KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RNV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T04:58:26.000Z",
+   "documentKey": "2924-03154526-6A1352045",
+   "isPriceSensitive": false,
+   "fileSize": "166KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NXT",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T04:57:46.000Z",
+   "documentKey": "2924-03154525-2A1706694",
+   "isPriceSensitive": false,
+   "fileSize": "452KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VNT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T04:26:16.000Z",
+   "documentKey": "2924-03154510-2A1706688",
+   "isPriceSensitive": false,
+   "fileSize": "248KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VNT",
+   "headline": "Change in substantial holding from CGF",
+   "date": "2026-10-28T04:16:36.000Z",
+   "documentKey": "2924-03154500-2A1706685",
+   "isPriceSensitive": false,
+   "fileSize": "266KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VNT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T04:14:06.000Z",
+   "documentKey": "2924-03154495-2A1706681",
+   "isPriceSensitive": false,
+   "fileSize": "472KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Change in substantial holding from CBA",
+   "date": "2026-10-28T03:32:46.000Z",
+   "documentKey": "2924-03154471-3A705206",
+   "isPriceSensitive": false,
+   "fileSize": "293KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DMP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T03:20:56.000Z",
+   "documentKey": "2924-03154464-2A1706661",
+   "isPriceSensitive": false,
+   "fileSize": "230KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SKO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T03:05:11.000Z",
+   "documentKey": "2924-03154458-3A705201",
+   "isPriceSensitive": false,
+   "fileSize": "77KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-28T01:26:26.000Z",
+   "documentKey": "2924-03154404-3A705195",
+   "isPriceSensitive": false,
+   "fileSize": "292KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EVO",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-28T00:02:00.000Z",
+   "documentKey": "2924-03154348-2A1706617",
+   "isPriceSensitive": false,
+   "fileSize": "2482KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MBH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T22:13:05.000Z",
+   "documentKey": "2924-03154179-3A705152",
+   "isPriceSensitive": false,
+   "fileSize": "635KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EVE",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T21:49:40.000Z",
+   "documentKey": "2924-03154132-6A1351870",
+   "isPriceSensitive": false,
+   "fileSize": "1184KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELD",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T21:20:45.000Z",
+   "documentKey": "2924-03154063-2A1706499",
+   "isPriceSensitive": false,
+   "fileSize": "995KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SBM",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T21:19:55.000Z",
+   "documentKey": "2924-03154053-3A705129",
+   "isPriceSensitive": false,
+   "fileSize": "1046KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WMC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T21:19:45.000Z",
+   "documentKey": "2924-03154050-6A1351854",
+   "isPriceSensitive": false,
+   "fileSize": "1085KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NXT",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T21:18:30.000Z",
+   "documentKey": "2924-03154033-2A1706485",
+   "isPriceSensitive": false,
+   "fileSize": "1403KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LTR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T21:17:40.000Z",
+   "documentKey": "2924-03154024-6A1351807",
+   "isPriceSensitive": false,
+   "fileSize": "1892KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T21:15:05.000Z",
+   "documentKey": "2924-03154000-6A1351847",
+   "isPriceSensitive": false,
+   "fileSize": "749KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AUB",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T21:14:45.000Z",
+   "documentKey": "2924-03153997-2A1706483",
+   "isPriceSensitive": false,
+   "fileSize": "75KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T21:11:00.000Z",
+   "documentKey": "2924-03153973-2A1706479",
+   "isPriceSensitive": false,
+   "fileSize": "6139KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CWY",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T09:26:03.000Z",
+   "documentKey": "2924-03153954-3A705109",
+   "isPriceSensitive": false,
+   "fileSize": "289KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VGL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T09:25:03.000Z",
+   "documentKey": "2924-03153952-3A705108",
+   "isPriceSensitive": false,
+   "fileSize": "352KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CEH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T09:17:43.000Z",
+   "documentKey": "2924-03153949-2A1706477",
+   "isPriceSensitive": false,
+   "fileSize": "347KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DMP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T09:15:13.000Z",
+   "documentKey": "2924-03153948-2A1706476",
+   "isPriceSensitive": false,
+   "fileSize": "388KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SEK",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T09:09:28.000Z",
+   "documentKey": "2924-03153947-3A705107",
+   "isPriceSensitive": false,
+   "fileSize": "332KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNV",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T09:05:53.000Z",
+   "documentKey": "2924-03153944-3A705106",
+   "isPriceSensitive": false,
+   "fileSize": "306KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IGO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T09:01:47.000Z",
+   "documentKey": "2924-03153943-6A1351763",
+   "isPriceSensitive": false,
+   "fileSize": "338KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PKD",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T09:00:13.000Z",
+   "documentKey": "2924-03153941-6A1351760",
+   "isPriceSensitive": false,
+   "fileSize": "301KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PKD",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T08:59:32.000Z",
+   "documentKey": "2924-03153939-6A1351758",
+   "isPriceSensitive": false,
+   "fileSize": "597KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VCX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T07:57:47.000Z",
+   "documentKey": "2924-03153921-3A705105",
+   "isPriceSensitive": false,
+   "fileSize": "1410KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RWC",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-27T07:56:07.000Z",
+   "documentKey": "2924-03153919-3A705104",
+   "isPriceSensitive": false,
+   "fileSize": "1362KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T07:55:12.000Z",
+   "documentKey": "2924-03153918-6A1351742",
+   "isPriceSensitive": false,
+   "fileSize": "1306KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MSB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T07:52:17.000Z",
+   "documentKey": "2924-03153915-3A705103",
+   "isPriceSensitive": false,
+   "fileSize": "2319KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T07:51:32.000Z",
+   "documentKey": "2924-03153913-2A1706470",
+   "isPriceSensitive": false,
+   "fileSize": "578KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AYA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T07:47:02.000Z",
+   "documentKey": "2924-03153911-6A1351741",
+   "isPriceSensitive": false,
+   "fileSize": "258KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BGA",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T07:46:02.000Z",
+   "documentKey": "2924-03153909-3A705102",
+   "isPriceSensitive": false,
+   "fileSize": "701KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MYG",
+   "headline": "Change in substantial holding - Amended",
+   "date": "2026-10-27T07:34:52.000Z",
+   "documentKey": "2924-03153906-2A1706467",
+   "isPriceSensitive": false,
+   "fileSize": "367KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TZN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T07:28:17.000Z",
+   "documentKey": "2924-03153903-2A1706465",
+   "isPriceSensitive": false,
+   "fileSize": "471KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HPC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T07:26:37.000Z",
+   "documentKey": "2924-03153898-3A705098",
+   "isPriceSensitive": false,
+   "fileSize": "421KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BAP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T07:18:57.000Z",
+   "documentKey": "2924-03153888-3A705097",
+   "isPriceSensitive": false,
+   "fileSize": "462KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NHF",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T06:59:07.000Z",
+   "documentKey": "2924-03153878-2A1706462",
+   "isPriceSensitive": false,
+   "fileSize": "166KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T06:56:52.000Z",
+   "documentKey": "2924-03153877-2A1706461",
+   "isPriceSensitive": false,
+   "fileSize": "190KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T06:52:42.000Z",
+   "documentKey": "2924-03153875-2A1706459",
+   "isPriceSensitive": false,
+   "fileSize": "165KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VAU",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-27T06:45:47.000Z",
+   "documentKey": "2924-03153873-6A1351717",
+   "isPriceSensitive": false,
+   "fileSize": "180KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "A4N",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-27T06:44:57.000Z",
+   "documentKey": "2924-03153872-2A1706452",
+   "isPriceSensitive": false,
+   "fileSize": "336KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GNC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T06:44:07.000Z",
+   "documentKey": "2924-03153871-2A1706446",
+   "isPriceSensitive": false,
+   "fileSize": "168KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-27T06:43:42.000Z",
+   "documentKey": "2924-03153870-2A1706449",
+   "isPriceSensitive": false,
+   "fileSize": "173KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-27T06:41:37.000Z",
+   "documentKey": "2924-03153867-6A1351716",
+   "isPriceSensitive": false,
+   "fileSize": "167KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MYG",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T06:40:02.000Z",
+   "documentKey": "2924-03153866-2A1706442",
+   "isPriceSensitive": false,
+   "fileSize": "672KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T05:56:37.000Z",
+   "documentKey": "2924-03153833-3A705091",
+   "isPriceSensitive": false,
+   "fileSize": "166KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MXI",
+   "headline": "Change in substantial holding from PPT",
+   "date": "2026-10-27T05:55:47.000Z",
+   "documentKey": "2924-03153830-3A705092",
+   "isPriceSensitive": false,
+   "fileSize": "551KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "APZ",
+   "headline": "Change in substantial holding from PPT",
+   "date": "2026-10-27T05:54:32.000Z",
+   "documentKey": "2924-03153828-2A1706419",
+   "isPriceSensitive": false,
+   "fileSize": "565KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RZI",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-27T05:42:47.000Z",
+   "documentKey": "2924-03153815-2A1706410",
+   "isPriceSensitive": false,
+   "fileSize": "1327KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RLC",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T05:42:37.000Z",
+   "documentKey": "2924-03153814-3A705089",
+   "isPriceSensitive": false,
+   "fileSize": "44KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "QAN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T05:20:47.000Z",
+   "documentKey": "2924-03153784-2A1706391",
+   "isPriceSensitive": false,
+   "fileSize": "325KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "YAL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T04:10:22.000Z",
+   "documentKey": "2924-03153752-2A1706377",
+   "isPriceSensitive": false,
+   "fileSize": "225KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T04:08:02.000Z",
+   "documentKey": "2924-03153750-2A1706375",
+   "isPriceSensitive": false,
+   "fileSize": "1078KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MYG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T02:57:21.000Z",
+   "documentKey": "2924-03153732-2A1706370",
+   "isPriceSensitive": false,
+   "fileSize": "116KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ALB",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T01:34:11.000Z",
+   "documentKey": "2924-03153696-6A1351647",
+   "isPriceSensitive": false,
+   "fileSize": "191KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ALB",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-27T01:33:36.000Z",
+   "documentKey": "2924-03153694-6A1351646",
+   "isPriceSensitive": false,
+   "fileSize": "84KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FDV",
+   "headline": "Change of interests of substantial holder - Cove view",
+   "date": "2026-10-27T00:41:31.000Z",
+   "documentKey": "2924-03153663-3A705062",
+   "isPriceSensitive": false,
+   "fileSize": "183KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WNR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-27T00:09:46.000Z",
+   "documentKey": "2924-03153647-3A705060",
+   "isPriceSensitive": false,
+   "fileSize": "378KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AAU",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T22:46:11.000Z",
+   "documentKey": "2924-03153567-2A1706298",
+   "isPriceSensitive": false,
+   "fileSize": "94KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FMR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T22:29:41.000Z",
+   "documentKey": "2924-03153531-6A1351584",
+   "isPriceSensitive": false,
+   "fileSize": "803KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T22:20:06.000Z",
+   "documentKey": "2924-03153513-2A1706285",
+   "isPriceSensitive": false,
+   "fileSize": "307KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WMC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T21:22:11.000Z",
+   "documentKey": "2924-03153387-6A1351534",
+   "isPriceSensitive": false,
+   "fileSize": "618KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SGM",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T21:22:10.000Z",
+   "documentKey": "2924-03153386-2A1706223",
+   "isPriceSensitive": false,
+   "fileSize": "356KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WMC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T21:22:06.000Z",
+   "documentKey": "2924-03153385-6A1351532",
+   "isPriceSensitive": false,
+   "fileSize": "779KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WCN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T21:21:55.000Z",
+   "documentKey": "2924-03153383-6A1351531",
+   "isPriceSensitive": false,
+   "fileSize": "123KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T21:20:40.000Z",
+   "documentKey": "2924-03153362-2A1706216",
+   "isPriceSensitive": false,
+   "fileSize": "864KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DYL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T21:20:26.000Z",
+   "documentKey": "2924-03153360-6A1351507",
+   "isPriceSensitive": false,
+   "fileSize": "874KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T21:20:16.000Z",
+   "documentKey": "2924-03153358-6A1351506",
+   "isPriceSensitive": false,
+   "fileSize": "1383KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T21:20:05.000Z",
+   "documentKey": "2924-03153355-6A1351505",
+   "isPriceSensitive": false,
+   "fileSize": "1237KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOE",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T21:19:50.000Z",
+   "documentKey": "2924-03153351-6A1351504",
+   "isPriceSensitive": false,
+   "fileSize": "847KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AUB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T21:19:40.000Z",
+   "documentKey": "2924-03153348-2A1706215",
+   "isPriceSensitive": false,
+   "fileSize": "295KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZNC",
+   "headline": "Change in substantial holding from FRS",
+   "date": "2026-10-26T21:15:35.000Z",
+   "documentKey": "2924-03153316-6A1351465",
+   "isPriceSensitive": false,
+   "fileSize": "432KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EUR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T21:14:30.000Z",
+   "documentKey": "2924-03153311-6A1351463",
+   "isPriceSensitive": false,
+   "fileSize": "866KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VNT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T21:07:05.000Z",
+   "documentKey": "2924-03153298-2A1706233",
+   "isPriceSensitive": false,
+   "fileSize": "258KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T08:25:58.000Z",
+   "documentKey": "2924-03153272-2A1706199",
+   "isPriceSensitive": false,
+   "fileSize": "1193KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MSB",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T08:24:48.000Z",
+   "documentKey": "2924-03153269-3A704988",
+   "isPriceSensitive": false,
+   "fileSize": "663KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MMS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T08:21:28.000Z",
+   "documentKey": "2924-03153267-3A704986",
+   "isPriceSensitive": false,
+   "fileSize": "1677KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LTR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T08:18:28.000Z",
+   "documentKey": "2924-03153266-6A1351440",
+   "isPriceSensitive": false,
+   "fileSize": "4100KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IEL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T08:14:18.000Z",
+   "documentKey": "2924-03153265-3A704985",
+   "isPriceSensitive": false,
+   "fileSize": "1852KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DRR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T08:12:23.000Z",
+   "documentKey": "2924-03153264-6A1351439",
+   "isPriceSensitive": false,
+   "fileSize": "702KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T08:10:08.000Z",
+   "documentKey": "2924-03153262-2A1706197",
+   "isPriceSensitive": false,
+   "fileSize": "1871KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CWY",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T08:06:18.000Z",
+   "documentKey": "2924-03153261-3A704984",
+   "isPriceSensitive": false,
+   "fileSize": "1342KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ASB",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T08:03:08.000Z",
+   "documentKey": "2924-03153259-6A1351437",
+   "isPriceSensitive": false,
+   "fileSize": "715KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ALB",
+   "headline": "Change in substantial holding from GTE",
+   "date": "2026-10-26T07:40:58.000Z",
+   "documentKey": "2924-03153250-6A1351430",
+   "isPriceSensitive": false,
+   "fileSize": "688KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RWC",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T06:57:13.000Z",
+   "documentKey": "2924-03153232-3A704982",
+   "isPriceSensitive": false,
+   "fileSize": "382KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VAU",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-26T06:38:48.000Z",
+   "documentKey": "2924-03153220-6A1351414",
+   "isPriceSensitive": false,
+   "fileSize": "165KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TSR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T06:37:48.000Z",
+   "documentKey": "2924-03153219-6A1351411",
+   "isPriceSensitive": false,
+   "fileSize": "184KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AYA",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T06:28:17.000Z",
+   "documentKey": "2924-03153214-6A1351406",
+   "isPriceSensitive": false,
+   "fileSize": "129KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EQR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T06:27:13.000Z",
+   "documentKey": "2924-03153213-2A1706183",
+   "isPriceSensitive": false,
+   "fileSize": "281KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EGL",
+   "headline": "Change in substantial holding from CGF",
+   "date": "2026-10-26T06:07:07.000Z",
+   "documentKey": "2924-03153202-2A1706177",
+   "isPriceSensitive": false,
+   "fileSize": "249KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EGL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T06:01:22.000Z",
+   "documentKey": "2924-03153199-2A1706172",
+   "isPriceSensitive": false,
+   "fileSize": "416KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WNR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T06:00:12.000Z",
+   "documentKey": "2924-03153196-3A704979",
+   "isPriceSensitive": false,
+   "fileSize": "356KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KIT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T05:58:37.000Z",
+   "documentKey": "2924-03153194-3A704978",
+   "isPriceSensitive": false,
+   "fileSize": "626KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RTH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T05:58:02.000Z",
+   "documentKey": "2924-03153192-3A704977",
+   "isPriceSensitive": false,
+   "fileSize": "149KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GTI",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T05:46:57.000Z",
+   "documentKey": "2924-03153184-2A1706169",
+   "isPriceSensitive": false,
+   "fileSize": "172KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CPU",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T05:23:12.000Z",
+   "documentKey": "2924-03153152-3A704973",
+   "isPriceSensitive": false,
+   "fileSize": "286KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MP1",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T05:22:12.000Z",
+   "documentKey": "2924-03153151-2A1706135",
+   "isPriceSensitive": false,
+   "fileSize": "252KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HUB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T05:21:42.000Z",
+   "documentKey": "2924-03153150-2A1706134",
+   "isPriceSensitive": false,
+   "fileSize": "317KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HPC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T05:16:27.000Z",
+   "documentKey": "2924-03153147-3A704971",
+   "isPriceSensitive": false,
+   "fileSize": "1089KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MP1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T05:16:22.000Z",
+   "documentKey": "2924-03153146-2A1706132",
+   "isPriceSensitive": false,
+   "fileSize": "413KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T05:13:47.000Z",
+   "documentKey": "2924-03153144-2A1706131",
+   "isPriceSensitive": false,
+   "fileSize": "489KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-26T04:33:37.000Z",
+   "documentKey": "2924-03153110-3A704959",
+   "isPriceSensitive": false,
+   "fileSize": "1028KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T03:06:12.000Z",
+   "documentKey": "2924-03153081-2A1706103",
+   "isPriceSensitive": false,
+   "fileSize": "226KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CPN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-26T02:53:32.000Z",
+   "documentKey": "2924-03153077-6A1351342",
+   "isPriceSensitive": false,
+   "fileSize": "313KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IGO",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-26T00:02:46.000Z",
+   "documentKey": "2924-03152996-6A1351300",
+   "isPriceSensitive": false,
+   "fileSize": "251KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-25T22:13:56.000Z",
+   "documentKey": "2924-03152834-2A1706012",
+   "isPriceSensitive": false,
+   "fileSize": "311KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AR1",
+   "headline": "Notice of ceasing to be a substantial holder",
+   "date": "2026-10-25T21:29:20.000Z",
+   "documentKey": "2924-03152717-2A1705962",
+   "isPriceSensitive": false,
+   "fileSize": "203KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZNC",
+   "headline": "Change in substantial holding from FRS",
+   "date": "2026-10-25T21:21:50.000Z",
+   "documentKey": "2924-03152662-6A1351136",
+   "isPriceSensitive": false,
+   "fileSize": "222KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TNE",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-25T21:19:55.000Z",
+   "documentKey": "2924-03152650-2A1705944",
+   "isPriceSensitive": false,
+   "fileSize": "785KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LTR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-25T21:19:45.000Z",
+   "documentKey": "2924-03152649-6A1351129",
+   "isPriceSensitive": false,
+   "fileSize": "1108KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VUL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-25T21:19:35.000Z",
+   "documentKey": "2924-03152648-6A1351128",
+   "isPriceSensitive": false,
+   "fileSize": "983KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-25T21:19:30.000Z",
+   "documentKey": "2924-03152647-6A1351127",
+   "isPriceSensitive": false,
+   "fileSize": "1325KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DYL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-25T21:19:20.000Z",
+   "documentKey": "2924-03152646-6A1351126",
+   "isPriceSensitive": false,
+   "fileSize": "1685KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-25T21:18:40.000Z",
+   "documentKey": "2924-03152642-6A1351122",
+   "isPriceSensitive": false,
+   "fileSize": "165KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EMR",
+   "headline": "Change in substantial holding - Amendment",
+   "date": "2026-10-25T21:18:30.000Z",
+   "documentKey": "2924-03152641-6A1351121",
+   "isPriceSensitive": false,
+   "fileSize": "154KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZAG",
+   "headline": "Change in substantial holding from CZR",
+   "date": "2026-10-23T09:24:28.000Z",
+   "documentKey": "2924-03152628-6A1351116",
+   "isPriceSensitive": false,
+   "fileSize": "327KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VEA",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T09:02:52.000Z",
+   "documentKey": "2924-03152620-3A704863",
+   "isPriceSensitive": false,
+   "fileSize": "1182KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AYA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-23T09:02:27.000Z",
+   "documentKey": "2924-03152619-6A1351107",
+   "isPriceSensitive": false,
+   "fileSize": "277KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TCL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T08:59:32.000Z",
+   "documentKey": "2924-03152616-3A704862",
+   "isPriceSensitive": false,
+   "fileSize": "2489KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DVP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-23T08:59:12.000Z",
+   "documentKey": "2924-03152615-6A1351104",
+   "isPriceSensitive": false,
+   "fileSize": "2623KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BSL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T08:44:57.000Z",
+   "documentKey": "2924-03152611-3A704861",
+   "isPriceSensitive": false,
+   "fileSize": "1074KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BGA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-23T08:44:42.000Z",
+   "documentKey": "2924-03152610-3A704860",
+   "isPriceSensitive": false,
+   "fileSize": "2475KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RTH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T07:56:52.000Z",
+   "documentKey": "2924-03152600-3A704859",
+   "isPriceSensitive": false,
+   "fileSize": "153KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MYG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-23T07:54:27.000Z",
+   "documentKey": "2924-03152597-2A1705933",
+   "isPriceSensitive": false,
+   "fileSize": "128KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EMR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T07:41:17.000Z",
+   "documentKey": "2924-03152587-6A1351089",
+   "isPriceSensitive": false,
+   "fileSize": "144KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MIN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-23T07:27:02.000Z",
+   "documentKey": "2924-03152581-6A1351082",
+   "isPriceSensitive": false,
+   "fileSize": "154KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-23T07:00:27.000Z",
+   "documentKey": "2924-03152559-2A1705925",
+   "isPriceSensitive": false,
+   "fileSize": "4422KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PBL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-23T06:24:42.000Z",
+   "documentKey": "2924-03152537-6A1351055",
+   "isPriceSensitive": false,
+   "fileSize": "271KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-23T06:22:52.000Z",
+   "documentKey": "2924-03152533-6A1351053",
+   "isPriceSensitive": false,
+   "fileSize": "172KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OBL",
+   "headline": "Change in substantial holding from PPT",
+   "date": "2026-10-23T05:43:47.000Z",
+   "documentKey": "2924-03152495-6A1351032",
+   "isPriceSensitive": false,
+   "fileSize": "561KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VUL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T05:29:37.000Z",
+   "documentKey": "2924-03152479-6A1351025",
+   "isPriceSensitive": false,
+   "fileSize": "237KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "COI",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T05:29:27.000Z",
+   "documentKey": "2924-03152478-2A1705898",
+   "isPriceSensitive": false,
+   "fileSize": "1059KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MP1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-23T05:02:27.000Z",
+   "documentKey": "2924-03152454-2A1705880",
+   "isPriceSensitive": false,
+   "fileSize": "486KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FWD",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-23T03:27:26.000Z",
+   "documentKey": "2924-03152382-6A1350976",
+   "isPriceSensitive": false,
+   "fileSize": "263KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LM1",
+   "headline": "Change in substantial holding from FRS",
+   "date": "2026-10-23T01:26:11.000Z",
+   "documentKey": "2924-03152290-6A1350931",
+   "isPriceSensitive": false,
+   "fileSize": "293KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Ceasing to be a substantial holder from CBA",
+   "date": "2026-10-23T00:47:36.000Z",
+   "documentKey": "2924-03152256-3A704802",
+   "isPriceSensitive": false,
+   "fileSize": "149KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RWC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T22:24:40.000Z",
+   "documentKey": "2924-03152111-3A704773",
+   "isPriceSensitive": false,
+   "fileSize": "293KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ASL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T21:18:35.000Z",
+   "documentKey": "2924-03151944-6A1350829",
+   "isPriceSensitive": false,
+   "fileSize": "226KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TG6",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T21:18:25.000Z",
+   "documentKey": "2924-03151941-6A1350828",
+   "isPriceSensitive": false,
+   "fileSize": "227KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T21:17:30.000Z",
+   "documentKey": "2924-03151933-6A1350815",
+   "isPriceSensitive": false,
+   "fileSize": "1594KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IPX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T21:17:15.000Z",
+   "documentKey": "2924-03151932-6A1350814",
+   "isPriceSensitive": false,
+   "fileSize": "1163KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VUL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-22T21:15:20.000Z",
+   "documentKey": "2924-03151915-6A1350806",
+   "isPriceSensitive": false,
+   "fileSize": "1888KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-22T08:24:02.000Z",
+   "documentKey": "2924-03151872-2A1705655",
+   "isPriceSensitive": false,
+   "fileSize": "587KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LIN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T08:23:47.000Z",
+   "documentKey": "2924-03151871-6A1350768",
+   "isPriceSensitive": false,
+   "fileSize": "1179KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MSB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-22T08:20:47.000Z",
+   "documentKey": "2924-03151870-3A704712",
+   "isPriceSensitive": false,
+   "fileSize": "2289KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T08:01:22.000Z",
+   "documentKey": "2924-03151864-6A1350761",
+   "isPriceSensitive": false,
+   "fileSize": "328KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-22T07:09:47.000Z",
+   "documentKey": "2924-03151847-2A1705649",
+   "isPriceSensitive": false,
+   "fileSize": "151KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CMO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T06:45:42.000Z",
+   "documentKey": "2924-03151841-6A1350747",
+   "isPriceSensitive": false,
+   "fileSize": "147KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OFX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T06:40:52.000Z",
+   "documentKey": "2924-03151839-2A1705644",
+   "isPriceSensitive": false,
+   "fileSize": "239KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T06:37:52.000Z",
+   "documentKey": "2924-03151838-2A1705642",
+   "isPriceSensitive": false,
+   "fileSize": "226KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VUL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T05:42:12.000Z",
+   "documentKey": "2924-03151819-6A1350733",
+   "isPriceSensitive": false,
+   "fileSize": "227KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CCP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-22T05:39:32.000Z",
+   "documentKey": "2924-03151818-2A1705637",
+   "isPriceSensitive": false,
+   "fileSize": "393KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LVE",
+   "headline": "Change in Substantial Holdings",
+   "date": "2026-10-22T05:36:12.000Z",
+   "documentKey": "2924-03151816-2A1705635",
+   "isPriceSensitive": false,
+   "fileSize": "250KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MXO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T05:30:22.000Z",
+   "documentKey": "2924-03151813-6A1350731",
+   "isPriceSensitive": false,
+   "fileSize": "153KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RTH",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-22T05:29:37.000Z",
+   "documentKey": "2924-03151809-3A704704",
+   "isPriceSensitive": false,
+   "fileSize": "188KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T05:21:57.000Z",
+   "documentKey": "2924-03151805-6A1350725",
+   "isPriceSensitive": false,
+   "fileSize": "380KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MBK",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T05:10:12.000Z",
+   "documentKey": "2924-03151801-3A704702",
+   "isPriceSensitive": false,
+   "fileSize": "371KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "COH",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-22T05:09:27.000Z",
+   "documentKey": "2924-03151799-2A1705628",
+   "isPriceSensitive": false,
+   "fileSize": "366KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CMG",
+   "headline": "Becoming a substantial holder - Latimore",
+   "date": "2026-10-22T04:29:01.000Z",
+   "documentKey": "2924-03151771-2A1705615",
+   "isPriceSensitive": false,
+   "fileSize": "98KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CMG",
+   "headline": "Change in substantial holding - Idemitsu",
+   "date": "2026-10-22T04:28:21.000Z",
+   "documentKey": "2924-03151770-2A1705614",
+   "isPriceSensitive": false,
+   "fileSize": "526KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FWD",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-22T04:14:31.000Z",
+   "documentKey": "2924-03151763-6A1350705",
+   "isPriceSensitive": false,
+   "fileSize": "122KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CAT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T03:41:16.000Z",
+   "documentKey": "2924-03151743-3A704698",
+   "isPriceSensitive": false,
+   "fileSize": "57KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IPC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T03:26:06.000Z",
+   "documentKey": "2924-03151732-2A1705598",
+   "isPriceSensitive": false,
+   "fileSize": "921KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LCE",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T03:13:11.000Z",
+   "documentKey": "2924-03151729-2A1705595",
+   "isPriceSensitive": false,
+   "fileSize": "947KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BM1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T03:11:41.000Z",
+   "documentKey": "2924-03151728-6A1350690",
+   "isPriceSensitive": false,
+   "fileSize": "3936KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HSN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T01:56:41.000Z",
+   "documentKey": "2924-03151679-3A704691",
+   "isPriceSensitive": false,
+   "fileSize": "412KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "M4M",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-22T01:53:31.000Z",
+   "documentKey": "2924-03151678-6A1350676",
+   "isPriceSensitive": false,
+   "fileSize": "65KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LCE",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-22T00:17:01.000Z",
+   "documentKey": "2924-03151643-2A1705540",
+   "isPriceSensitive": false,
+   "fileSize": "88KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OSS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T23:10:05.000Z",
+   "documentKey": "2924-03151626-2A1705531",
+   "isPriceSensitive": false,
+   "fileSize": "1354KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T22:59:50.000Z",
+   "documentKey": "2924-03151616-3A704679",
+   "isPriceSensitive": false,
+   "fileSize": "738KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Becoming a substantial holder from CBA",
+   "date": "2026-10-21T22:55:35.000Z",
+   "documentKey": "2924-03151607-3A704676",
+   "isPriceSensitive": false,
+   "fileSize": "259KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T22:44:15.000Z",
+   "documentKey": "2924-03151586-2A1705511",
+   "isPriceSensitive": false,
+   "fileSize": "200KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T22:10:15.000Z",
+   "documentKey": "2924-03151525-2A1705487",
+   "isPriceSensitive": false,
+   "fileSize": "236KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "M4M",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T21:23:45.000Z",
+   "documentKey": "2924-03151443-6A1350574",
+   "isPriceSensitive": false,
+   "fileSize": "891KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WAF",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T21:18:10.000Z",
+   "documentKey": "2924-03151405-6A1350573",
+   "isPriceSensitive": false,
+   "fileSize": "275KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T21:17:55.000Z",
+   "documentKey": "2924-03151400-6A1350549",
+   "isPriceSensitive": false,
+   "fileSize": "680KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ASB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T21:17:50.000Z",
+   "documentKey": "2924-03151399-6A1350548",
+   "isPriceSensitive": false,
+   "fileSize": "628KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WAF",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T21:17:10.000Z",
+   "documentKey": "2924-03151392-6A1350569",
+   "isPriceSensitive": false,
+   "fileSize": "517KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AOV",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T21:17:00.000Z",
+   "documentKey": "2924-03151390-3A704641",
+   "isPriceSensitive": false,
+   "fileSize": "410KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RSG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T21:16:50.000Z",
+   "documentKey": "2924-03151389-6A1350568",
+   "isPriceSensitive": false,
+   "fileSize": "549KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ARO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T09:07:17.000Z",
+   "documentKey": "2924-03151354-6A1350534",
+   "isPriceSensitive": false,
+   "fileSize": "107KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FPR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T09:03:22.000Z",
+   "documentKey": "2924-03151350-2A1705419",
+   "isPriceSensitive": false,
+   "fileSize": "504KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TAR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T08:57:37.000Z",
+   "documentKey": "2924-03151349-6A1350532",
+   "isPriceSensitive": false,
+   "fileSize": "127KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TAR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T08:57:12.000Z",
+   "documentKey": "2924-03151348-6A1350531",
+   "isPriceSensitive": false,
+   "fileSize": "127KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OCN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T08:37:22.000Z",
+   "documentKey": "2924-03151340-6A1350525",
+   "isPriceSensitive": false,
+   "fileSize": "1308KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OCN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T08:33:02.000Z",
+   "documentKey": "2924-03151338-6A1350524",
+   "isPriceSensitive": false,
+   "fileSize": "268KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-10-21T07:55:47.000Z",
+   "documentKey": "2924-03151328-6A1350504",
+   "isPriceSensitive": false,
+   "fileSize": "7876KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SDF",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T07:51:47.000Z",
+   "documentKey": "2924-03151326-2A1705409",
+   "isPriceSensitive": false,
+   "fileSize": "875KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SGM",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T07:50:52.000Z",
+   "documentKey": "2924-03151324-2A1705408",
+   "isPriceSensitive": false,
+   "fileSize": "2508KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T07:49:02.000Z",
+   "documentKey": "2924-03151322-2A1705407",
+   "isPriceSensitive": false,
+   "fileSize": "1847KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MMS",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T07:48:27.000Z",
+   "documentKey": "2924-03151321-3A704635",
+   "isPriceSensitive": false,
+   "fileSize": "684KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "INA",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T07:46:37.000Z",
+   "documentKey": "2924-03151319-2A1705405",
+   "isPriceSensitive": false,
+   "fileSize": "725KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IEL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T07:42:17.000Z",
+   "documentKey": "2924-03151317-3A704634",
+   "isPriceSensitive": false,
+   "fileSize": "695KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GNC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T07:41:37.000Z",
+   "documentKey": "2924-03151315-2A1705402",
+   "isPriceSensitive": false,
+   "fileSize": "846KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T07:38:47.000Z",
+   "documentKey": "2924-03151312-3A704633",
+   "isPriceSensitive": false,
+   "fileSize": "700KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DRR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T07:38:22.000Z",
+   "documentKey": "2924-03151311-6A1350513",
+   "isPriceSensitive": false,
+   "fileSize": "1897KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CMO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T07:23:22.000Z",
+   "documentKey": "2924-03151305-6A1350508",
+   "isPriceSensitive": false,
+   "fileSize": "257KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CAR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T07:22:57.000Z",
+   "documentKey": "2924-03151304-3A704631",
+   "isPriceSensitive": false,
+   "fileSize": "191KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOE",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T07:22:37.000Z",
+   "documentKey": "2924-03151303-6A1350507",
+   "isPriceSensitive": false,
+   "fileSize": "1124KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BGA",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T07:22:07.000Z",
+   "documentKey": "2924-03151301-3A704630",
+   "isPriceSensitive": false,
+   "fileSize": "1550KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AOV",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T07:10:32.000Z",
+   "documentKey": "2924-03151298-3A704628",
+   "isPriceSensitive": false,
+   "fileSize": "657KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RXL",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-21T07:04:57.000Z",
+   "documentKey": "2924-03151297-6A1350503",
+   "isPriceSensitive": false,
+   "fileSize": "1045KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GYG",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T06:21:41.000Z",
+   "documentKey": "2924-03151279-2A1705391",
+   "isPriceSensitive": false,
+   "fileSize": "149KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DWG",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T06:16:16.000Z",
+   "documentKey": "2924-03151274-6A1350490",
+   "isPriceSensitive": false,
+   "fileSize": "135KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ANN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T06:15:31.000Z",
+   "documentKey": "2924-03151273-3A704627",
+   "isPriceSensitive": false,
+   "fileSize": "657KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-21T06:15:21.000Z",
+   "documentKey": "2924-03151272-6A1350489",
+   "isPriceSensitive": false,
+   "fileSize": "829KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AEL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T06:06:01.000Z",
+   "documentKey": "2924-03151267-2A1705382",
+   "isPriceSensitive": false,
+   "fileSize": "248KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AEL",
+   "headline": "Change in substantial holding from CGF",
+   "date": "2026-10-21T05:56:36.000Z",
+   "documentKey": "2924-03151257-2A1705378",
+   "isPriceSensitive": false,
+   "fileSize": "255KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AEL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T05:44:26.000Z",
+   "documentKey": "2924-03151252-2A1705374",
+   "isPriceSensitive": false,
+   "fileSize": "429KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RXL",
+   "headline": "Ceasing to be a substantial holder for MS",
+   "date": "2026-10-21T05:19:51.000Z",
+   "documentKey": "2924-03151235-6A1350476",
+   "isPriceSensitive": false,
+   "fileSize": "778KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding from MS",
+   "date": "2026-10-21T05:15:16.000Z",
+   "documentKey": "2924-03151231-6A1350472",
+   "isPriceSensitive": false,
+   "fileSize": "2924KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KSC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T04:35:26.000Z",
+   "documentKey": "2924-03151200-2A1705348",
+   "isPriceSensitive": false,
+   "fileSize": "3437KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FPR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T04:10:21.000Z",
+   "documentKey": "2924-03151187-2A1705339",
+   "isPriceSensitive": false,
+   "fileSize": "1099KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MP1",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T04:08:31.000Z",
+   "documentKey": "2924-03151186-2A1705338",
+   "isPriceSensitive": false,
+   "fileSize": "752KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CMO",
+   "headline": "Change in substantial holding from GBR",
+   "date": "2026-10-21T04:08:31.000Z",
+   "documentKey": "2924-03151185-6A1350452",
+   "isPriceSensitive": false,
+   "fileSize": "264KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T04:05:41.000Z",
+   "documentKey": "2924-03151182-3A704616",
+   "isPriceSensitive": false,
+   "fileSize": "159KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T03:59:36.000Z",
+   "documentKey": "2924-03151181-2A1705337",
+   "isPriceSensitive": false,
+   "fileSize": "226KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ARN",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T03:55:51.000Z",
+   "documentKey": "2924-03151179-6A1350448",
+   "isPriceSensitive": false,
+   "fileSize": "350KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MBK",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T03:41:26.000Z",
+   "documentKey": "2924-03151173-3A704614",
+   "isPriceSensitive": false,
+   "fileSize": "225KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PEB",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T03:36:11.000Z",
+   "documentKey": "2924-03151168-2A1705332",
+   "isPriceSensitive": false,
+   "fileSize": "165KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "YAR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-21T02:47:46.000Z",
+   "documentKey": "2924-03151135-6A1350423",
+   "isPriceSensitive": false,
+   "fileSize": "64KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Ceasing to be a substantial holder from CBA",
+   "date": "2026-10-21T02:15:06.000Z",
+   "documentKey": "2924-03151120-3A704606",
+   "isPriceSensitive": false,
+   "fileSize": "150KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAR",
+   "headline": "Becoming a substantial holder from CBA",
+   "date": "2026-10-21T02:10:51.000Z",
+   "documentKey": "2924-03151118-3A704605",
+   "isPriceSensitive": false,
+   "fileSize": "255KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CAR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-21T02:06:36.000Z",
+   "documentKey": "2924-03151115-3A704604",
+   "isPriceSensitive": false,
+   "fileSize": "344KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TG6",
+   "headline": "FRS Change in Substantial Holding - Correction",
+   "date": "2026-10-21T01:57:01.000Z",
+   "documentKey": "2924-03151110-6A1350408",
+   "isPriceSensitive": false,
+   "fileSize": "357KB",
+   "announcementTypes": [
+    "Change in substantial holding",
+    "Company Administration - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FLX",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-21T00:03:55.000Z",
+   "documentKey": "2924-03151062-2A1705294",
+   "isPriceSensitive": false,
+   "fileSize": "124KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AI1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T23:36:50.000Z",
+   "documentKey": "2924-03151049-6A1350385",
+   "isPriceSensitive": false,
+   "fileSize": "235KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HAR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T23:06:50.000Z",
+   "documentKey": "2924-03151041-6A1350382",
+   "isPriceSensitive": false,
+   "fileSize": "1217KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RWC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T22:06:35.000Z",
+   "documentKey": "2924-03150947-3A704576",
+   "isPriceSensitive": false,
+   "fileSize": "305KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RSG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T21:25:25.000Z",
+   "documentKey": "2924-03150854-6A1350324",
+   "isPriceSensitive": false,
+   "fileSize": "531KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BM1",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T21:18:35.000Z",
+   "documentKey": "2924-03150809-6A1350328",
+   "isPriceSensitive": false,
+   "fileSize": "114KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T21:18:20.000Z",
+   "documentKey": "2924-03150806-2A1705173",
+   "isPriceSensitive": false,
+   "fileSize": "768KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BM1",
+   "headline": "Change in substantial holding from MIN",
+   "date": "2026-10-20T21:18:00.000Z",
+   "documentKey": "2924-03150803-6A1350326",
+   "isPriceSensitive": false,
+   "fileSize": "325KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WAF",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-20T21:17:15.000Z",
+   "documentKey": "2924-03150797-6A1350318",
+   "isPriceSensitive": false,
+   "fileSize": "430KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LTR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T21:15:35.000Z",
+   "documentKey": "2924-03150783-6A1350315",
+   "isPriceSensitive": false,
+   "fileSize": "1692KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SLC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T21:15:15.000Z",
+   "documentKey": "2924-03150781-2A1705160",
+   "isPriceSensitive": false,
+   "fileSize": "293KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T09:27:12.000Z",
+   "documentKey": "2924-03150765-6A1350275",
+   "isPriceSensitive": false,
+   "fileSize": "1333KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T09:15:52.000Z",
+   "documentKey": "2924-03150764-2A1705159",
+   "isPriceSensitive": false,
+   "fileSize": "1548KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T08:57:47.000Z",
+   "documentKey": "2924-03150759-6A1350270",
+   "isPriceSensitive": false,
+   "fileSize": "137KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WGX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T08:49:47.000Z",
+   "documentKey": "2924-03150755-6A1350267",
+   "isPriceSensitive": false,
+   "fileSize": "1113KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OML",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-20T08:46:17.000Z",
+   "documentKey": "2924-03150753-2A1705157",
+   "isPriceSensitive": false,
+   "fileSize": "783KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FFM",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-20T08:43:47.000Z",
+   "documentKey": "2924-03150752-6A1350264",
+   "isPriceSensitive": false,
+   "fileSize": "747KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T08:41:22.000Z",
+   "documentKey": "2924-03150751-2A1705156",
+   "isPriceSensitive": false,
+   "fileSize": "920KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CU6",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-20T08:40:02.000Z",
+   "documentKey": "2924-03150750-2A1705155",
+   "isPriceSensitive": false,
+   "fileSize": "866KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ASB",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T08:36:47.000Z",
+   "documentKey": "2924-03150748-6A1350263",
+   "isPriceSensitive": false,
+   "fileSize": "3323KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AZJ",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T08:35:27.000Z",
+   "documentKey": "2924-03150745-2A1705152",
+   "isPriceSensitive": false,
+   "fileSize": "921KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VMM",
+   "headline": "Change in substantial holding from MS",
+   "date": "2026-10-20T08:21:32.000Z",
+   "documentKey": "2924-03150740-6A1350260",
+   "isPriceSensitive": false,
+   "fileSize": "907KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BM1",
+   "headline": "Change in substantial holding from DLI",
+   "date": "2026-10-20T08:15:17.000Z",
+   "documentKey": "2924-03150737-6A1350256",
+   "isPriceSensitive": false,
+   "fileSize": "106KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "VMM",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-10-20T07:48:17.000Z",
+   "documentKey": "2924-03150730-6A1350252",
+   "isPriceSensitive": false,
+   "fileSize": "964KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-10-20T07:28:37.000Z",
+   "documentKey": "2924-03150720-6A1350245",
+   "isPriceSensitive": false,
+   "fileSize": "8456KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IGO",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T07:27:42.000Z",
+   "documentKey": "2924-03150719-6A1350244",
+   "isPriceSensitive": false,
+   "fileSize": "349KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CIP",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-20T07:18:17.000Z",
+   "documentKey": "2924-03150714-2A1705143",
+   "isPriceSensitive": false,
+   "fileSize": "965KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GYG",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-20T07:15:12.000Z",
+   "documentKey": "2924-03150712-2A1705142",
+   "isPriceSensitive": false,
+   "fileSize": "2101KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AMP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T07:05:02.000Z",
+   "documentKey": "2924-03150702-2A1705139",
+   "isPriceSensitive": false,
+   "fileSize": "519KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LIN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T06:53:17.000Z",
+   "documentKey": "2924-03150696-6A1350229",
+   "isPriceSensitive": false,
+   "fileSize": "143KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T06:52:27.000Z",
+   "documentKey": "2924-03150695-3A704537",
+   "isPriceSensitive": false,
+   "fileSize": "347KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T06:51:57.000Z",
+   "documentKey": "2924-03150694-6A1350228",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BM1",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T06:51:12.000Z",
+   "documentKey": "2924-03150693-6A1350227",
+   "isPriceSensitive": false,
+   "fileSize": "139KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "YRL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T05:58:46.000Z",
+   "documentKey": "2924-03150655-6A1350205",
+   "isPriceSensitive": false,
+   "fileSize": "172KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CAR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T05:32:41.000Z",
+   "documentKey": "2924-03150638-3A704525",
+   "isPriceSensitive": false,
+   "fileSize": "355KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RKN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T05:24:31.000Z",
+   "documentKey": "2924-03150633-2A1705112",
+   "isPriceSensitive": false,
+   "fileSize": "487KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SKY",
+   "headline": "Change in substantial holding - Rigi Investments",
+   "date": "2026-10-20T05:15:36.000Z",
+   "documentKey": "2924-03150622-2A1705109",
+   "isPriceSensitive": false,
+   "fileSize": "4176KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-20T05:13:51.000Z",
+   "documentKey": "2924-03150620-6A1350195",
+   "isPriceSensitive": false,
+   "fileSize": "215KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CTD",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T04:52:06.000Z",
+   "documentKey": "2924-03150606-2A1705101",
+   "isPriceSensitive": false,
+   "fileSize": "134KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T04:08:21.000Z",
+   "documentKey": "2924-03150592-3A704512",
+   "isPriceSensitive": false,
+   "fileSize": "244KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WTM",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T03:55:36.000Z",
+   "documentKey": "2924-03150585-6A1350181",
+   "isPriceSensitive": false,
+   "fileSize": "1197KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FRE",
+   "headline": "Change in substantial holding - Pharma Nutria",
+   "date": "2026-10-20T03:54:41.000Z",
+   "documentKey": "2924-03150584-6A1350179",
+   "isPriceSensitive": false,
+   "fileSize": "957KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SKC",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-20T03:53:16.000Z",
+   "documentKey": "2924-03150582-2A1705091",
+   "isPriceSensitive": false,
+   "fileSize": "156KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RIV",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T03:11:01.000Z",
+   "documentKey": "2924-03150562-2A1705079",
+   "isPriceSensitive": false,
+   "fileSize": "338KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AKA",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-20T02:22:36.000Z",
+   "documentKey": "2924-03150548-3A704504",
+   "isPriceSensitive": false,
+   "fileSize": "202KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AKA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T02:22:26.000Z",
+   "documentKey": "2924-03150547-3A704503",
+   "isPriceSensitive": false,
+   "fileSize": "233KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FBU",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-20T01:22:36.000Z",
+   "documentKey": "2924-03150529-2A1705065",
+   "isPriceSensitive": false,
+   "fileSize": "78KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MBK",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T23:33:10.000Z",
+   "documentKey": "2924-03150483-3A704490",
+   "isPriceSensitive": false,
+   "fileSize": "127KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NTI",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-19T22:55:25.000Z",
+   "documentKey": "2924-03150453-6A1350136",
+   "isPriceSensitive": false,
+   "fileSize": "142KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ABR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T22:38:15.000Z",
+   "documentKey": "2924-03150426-6A1350129",
+   "isPriceSensitive": false,
+   "fileSize": "1862KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T22:16:30.000Z",
+   "documentKey": "2924-03150389-2A1704996",
+   "isPriceSensitive": false,
+   "fileSize": "236KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RSG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-19T21:23:35.000Z",
+   "documentKey": "2924-03150291-6A1350080",
+   "isPriceSensitive": false,
+   "fileSize": "1425KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FMG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-19T21:23:15.000Z",
+   "documentKey": "2924-03150287-6A1350079",
+   "isPriceSensitive": false,
+   "fileSize": "585KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FMG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T21:23:00.000Z",
+   "documentKey": "2924-03150284-6A1350078",
+   "isPriceSensitive": false,
+   "fileSize": "1429KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T21:22:55.000Z",
+   "documentKey": "2924-03150283-3A704450",
+   "isPriceSensitive": false,
+   "fileSize": "298KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TOR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T21:22:05.000Z",
+   "documentKey": "2924-03150276-6A1350063",
+   "isPriceSensitive": false,
+   "fileSize": "217KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WAF",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T21:18:40.000Z",
+   "documentKey": "2924-03150252-6A1350076",
+   "isPriceSensitive": false,
+   "fileSize": "839KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TNE",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T21:18:25.000Z",
+   "documentKey": "2924-03150251-2A1704945",
+   "isPriceSensitive": false,
+   "fileSize": "696KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LYC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T21:17:55.000Z",
+   "documentKey": "2924-03150247-6A1350073",
+   "isPriceSensitive": false,
+   "fileSize": "497KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOA",
+   "headline": "Annexures to Form 603 Becoming a substantial holder",
+   "date": "2026-10-19T21:11:40.000Z",
+   "documentKey": "2924-03150217-6A1350030",
+   "isPriceSensitive": false,
+   "fileSize": "493KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CWY",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T09:00:27.000Z",
+   "documentKey": "2924-03150199-3A704432",
+   "isPriceSensitive": false,
+   "fileSize": "702KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SDF",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T08:33:57.000Z",
+   "documentKey": "2924-03150193-2A1704929",
+   "isPriceSensitive": false,
+   "fileSize": "1207KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNI",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T08:31:47.000Z",
+   "documentKey": "2924-03150192-2A1704928",
+   "isPriceSensitive": false,
+   "fileSize": "1773KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LOT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T08:31:12.000Z",
+   "documentKey": "2924-03150191-6A1350018",
+   "isPriceSensitive": false,
+   "fileSize": "597KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GDG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T08:29:12.000Z",
+   "documentKey": "2924-03150189-3A704431",
+   "isPriceSensitive": false,
+   "fileSize": "2789KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FLT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T08:24:32.000Z",
+   "documentKey": "2924-03150188-2A1704927",
+   "isPriceSensitive": false,
+   "fileSize": "948KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T08:11:37.000Z",
+   "documentKey": "2924-03150183-6A1350016",
+   "isPriceSensitive": false,
+   "fileSize": "126KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CIP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-19T08:10:37.000Z",
+   "documentKey": "2924-03150180-2A1704924",
+   "isPriceSensitive": false,
+   "fileSize": "120KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KZR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T08:04:32.000Z",
+   "documentKey": "2924-03150177-6A1350012",
+   "isPriceSensitive": false,
+   "fileSize": "1117KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NTI",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T07:38:32.000Z",
+   "documentKey": "2924-03150163-6A1350004",
+   "isPriceSensitive": false,
+   "fileSize": "1458KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SRL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-19T07:34:57.000Z",
+   "documentKey": "2924-03150159-3A704430",
+   "isPriceSensitive": false,
+   "fileSize": "178KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ELV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T07:34:32.000Z",
+   "documentKey": "2924-03150158-2A1704913",
+   "isPriceSensitive": false,
+   "fileSize": "252KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-19T06:16:51.000Z",
+   "documentKey": "2924-03150104-6A1349956",
+   "isPriceSensitive": false,
+   "fileSize": "830KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-19T06:13:46.000Z",
+   "documentKey": "2924-03150101-2A1704899",
+   "isPriceSensitive": false,
+   "fileSize": "485KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FWD",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T06:03:41.000Z",
+   "documentKey": "2924-03150093-6A1349950",
+   "isPriceSensitive": false,
+   "fileSize": "479KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EDU",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T06:01:16.000Z",
+   "documentKey": "2924-03150091-2A1704888",
+   "isPriceSensitive": false,
+   "fileSize": "174KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ID1",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T06:01:11.000Z",
+   "documentKey": "2924-03150090-6A1349949",
+   "isPriceSensitive": false,
+   "fileSize": "2335KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T06:00:11.000Z",
+   "documentKey": "2924-03150089-6A1349948",
+   "isPriceSensitive": false,
+   "fileSize": "303KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TOR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T05:57:56.000Z",
+   "documentKey": "2924-03150086-6A1349947",
+   "isPriceSensitive": false,
+   "fileSize": "171KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EQT",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-19T05:56:56.000Z",
+   "documentKey": "2924-03150085-3A704429",
+   "isPriceSensitive": false,
+   "fileSize": "169KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SFR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T05:42:11.000Z",
+   "documentKey": "2924-03150075-6A1349943",
+   "isPriceSensitive": false,
+   "fileSize": "3266KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SEG",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T05:39:51.000Z",
+   "documentKey": "2924-03150074-3A704425",
+   "isPriceSensitive": false,
+   "fileSize": "97KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SEG",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-19T05:39:16.000Z",
+   "documentKey": "2924-03150073-3A704424",
+   "isPriceSensitive": false,
+   "fileSize": "806KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CAA",
+   "headline": "Change in substantial holding from PPT",
+   "date": "2026-10-19T05:36:41.000Z",
+   "documentKey": "2924-03150070-2A1704879",
+   "isPriceSensitive": false,
+   "fileSize": "553KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SLS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-19T05:20:01.000Z",
+   "documentKey": "2924-03150058-6A1349939",
+   "isPriceSensitive": false,
+   "fileSize": "83KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "A2M",
+   "headline": "UPDATE - Change in substantial holding",
+   "date": "2026-10-19T03:02:11.000Z",
+   "documentKey": "2924-03149996-2A1704844",
+   "isPriceSensitive": false,
+   "fileSize": "18602KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-18T22:16:14.000Z",
+   "documentKey": "2924-03149784-2A1704733",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MGU",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-18T21:59:49.000Z",
+   "documentKey": "2924-03149741-6A1349827",
+   "isPriceSensitive": false,
+   "fileSize": "189KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EQT",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-18T21:41:04.000Z",
+   "documentKey": "2924-03149708-3A704347",
+   "isPriceSensitive": false,
+   "fileSize": "916KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CIA",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-18T21:12:59.000Z",
+   "documentKey": "2924-03149680-2A1704686",
+   "isPriceSensitive": false,
+   "fileSize": "890KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-18T21:12:39.000Z",
+   "documentKey": "2924-03149679-6A1349814",
+   "isPriceSensitive": false,
+   "fileSize": "666KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LIN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-18T21:04:34.000Z",
+   "documentKey": "2924-03149633-6A1349761",
+   "isPriceSensitive": false,
+   "fileSize": "745KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-18T21:04:24.000Z",
+   "documentKey": "2924-03149632-6A1349762",
+   "isPriceSensitive": false,
+   "fileSize": "451KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IPX",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-18T21:04:09.000Z",
+   "documentKey": "2924-03149631-6A1349760",
+   "isPriceSensitive": false,
+   "fileSize": "427KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PDN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-18T21:03:59.000Z",
+   "documentKey": "2924-03149630-6A1349756",
+   "isPriceSensitive": false,
+   "fileSize": "2120KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FBR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-18T21:03:44.000Z",
+   "documentKey": "2924-03149629-6A1349757",
+   "isPriceSensitive": false,
+   "fileSize": "246KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SDR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-18T21:03:34.000Z",
+   "documentKey": "2924-03149628-2A1704658",
+   "isPriceSensitive": false,
+   "fileSize": "779KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AZ9",
+   "headline": "Change in Substantial Shareholders Interests",
+   "date": "2026-10-16T09:05:54.000Z",
+   "documentKey": "2924-03149576-6A1349745",
+   "isPriceSensitive": false,
+   "fileSize": "434KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOA",
+   "headline": "Becoming a substantial holder from SFR",
+   "date": "2026-10-16T08:42:34.000Z",
+   "documentKey": "2924-03149572-6A1349741",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JDO",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-16T08:38:34.000Z",
+   "documentKey": "2924-03149570-2A1704651",
+   "isPriceSensitive": false,
+   "fileSize": "151KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RRL",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-16T08:35:04.000Z",
+   "documentKey": "2924-03149569-6A1349738",
+   "isPriceSensitive": false,
+   "fileSize": "215KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Becoming a substantial holder from MQG",
+   "date": "2026-10-16T08:31:59.000Z",
+   "documentKey": "2924-03149568-2A1704647",
+   "isPriceSensitive": false,
+   "fileSize": "500KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SDR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-16T08:09:39.000Z",
+   "documentKey": "2924-03149564-2A1704643",
+   "isPriceSensitive": false,
+   "fileSize": "1069KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNR",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T08:06:29.000Z",
+   "documentKey": "2924-03149557-6A1349729",
+   "isPriceSensitive": false,
+   "fileSize": "2076KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MMS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T07:59:09.000Z",
+   "documentKey": "2924-03149553-3A704330",
+   "isPriceSensitive": false,
+   "fileSize": "1649KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-10-16T07:57:54.000Z",
+   "documentKey": "2924-03149551-6A1349724",
+   "isPriceSensitive": false,
+   "fileSize": "5375KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KCN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T07:57:19.000Z",
+   "documentKey": "2924-03149549-2A1704641",
+   "isPriceSensitive": false,
+   "fileSize": "2924KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GGP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T07:56:04.000Z",
+   "documentKey": "2924-03149545-6A1349720",
+   "isPriceSensitive": false,
+   "fileSize": "572KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GDG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T07:55:19.000Z",
+   "documentKey": "2924-03149543-3A704329",
+   "isPriceSensitive": false,
+   "fileSize": "565KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DRR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T07:47:09.000Z",
+   "documentKey": "2924-03149538-6A1349717",
+   "isPriceSensitive": false,
+   "fileSize": "791KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOQ",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-16T07:45:09.000Z",
+   "documentKey": "2924-03149531-2A1704635",
+   "isPriceSensitive": false,
+   "fileSize": "5154KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AOV",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T07:44:19.000Z",
+   "documentKey": "2924-03149529-3A704328",
+   "isPriceSensitive": false,
+   "fileSize": "1358KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EUZ",
+   "headline": "Becoming a substantial holder from AT4",
+   "date": "2026-10-16T07:28:19.000Z",
+   "documentKey": "2924-03149521-6A1349711",
+   "isPriceSensitive": false,
+   "fileSize": "215KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Becoming a substantial holder from MS",
+   "date": "2026-10-16T06:58:49.000Z",
+   "documentKey": "2924-03149505-6A1349693",
+   "isPriceSensitive": false,
+   "fileSize": "10363KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TG6",
+   "headline": "Change in substantial holding from FRS",
+   "date": "2026-10-16T06:38:14.000Z",
+   "documentKey": "2924-03149495-6A1349688",
+   "isPriceSensitive": false,
+   "fileSize": "181KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MGH",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-16T06:10:19.000Z",
+   "documentKey": "2924-03149479-2A1704610",
+   "isPriceSensitive": false,
+   "fileSize": "412KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GLS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-16T06:09:34.000Z",
+   "documentKey": "2924-03149478-3A704324",
+   "isPriceSensitive": false,
+   "fileSize": "252KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BPT",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T05:57:19.000Z",
+   "documentKey": "2924-03149469-2A1704607",
+   "isPriceSensitive": false,
+   "fileSize": "162KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T05:56:54.000Z",
+   "documentKey": "2924-03149468-3A704323",
+   "isPriceSensitive": false,
+   "fileSize": "161KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FWD",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T05:46:04.000Z",
+   "documentKey": "2924-03149460-6A1349672",
+   "isPriceSensitive": false,
+   "fileSize": "123KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EVN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-16T05:24:44.000Z",
+   "documentKey": "2924-03149444-2A1704586",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WGN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T05:15:14.000Z",
+   "documentKey": "2924-03149426-2A1704581",
+   "isPriceSensitive": false,
+   "fileSize": "824KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FPR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-16T05:13:59.000Z",
+   "documentKey": "2924-03149421-2A1704580",
+   "isPriceSensitive": false,
+   "fileSize": "578KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "LRK",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-16T04:13:28.000Z",
+   "documentKey": "2924-03149391-3A704305",
+   "isPriceSensitive": false,
+   "fileSize": "258KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T03:50:23.000Z",
+   "documentKey": "2924-03149383-2A1704567",
+   "isPriceSensitive": false,
+   "fileSize": "752KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T03:48:48.000Z",
+   "documentKey": "2924-03149381-2A1704565",
+   "isPriceSensitive": false,
+   "fileSize": "751KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ID1",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-16T03:31:03.000Z",
+   "documentKey": "2924-03149375-6A1349609",
+   "isPriceSensitive": false,
+   "fileSize": "155KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EUZ",
+   "headline": "Becoming a substantial holder - T Marshall",
+   "date": "2026-10-16T02:13:18.000Z",
+   "documentKey": "2924-03149336-6A1349595",
+   "isPriceSensitive": false,
+   "fileSize": "228KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "A2M",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T22:35:32.000Z",
+   "documentKey": "2924-03149204-2A1704485",
+   "isPriceSensitive": false,
+   "fileSize": "968KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T21:33:17.000Z",
+   "documentKey": "2924-03149094-2A1704426",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RSG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T21:25:17.000Z",
+   "documentKey": "2924-03149070-6A1349516",
+   "isPriceSensitive": false,
+   "fileSize": "869KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ALQ",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T21:21:32.000Z",
+   "documentKey": "2924-03149028-2A1704399",
+   "isPriceSensitive": false,
+   "fileSize": "747KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "AUC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T21:20:22.000Z",
+   "documentKey": "2924-03149020-6A1349521",
+   "isPriceSensitive": false,
+   "fileSize": "856KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BOE",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T21:18:47.000Z",
+   "documentKey": "2924-03149013-6A1349510",
+   "isPriceSensitive": false,
+   "fileSize": "783KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZIP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T21:18:37.000Z",
+   "documentKey": "2924-03149011-2A1704389",
+   "isPriceSensitive": false,
+   "fileSize": "1672KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MEK",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-15T09:10:40.000Z",
+   "documentKey": "2924-03148988-6A1349480",
+   "isPriceSensitive": false,
+   "fileSize": "67KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FBR",
+   "headline": "Correction - Substantial holder disclosure",
+   "date": "2026-10-15T08:56:29.000Z",
+   "documentKey": "2924-03148986-6A1349477",
+   "isPriceSensitive": false,
+   "fileSize": "171KB",
+   "announcementTypes": [
+    "Security holder details - Other"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SGP",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T08:49:34.000Z",
+   "documentKey": "2924-03148985-2A1704387",
+   "isPriceSensitive": false,
+   "fileSize": "1490KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PNR",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-15T08:44:19.000Z",
+   "documentKey": "2924-03148984-6A1349476",
+   "isPriceSensitive": false,
+   "fileSize": "1115KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "FBR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T08:40:24.000Z",
+   "documentKey": "2924-03148982-6A1349475",
+   "isPriceSensitive": false,
+   "fileSize": "170KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "IEL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T08:40:04.000Z",
+   "documentKey": "2924-03148981-3A704206",
+   "isPriceSensitive": false,
+   "fileSize": "1919KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GGP",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T08:36:39.000Z",
+   "documentKey": "2924-03148980-6A1349474",
+   "isPriceSensitive": false,
+   "fileSize": "3492KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GDG",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T08:34:44.000Z",
+   "documentKey": "2924-03148978-3A704204",
+   "isPriceSensitive": false,
+   "fileSize": "2761KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DVP",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-15T08:31:34.000Z",
+   "documentKey": "2924-03148976-6A1349472",
+   "isPriceSensitive": false,
+   "fileSize": "782KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OR3",
+   "headline": "Notice of Change of Interests of Substantial Holder",
+   "date": "2026-10-15T08:21:29.000Z",
+   "documentKey": "2924-03148974-6A1349471",
+   "isPriceSensitive": false,
+   "fileSize": "1345KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "NC6",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T08:01:24.000Z",
+   "documentKey": "2924-03148965-6A1349466",
+   "isPriceSensitive": false,
+   "fileSize": "423KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T07:53:54.000Z",
+   "documentKey": "2924-03148960-6A1349464",
+   "isPriceSensitive": false,
+   "fileSize": "446KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GYG",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-10-15T07:33:09.000Z",
+   "documentKey": "2924-03148953-2A1704381",
+   "isPriceSensitive": false,
+   "fileSize": "6921KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAL",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T07:22:04.000Z",
+   "documentKey": "2924-03148950-6A1349458",
+   "isPriceSensitive": false,
+   "fileSize": "173KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EOS",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-15T06:58:59.000Z",
+   "documentKey": "2924-03148943-2A1704369",
+   "isPriceSensitive": false,
+   "fileSize": "226KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SRL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T06:58:24.000Z",
+   "documentKey": "2924-03148942-3A704201",
+   "isPriceSensitive": false,
+   "fileSize": "236KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BPG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-15T06:57:59.000Z",
+   "documentKey": "2924-03148941-2A1704367",
+   "isPriceSensitive": false,
+   "fileSize": "643KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ACL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T06:43:59.000Z",
+   "documentKey": "2924-03148930-3A704200",
+   "isPriceSensitive": false,
+   "fileSize": "235KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "BPT",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T06:43:29.000Z",
+   "documentKey": "2924-03148929-2A1704362",
+   "isPriceSensitive": false,
+   "fileSize": "236KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MYG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-15T03:46:13.000Z",
+   "documentKey": "2924-03148839-2A1704269",
+   "isPriceSensitive": false,
+   "fileSize": "157KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KAL",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-15T03:42:58.000Z",
+   "documentKey": "2924-03148838-6A1349413",
+   "isPriceSensitive": false,
+   "fileSize": "132KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "HRE",
+   "headline": "Change in substantial holding from HAV",
+   "date": "2026-10-14T23:00:07.000Z",
+   "documentKey": "2924-03148740-3A704169",
+   "isPriceSensitive": false,
+   "fileSize": "93KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RSG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T22:54:47.000Z",
+   "documentKey": "2924-03148733-6A1349377",
+   "isPriceSensitive": false,
+   "fileSize": "563KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T22:13:27.000Z",
+   "documentKey": "2924-03148670-2A1704180",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "EDU",
+   "headline": "Change in Substantial Holding",
+   "date": "2026-10-14T21:17:47.000Z",
+   "documentKey": "2924-03148554-2A1704118",
+   "isPriceSensitive": false,
+   "fileSize": "250KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ALQ",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T21:17:32.000Z",
+   "documentKey": "2924-03148552-2A1704119",
+   "isPriceSensitive": false,
+   "fileSize": "453KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "WAF",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T21:17:22.000Z",
+   "documentKey": "2924-03148550-6A1349328",
+   "isPriceSensitive": false,
+   "fileSize": "562KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PLS",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-14T21:15:52.000Z",
+   "documentKey": "2924-03148533-6A1349322",
+   "isPriceSensitive": false,
+   "fileSize": "2640KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TLC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T21:15:37.000Z",
+   "documentKey": "2924-03148530-3A704113",
+   "isPriceSensitive": false,
+   "fileSize": "3747KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ZAG",
+   "headline": "Change in substantial holding from CZR",
+   "date": "2026-10-14T21:11:37.000Z",
+   "documentKey": "2924-03148491-6A1349289",
+   "isPriceSensitive": false,
+   "fileSize": "325KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "TLC",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T08:48:20.000Z",
+   "documentKey": "2924-03148459-3A704105",
+   "isPriceSensitive": false,
+   "fileSize": "1778KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PPT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T08:46:55.000Z",
+   "documentKey": "2924-03148458-2A1704094",
+   "isPriceSensitive": false,
+   "fileSize": "6564KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GDG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T08:40:45.000Z",
+   "documentKey": "2924-03148455-3A704104",
+   "isPriceSensitive": false,
+   "fileSize": "710KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GHY",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-14T07:13:39.000Z",
+   "documentKey": "2924-03148421-2A1704081",
+   "isPriceSensitive": false,
+   "fileSize": "1016KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "JDO",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-14T07:12:49.000Z",
+   "documentKey": "2924-03148418-2A1704083",
+   "isPriceSensitive": false,
+   "fileSize": "153KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PRN",
+   "headline": "Change in substantial holding from MQG",
+   "date": "2026-10-14T07:11:24.000Z",
+   "documentKey": "2924-03148415-6A1349249",
+   "isPriceSensitive": false,
+   "fileSize": "2394KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DOW",
+   "headline": "Ceasing to be a substantial holder from MQG",
+   "date": "2026-10-14T07:09:14.000Z",
+   "documentKey": "2924-03148412-2A1704074",
+   "isPriceSensitive": false,
+   "fileSize": "486KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GHY",
+   "headline": "Change of Director's Interest and Substantial Holding",
+   "date": "2026-10-14T07:06:59.000Z",
+   "documentKey": "2924-03148410-2A1704069",
+   "isPriceSensitive": false,
+   "fileSize": "2201KB",
+   "announcementTypes": [
+    "Change in substantial holding",
+    "Change of Director's Interest Notice"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RWC",
+   "headline": "Change in substantial holding from MUFG",
+   "date": "2026-10-14T07:03:24.000Z",
+   "documentKey": "2924-03148406-3A704101",
+   "isPriceSensitive": false,
+   "fileSize": "959KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "RGN",
+   "headline": "Becoming a substantial holder from MUFG",
+   "date": "2026-10-14T06:56:19.000Z",
+   "documentKey": "2924-03148400-2A1704067",
+   "isPriceSensitive": false,
+   "fileSize": "797KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GYG",
+   "headline": "Ceasing to be a substantial holder from MUFG",
+   "date": "2026-10-14T06:47:14.000Z",
+   "documentKey": "2924-03148396-2A1704065",
+   "isPriceSensitive": false,
+   "fileSize": "1137KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T06:30:19.000Z",
+   "documentKey": "2924-03148389-2A1704060",
+   "isPriceSensitive": false,
+   "fileSize": "136KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "MAH",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T06:02:04.000Z",
+   "documentKey": "2924-03148370-6A1349229",
+   "isPriceSensitive": false,
+   "fileSize": "105KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PCG",
+   "headline": "Change in substantial holding for Russel Pillemer",
+   "date": "2026-10-14T05:44:59.000Z",
+   "documentKey": "2924-03148356-2A1704044",
+   "isPriceSensitive": false,
+   "fileSize": "220KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "SFR",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T05:30:24.000Z",
+   "documentKey": "2924-03148339-6A1349216",
+   "isPriceSensitive": false,
+   "fileSize": "433KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CPU",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T05:26:34.000Z",
+   "documentKey": "2924-03148335-3A704092",
+   "isPriceSensitive": false,
+   "fileSize": "637KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "CAF",
+   "headline": "Change in substantial holding - Pilgrim",
+   "date": "2026-10-14T04:16:04.000Z",
+   "documentKey": "2924-03148277-2A1704012",
+   "isPriceSensitive": false,
+   "fileSize": "678KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "OMA",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-14T04:01:44.000Z",
+   "documentKey": "2924-03148272-2A1704010",
+   "isPriceSensitive": false,
+   "fileSize": "228KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-14T03:35:04.000Z",
+   "documentKey": "2924-03148254-2A1703994",
+   "isPriceSensitive": false,
+   "fileSize": "413KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "STN",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-14T02:07:28.000Z",
+   "documentKey": "2924-03148222-6A1349171",
+   "isPriceSensitive": false,
+   "fileSize": "64KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "ILT",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-14T02:00:03.000Z",
+   "documentKey": "2924-03148212-3A704069",
+   "isPriceSensitive": false,
+   "fileSize": "3378KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "DXC",
+   "headline": "Becoming a substantial holder",
+   "date": "2026-10-14T01:39:58.000Z",
+   "documentKey": "2924-03148204-3A704067",
+   "isPriceSensitive": false,
+   "fileSize": "377KB",
+   "announcementTypes": [
+    "Becoming a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PGD",
+   "headline": "Change in substantial holding - Yandal Investments Pty Ltd",
+   "date": "2026-10-14T00:53:13.000Z",
+   "documentKey": "2924-03148162-6A1349149",
+   "isPriceSensitive": false,
+   "fileSize": "140KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "PEN",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-13T23:32:33.000Z",
+   "documentKey": "2924-03148129-6A1349132",
+   "isPriceSensitive": false,
+   "fileSize": "998KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "GYG",
+   "headline": "Ceasing to be a substantial holder",
+   "date": "2026-10-13T23:00:03.000Z",
+   "documentKey": "2924-03148107-2A1703931",
+   "isPriceSensitive": false,
+   "fileSize": "71KB",
+   "announcementTypes": [
+    "Ceasing to be a substantial holder"
+   ],
+   "url": ""
+  },
+  {
+   "symbol": "KME",
+   "headline": "Change in substantial holding",
+   "date": "2026-10-13T22:18:03.000Z",
+   "documentKey": "2924-03148006-2A1703883",
+   "isPriceSensitive": false,
+   "fileSize": "315KB",
+   "announcementTypes": [
+    "Change in substantial holding"
+   ],
+   "url": ""
+  }
+ ],
+ "total_secs": 16.9,
+ "files": [
+  {
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03157951-2A1708314",
+   "status": 200,
+   "final": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03157951-2A1708314",
+   "type": "application/pdf",
+   "len": 547178,
+   "pdf": true,
+   "head": ""
+  },
+  {
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03157941-2A1708311",
+   "status": 200,
+   "final": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03157941-2A1708311",
+   "type": "application/pdf",
+   "len": 136951,
+   "pdf": true,
+   "head": ""
+  },
+  {
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03157900-2A1708271",
+   "status": 200,
+   "final": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03157900-2A1708271",
+   "type": "application/pdf",
+   "len": 758649,
+   "pdf": true,
+   "head": ""
+  },
+  {
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03148107-2A1703931",
+   "status": 200,
+   "final": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03148107-2A1703931",
+   "type": "application/pdf",
+   "len": 102573,
+   "pdf": true,
+   "head": ""
+  },
+  {
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03148006-2A1703883",
+   "status": 200,
+   "final": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03148006-2A1703883",
+   "type": "application/pdf",
+   "len": 359485,
+   "pdf": true,
+   "head": ""
+  }
+ ]
+}

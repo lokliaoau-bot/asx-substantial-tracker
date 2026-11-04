@@ -1,7 +1,8 @@
 name: debug-corpus   # 临时诊断用：导出全部公告的文字语料 + 试探 ASX 接口，推到 debug-corpus-out 分支。不会合并到 main。
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [debug-corpus]     # 推送到这个临时分支时运行（手动触发要求工作流在 main 上，这里不想动 main）
 
 permissions:
   contents: write

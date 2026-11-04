@@ -25,7 +25,7 @@ jobs:
           sys.path.insert(0, "scraper")
           import scrape
           for k in ["2924-03150606-2A1705101", "2924-03150529-2A1705065", "2924-03150809-6A1350328",
-                    "2924-03150781-2A1705160", "2924-03153386-2A1706298", "2924-03154545-3A705224"]:
+                    "2924-03150781-2A1705160", "2924-03153386-2A1706223", "2924-03154545-3A705224"]:
               try:
                   data, _ = scrape.download_pdf(scrape.FILE_API + k)
                   open(f"out/pdfs/{k}.pdf", "wb").write(data); print("ok", k, len(data))

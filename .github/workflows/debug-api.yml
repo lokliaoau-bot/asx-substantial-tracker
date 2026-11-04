@@ -1,0 +1,80 @@
+name: debug-api-pdfs   # 临时诊断用：同一份公告的 ASX 网站版和接口版 PDF 解析结果对比。不会合并到 main。
+
+on:
+  push:
+    branches: [debug-api-pdfs]
+
+permissions:
+  contents: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr
+      - run: pip install -r requirements.txt
+      - name: Compare
+        run: |
+          mkdir -p out/pdfs
+          python - <<'PY'
+          import json, sys, time, datetime as dt
+          sys.path.insert(0, "scraper")
+          import scrape
+          now = scrape.now_syd(); today = now.date()
+          lst = []
+          for url in scrape.LIST_PAGES:
+              rows, ok = scrape.parse_listing(scrape.fetch(url).text, today)
+              lst += [r for r in rows if scrape.SUBSTANTIAL_RE.search(r["headline"])]
+          api, cov = scrape.market_rows(now)
+          idx = {}
+          for r in api:
+              for k in scrape.dedupe_keys(r): idx[k] = r
+          pairs = []
+          for r in lst:
+              m = next((idx[k] for k in scrape.dedupe_keys(r) if k in idx), None)
+              if m: pairs.append((r, m))
+          print("list", len(lst), "api", len(api), "pairs", len(pairs))
+          def parse(url, ntype):
+              data, final = scrape.download_pdf(url)
+              enc = b"/Encrypt" in data[:200000] or b"/Encrypt" in data[-5000:]
+              texts = scrape.pdf_texts(data)
+              t = scrape.strict_form_type(texts[0]) if texts else ""
+              t = t or (ntype if ntype != "other" else (scrape.infer_type(texts[0]) if texts else "other"))
+              r = scrape.analyse_texts(texts, t) if texts else None
+              used = False
+              if scrape.blank(r) or not r["holder_name"]:
+                  o = scrape.ocr_texts(data)
+                  if o:
+                      orr = scrape.analyse_texts(o, t, ocr=True)
+                      if r is None or (scrape.blank(r) and not scrape.blank(orr)): r, used = orr, True
+                      elif not r["holder_name"] and orr["holder_name"]: r = dict(r, holder_name=orr["holder_name"]); used = True
+              return data, enc, ({k: r[k] for k in ("holder_name", "voting_power", "change_date", "company")} if r else None), used
+          report, saved = [], 0
+          for lr, ar in pairs[:45]:
+              rec = {"code": lr["code"], "api_code": ar["code"], "date": lr["date"], "time": lr["time"], "headline": lr["headline"]}
+              try:
+                  _, e1, r1, o1 = parse(lr["url"], scrape.classify(lr["headline"]))
+                  d2, e2, r2, o2 = parse(ar["url"], scrape.classify(ar["headline"]))
+                  rec.update(list=r1, api=r2, list_ocr=o1, api_ocr=o2, list_enc=e1, api_enc=e2, same=(r1 == r2))
+                  if saved < 3 and e2 and len(d2) < 400000:
+                      open(f"out/pdfs/api_{ar['code']}_{ar['id'][3:]}.pdf", "wb").write(d2); saved += 1
+              except Exception as ex:
+                  rec["error"] = f"{type(ex).__name__}: {ex}"
+              report.append(rec); print(rec.get("same"), lr["code"], rec.get("error", ""))
+              time.sleep(0.6)
+          json.dump(report, open("out/compare.json", "w"), ensure_ascii=False, indent=1)
+          PY
+      - name: Push output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan debug-api-out
+          git rm -rq --cached .
+          git add -f out
+          git commit -qm "debug: api pdf compare"
+          git push -f origin debug-api-out

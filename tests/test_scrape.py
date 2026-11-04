@@ -1069,3 +1069,22 @@ def test_ocr_fills_only_missing_fields():
         scrape.download_pdf = orig
     assert e["holder_name"].startswith("Sohra Peak Capital Partners") and e["ocr"] is True
     assert e["change_date"] == "2026-10-28" and e["voting_power"] == [5.19]          # 数字仍用文字层的
+
+
+def test_backfill_keeps_pages_already_fetched_when_a_later_page_fails(sandbox, monkeypatch):
+    fake = backfill_fake()
+    real_call = fake.__call__
+
+    def flaky(url, **kw):
+        if url.startswith(scrape.MARKET_API) and "page=3&" in url:
+            raise scrape.FetchError("HTTP 502")
+        return real_call(url, **kw)
+
+    monkeypatch.setattr(scrape, "fetch", flaky)
+    monkeypatch.setattr(scrape, "API_PAGE_SIZE", 1)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    assert scrape.main() == 0
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["backfill"]["ok"] and out["last_run"]["backfill"]["added"] == 1   # 第 3 页（OLD）拿到了
+    assert any("只翻到第 3 页" in e for e in out["last_run"]["errors"])
+    assert "OLD" in {n["code"] for n in out["notices"]}

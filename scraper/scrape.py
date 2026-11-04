@@ -271,13 +271,19 @@ def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
     覆盖信息：oldest = 翻到的最早一条的悉尼时间；reached = 是否已经翻过补抓窗口的起点；
     days = 翻到的所有公告日期（不只大股东公告，用来判断哪些交易日有数据）。"""
     window_start = (now - dt.timedelta(days=BACKFILL_DAYS)).date()
-    rows, days, oldest, reached = [], set(), None, False
+    rows, days, oldest, reached, warning = [], set(), None, False, ""
     for page in range(API_MAX_PAGES):
-        r = fetch(f"{MARKET_API}?page={page}&itemsPerPage={API_PAGE_SIZE}", timeout=60)
         try:
-            items = ((json.loads(r.text) or {}).get("data") or {}).get("items") or []
-        except (ValueError, AttributeError) as e:
-            raise FetchError(f"接口返回的不是预期的 JSON（{e}）") from e
+            r = fetch(f"{MARKET_API}?page={page}&itemsPerPage={API_PAGE_SIZE}", timeout=60)
+            try:
+                items = ((json.loads(r.text) or {}).get("data") or {}).get("items") or []
+            except (ValueError, AttributeError) as e:
+                raise FetchError(f"接口返回的不是预期的 JSON（{e}）") from e
+        except FetchError as e:
+            if page == 0:
+                raise
+            warning = f"补抓只翻到第 {page} 页（{e}），更早的下次再补"     # 前面几页已经拿到的照样用
+            break
         if not items:
             break
         for it in items:
@@ -304,7 +310,7 @@ def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
             reached = True
             break
         time.sleep(PAUSE)
-    return rows, {"oldest": oldest, "reached": reached, "days": days}
+    return rows, {"oldest": oldest, "reached": reached, "days": days, "warning": warning}
 
 
 def dedupe_keys(e: dict) -> set:
@@ -1087,6 +1093,8 @@ def main() -> int:
                     covered.add(d.isoformat())
                 d += dt.timedelta(days=1)
             mark_days(covered, today, hhmm, scanned, partial)
+        if cov["warning"]:
+            errors.append(cov["warning"])
         log(f"全市场接口：{len(api_rows)} 条大股东公告，覆盖到 {backfill['from']}")
     except FetchError as e:
         errors.append(f"补抓接口读取失败（只影响补回之前漏掉的日子）：{e}")

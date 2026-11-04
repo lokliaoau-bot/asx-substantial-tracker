@@ -1154,3 +1154,12 @@ def test_pdfium_fallback_when_pypdf_cannot_open(monkeypatch):
 
 def test_pdf_needing_a_real_password_is_unreadable_not_an_error():
     assert scrape.pdf_texts(encrypted_pdf(AES_LINES, user="secret")) == []
+
+
+def test_real_api_pdf_is_aes_encrypted_and_readable():
+    data = (FIXTURES / "api_aes_encrypted_jns.pdf").read_bytes()       # 从全市场接口下载的原始 PDF
+    assert b"/Encrypt" in data
+    texts = scrape.pdf_texts(data)
+    assert scrape.strict_form_type(texts[0]) == "ceasing"
+    r = scrape.analyse_texts(texts, "ceasing")
+    assert r["holder_name"] == "Acorn Capital Limited" and r["change_date"] == "2026-10-30"

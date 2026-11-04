@@ -42,13 +42,13 @@
 | --- | --- |
 | `index.html` | 网页（单文件，含 CSS/JS）。自动从 `*.github.io/<repo>` 识别仓库。令牌存在浏览器 localStorage，键名前缀 `ssr_`。 |
 | `manifest.webmanifest`、`icon-192.png`、`icon-512.png`、`apple-touch-icon.png` | 添加到手机桌面用的清单和图标。 |
-| `scraper/scrape.py` | 抓取脚本。依赖 requests、beautifulsoup4、pypdf、tzdata；扫描件 OCR 另需 pypdfium2、Pillow 和系统里的 tesseract（工作流用 apt 安装，装不上时自动跳过 OCR）。 |
+| `scraper/scrape.py` | 抓取脚本。依赖 requests、beautifulsoup4、pypdf、cryptography（接口下载的 PDF 是 AES 加密的）、tzdata；扫描件 OCR 另需 pypdfium2、Pillow 和系统里的 tesseract（工作流用 apt 安装，装不上时自动跳过 OCR）。 |
 | `scraper/watchlist.json` | 关注名单：`holders[].name/aliases/hints`，以及 `noise_hints`。 |
 | `data/notices.json` | 网页读取的数据。初始是空结构，首次运行后由脚本覆盖。 |
 | `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
 | `.github/workflows/scrape.yml` | 抓取工作流：只有手动触发（网页按钮）。需要 `contents: write`。 |
 | `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
-| `tests/test_scrape.py` | 85 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
+| `tests/test_scrape.py` | 92 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
 | `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |
 | `requirements.txt` / `requirements-dev.txt` | 运行依赖 / 测试依赖（版本已锁定，已在 Python 3.12 干净环境验证可安装）。 |
 | `README.md` | 给用户看的使用说明。 |
@@ -112,7 +112,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：85 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
+python -m pytest -q   # 期望：92 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -337,9 +337,18 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 | 中 | PDF 返回 404 时被永久跳过，刚发布还没生成 PDF 的公告会漏掉。 | 404 改为下次运行重试（最多 3 次）。 |
 | 低 | 覆盖天数把周末算进去；补抓后网页提示文字不对（“过了今天就补不回来”）。 | 只算工作日；提示文字按补抓是否成功调整。 |
 
+合并前三轮审查发现并修复：
+
+| 轮次 | 发现的问题 | 处理 |
+| --- | --- | --- |
+| 1 正确性 | 补抓翻到后面某一页时网络出错，前面已经翻到的结果会被整个丢掉。 | 保留已经拿到的部分，记一条提醒，更早的下次再补。语料新旧对比：133 份里 20 份结果变化，逐条人工确认全部是改对或改成留空，其余 113 份不变。 |
+| 2 异常 | 安静时期 1 万条可能跨一个多月，超过 35 天保留期的公告会每次被下载、清掉、再下载。 | 只补 16 天窗口以内的；覆盖天数也不早于窗口起点。 |
+| 2 异常 | 列表页和接口对同一份公告的时间若差一分钟，会显示两条。 | 再按（申报方、股票、类型、变动日、比例）去重一次，优先保留列表页那条。 |
+| 3 真实环境 | 接口下载的 PDF 都是 AES 加密（只限制编辑，空密码能打开），正式环境缺 cryptography，第一次真实运行 169 份全部打不开；本地测试的 PDF 都没加密，发现不了。 | 加入 cryptography；pypdf 打不开时改用 pdfium 读文字层；真要密码的 PDF 按“读不出”处理，不反复重试。在 GitHub 上用同一批公告的网站版和接口版 PDF 逐份对比解析结果。 |
+
 ### 测试结果（交付时）
 
-- `python -m pytest -q`：85 passed（其中 28 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
+- `python -m pytest -q`：92 passed（其中 29 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
 - `python tests/frontend_check.py`：33 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
 - 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
 

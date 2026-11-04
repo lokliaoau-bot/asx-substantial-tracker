@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-04T17:21:39+11:00",
- "last_success_at": "2026-11-04T17:08:35+11:00",
+ "updated_at": "2026-11-04T17:23:32+11:00",
+ "last_success_at": "2026-11-04T17:22:36+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -18,15 +18,15 @@
   "2026-11-04"
  ],
  "partial_days": {
-  "2026-11-04": "17:08"
+  "2026-11-04": "17:22"
  },
  "last_run": {
   "ok": true,
   "list_pages_ok": 2,
-  "substantial_found": 535,
-  "pdf_checked": 204,
+  "substantial_found": 538,
+  "pdf_checked": 8,
   "skipped_noise": 0,
-  "deferred": 5,
+  "deferred": 0,
   "backfill": {
    "ok": true,
    "from": "2026-10-19",

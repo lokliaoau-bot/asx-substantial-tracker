@@ -1006,7 +1006,7 @@ def test_backfill_adds_missed_days_and_skips_duplicates(sandbox, monkeypatch):
     got = {n["code"]: n for n in out["notices"]}
     assert got["OLD"]["holder"] == "Regal Funds Management" and got["OLD"]["pdf_url"].startswith(scrape.FILE_API)
     bf = out["last_run"]["backfill"]
-    assert bf["ok"] and bf["added"] == 3 and out["last_run"]["errors"] == []
+    assert bf["ok"] and bf["added"] == 2 and out["last_run"]["errors"] == []        # 10 月 1 日那条在 16 天窗口以外
     assert {"2026-10-29", "2026-10-30"} <= set(out["scanned_days"]) and out["partial_days"] == {}
     # 再跑一次：不重复添加、不重复下载
     fake.pdf_downloads.clear()
@@ -1023,7 +1023,7 @@ def test_backfill_stops_paging_once_window_is_covered(sandbox, monkeypatch):
     scrape.main()
     assert fake.api_pages == [0, 1, 2, 3, 4, 5]          # 第 6 条（10 月 1 日）已经早于窗口起点，翻到这里就停
     out = read(sandbox / "data" / "notices.json")
-    assert out["last_run"]["backfill"]["from"] == "2026-10-02"
+    assert out["last_run"]["backfill"]["from"] == "2026-10-27"      # 覆盖起点不早于窗口起点（3 天前）
 
 
 def test_backfill_failure_does_not_break_list_scraping(sandbox, monkeypatch):
@@ -1088,3 +1088,30 @@ def test_backfill_keeps_pages_already_fetched_when_a_later_page_fails(sandbox, m
     assert out["last_run"]["backfill"]["ok"] and out["last_run"]["backfill"]["added"] == 1   # 第 3 页（OLD）拿到了
     assert any("只翻到第 3 页" in e for e in out["last_run"]["errors"])
     assert "OLD" in {n["code"] for n in out["notices"]}
+
+
+# ---------------------------------------------------------------- 第 2 轮审查（补抓的边界情况）
+
+def test_backfill_ignores_items_older_than_window(sandbox, monkeypatch):
+    fake = backfill_fake()
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    entries = read(sandbox / "data" / "all_notices.json")["entries"]
+    assert "mk-2924-9004-A" not in entries                 # 10 月 1 日那条早于 16 天窗口，不下载
+    assert "mk-2924-9004-A" not in fake.pdf_downloads
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["backfill"]["from"] == "2026-10-14"      # 覆盖天数也不早于窗口起点
+    assert min(out["scanned_days"]) >= "2026-10-14"
+
+
+def test_same_notice_with_one_minute_difference_shown_once():
+    base = {"status": "parsed", "holder_name": "Regal Funds Management Pty Limited", "type": "change",
+            "change_date": "2026-10-28", "voting_power": [6.1, 7.2], "date": "2026-10-30", "headline": "Change in substantial holding"}
+    out = scrape.build_notices({
+        "1001": {**base, "id": "1001", "code": "ABC", "time": "16:10"},
+        "mk-x": {**base, "id": "mk-x", "code": "ABC", "time": "16:11"},
+        "1002": {**base, "id": "1002", "code": "XYZ", "time": "16:10"},                                 # 不同股票，不合并
+        "1003": {**base, "id": "1003", "code": "ABC", "time": "17:00", "voting_power": [], "change_date": ""},   # 缺数字的不合并
+    }, HOLDERS)
+    assert sorted(n["id"] for n in out) == ["1001", "1002", "1003"]

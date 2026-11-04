@@ -293,6 +293,8 @@ def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
                 continue
             oldest = t
             days.add(t.date().isoformat())
+            if t.date() < window_start:
+                continue                       # 窗口以外的不补：太旧的会被保留期清掉，下次又补，白白重复下载
             headline = (it.get("headline") or "").strip()
             key = (it.get("documentKey") or "").strip()
             code = (it.get("symbol") or "").strip().upper()
@@ -925,7 +927,16 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
             item.update(holder=holder, group=group_of.get(holder, ""), confidence=conf, ocr=bool(e.get("ocr")))
             out.append(item)
     out.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
-    return out
+    # 保险：同一份公告从列表页和接口各来一条、时间又差了一分钟时，按内容再去重一次（优先保留列表页那条）
+    seen, uniq = set(), []
+    for n in sorted(out, key=lambda n: str(n.get("id", "")).startswith("mk-")):
+        key = (n["holder"], n.get("code"), n.get("type"), n.get("change_date"), tuple(n.get("voting_power") or ()))
+        if n.get("change_date") and n.get("voting_power") and key in seen:
+            continue
+        seen.add(key)
+        uniq.append(n)
+    uniq.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
+    return uniq
 
 
 # ---------------------------------------------------------------- 主流程
@@ -1084,7 +1095,8 @@ def main() -> int:
         backfill["ok"] = True
         if cov["oldest"]:
             # 接口按时间倒序，翻页在最早那天的中间停下，那天只拿到一部分；从第二天起才是完整的
-            first_full = cov["oldest"].date() + dt.timedelta(days=1)
+            window_start = (now - dt.timedelta(days=BACKFILL_DAYS)).date()
+            first_full = max(cov["oldest"].date() + dt.timedelta(days=1), window_start)
             backfill["from"] = first_full.isoformat()
             d = first_full
             covered = set()

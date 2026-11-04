@@ -1,0 +1,1787 @@
+{
+ "p0_100": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=100",
+  "n": 100,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T00:10:16.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3B (Proposed issue of securities)",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Asset Acquisition",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Company Name",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Administration - Other",
+   "Company Presentation",
+   "Company Secretary Appointment/Resignation",
+   "Constitution",
+   "Daily Share Buy-Back Notice",
+   "Disclosure Document",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Initial Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Notice of Annual General Meeting",
+   "Notice of Meeting - Other",
+   "Periodic Reports - Other",
+   "Progress Report",
+   "Proxy Form",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ],
+   [
+    "NOL",
+    "Change in substantial holding",
+    "2026-11-04T01:07:06.000Z",
+    "2924-03157900-2A1708271"
+   ],
+   [
+    "LOT",
+    "Change in substantial holding",
+    "2026-11-04T01:06:06.000Z",
+    "2924-03157899-6A1353571"
+   ],
+   [
+    "BOE",
+    "Change in substantial holding",
+    "2026-11-04T01:05:36.000Z",
+    "2924-03157898-6A1353570"
+   ]
+  ]
+ },
+ "p5_100": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=5&itemsPerPage=100",
+  "n": 100,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Notice of Meeting - Other",
+    "Company Administration - Other",
+    "Letter to Shareholders"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "IGN"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "IGN",
+     "xid": "949266962",
+     "ASXSecurityType": 1,
+     "displayName": "IGNITE LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU0000033763",
+     "xidEntity": 204155954,
+     "sector": "Industrials",
+     "industryGroup": "Commercial & Professional Services",
+     "industry": "Professional Services",
+     "subIndustry": "Human Resource & Employment Services"
+    }
+   ],
+   "date": "2026-11-03T02:01:06.000Z",
+   "documentKey": "2924-03157479-2A1708053",
+   "fileSize": "885KB",
+   "headline": "Shareholder Communication - Section 249P Statement",
+   "isPriceSensitive": false,
+   "symbol": "IGN",
+   "symbolsSecondary": [
+    "IGN",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-03T02:01:06.000Z",
+   "2026-11-02T22:40:21.000Z"
+  ],
+  "types": [
+   "Admission to Official List",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3B (Proposed issue of securities)",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Commencement of Official Quotation",
+   "Company Administration - Other",
+   "Company Presentation",
+   "Daily Share Buy-Back Notice",
+   "Debt Facility",
+   "Disclosure Document",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Issued Capital - Other",
+   "Letter to Shareholders",
+   "Net Tangible Asset Backing",
+   "Notice of Meeting - Other",
+   "Periodic Reports - Other",
+   "Placement",
+   "Progress Report",
+   "Security Purchase Plan",
+   "Security holder details - Other",
+   "Structured Products Distribution",
+   "Trading Halt Lifted",
+   "Trust Deed",
+   "Waiver",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "GTK",
+    "Change in substantial holding",
+    "2026-11-03T01:37:46.000Z",
+    "2924-03157467-3A705714"
+   ],
+   [
+    "ADS",
+    "Change in substantial holding - A Dyer",
+    "2026-11-03T01:26:26.000Z",
+    "2924-03157460-3A705709"
+   ],
+   [
+    "EOL",
+    "Change in substantial holding",
+    "2026-11-03T01:18:11.000Z",
+    "2924-03157457-2A1708049"
+   ],
+   [
+    "LM1",
+    "Change in substantial holding from FRS",
+    "2026-11-03T00:45:51.000Z",
+    "2924-03157446-6A1353394"
+   ],
+   [
+    "BTR",
+    "Becoming a substantial holder from GMD",
+    "2026-11-03T00:23:06.000Z",
+    "2924-03157442-6A1353392"
+   ],
+   [
+    "ZNC",
+    "Change in substantial holding from FRS",
+    "2026-11-03T00:03:36.000Z",
+    "2924-03157435-6A1353386"
+   ],
+   [
+    "CTT",
+    "Change in substantial holding",
+    "2026-11-02T23:42:51.000Z",
+    "2924-03157430-3A705703"
+   ],
+   [
+    "CTM",
+    "Becoming a substantial holder",
+    "2026-11-02T22:59:36.000Z",
+    "2924-03157402-6A1353381"
+   ]
+  ]
+ },
+ "p20_100": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=20&itemsPerPage=100",
+  "n": 100,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Trading Halt"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "SBZ"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "SBZ",
+     "xid": "148163",
+     "ASXSecurityType": 1,
+     "displayName": "SCHOOLBLAZER LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU0000458531",
+     "xidEntity": 204107997,
+     "sector": "Industrials",
+     "industryGroup": "Capital Goods",
+     "industry": "Trading Companies & Distributors",
+     "subIndustry": "Trading Companies & Distributors"
+    }
+   ],
+   "date": "2026-10-29T23:19:25.000Z",
+   "documentKey": "2924-03155980-2A1707266",
+   "fileSize": "315KB",
+   "headline": "Trading Halt",
+   "isPriceSensitive": true,
+   "symbol": "SBZ",
+   "symbolsSecondary": [
+    "SBZ",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-10-29T23:19:25.000Z",
+   "2026-10-29T22:36:05.000Z"
+  ],
+  "types": [
+   "Annual Report",
+   "Appendix 2A",
+   "Appendix 3B (Proposed issue of securities)",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Appendix 4G",
+   "Asset Acquisition",
+   "Chair's Address to Shareholders",
+   "Change of Director's Interest Notice",
+   "Commitments Test Entity - First Quarter Activity Report",
+   "Commitments Test Entity - First Quarter Cashflow Report",
+   "Commitments Test Entity - Third Quarter Activity Report",
+   "Commitments Test Entity - Third Quarter Cashflow Report",
+   "Company Administration - Other",
+   "Company Presentation",
+   "Corporate Governance",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Final Director's Interest Notice",
+   "First Quarter Activities Report",
+   "First Quarter Cash Flow Report",
+   "Full Year Accounts",
+   "Full Year Audit Review",
+   "Full Year Directors' Report",
+   "Full Year Directors' Statement",
+   "Initial Director's Interest Notice",
+   "Issued Capital - Other",
+   "Letter to Shareholders",
+   "Notice Pending",
+   "Notice of Annual General Meeting",
+   "Periodic Reports - Other",
+   "Placement",
+   "Progress Report",
+   "Proxy Form",
+   "Reinstatement to Official Quotation",
+   "Security Purchase Plan",
+   "Structured Products Distribution",
+   "Sustainability/Climate Action Report",
+   "Takeover - Other",
+   "Third Quarter Activities Report"
+  ],
+  "substantial": []
+ },
+ "p60_100": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=60&itemsPerPage=100",
+  "n": 100,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Commitments Test Entity - First Quarter Activity Report",
+    "Commitments Test Entity - First Quarter Cashflow Report"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "ALA"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "ALA",
+     "xid": "98538",
+     "ASXSecurityType": 1,
+     "displayName": "AROVELLA THERAPEUTICS LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU0000182784",
+     "xidEntity": 204153526,
+     "sector": "Health Care",
+     "industryGroup": "Pharmaceuticals, Biotechnology & Life Sciences",
+     "industry": "Pharmaceuticals",
+     "subIndustry": "Pharmaceuticals"
+    }
+   ],
+   "date": "2026-10-22T21:27:10.000Z",
+   "documentKey": "2924-03151986-3A704740",
+   "fileSize": "754KB",
+   "headline": "Quarterly Activities/Appendix 4C Cash Flow Report",
+   "isPriceSensitive": true,
+   "symbol": "ALA",
+   "symbolsSecondary": [
+    "ALA",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-10-22T21:27:10.000Z",
+   "2026-10-22T19:45:05.000Z"
+  ],
+  "types": [
+   "Annual Report",
+   "Appendix 2A",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Appendix 4G",
+   "Asset Disposal",
+   "Becoming a substantial holder",
+   "CEO/Managing Director - Appointment Resignation",
+   "Chair's Address - Other",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Commitments Test Entity - First Quarter Activity Report",
+   "Commitments Test Entity - First Quarter Cashflow Report",
+   "Company Administration - Other",
+   "Company Presentation",
+   "Company Secretary Appointment/Resignation",
+   "Corporate Governance",
+   "Daily Share Buy-Back Notice",
+   "Disclosure Document",
+   "First Quarter Activities Report",
+   "First Quarter Cash Flow Report",
+   "Full Year Accounts",
+   "Full Year Audit Review",
+   "Full Year Directors' Report",
+   "Full Year Directors' Statement",
+   "Issued Capital - Other",
+   "Letter to Shareholders",
+   "MAP Test",
+   "Net Tangible Asset Backing",
+   "Notice of Annual General Meeting",
+   "Notice of Extraordinary General Meeting",
+   "Notice of Meeting - Other",
+   "Periodic Reports - Other",
+   "Progress Report",
+   "Proxy Form",
+   "Security Purchase Plan",
+   "Security holder details - Other",
+   "Sustainability/Climate Action Report",
+   "Top 20 shareholders"
+  ],
+  "substantial": [
+   [
+    "ASL",
+    "Change in substantial holding",
+    "2026-10-22T21:18:35.000Z",
+    "2924-03151944-6A1350829"
+   ],
+   [
+    "TG6",
+    "Change in substantial holding",
+    "2026-10-22T21:18:25.000Z",
+    "2924-03151941-6A1350828"
+   ],
+   [
+    "PLS",
+    "Change in substantial holding",
+    "2026-10-22T21:17:30.000Z",
+    "2924-03151933-6A1350815"
+   ],
+   [
+    "IPX",
+    "Change in substantial holding",
+    "2026-10-22T21:17:15.000Z",
+    "2924-03151932-6A1350814"
+   ],
+   [
+    "VUL",
+    "Becoming a substantial holder",
+    "2026-10-22T21:15:20.000Z",
+    "2924-03151915-6A1350806"
+   ]
+  ]
+ },
+ "p150_100": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=150&itemsPerPage=100",
+  "n": 0,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 0
+  },
+  "first": null,
+  "dates": null,
+  "types": [],
+  "substantial": []
+ },
+ "p0_1000": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=1000",
+  "n": 1000,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-01T22:57:35.000Z"
+  ],
+  "types": [
+   "Admission to Official List",
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Annual Report",
+   "Appendix 2A",
+   "Appendix 3B (Proposed issue of securities)",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Appendix 4G",
+   "Asset Acquisition",
+   "Asset Disposal",
+   "Becoming a substantial holder",
+   "Bidder's Statement - Off-market bid",
+   "CEO/Managing Director - Appointment Resignation",
+   "Capital Reconstruction",
+   "Ceasing to be a substantial holder",
+   "Chair Appointment/Resignation",
+   "Chair's Address - Other",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Company Name",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Commencement of Official Quotation",
+   "Commitments Test Entity - First Quarter Activity Report",
+   "Commitments Test Entity - First Quarter Cashflow Report",
+   "Commitments Test Entity - Third Quarter Activity Report",
+   "Commitments Test Entity - Third Quarter Cashflow Report",
+   "Company Administration - Other",
+   "Company Presentation",
+   "Company Secretary Appointment/Resignation",
+   "Constitution",
+   "Corporate Governance",
+   "Daily Fund Update",
+   "Daily Share Buy-Back Notice",
+   "Debt Facility",
+   "Details of Auditor Appointment/Resignation",
+   "Details of Company Address",
+   "Details of Registered office address",
+   "Details of Share Registry address"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ],
+   [
+    "NOL",
+    "Change in substantial holding",
+    "2026-11-04T01:07:06.000Z",
+    "2924-03157900-2A1708271"
+   ],
+   [
+    "LOT",
+    "Change in substantial holding",
+    "2026-11-04T01:06:06.000Z",
+    "2924-03157899-6A1353571"
+   ],
+   [
+    "BOE",
+    "Change in substantial holding",
+    "2026-11-04T01:05:36.000Z",
+    "2924-03157898-6A1353570"
+   ],
+   [
+    "WAF",
+    "Becoming a substantial holder",
+    "2026-11-03T23:16:50.000Z",
+    "2924-03157860-6A1353563"
+   ],
+   [
+    "SPG",
+    "Notice of Initial Substantial Holder",
+    "2026-11-03T22:52:10.000Z",
+    "2924-03157822-3A705776"
+   ],
+   [
+    "FOS",
+    "Change in substantial holding from SKM",
+    "2026-11-03T22:40:35.000Z",
+    "2924-03157805-3A705770"
+   ],
+   [
+    "DUB",
+    "Change in substantial holding - MB",
+    "2026-11-03T22:34:10.000Z",
+    "2924-03157792-3A705768"
+   ],
+   [
+    "KME",
+    "Change in substantial holding",
+    "2026-11-03T22:03:25.000Z",
+    "2924-03157747-2A1708194"
+   ],
+   [
+    "FLT",
+    "Ceasing to be a substantial holder",
+    "2026-11-03T21:21:05.000Z",
+    "2924-03157669-2A1708144"
+   ],
+   [
+    "DYL",
+    "Becoming a substantial holder",
+    "2026-11-03T21:20:30.000Z",
+    "2924-03157665-6A1353497"
+   ],
+   [
+    "ELV",
+    "Becoming a substantial holder",
+    "2026-11-03T21:20:25.000Z",
+    "2924-03157664-2A1708143"
+   ],
+   [
+    "CIA",
+    "Becoming a substantial holder",
+    "2026-11-03T21:20:05.000Z",
+    "2924-03157662-2A1708142"
+   ],
+   [
+    "WTC",
+    "Change in substantial holding",
+    "2026-11-03T08:58:03.000Z",
+    "2924-03157616-2A1708135"
+   ],
+   [
+    "WA1",
+    "Ceasing to be a substantial holder",
+    "2026-11-03T08:54:13.000Z",
+    "2924-03157615-6A1353470"
+   ],
+   [
+    "PLS",
+    "Change in substantial holding",
+    "2026-11-03T08:53:43.000Z",
+    "2924-03157614-6A1353469"
+   ],
+   [
+    "OML",
+    "Becoming a substantial holder",
+    "2026-11-03T08:53:08.000Z",
+    "2924-03157613-2A1708134"
+   ],
+   [
+    "KCN",
+    "Becoming a substantial holder",
+    "2026-11-03T08:52:13.000Z",
+    "2924-03157611-2A1708132"
+   ],
+   [
+    "GGP",
+    "Ceasing to be a substantial holder",
+    "2026-11-03T08:51:38.000Z",
+    "2924-03157610-6A1353468"
+   ],
+   [
+    "FFM",
+    "Ceasing to be a substantial holder",
+    "2026-11-03T08:43:23.000Z",
+    "2924-03157608-6A1353467"
+   ],
+   [
+    "CWY",
+    "Change in substantial holding",
+    "2026-11-03T08:41:43.000Z",
+    "2924-03157607-3A705732"
+   ],
+   [
+    "CYL",
+    "Change in substantial holding",
+    "2026-11-03T08:39:08.000Z",
+    "2924-03157606-6A1353466"
+   ],
+   [
+    "DXN",
+    "Becoming a substantial holder",
+    "2026-11-03T07:14:07.000Z",
+    "2924-03157583-3A705729"
+   ],
+   [
+    "KAR",
+    "Becoming a substantial holder",
+    "2026-11-03T07:11:22.000Z",
+    "2924-03157582-3A705727"
+   ],
+   [
+    "DXN",
+    "Ceasing to be a substantial holder for DXN from WAM/WAA/WMI",
+    "2026-11-03T07:09:27.000Z",
+    "2924-03157581-3A705728"
+   ],
+   [
+    "DNL",
+    "Change in substantial holding",
+    "2026-11-03T07:01:22.000Z",
+    "2924-03157580-3A705726"
+   ],
+   [
+    "NWL",
+    "Becoming a substantial holder",
+    "2026-11-03T06:42:12.000Z",
+    "2924-03157576-3A705725"
+   ],
+   [
+    "SIQ",
+    "Ceasing to be a substantial holder",
+    "2026-11-03T06:38:02.000Z",
+    "2924-03157575-2A1708116"
+   ],
+   [
+    "AMI",
+    "Change in substantial holding",
+    "2026-11-03T06:34:37.000Z",
+    "2924-03157574-2A1708115"
+   ]
+  ]
+ },
+ "f_announcementTypes": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&announcementTypes=SECURITY+HOLDER+DETAILS",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-03T21:16:20.000Z"
+  ],
+  "types": [
+   "Becoming a substantial holder",
+   "Ceasing to be a substantial holder",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Final Director's Interest Notice",
+   "Initial Director's Interest Notice",
+   "Security holder details - Other"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ],
+   [
+    "NOL",
+    "Change in substantial holding",
+    "2026-11-04T01:07:06.000Z",
+    "2924-03157900-2A1708271"
+   ],
+   [
+    "LOT",
+    "Change in substantial holding",
+    "2026-11-04T01:06:06.000Z",
+    "2924-03157899-6A1353571"
+   ],
+   [
+    "BOE",
+    "Change in substantial holding",
+    "2026-11-04T01:05:36.000Z",
+    "2924-03157898-6A1353570"
+   ],
+   [
+    "WAF",
+    "Becoming a substantial holder",
+    "2026-11-03T23:16:50.000Z",
+    "2924-03157860-6A1353563"
+   ],
+   [
+    "SPG",
+    "Notice of Initial Substantial Holder",
+    "2026-11-03T22:52:10.000Z",
+    "2924-03157822-3A705776"
+   ],
+   [
+    "FOS",
+    "Change in substantial holding from SKM",
+    "2026-11-03T22:40:35.000Z",
+    "2924-03157805-3A705770"
+   ],
+   [
+    "DUB",
+    "Change in substantial holding - MB",
+    "2026-11-03T22:34:10.000Z",
+    "2924-03157792-3A705768"
+   ],
+   [
+    "KME",
+    "Change in substantial holding",
+    "2026-11-03T22:03:25.000Z",
+    "2924-03157747-2A1708194"
+   ],
+   [
+    "FLT",
+    "Ceasing to be a substantial holder",
+    "2026-11-03T21:21:05.000Z",
+    "2924-03157669-2A1708144"
+   ],
+   [
+    "DYL",
+    "Becoming a substantial holder",
+    "2026-11-03T21:20:30.000Z",
+    "2924-03157665-6A1353497"
+   ],
+   [
+    "ELV",
+    "Becoming a substantial holder",
+    "2026-11-03T21:20:25.000Z",
+    "2924-03157664-2A1708143"
+   ],
+   [
+    "CIA",
+    "Becoming a substantial holder",
+    "2026-11-03T21:20:05.000Z",
+    "2924-03157662-2A1708142"
+   ]
+  ]
+ },
+ "f_announcementType": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&announcementType=SECURITY+HOLDER+DETAILS",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_types": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&types=SECURITY+HOLDER+DETAILS",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_searchText": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&searchText=substantial",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_keyword": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&keyword=substantial",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_startDate": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&startDate=2026-10-28",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_dateFrom": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&dateFrom=2026-10-28",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_fromDate": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&fromDate=2026-10-28",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "f_date": {
+  "status": 200,
+  "url": "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=50&date=2026-10-28",
+  "n": 50,
+  "keys_top": [
+   "data"
+  ],
+  "keys_data": [
+   "items",
+   "count"
+  ],
+  "meta": {
+   "count": 10000
+  },
+  "first": {
+   "announcementTypes": [
+    "Change of Director's Interest Notice"
+   ],
+   "companies": [
+    {
+     "symbolDisplay": "LTR"
+    }
+   ],
+   "companyInfo": [
+    {
+     "symbol": "LTR",
+     "xid": "6087209",
+     "ASXSecurityType": 1,
+     "displayName": "LIONTOWN LIMITED",
+     "issueType": "CS",
+     "issueTypeName": "Common Stock",
+     "issueTypeCode": 1,
+     "isin": "AU000000LTR4",
+     "xidEntity": 204250423,
+     "sector": "Materials",
+     "industryGroup": "Materials",
+     "industry": "Metals & Mining",
+     "subIndustry": "Diversified Metals & Mining"
+    }
+   ],
+   "date": "2026-11-04T04:49:42.000Z",
+   "documentKey": "2924-03157977-6A1353599",
+   "fileSize": "220KB",
+   "headline": "Appendix 3Y - Jennifer Morris",
+   "isPriceSensitive": false,
+   "symbol": "LTR",
+   "symbolsSecondary": [
+    "LTR",
+    ""
+   ],
+   "url": ""
+  },
+  "dates": [
+   "2026-11-04T04:49:42.000Z",
+   "2026-11-04T02:44:21.000Z"
+  ],
+  "types": [
+   "Alteration to Notice of Meeting",
+   "Alteration to issued capital",
+   "Appendix 2A",
+   "Appendix 3G",
+   "Appendix 3H (Notification of cessation of securities)",
+   "Becoming a substantial holder",
+   "Chair's Address to Shareholders",
+   "Change in substantial holding",
+   "Change of Director's Interest Notice",
+   "Cleansing Notice",
+   "Company Presentation",
+   "Dividend - Other",
+   "Dividend Pay Date",
+   "Dividend Rate",
+   "Dividend Record Date",
+   "Dividend Reinvestment Plan",
+   "Final Director's Interest Notice",
+   "Interest Pay Date",
+   "Interest Rate",
+   "Interest Record Date",
+   "Issued Capital - Other",
+   "Net Tangible Asset Backing",
+   "Periodic Reports - Other",
+   "Results of Meeting",
+   "Security holder details - Other",
+   "Web Cast"
+  ],
+  "substantial": [
+   [
+    "EGY",
+    "Change in substantial holding from HUB",
+    "2026-11-04T03:58:06.000Z",
+    "2924-03157951-2A1708314"
+   ],
+   [
+    "MYG",
+    "Becoming a substantial holder",
+    "2026-11-04T03:36:46.000Z",
+    "2924-03157941-2A1708311"
+   ]
+  ]
+ },
+ "page_html_len": 135354,
+ "scripts": [
+  "/.rum/@adobe/helix-rum-js@%5E2/dist/micro.js",
+  "/etc.clientlibs/asx/clientlibs/clientlib-base-98.0.1.lc-84e026e139991d67251c605b56ea9e8c-lc.min.js",
+  "/etc.clientlibs/asx/clientlibs/clientlib-dependencies.lc-09b76bea3a1bc11bb99e50bc0deba119-lc.min.js",
+  "/etc.clientlibs/clientlibs/granite/jquery.lc-7842899024219bcbdb5e72c946870b79-lc.min.js",
+  "/etc.clientlibs/core/wcm/components/commons/site/clientlibs/container.lc-0a6aff292f5cc42142779cde92054524-lc.min.js",
+  "https://asx.cmfyapp.com/js/common.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://asx.cmfyapp.com/js/manifest.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://asx.cmfyapp.com/js/vendor.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://cdnjs.cloudflare.com/ajax/libs/F2/1.4.3/f2.min.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.7.0/polyfill.min.js",
+  "https://cookie-cdn.cookiepro.com/scripttemplates/otSDKStub.js",
+  "https://intercept-widget.questionpro.com.au/static/js/loader.js",
+  "https://siteimproveanalytics.com/js/siteanalyze_6054237.js",
+  "https://unpkg.com/axios@0.18.0/dist/axios.min.js",
+  "https://www.chartworks.io/content/chartworks/dist/1.4.30/js/chartworks.min.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b"
+ ],
+ "snippets": [
+  {
+   "src": "https://www.asx.com.au/etc.clientlibs/asx/clientlibs/clientlib-base-98.0.1.lc-84e026e139991d67251c605b56ea9e8c-lc.min.js",
+   "ctx": "x3e \");var n=\"/content/dam/asx/markit-companies.json\",p=document.getElementById(\"search-config\"),q;c.addEventListener(\"click\",function(){v.querySelector(\".multi-select-search\").focus()});nullCheck(p)&&(q=p.getAttribute(\"data-f2ApiDomain\"));p=q+\"/companies/directory?page\\x3d\"+companyCallcounter+\"\\x26itemsPerPage\\x3d25\\x26order\\x3dascending\\x26orderBy\\x3dcompanyName\\x26includeFilterOptions\\x3dtrue\\x26recentListingsOnly\\x3dfalse\";console.log(\"populateCompanyDropDown - \\x3e \"+\nn+\" | \"+p);\"aemcloud\"===toggleApiUrl&&(n=p);fetch(n).then(function(x){if(!x.ok)throw Error(\"Network response was not ok\");return x.jso"
+  },
+  {
+   "src": "https://www.asx.com.au/etc.clientlibs/asx/clientlibs/clientlib-base-98.0.1.lc-84e026e139991d67251c605b56ea9e8c-lc.min.js",
+   "ctx": ",\"ig\");(T=(T=E.match(a))&&0<T.length?!0:!1)&&(E=E.replace(a,function(d){return\"\\x3cspan class\\x3d'highlight'\\x3e\"+d+\"\\x3c/span\\x3e\"}))}return E}}},computed:{},watch:{query:function(E){this.onPredictiveSearch(E)}},methods:{onPredictiveSearch:_.debounce(function(E){var G={per_page:24,engine_key:q},T={itemsPerPage:5,page:0,access_token:y};this.isResultDisplayed=this.isLoading=!1;if(E&&2<=E.length){this.isLoading=\n!0;G.q=encodeURI(E.split(\" \").join(\"+\"));T.searchText=E;var Y=this;c.ajax({type:\"GET\",dataType:\"jsonp\",url:p,data:G,success:function(a){c.ajax({type:\"GET\",url:x,data:T,success:function(d){void 0!=d&"
+  },
+  {
+   "src": "https://www.asx.com.au/etc.clientlibs/asx/clientlibs/clientlib-base-98.0.1.lc-84e026e139991d67251c605b56ea9e8c-lc.min.js",
+   "ctx": "p_content=T.pages.content.slice(0,\n3),T.blog.top_content=T.blog.content.slice(0,3),T.documents.top_content=T.documents.content.slice(0,3));a.info.page.spelling_suggestion&&(T.suggestion=a.info.page.spelling_suggestion.text);T.isLoading=!1}});Y={searchText:T.query.split(\"+\").join(\" \"),access_token:x,itemsPerPage:100};c.ajax({type:\"GET\",url:q,data:Y,success:function(a){if(void 0!=a.data.items){a=a.data.items;var d=Object.keys(a).length;T.prices.count=d;T.prices.content=a}else T.prices.count=0,T.prices.content=[]}})},getSortedData:function(G){\"\"===\nG.sort&&this.getStaticData(G);if(G.newSearch||\"pages\"==G.ite"
+  }
+ ]
+}

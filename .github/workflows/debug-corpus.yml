@@ -26,62 +26,40 @@ jobs:
           import scrape, requests
           S = requests.Session(); S.headers.update(scrape.HEADERS)
           API = "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements"
-          out = {}
-          def get(params, label):
-              try:
-                  r = S.get(API, params=params, timeout=40)
-                  j = r.json() if "json" in r.headers.get("Content-Type", "") else None
-              except Exception as ex:
-                  out[label] = {"error": str(ex)}; return None
-              items = ((j or {}).get("data") or {}).get("items") or []
-              out[label] = {"status": r.status_code, "url": r.url, "n": len(items),
-                            "keys_top": list((j or {}).keys()), "keys_data": [k for k in ((j or {}).get("data") or {}).keys()],
-                            "meta": {k: v for k, v in ((j or {}).get("data") or {}).items() if k != "items"},
-                            "first": items[0] if items else None,
-                            "dates": [items[0]["date"], items[-1]["date"]] if items else None,
-                            "types": sorted({t for it in items for t in (it.get("announcementTypes") or [])})[:40],
-                            "substantial": [(it.get("symbol"), it.get("headline"), it.get("date"), it.get("documentKey")) for it in items
-                                            if re.search(r"substantial", it.get("headline") or "", re.I)][:30]}
+          out = {"pages": [], "substantial": []}
+          t0 = time.time()
+          for page in range(0, 12):
+              t1 = time.time()
+              r = S.get(API, params={"page": page, "itemsPerPage": 1000}, timeout=60)
+              items = (r.json().get("data") or {}).get("items") or []
+              out["pages"].append({"page": page, "status": r.status_code, "n": len(items), "bytes": len(r.content), "secs": round(time.time() - t1, 1),
+                                   "first": items[0]["date"] if items else None, "last": items[-1]["date"] if items else None})
+              for it in items:
+                  if re.search(r"substantial\s+(?:holder|holding|shareholder)", it.get("headline") or "", re.I):
+                      out["substantial"].append({k: it.get(k) for k in ("symbol", "headline", "date", "documentKey", "isPriceSensitive", "fileSize", "announcementTypes", "url")})
+              if not items:
+                  break
               time.sleep(1)
-              return items
-          get({"page": 0, "itemsPerPage": 100}, "p0_100")
-          for p in (5, 20, 60, 150):
-              get({"page": p, "itemsPerPage": 100}, f"p{p}_100")
-          get({"page": 0, "itemsPerPage": 1000}, "p0_1000")
-          # 猜几个筛选参数，看第一条是否变化
-          for k, v in [("announcementTypes", "SECURITY HOLDER DETAILS"), ("announcementType", "SECURITY HOLDER DETAILS"),
-                       ("types", "SECURITY HOLDER DETAILS"), ("searchText", "substantial"), ("keyword", "substantial"),
-                       ("startDate", "2026-10-28"), ("dateFrom", "2026-10-28"), ("fromDate", "2026-10-28"), ("date", "2026-10-28")]:
-              get({"page": 0, "itemsPerPage": 50, k: v}, f"f_{k}")
-          # 看网站前端怎么调用这个接口
-          snippets = []
-          try:
-              html = S.get("https://www.asx.com.au/markets/trade-our-cash-market/announcements", timeout=40).text
-              out["page_html_len"] = len(html)
-              srcs = sorted(set(re.findall(r'src="([^"]+\.js[^"]*)"', html)))[:60]
-              out["scripts"] = srcs
-              for s in srcs:
-                  u = s if s.startswith("http") else "https://www.asx.com.au" + s
-                  if "asx.com.au" not in u and "markitdigital" not in u: continue
+          out["total_secs"] = round(time.time() - t0, 1)
+          files = []
+          for it in out["substantial"][:3] + out["substantial"][-2:]:
+              for u in ("https://asx.api.markitdigital.com/asx-research/1.0/file/" + it["documentKey"],):
                   try:
-                      js = S.get(u, timeout=40).text
-                  except Exception: continue
-                  for m in re.finditer(r"markets/announcements", js):
-                      snippets.append({"src": u, "ctx": js[max(0, m.start()-700): m.end()+700]})
-                  for m in re.finditer(r"announcementTypes|itemsPerPage|summaryCountsDate", js):
-                      snippets.append({"src": u, "ctx": js[max(0, m.start()-300): m.end()+300]})
-                  time.sleep(0.5)
-          except Exception as ex:
-              out["page_error"] = str(ex)
-          out["snippets"] = snippets[:40]
-          json.dump(out, open("out/probe2.json", "w"), ensure_ascii=False, indent=1)
+                      r = S.get(u, timeout=60, allow_redirects=True)
+                      files.append({"url": u, "status": r.status_code, "final": r.url, "type": r.headers.get("Content-Type"),
+                                    "len": len(r.content), "pdf": r.content[:5] == b"%PDF-", "head": r.text[:300] if r.content[:5] != b"%PDF-" else ""})
+                  except Exception as ex:
+                      files.append({"url": u, "error": str(ex)})
+                  time.sleep(1)
+          out["files"] = files
+          json.dump(out, open("out/probe3.json", "w"), ensure_ascii=False, indent=1)
           PY
       - name: Push output
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout --orphan debug-probe-out
+          git checkout --orphan debug-probe3-out
           git rm -rq --cached .
           git add -f out
-          git commit -qm "debug: probe"
-          git push -f origin debug-probe-out
+          git commit -qm "debug: probe3"
+          git push -f origin debug-probe3-out

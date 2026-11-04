@@ -1,0 +1,91 @@
+name: debug-corpus   # 临时诊断用：导出全部公告的文字语料 + 试探 ASX 接口，推到 debug-corpus-out 分支。不会合并到 main。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dump:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr
+      - run: pip install -r requirements.txt
+      - name: Dump corpus
+        run: |
+          mkdir -p out/pdfs
+          python - <<'PY'
+          import json, sys, time, io, datetime as dt
+          sys.path.insert(0, "scraper")
+          import scrape, requests
+          from pypdf import PdfReader, PdfWriter
+          store = json.load(open("data/all_notices.json"))["entries"]
+          items = {k: dict(v) for k, v in store.items()}
+          # 加上今天/上一交易日列表里的新公告，扩大样本
+          today = dt.datetime.now(scrape.SYD).date()
+          for url in scrape.LIST_PAGES:
+              try:
+                  rows, ok = scrape.parse_listing(scrape.fetch(url).text, today)
+              except Exception as ex:
+                  print("list fail", url, ex); continue
+              for r in rows:
+                  if scrape.SUBSTANTIAL_RE.search(r["headline"]) and r["id"] not in items:
+                      items[r["id"]] = {**r, "type": scrape.classify(r["headline"]), "hint": scrape.headline_hint(r["headline"])}
+          corpus = {}
+          for i, e in sorted(items.items()):
+              rec = {k: e.get(k) for k in ("id", "code", "date", "time", "headline", "type", "hint", "pages", "url")}
+              try:
+                  data, pdf_url = scrape.download_pdf(e["url"])
+              except Exception as ex:
+                  rec["error"] = f"{type(ex).__name__}: {ex}"; corpus[i] = rec; print("fail", i, ex); continue
+              rec["pdf_url"] = pdf_url
+              try:
+                  rec["texts"] = scrape.pdf_texts(data)
+              except Exception as ex:
+                  rec["texts"] = []; rec["text_error"] = str(ex)
+              res = scrape.analyse_texts(rec["texts"], rec["type"] if rec["type"] != "other" else (scrape.infer_type(rec["texts"][0]) if rec["texts"] else "other")) if rec["texts"] else None
+              if scrape.blank(res):
+                  try:
+                      rec["ocr_texts"] = scrape.ocr_texts(data)
+                  except Exception as ex:
+                      rec["ocr_error"] = str(ex)
+              try:
+                  r = PdfReader(io.BytesIO(data)); w = PdfWriter()
+                  for p in r.pages[:3]: w.add_page(p)
+                  buf = io.BytesIO(); w.write(buf)
+                  open(f"out/pdfs/{e['code']}_{i}.pdf", "wb").write(buf.getvalue())
+              except Exception as ex:
+                  rec["trim_error"] = str(ex)
+              corpus[i] = rec
+              print("ok", i, e["code"], len(rec.get("texts") or []), "ocr" if rec.get("ocr_texts") else "")
+              time.sleep(0.6)
+          json.dump(corpus, open("out/corpus.json", "w"), ensure_ascii=False)
+          # 试探：有没有能按日期查全市场公告的接口（只发几次请求）
+          probes = {}
+          for u in ["https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=5",
+                    "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?summaryCountsDate=2026-10-29&page=0&itemsPerPage=5",
+                    "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/announcements",
+                    "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=BHP&timeframe=D&period=W"]:
+              try:
+                  r = requests.get(u, headers=scrape.HEADERS, timeout=30)
+                  probes[u] = {"status": r.status_code, "type": r.headers.get("Content-Type"), "body": r.text[:3000]}
+              except Exception as ex:
+                  probes[u] = {"error": str(ex)}
+              time.sleep(1)
+          json.dump(probes, open("out/probes.json", "w"), ensure_ascii=False, indent=1)
+          PY
+      - name: Push output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan debug-corpus-out
+          git rm -rq --cached . 
+          git add -f out
+          git commit -qm "debug: corpus"
+          git push -f origin debug-corpus-out

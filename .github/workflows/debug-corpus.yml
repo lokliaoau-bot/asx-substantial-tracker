@@ -1,92 +1,87 @@
-name: debug-corpus   # 临时诊断用：导出全部公告的文字语料 + 试探 ASX 接口，推到 debug-corpus-out 分支。不会合并到 main。
+name: debug-probe   # 临时诊断用：摸清 ASX markets/announcements 接口的翻页和筛选参数。不会合并到 main。
 
 on:
   push:
-    branches: [debug-corpus]     # 推送到这个临时分支时运行（手动触发要求工作流在 main 上，这里不想动 main）
+    branches: [debug-corpus]
 
 permissions:
   contents: write
 
 jobs:
-  dump:
+  probe:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr
       - run: pip install -r requirements.txt
-      - name: Dump corpus
+      - name: Probe
         run: |
-          mkdir -p out/pdfs
+          mkdir -p out
           python - <<'PY'
-          import json, sys, time, io, datetime as dt
+          import json, re, sys, time
           sys.path.insert(0, "scraper")
           import scrape, requests
-          from pypdf import PdfReader, PdfWriter
-          store = json.load(open("data/all_notices.json"))["entries"]
-          items = {k: dict(v) for k, v in store.items()}
-          # 加上今天/上一交易日列表里的新公告，扩大样本
-          today = dt.datetime.now(scrape.SYD).date()
-          for url in scrape.LIST_PAGES:
+          S = requests.Session(); S.headers.update(scrape.HEADERS)
+          API = "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements"
+          out = {}
+          def get(params, label):
               try:
-                  rows, ok = scrape.parse_listing(scrape.fetch(url).text, today)
+                  r = S.get(API, params=params, timeout=40)
+                  j = r.json() if "json" in r.headers.get("Content-Type", "") else None
               except Exception as ex:
-                  print("list fail", url, ex); continue
-              for r in rows:
-                  if scrape.SUBSTANTIAL_RE.search(r["headline"]) and r["id"] not in items:
-                      items[r["id"]] = {**r, "type": scrape.classify(r["headline"]), "hint": scrape.headline_hint(r["headline"])}
-          corpus = {}
-          for i, e in sorted(items.items()):
-              rec = {k: e.get(k) for k in ("id", "code", "date", "time", "headline", "type", "hint", "pages", "url")}
-              try:
-                  data, pdf_url = scrape.download_pdf(e["url"])
-              except Exception as ex:
-                  rec["error"] = f"{type(ex).__name__}: {ex}"; corpus[i] = rec; print("fail", i, ex); continue
-              rec["pdf_url"] = pdf_url
-              try:
-                  rec["texts"] = scrape.pdf_texts(data)
-              except Exception as ex:
-                  rec["texts"] = []; rec["text_error"] = str(ex)
-              res = scrape.analyse_texts(rec["texts"], rec["type"] if rec["type"] != "other" else (scrape.infer_type(rec["texts"][0]) if rec["texts"] else "other")) if rec["texts"] else None
-              if scrape.blank(res):
-                  try:
-                      rec["ocr_texts"] = scrape.ocr_texts(data)
-                  except Exception as ex:
-                      rec["ocr_error"] = str(ex)
-              try:
-                  r = PdfReader(io.BytesIO(data)); w = PdfWriter()
-                  for p in r.pages[:3]: w.add_page(p)
-                  buf = io.BytesIO(); w.write(buf)
-                  open(f"out/pdfs/{e['code']}_{i}.pdf", "wb").write(buf.getvalue())
-              except Exception as ex:
-                  rec["trim_error"] = str(ex)
-              corpus[i] = rec
-              print("ok", i, e["code"], len(rec.get("texts") or []), "ocr" if rec.get("ocr_texts") else "")
-              time.sleep(0.6)
-          json.dump(corpus, open("out/corpus.json", "w"), ensure_ascii=False)
-          # 试探：有没有能按日期查全市场公告的接口（只发几次请求）
-          probes = {}
-          for u in ["https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=0&itemsPerPage=5",
-                    "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?summaryCountsDate=2026-10-29&page=0&itemsPerPage=5",
-                    "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/announcements",
-                    "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=BHP&timeframe=D&period=W"]:
-              try:
-                  r = requests.get(u, headers=scrape.HEADERS, timeout=30)
-                  probes[u] = {"status": r.status_code, "type": r.headers.get("Content-Type"), "body": r.text[:3000]}
-              except Exception as ex:
-                  probes[u] = {"error": str(ex)}
+                  out[label] = {"error": str(ex)}; return None
+              items = ((j or {}).get("data") or {}).get("items") or []
+              out[label] = {"status": r.status_code, "url": r.url, "n": len(items),
+                            "keys_top": list((j or {}).keys()), "keys_data": [k for k in ((j or {}).get("data") or {}).keys()],
+                            "meta": {k: v for k, v in ((j or {}).get("data") or {}).items() if k != "items"},
+                            "first": items[0] if items else None,
+                            "dates": [items[0]["date"], items[-1]["date"]] if items else None,
+                            "types": sorted({t for it in items for t in (it.get("announcementTypes") or [])})[:40],
+                            "substantial": [(it.get("symbol"), it.get("headline"), it.get("date"), it.get("documentKey")) for it in items
+                                            if re.search(r"substantial", it.get("headline") or "", re.I)][:30]}
               time.sleep(1)
-          json.dump(probes, open("out/probes.json", "w"), ensure_ascii=False, indent=1)
+              return items
+          get({"page": 0, "itemsPerPage": 100}, "p0_100")
+          for p in (5, 20, 60, 150):
+              get({"page": p, "itemsPerPage": 100}, f"p{p}_100")
+          get({"page": 0, "itemsPerPage": 1000}, "p0_1000")
+          # 猜几个筛选参数，看第一条是否变化
+          for k, v in [("announcementTypes", "SECURITY HOLDER DETAILS"), ("announcementType", "SECURITY HOLDER DETAILS"),
+                       ("types", "SECURITY HOLDER DETAILS"), ("searchText", "substantial"), ("keyword", "substantial"),
+                       ("startDate", "2026-10-28"), ("dateFrom", "2026-10-28"), ("fromDate", "2026-10-28"), ("date", "2026-10-28")]:
+              get({"page": 0, "itemsPerPage": 50, k: v}, f"f_{k}")
+          # 看网站前端怎么调用这个接口
+          snippets = []
+          try:
+              html = S.get("https://www.asx.com.au/markets/trade-our-cash-market/announcements", timeout=40).text
+              out["page_html_len"] = len(html)
+              srcs = sorted(set(re.findall(r'src="([^"]+\.js[^"]*)"', html)))[:60]
+              out["scripts"] = srcs
+              for s in srcs:
+                  u = s if s.startswith("http") else "https://www.asx.com.au" + s
+                  if "asx.com.au" not in u and "markitdigital" not in u: continue
+                  try:
+                      js = S.get(u, timeout=40).text
+                  except Exception: continue
+                  for m in re.finditer(r"markets/announcements", js):
+                      snippets.append({"src": u, "ctx": js[max(0, m.start()-700): m.end()+700]})
+                  for m in re.finditer(r"announcementTypes|itemsPerPage|summaryCountsDate", js):
+                      snippets.append({"src": u, "ctx": js[max(0, m.start()-300): m.end()+300]})
+                  time.sleep(0.5)
+          except Exception as ex:
+              out["page_error"] = str(ex)
+          out["snippets"] = snippets[:40]
+          json.dump(out, open("out/probe2.json", "w"), ensure_ascii=False, indent=1)
           PY
       - name: Push output
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout --orphan debug-corpus-out
-          git rm -rq --cached . 
+          git checkout --orphan debug-probe-out
+          git rm -rq --cached .
           git add -f out
-          git commit -qm "debug: corpus"
-          git push -f origin debug-corpus-out
+          git commit -qm "debug: probe"
+          git push -f origin debug-probe-out

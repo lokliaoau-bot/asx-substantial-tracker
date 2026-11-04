@@ -262,7 +262,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   </details>
 
   <footer>
-    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。标着“扫描件·文字识别”的，是把扫描的图片 PDF 用 OCR 识别出来的，数字可能认错，请以原文为准。养老金只看得到它们自己操盘的部分；交给外部基金经理管理的钱，会以基金经理的名义申报。本工具只做信息整理，不构成投资建议。
+    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。标着“扫描件·文字识别”的，是把扫描的图片 PDF 用 OCR 识别出来的，数字可能认错，请以原文为准。养老金只看得到它们自己操盘的部分；交给外部基金经理管理的钱，会以基金经理的名义申报。每次抓取会同时读 ASX 的当日公告列表和全市场公告接口，自动补回最近两三周里没点按钮那几天的公告。本工具只做信息整理，不构成投资建议。
   </footer>
 </main>
 
@@ -586,14 +586,20 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     return d;
   }
 
+  const backfillOk = () => !!(state.data && state.data.last_run && state.data.last_run.backfill && state.data.last_run.backfill.ok);
+
   function renderPartial() {
     const box = $("partial");
     const partial = (state.data && state.data.partial_days) || {};
     const today = sydneyToday(), prev = prevWeekday(today);
     if (partial[today]) {
-      box.textContent = `今天的公告只抓到 ${partial[today]}。ASX 晚上 8 点多还会发公告，晚上 9 点以后或下一个交易日再点一次“抓取最新公告”，就能把今天补全。`;
+      box.textContent = backfillOk()
+        ? `今天的公告只抓到 ${partial[today]}。ASX 晚上 8 点多还会发公告，晚上 9 点以后或之后任何一天再点一次“抓取最新公告”，会自动补全（最近两三周内的都能补回）。`
+        : `今天的公告只抓到 ${partial[today]}。ASX 晚上 8 点多还会发公告，晚上 9 点以后或下一个交易日再点一次“抓取最新公告”，就能把今天补全。`;
     } else if (partial[prev]) {
-      box.textContent = `${fmtDate(prev)} 的公告只抓到 ${partial[prev]}。今天点一次“抓取最新公告”就能补全；过了今天，那天后来发的公告就补不回来了。`;
+      box.textContent = backfillOk()
+        ? `${fmtDate(prev)} 的公告只抓到 ${partial[prev]}，再点一次“抓取最新公告”会自动补全。`
+        : `${fmtDate(prev)} 的公告只抓到 ${partial[prev]}。今天点一次“抓取最新公告”就能补全；过了今天，那天后来发的公告就补不回来了。`;
     } else {
       box.hidden = true;
       return;
@@ -615,12 +621,16 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     const days = (d && d.scanned_days) || [];
     if (!d || !d.last_success_at) { cov.hidden = true; return; }
     const from = windowStart();
-    const covered = days.filter((x) => x >= from);
+    const isWeekday = (x) => ![0, 6].includes(new Date(x + "T00:00:00Z").getUTCDay());
+    const covered = days.filter((x) => x >= from && isWeekday(x));   // 偶尔有周末发布的公告，不能把周末算进覆盖天数
     const end = covered.length ? covered[covered.length - 1] : sydneyToday();
     const missing = weekdaysBetween(from, end) - covered.length;
     if (missing >= 2) {
       cov.hidden = false;
-      cov.textContent = `这段时间里约有 ${missing} 个交易日还没有数据。ASX 公开的全市场列表只提供当天和上一交易日，每次点“抓取最新公告”会补上这两天。想要连续的近两周数据，每隔一两个交易日点一次就行。`;
+      const bf = d.last_run && d.last_run.backfill;
+      cov.textContent = bf && bf.ok
+        ? `这段时间里约有 ${missing} 个交易日还没有数据。每次点“抓取最新公告”会自动补回最近两三周的公告（${bf.from ? "目前补到 " + fmtDate(bf.from) : "补抓范围取决于 ASX 接口"}），更早的就补不回来了。`
+        : `这段时间里约有 ${missing} 个交易日还没有数据。这次自动补抓没成功，只读到了当天和上一交易日；下次点“抓取最新公告”会再试。`;
     } else {
       cov.hidden = true;
     }

@@ -180,12 +180,27 @@ PDFS = {
 
 
 class FakeASX:
-    def __init__(self, listing=LISTING, fail_ids=(), lists_down=False, prev_listing=None, broken_ids=()):
+    def __init__(self, listing=LISTING, fail_ids=(), lists_down=False, prev_listing=None, broken_ids=(),
+                 api_items=(), api_down=False, api_pdfs=None):
         self.listing, self.fail_ids, self.lists_down = listing, set(fail_ids), lists_down
         self.prev_listing, self.broken_ids = prev_listing, set(broken_ids)
+        self.api_items, self.api_down, self.api_pdfs = list(api_items), api_down, api_pdfs or {}
         self.pdf_downloads = []
+        self.api_pages = []
 
     def __call__(self, url, *, max_bytes=None, tries=3, timeout=60):
+        if url.startswith(scrape.MARKET_API):
+            if self.api_down:
+                raise scrape.FetchError("HTTP 503")
+            page = int(url.split("page=")[1].split("&")[0])
+            size = int(url.split("itemsPerPage=")[1].split("&")[0])
+            self.api_pages.append(page)
+            body = {"data": {"count": len(self.api_items), "items": self.api_items[page * size:(page + 1) * size]}}
+            return scrape.Fetched(url, json.dumps(body).encode(), "application/json; charset=utf-8")
+        if url.startswith(scrape.FILE_API):
+            key = url[len(scrape.FILE_API):]
+            self.pdf_downloads.append("mk-" + key)
+            return scrape.Fetched(url, make_pdf(self.api_pdfs[key]), "application/pdf")
         if url.endswith("Anns.do"):
             if self.lists_down:
                 raise scrape.FetchError("HTTP 503")
@@ -839,3 +854,218 @@ def test_ocr_result_without_anything_keeps_text_result(sandbox, monkeypatch):
     assert e["status"] == "parsed" and e["ocr"] is False and e["ocr_tried"] is True
     scrape.main()                                         # 已经试过 OCR 的不会每次重读
     assert read(sandbox / "data" / "notices.json")["last_run"]["pdf_checked"] == 0
+
+
+# ---------------------------------------------------------------- 第六轮（2026-11-04）：成功率和准确率
+
+def test_more_date_formats():
+    for s in ("on 28/October/2026", "on October 28, 2026", "on Oct. 28, 2026", "on // 28 10 2026", "on / / 28102026",
+              "on 10/28/2026", "on 28-Oct-2026", "on 28th October 2026"):
+        assert scrape.parse_date(s) == "2026-10-28", s
+    assert scrape.parse_date("on 15 Sept 2026") == "2026-09-15"
+    assert scrape.parse_date("ACN 062 576 238") == ""                     # 不会把 ACN 当成日期
+
+
+def test_real_jpmorgan_and_morgan_stanley_dates():
+    r = real("603_slash_month_jpm_flt.pdf", "becoming")                  # 28/October/2026
+    assert r["holder_name"].startswith("JPMorgan Chase") and r["change_date"] == "2026-10-28" and r["voting_power"] == [5.23]
+    r = real("604_us_date_ms_oml.pdf", "change")                         # October 28, 2026（美式）
+    assert r["change_date"] == "2026-10-28" and r["voting_power"] == [8.97, 7.84]
+
+
+def test_real_comb_field_dates():
+    r = real("603_spaced_digits_tzn.pdf", "becoming")                    # “28 10 2026”
+    assert r["change_date"] == "2026-10-28" and r["voting_power"] == [5.58]
+    r = real("603_8digit_date_mlg.pdf", "becoming")                      # “28102026”
+    assert r["change_date"] == "2026-10-28" and r["voting_power"] == [5.19]
+
+
+def test_real_custom_forms_without_section_header():
+    r = real("603_custom_name_perennial_pc2.pdf", "becoming")           # 以前漏掉的 Perennial 新进
+    assert r["holder_name"] == "Perennial Value Management Limited"
+    assert r["change_date"] == "2026-10-29" and r["voting_power"] == [5.06]
+    assert scrape.match_entry({"holder_name": r["holder_name"]}, HOLDERS) == ("Perennial", "高")
+    r = real("notice_custom_nyr.pdf", "becoming")
+    assert r["holder_name"] == "John Moore" and r["change_date"] == "2026-10-30" and r["voting_power"] == [5.58]
+
+
+def test_real_sec_13g():
+    r = real("sec13g_aai.pdf", "becoming")
+    assert r["holder_name"] == "Vanguard Portfolio Management" and r["voting_power"] == [5.04]
+    assert r["change_date"] == "2026-09-30" and r["company"] == "Alcoa Corp"
+
+
+def test_see_annexure_is_not_a_name():
+    r = real("603_see_annexure_wmc.pdf", "becoming")
+    assert r["holder_name"] == "" and r["voting_power"] == [29.5]
+    assert not scrape.looks_like_name("See Annexure A") and not scrape.looks_like_name("Refer to Annexure B")
+
+
+def test_fallback_name_ignores_cover_letter_and_signature():
+    letter = "Dear Sir\nName: Jane Citizen\nCompany Secretary\nForm 603\nNotice of initial substantial holder\nName: Regal Funds Management Pty Ltd\n2. Details of voting power\nOrdinary 1 6.1%"
+    assert scrape.fallback_name(letter) == "Regal Funds Management Pty Ltd"
+    sig = "Form 604\nNotice of change of interests\n2. Previous and present voting power\nOrdinary 1 6% 2 7%\nSignature\nName: John Smith"
+    assert scrape.fallback_name(sig) == ""
+
+
+def test_new_aliases():
+    assert scrape.match_entry({"holder_name": "L1 Group Limited"}, HOLDERS) == ("L1 Capital", "高")
+    assert scrape.match_entry({"holder_name": "Wyloo Consolidated Investments Pty Ltd"}, HOLDERS) == ("Tattarang (Andrew Forrest)", "高")
+
+
+def test_ocr_junk_and_section_two_variants():
+    assert scrape.clean_name("> Regal Funds Management") == "Regal Funds Management"
+    assert not scrape.looks_like_name(scrape.clean_name("> 2. Details of voting power"))
+    t = "1. Details of substantial holder (1)\nName See Annexure A\n> 2. Details of voting power\nThe total"
+    assert scrape.parse_holder_section(t, ocr=True)[0] == ""
+    seg = "2, Previous and present voting power\nav) 884% 99%\nORDS 157,488,475\n(14.45% based on 1,751,348,821)"
+    assert scrape.pick_voting_power(seg, "change", True, ocr=True) == []       # 扫描件不跨行拼数字
+
+
+def test_strict_form_type_overrides_headline(sandbox, monkeypatch):
+    form = ["Form 604", "Notice of change of interests of substantial holder", "To Company Name/Scheme ABC Limited",
+            "1. Details of substantial holder (1)", "Name Some Random Fund Pty Ltd",
+            "There was a change in the interests of the substantial holder on 27/10/2026",
+            "2. Previous and present voting power", "Ordinary 1 6.01% 2 7.05%"]
+    monkeypatch.setitem(PDFS, "1001", form)
+    monkeypatch.setattr(scrape, "fetch", FakeASX(listing=LISTING.replace("Becoming a substantial holder<br>", "Ceasing to be a substantial holder<br>")))
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["type"] == "change" and e["voting_power"] == [6.01, 7.05]
+
+
+def test_fetch_404_is_retried_later(monkeypatch):
+    class Resp:
+        status_code, headers, url = 404, {}, "u"
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def iter_content(self, chunk_size=0): return iter([])
+    calls = []
+    monkeypatch.setattr(scrape.session, "get", lambda *a, **k: calls.append(1) or Resp())
+    with pytest.raises(scrape.FetchError) as ex:
+        scrape.fetch("https://www.asx.com.au/x.pdf")
+    assert not isinstance(ex.value, scrape.PermanentFetchError) and len(calls) == 1
+
+
+def test_weekend_today_page_with_friday_rows_is_complete():
+    scanned, partial = set(), {}
+    scrape.mark_days({"2026-11-06"}, dt.date(2026, 11, 7), "10:00", scanned, partial)   # 周六上午打开
+    assert scanned == {"2026-11-06"} and partial == {}
+    scrape.mark_days({"2026-11-09"}, dt.date(2026, 11, 9), "10:00", scanned, partial)   # 周一上午：当天只抓到一部分
+    assert partial == {"2026-11-09": "10:00"}
+
+
+# ---------------- 补抓：全市场公告接口
+
+def api_item(symbol, headline, utc, key, types=(), ps=False):
+    return {"symbol": symbol, "headline": headline, "date": utc, "documentKey": key,
+            "announcementTypes": list(types), "isPriceSensitive": ps}
+
+
+LISTING_HUB = LISTING.replace("</table>", """<tr><td>HUB</td><td>30/10/2026<br><span>4:56 PM</span></td><td class="pricesens"></td>
+<td><a href="/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=1007">Change in substantial holding for KIT</a></td></tr></table>""")
+PDFS["1007"] = ["Form 604", "To Company Name/Scheme Kapstream Investment Trust", "1. Details of substantial holder (1)",
+                "Name HUB24 Limited", "There was a change in the interests of the substantial holder on 28/10/2026",
+                "2. Previous and present voting power", "Ordinary 1 6.12% 2 5.12%"]
+REGAL_603 = ["Form 603", "To Company Name/Scheme Old Day Limited", "1. Details of substantial holder (1)",
+             "Name Regal Funds Management Pty Limited", "The holder became a substantial holder on 27/10/2026",
+             "2. Details of voting power", "Ordinary 1 6.40%"]
+
+
+def backfill_fake(**kw):
+    items = [
+        api_item("SLC", "Becoming a substantial holder", "2026-10-30T05:10:00.000Z", "2924-1001-A"),        # 列表页已有
+        api_item("KIT", "Change in substantial holding from HUB", "2026-10-30T05:56:00.000Z", "2924-1007-A"),  # “for KIT” 的另一条发布
+        api_item("OLD", "Becoming a substantial holder", "2026-10-28T23:00:00.000Z", "2924-9001-A",
+                 types=["Becoming a substantial holder"]),                                                  # 漏掉的那天
+        api_item("ZZZ", "Quarterly Activities Report", "2026-10-28T22:00:00.000Z", "2924-9002-A"),         # 不是大股东公告
+        api_item("GEN", "Substantial Holder Notice", "2026-10-28T21:00:00.000Z", "2924-9003-A",
+                 types=["Ceasing to be a substantial holder"]),
+        api_item("OLD2", "Change in substantial holding", "2026-10-01T00:00:00.000Z", "2924-9004-A"),     # 窗口以外
+    ]
+    pdfs = {"2924-9001-A": REGAL_603,
+            "2924-9003-A": ["Form 605", "1. Details of substantial holder (1)", "Name Somebody Else Pty Ltd",
+                            "The holder ceased to be a substantial holder on 27/10/2026"],
+            "2924-9004-A": REGAL_603}
+    return FakeASX(listing=LISTING_HUB, api_items=items, api_pdfs=pdfs, **kw)
+
+
+def test_backfill_adds_missed_days_and_skips_duplicates(sandbox, monkeypatch):
+    fake = backfill_fake()
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    assert scrape.main() == 0
+    entries = read(sandbox / "data" / "all_notices.json")["entries"]
+    assert "mk-2924-1001-A" not in entries and "mk-2924-1007-A" not in entries      # 和列表页重复的不再加
+    old = entries["mk-2924-9001-A"]
+    assert old["status"] == "parsed" and old["date"] == "2026-10-29" and old["time"] == "10:00"
+    assert old["url"] == scrape.FILE_API + "2924-9001-A" and old["holder_name"].startswith("Regal Funds")
+    assert entries["mk-2924-9003-A"]["type"] == "ceasing"                             # 标题看不出类型时用接口给的类型
+    assert "mk-2924-9002-A" not in entries
+    out = read(sandbox / "data" / "notices.json")
+    got = {n["code"]: n for n in out["notices"]}
+    assert got["OLD"]["holder"] == "Regal Funds Management" and got["OLD"]["pdf_url"].startswith(scrape.FILE_API)
+    bf = out["last_run"]["backfill"]
+    assert bf["ok"] and bf["added"] == 3 and out["last_run"]["errors"] == []
+    assert {"2026-10-29", "2026-10-30"} <= set(out["scanned_days"]) and out["partial_days"] == {}
+    # 再跑一次：不重复添加、不重复下载
+    fake.pdf_downloads.clear()
+    scrape.main()
+    assert fake.pdf_downloads == [] and len(read(sandbox / "data" / "all_notices.json")["entries"]) == len(entries)
+
+
+def test_backfill_stops_paging_once_window_is_covered(sandbox, monkeypatch):
+    fake = backfill_fake()
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "API_PAGE_SIZE", 1)
+    monkeypatch.setattr(scrape, "BACKFILL_DAYS", 3)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    assert fake.api_pages == [0, 1, 2, 3, 4, 5]          # 第 6 条（10 月 1 日）已经早于窗口起点，翻到这里就停
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["backfill"]["from"] == "2026-10-02"
+
+
+def test_backfill_failure_does_not_break_list_scraping(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", backfill_fake(api_down=True))
+    assert scrape.main() == 0
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["ok"] and not out["last_run"]["backfill"]["ok"]
+    assert any("补抓接口" in e for e in out["last_run"]["errors"])
+    assert {n["code"] for n in out["notices"]} >= {"SLC", "XYZ", "WAX"}
+
+
+def test_backfill_partial_today_before_9pm(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", backfill_fake(prev_listing=EMPTY_LISTING))
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 15, 0, tzinfo=scrape.SYD))
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["partial_days"] == {"2026-10-30": "15:00"} and "2026-10-29" in out["scanned_days"]
+
+
+@needs_ocr
+def test_image_overlay_form_gets_name_from_ocr(sandbox, monkeypatch):
+    data = (FIXTURES / "603_image_overlay_tvl.pdf").read_bytes()
+    texts = scrape.pdf_texts(data)
+    assert texts and scrape.analyse_texts(texts, "becoming")["holder_name"] == ""   # 文字层只有空白模板
+    fake = FakeASX()
+    real_call = fake.__call__
+    monkeypatch.setattr(scrape, "fetch", lambda url, **kw: scrape.Fetched(url, data, "application/pdf")
+                        if url.endswith("idsId=1001") else real_call(url, **kw))
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["ocr"] is True and e["holder_name"].startswith("Certane CT") and e["voting_power"] == [5.02]
+
+
+@needs_ocr
+def test_ocr_fills_only_missing_fields():
+    data = (FIXTURES / "603_8digit_date_mlg.pdf").read_bytes()
+    e = {"url": "u", "type": "becoming"}
+    orig = scrape.download_pdf
+    try:
+        scrape.download_pdf = lambda url: (data, "https://x/mlg.pdf")
+        scrape.process_entry(e, scrape.OCRBudget())
+    finally:
+        scrape.download_pdf = orig
+    assert e["holder_name"].startswith("Sohra Peak Capital Partners") and e["ocr"] is True
+    assert e["change_date"] == "2026-10-28" and e["voting_power"] == [5.19]          # 数字仍用文字层的

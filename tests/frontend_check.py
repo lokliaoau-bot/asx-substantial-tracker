@@ -29,7 +29,8 @@ SAMPLE = {
     "schema": 2, "updated_at": f"{day(0)}T20:41:00+11:00", "last_success_at": f"{day(0)}T20:41:00+11:00",
     "scanned_days": [day(1), day(0)],
     "partial_days": {day(0): "14:05"},
-    "last_run": {"ok": True, "list_pages_ok": 2, "substantial_found": 40, "pdf_checked": 30, "skipped_noise": 10, "deferred": 0, "errors": []},
+    "last_run": {"ok": True, "list_pages_ok": 2, "substantial_found": 40, "pdf_checked": 30, "skipped_noise": 10, "deferred": 0,
+                 "backfill": {"ok": True, "from": day(20), "added": 300}, "errors": []},
     "watchlist": ["Paradice Investment Management", "Wilson Asset Management", "Regal Funds Management", "L1 Capital", "Perennial",
                   "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading", "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)",
                   "AustralianSuper", "UniSuper"],
@@ -142,7 +143,9 @@ def main():
         pg.click("#groupSeg button[data-group='all']")
         check("挂在 WMI 名下发布" in pg.inner_text("#rows") and "EOL" in pg.inner_text("#rows"),
               "挂在申报方代码下的公告显示真正的标的代码，并注明挂在哪个代码下")
-        check(not pg.locator("#partial").is_hidden() and "14:05" in pg.inner_text("#partial"), "今天只抓到一部分时提示")
+        check(not pg.locator("#partial").is_hidden() and "14:05" in pg.inner_text("#partial") and "自动补全" in pg.inner_text("#partial"),
+              "今天只抓到一部分时提示（有自动补抓时提示稍后再点即可）")
+        check("自动补回最近两三周" in pg.inner_text("#coverage"), "覆盖提示说明会自动补抓")
         pg.fill("#q", "WMI")
         check(pg.locator("#rows tr").count() == 1, "按挂靠代码也能搜到")
         pg.fill("#q", "")

@@ -48,11 +48,13 @@
     {
       "name": "L1 Capital",
       "aliases": [
-        "L1 Capital"
+        "L1 Capital",
+        "L1 Group"
       ],
       "hints": [
         "L1",
-        "L1C"
+        "L1C",
+        "L1G"
       ],
       "group": "主动基金"
     },
@@ -124,11 +126,13 @@
       "name": "Tattarang (Andrew Forrest)",
       "aliases": [
         "Tattarang",
-        "Squadron Resources"
+        "Squadron Resources",
+        "Wyloo"
       ],
       "hints": [
         "Tattarang",
-        "Squadron"
+        "Squadron",
+        "Wyloo"
       ],
       "group": "主动基金"
     },

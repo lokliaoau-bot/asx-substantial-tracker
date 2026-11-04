@@ -42,6 +42,13 @@ LIST_PAGES = (
     BASE + "/asx/v2/statistics/todayAnns.do",
     BASE + "/asx/v2/statistics/prevBusDayAnns.do",
 )
+# ASX 网站自己用的全市场公告接口（Markit Digital 提供）：按时间倒序，最多能翻约 1 万条（大约 2–3 周）。
+# 用来补回没点按钮那几天的公告。接口没有公开文档，读不到时只记提醒、不影响列表页的抓取。
+MARKET_API = "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements"
+FILE_API = "https://asx.api.markitdigital.com/asx-research/1.0/file/"
+API_PAGE_SIZE = 1000
+API_MAX_PAGES = int(os.environ.get("API_MAX_PAGES", "12"))
+BACKFILL_DAYS = int(os.environ.get("BACKFILL_DAYS", "16"))   # 网页最多看 14 天，多补两天
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -58,7 +65,7 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
-PARSER_VERSION = 5   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+PARSER_VERSION = 6   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
 OCR_DPI = 400                                             # 扫描件按 400dpi 渲染再识别（300dpi 会把 Name 认成 tame）
 OCR_PAGES = 3                                             # 扫描件可能第一页是封面信，多看一页
 OCR_TIMEOUT = 90                                          # 单页识别超时（秒）
@@ -138,9 +145,9 @@ def fetch(url: str, *, max_bytes: int | None = None, tries: int = 3, timeout: in
                         if max_bytes and len(buf) > max_bytes:
                             raise PermanentFetchError("文件太大，已跳过")
                     return Fetched(r.url, bytes(buf), r.headers.get("Content-Type", ""))
-                if r.status_code in (404, 410):
-                    raise PermanentFetchError(f"HTTP {r.status_code}")
                 last = f"HTTP {r.status_code}"
+                if r.status_code in (404, 410):
+                    break            # 刚发布的公告偶尔还没生成 PDF，不立刻重试，留给下次运行（最多 3 次）
         except PermanentFetchError:
             raise
         except requests.RequestException as e:
@@ -253,6 +260,63 @@ def headline_target(headline: str, code: str) -> str:
     返回真正的标的代码；标题里没有、或者就是本身代码时返回空串。"""
     m = TARGET_RE.search(headline or "")
     return m.group(1) if m and m.group(1) != code else ""
+
+
+API_TYPES = {"becoming a substantial holder": "becoming", "change in substantial holding": "change",
+             "ceasing to be a substantial holder": "ceasing"}
+
+
+def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
+    """从全市场公告接口往前翻，挑出大股东公告。返回 (公告列表, 覆盖信息)。
+    覆盖信息：oldest = 翻到的最早一条的悉尼时间；reached = 是否已经翻过补抓窗口的起点；
+    days = 翻到的所有公告日期（不只大股东公告，用来判断哪些交易日有数据）。"""
+    window_start = (now - dt.timedelta(days=BACKFILL_DAYS)).date()
+    rows, days, oldest, reached = [], set(), None, False
+    for page in range(API_MAX_PAGES):
+        r = fetch(f"{MARKET_API}?page={page}&itemsPerPage={API_PAGE_SIZE}", timeout=60)
+        try:
+            items = ((json.loads(r.text) or {}).get("data") or {}).get("items") or []
+        except (ValueError, AttributeError) as e:
+            raise FetchError(f"接口返回的不是预期的 JSON（{e}）") from e
+        if not items:
+            break
+        for it in items:
+            try:
+                t = dt.datetime.fromisoformat(str(it.get("date", "")).replace("Z", "+00:00")).astimezone(SYD)
+            except ValueError:
+                continue
+            oldest = t
+            days.add(t.date().isoformat())
+            headline = (it.get("headline") or "").strip()
+            key = (it.get("documentKey") or "").strip()
+            code = (it.get("symbol") or "").strip().upper()
+            if not (SUBSTANTIAL_RE.search(headline) and key and re.fullmatch(r"[A-Z0-9]{3,6}", code)
+                    and re.fullmatch(r"[\w.\-]+", key)):
+                continue
+            types = [API_TYPES.get(str(x).strip().lower()) for x in (it.get("announcementTypes") or [])]
+            rows.append({
+                "id": "mk-" + key, "code": code, "date": t.date().isoformat(), "time": t.strftime("%H:%M"),
+                "headline": headline, "url": FILE_API + key, "pages": None,
+                "price_sensitive": bool(it.get("isPriceSensitive")), "source": "api",
+                "api_type": next((x for x in types if x), ""),
+            })
+        if oldest and oldest.date() < window_start:
+            reached = True
+            break
+        time.sleep(PAUSE)
+    return rows, {"oldest": oldest, "reached": reached, "days": days}
+
+
+def dedupe_keys(e: dict) -> set:
+    """同一份公告可能有两条发布记录：挂在申报方代码下（“... for LM1”）和挂在标的代码下（“... from FRS”），
+    发布时间相同。用 (代码或标的代码, 日期, 时间) 判断是不是同一份。"""
+    if not e.get("time"):
+        return {("id", e.get("id"))}
+    keys = {(e.get("code"), e.get("date"), e.get("time"))}
+    t = headline_target(e.get("headline", ""), e.get("code", ""))
+    if t:
+        keys.add((t, e.get("date"), e.get("time")))
+    return keys
 
 
 # ---------------------------------------------------------------- PDF
@@ -406,10 +470,13 @@ COMPANY_RE = re.compile(
     r"(?:To\s*:?\s*)?Company(?:\s+Name)?\s*/\s*(?:regi\w*\s*scheme\s*/\s*notified\s*foreign\s*passport(?:\s+fund\s*n\s*ame)?|Scheme)"
     r"\s*[:\-]?[ \t]*(.*)", re.I)
 TO_LINE_RE = re.compile(r"^To\s*:\s*(\S.*)$", re.I | re.M)      # 自制表格：“To: HELLOWORLD TRAVEL LIMITED”
-SECTION2_RE = re.compile(r"\n\s*2\s*\.\s+\S")
+SECTION2_RE = re.compile(r"\n\s*2\s*\.\s+\S"                                   # 第二节标题
+                         r"|\n[^\n\w]{0,4}(?:\w{1,2}\)\s*)?2\s*[.,]\s*(?:Details\s+of\s+voting|P\w{3,5}ous\s+and\s+present)", re.I)  # 扫描件：“> 2. …”“aD) 2, Provious …”
 LABEL_RE = re.compile(
     r"^(?:the\s+(?:holder|previous)\b|there\s+was\b|acn\b|arsn\b|abn\b|nfpfrn\b|apfrn\b|name\b|details\b|previous\b|(?:share)?holder\b|[(\d])"
-    r"|substantial\s+holder|if\s+applicable|notice\s+was|^not\s+applicable$",   # NFPFRN：2018 版表格的栏目名
+    r"|substantial\s+holder|if\s+applicable|notice\s+was|^not\s+applicable$"   # NFPFRN：2018 版表格的栏目名
+    r"|^(?:see|refer(?:\s+to)?|as\s+(?:per|set\s+out\s+in))\b.{0,20}annexure|^annexure\s+[a-z0-9]\b"   # “See Annexure A”
+    r"|passport\s+fund|scheme\s*/\s*notified|registered\s+scheme",
     re.I,
 )
 NAME_LINE_RE = re.compile(r"^(?:\(\s*1\s*\)\s*)?Name\b\s*(?:\(if applicable\))?\s*[:\-]?\s*(.*)$", re.I)
@@ -442,6 +509,7 @@ def clean_company(s: str) -> str:
 
 
 def clean_name(s: str) -> str:
+    s = re.sub(r"^[^\w(“\"']+", "", s or "")          # 扫描件识别出的开头杂字符：“> ”“| ”
     return ID_TAIL_RE.sub("", s).strip(" :-")
 
 
@@ -488,14 +556,18 @@ PCT_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,8})?)\s?%")              # 有
 BARE_PCT_RE = re.compile(r"(?<![\d.,$])(\d{1,3}\.\d{1,8})(?![\d,%]|\.\d)")  # 表头写 “Voting power (%)”，数字不带 %
 TOTAL_RE = re.compile(r"\btotal\b", re.I)
 EVENT_RE = re.compile(                                  # 词间用 \s*：扫描件识别常丢空格（“ofthe”）
-    r"(?:became|ceased\s*to\s*be)\s*a\s*substantial\s*holder\s*on"
+    r"(?:became|ceased\s*to\s*be)\s*a\s*substantial\s*(?:share)?holder\s*on"
+    r"|date\s*of\s*becoming\s*a\s*substantial\s*(?:share)?holder"
     r"|change\s*in\s*the\s*interests?\s*of\s*the"      # 604 常见排版：日期夹在“of the”和“substantial holder on”之间
     r"|interests?\s*of\s*the\s*substantial\s*holder\s*on"
-    r"|substantial\s*holder\s*on",
+    r"|substantial\s*(?:share)?holder\s*on",
     re.I,
 )
 DATE_NUM_RE = re.compile(r"(?<!\d)(\d{1,2})\s?[/.\-]\s?(\d{1,2})\s?[/.\-]\s?(\d{4}|\d{2})(?!\d)")   # 兼容“29 /10/2026”这种多了空格的写法
-DATE_TXT_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?[\s\-]+([A-Za-z]{3,9})[\s,\-]+(\d{4})")
+DATE_SP_RE = re.compile(r"(?<![\d/])(\d{1,2})\s+(\d{1,2})\s+(20\d{2})(?!\d)")     # 方格填写：“28 10 2026”
+DATE_8_RE = re.compile(r"(?<!\d)(\d{2})(\d{2})(20\d{2})(?!\d)")                   # 方格填写：“28102026”
+DATE_TXT_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?[\s\-/.,]+([A-Za-z]{3,9})\.?[\s,\-/.]+(\d{4})")   # 28 Oct 2026、28/October/2026
+DATE_US_RE = re.compile(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})")              # October 28, 2026（美式）
 
 
 def plausible(d: dt.date) -> bool:
@@ -503,28 +575,42 @@ def plausible(d: dt.date) -> bool:
     return 2000 <= d.year <= dt.date.today().year + 1
 
 
-def parse_date(seg: str) -> str:
-    found = []
-    for m in DATE_NUM_RE.finditer(seg):
-        d, mo, y = (int(x) for x in m.groups())
-        y = y + 2000 if y < 100 else y
+def _num_date(d: int, mo: int, y: int) -> dt.date | None:
+    y = y + 2000 if y < 100 else y
+    if mo > 12 >= d:
+        d, mo = mo, d                      # 美式 月/日/年（Morgan Stanley 等）
+    try:
+        got = dt.date(y, mo, d)
+    except ValueError:
+        return None
+    return got if plausible(got) else None
+
+
+def _txt_date(day: str, month: str, year: str) -> dt.date | None:
+    month = month[:3] if month.lower().startswith("sept") else month
+    for fmt in ("%d %B %Y", "%d %b %Y"):
         try:
-            if plausible(dt.date(y, mo, d)):
-                found.append((m.start(), dt.date(y, mo, d)))
-                break
+            got = dt.datetime.strptime(f"{day} {month} {year}", fmt).date()
+            return got if plausible(got) else None
         except ValueError:
             continue
-    for m in DATE_TXT_RE.finditer(seg):
-        got = None
-        for fmt in ("%d %B %Y", "%d %b %Y"):
-            try:
-                got = dt.datetime.strptime(f"{m.group(1)} {m.group(2)} {m.group(3)}", fmt).date()
+    return None
+
+
+def parse_date(seg: str) -> str:
+    """在一小段文字里找最先出现的、合理的日期。支持 28/10/2026、28 Oct 2026、28/October/2026、
+    October 28, 2026、方格填写的 “28 10 2026” 和 “28102026”。"""
+    found = []
+    for rx, conv in ((DATE_NUM_RE, lambda m: _num_date(*(int(x) for x in m.groups()))),
+                     (DATE_SP_RE, lambda m: _num_date(*(int(x) for x in m.groups()))),
+                     (DATE_8_RE, lambda m: _num_date(*(int(x) for x in m.groups()))),
+                     (DATE_TXT_RE, lambda m: _txt_date(m.group(1), m.group(2), m.group(3))),
+                     (DATE_US_RE, lambda m: _txt_date(m.group(2), m.group(1), m.group(3)))):
+        for m in rx.finditer(seg):
+            got = conv(m)
+            if got:
+                found.append((m.start(), got))
                 break
-            except ValueError:
-                continue
-        if got and plausible(got):
-            found.append((m.start(), got))
-            break
     return min(found)[1].isoformat() if found else ""
 
 
@@ -554,7 +640,7 @@ def pick_voting_power(seg: str, ntype: str, bounded: bool, ocr: bool = False) ->
     0.06% / 4.94% / GRAND TOTAL 5.00%。优先用合计行；没有合计行时：
     变动类取比例最大的那一行（前后两个值），新进类取最大值。
     扫描件（ocr=True）的数字容易认错：只认带 % 的数字，且低于 5% 的整组不要（宁缺毋错）。"""
-    vp = _pick(pct_rows(seg, allow_bare=not ocr), ntype, bounded)
+    vp = _pick(pct_rows(seg, allow_bare=not ocr), ntype, bounded, ocr)
     if ntype == "becoming" and vp and vp[0] < 4.95:
         return []              # 新进大股东必然 ≥5%，低于这个数一定是读错了行
     if ocr and any(v < 4.95 for v in vp):
@@ -562,7 +648,7 @@ def pick_voting_power(seg: str, ntype: str, bounded: bool, ocr: bool = False) ->
     return vp
 
 
-def _pick(rows: list[tuple[str, list[float]]], ntype: str, bounded: bool) -> list[float]:
+def _pick(rows: list[tuple[str, list[float]]], ntype: str, bounded: bool, ocr: bool = False) -> list[float]:
     if not rows:
         return []
     totals = [v for ln, v in rows if TOTAL_RE.search(ln)]
@@ -571,7 +657,9 @@ def _pick(rows: list[tuple[str, list[float]]], ntype: str, bounded: bool) -> lis
         if totals and len(totals[-1]) >= 2:
             return totals[-1][:2]
         pairs = [v for _, v in rows if len(v) >= 2]
-        return max(pairs, key=lambda v: max(v[:2]))[:2] if pairs else flat[:2]
+        if pairs:
+            return max(pairs, key=lambda v: max(v[:2]))[:2]
+        return [] if ocr else flat[:2]     # 扫描件不跨行拼数字（会把说明文字里的比例拼进来）
     if totals:
         return [totals[-1][-1]]
     return [max(flat)] if bounded else flat[:1]   # 没截到第三节时不取最大值，免得读到后面的 “100%”
@@ -588,7 +676,29 @@ def parse_details(text: str, ntype: str, ocr: bool = False) -> dict:
     return out
 
 
-# 其他格式：新西兰双重上市公司用 FMC Act 表格，爱尔兰公司（James Hardie）用 TR-1 表格
+# 自制格式：没有 “1. Details of substantial holder” 标题，只有 “Name: …” 或 “Name of Substantial Holder: …”
+ALT_NAME_RE = re.compile(r"^Name\s+of\s+(?:the\s+)?substantial\s+(?:share)?holder\s*[:\-]\s*(\S.*)$", re.I | re.M)
+PLAIN_NAME_RE = re.compile(r"^Name\s*:\s*(\S.*)$", re.I | re.M)
+FORM_HEADER_RE = re.compile(r"Form\s*60[345]\b|Notice\s+of\s+(?:initial\s+substantial|change\s+of\s+interests|ceasing\s+to\s+be)", re.I)
+
+
+def fallback_name(text: str) -> str:
+    """只在第二节（持股比例）之前找，免得读到签名栏的 “Name:”；普通 “Name:” 还要求出现在表格标题之后，
+    免得读到封面信。"""
+    end = SEC2_RE.search(text) or VP_RE.search(text)
+    limit = end.start() if end else min(len(text), 2500)
+    m = ALT_NAME_RE.search(text, 0, limit)
+    if not m:
+        head = FORM_HEADER_RE.search(text, 0, limit)
+        m = PLAIN_NAME_RE.search(text, head.end(), limit) if head else None
+    if m:
+        val = clean_name(m.group(1))
+        if looks_like_name(val):
+            return val[:200]
+    return ""
+
+
+# 其他格式：新西兰双重上市公司用 FMC Act 表格，爱尔兰公司（James Hardie）用 TR-1 表格，美国公司 CDI 用 SEC 13G/13D
 NZ_RE = re.compile(r"Substantial\s+product\s+holder\(s\)\s+giving\s+disclosure", re.I)
 NZ_NAME_RE = re.compile(r"Full\s+name\(s\)\s*:\s*(.+)", re.I)
 NZ_PCT_RE = re.compile(r"total\s+percentage\s+held\s+in\s+class\s*:\s*(\d{1,3}(?:\.\d+)?)\s*%", re.I)
@@ -601,6 +711,11 @@ TR1_RESULT_RE = re.compile(r"Resulting\s+situation[\s\S]{0,200}?(\d{1,3}(?:\.\d+
 TR1_PREV_RE = re.compile(r"Position\s+of\s+previous[\s\S]{0,200}?(\d{1,3}(?:\.\d+)?)\s*%", re.I)
 TR1_DATE_RE = re.compile(r"threshold\s+was\s+crossed\s+or\s+reached\w*\s*:?\s*([^\n]*\n?[^\n]*)", re.I)
 TR1_COMPANY_RE = re.compile(r"Identity\s+of\s+the\s+issuer.*?:\s*\n?\s*([^\n]+)", re.I | re.S)
+SEC13_RE = re.compile(r"SCHEDULE\s+13[GD]\b", re.I)
+SEC13_NAME_RE = re.compile(r"Names?\s+of\s+Reporting\s+Persons?\s*\n\s*([^\n]+)", re.I)
+SEC13_PCT_RE = re.compile(r"Percent\s+of\s+class\s+represented\s+by\s+amount\s+in\s+row\s*\(\s*\d+\s*\)\s*\n?\s*(\d{1,3}(?:\.\d+)?)\s*%", re.I)
+SEC13_COMPANY_RE = re.compile(r"\n([^\n]+)\n\(Name\s+of\s+Issuer\)", re.I)
+SEC13_DATE_RE = re.compile(r"\n([^\n]+)\n\(Date\s+of\s+Event", re.I)
 
 
 def parse_other_forms(text: str, ntype: str) -> dict:
@@ -628,6 +743,13 @@ def parse_other_forms(text: str, ntype: str) -> dict:
                 "voting_power": vp(float(cur.group(1)) if cur else None, float(prev.group(1)) if prev else None),
                 "change_date": parse_date(date.group(1)) if date else "",
                 "company": comp.group(1).strip()[:120] if comp else ""}
+    if SEC13_RE.search(text):
+        name, pct = SEC13_NAME_RE.search(text), SEC13_PCT_RE.search(text)
+        date, comp = SEC13_DATE_RE.search(text), SEC13_COMPANY_RE.search(text)
+        return {"holder_name": clean_name(name.group(1))[:200] if name else "",
+                "voting_power": vp(float(pct.group(1)) if pct else None, None),
+                "change_date": parse_date(date.group(1)) if date else "",
+                "company": comp.group(1).strip()[:120] if comp else ""}
     return {}
 
 
@@ -642,6 +764,15 @@ def infer_type(text: str) -> str:
     """标题看不出类型（例如 “Substantial Holder Notice”）时，按 PDF 里最先出现的表格编号判断。"""
     hits = [(m.start(), t) for rx, t in FORM_TYPES for m in [rx.search(text)] if m]
     return min(hits)[1] if hits else ""
+
+
+STRICT_FORM_RE = re.compile(r"^\s*Form\s*60([345])\s*$", re.I | re.M)
+
+
+def strict_form_type(text: str) -> str:
+    """PDF 开头单独一行写着 “Form 603/604/605” 时，以表格为准（标题偶尔写错，例如 604 表格配“退出”标题）。"""
+    m = STRICT_FORM_RE.search(text[:1200])
+    return {"3": "becoming", "4": "change", "5": "ceasing"}[m.group(1)] if m else ""
 
 
 # ---------------------------------------------------------------- 关注名单与匹配
@@ -815,8 +946,13 @@ def analyse_texts(texts: list[str], ntype: str, ocr: bool = False) -> dict:
             out["holder_name"] = parse_holder_section(t, ocr=ocr)[0]
             if out["holder_name"]:
                 break
+    if not out["holder_name"]:
+        for t in texts:                                  # 自制格式：“Name: …” / “Name of Substantial Holder: …”
+            out["holder_name"] = fallback_name(t)
+            if out["holder_name"]:
+                break
     if not out["holder_name"] and not regions:
-        for t in texts:                                  # 新西兰 / TR-1 等其他格式
+        for t in texts:                                  # 新西兰 / TR-1 / 13G 等其他格式
             alt = parse_other_forms(t, ntype)
             if alt:
                 for k, v in alt.items():
@@ -854,11 +990,12 @@ def process_entry(e: dict, ocr_budget: OCRBudget | None = None) -> None:
     e["pdf_url"] = safe_url(pdf_url)
     texts = pdf_texts(data)
     ntype = e.get("type", "other")
-    if texts and ntype == "other":
-        ntype = infer_type(texts[0]) or "other"
+    if texts:
+        ntype = strict_form_type(texts[0]) or (ntype if ntype != "other" else (infer_type(texts[0]) or "other"))
     result = analyse_texts(texts, ntype) if texts else None
     e["ocr"] = e["ocr_tried"] = False
-    if blank(result) and ocr_budget is not None and ocr_available():
+    # 文字层什么都认不出（扫描件、封面信 + 扫描表格），或者认不出申报方（填写内容是贴上去的图片），再用 OCR 读
+    if (blank(result) or not result["holder_name"]) and ocr_budget is not None and ocr_available():
         ocr_budget.take()
         try:
             otexts = ocr_texts(data)
@@ -867,10 +1004,16 @@ def process_entry(e: dict, ocr_budget: OCRBudget | None = None) -> None:
             log(f"    文字识别环境出错（{ex}），OCR 恢复后会重读")
             otexts = []
         if otexts:
-            otype = ntype if ntype != "other" else (infer_type(otexts[0]) or "other")
+            otype = strict_form_type(otexts[0]) or (ntype if ntype != "other" else (infer_type(otexts[0]) or "other"))
             oresult = analyse_texts(otexts, otype, ocr=True)
-            if result is None or not blank(oresult):
+            if result is None or (blank(result) and not blank(oresult)):
                 result, ntype, e["ocr"] = oresult, otype, True
+            elif not result["holder_name"] and oresult["holder_name"]:
+                merged = dict(result, holder_name=oresult["holder_name"])   # 文字层的数字更可靠，缺的才用 OCR 补
+                for k in ("company", "change_date", "region"):
+                    merged[k] = merged[k] or oresult[k]
+                merged["voting_power"] = merged["voting_power"] or oresult["voting_power"]
+                result, e["ocr"] = merged, True
     e["type"] = ntype
     if result is None:
         e["status"], e["parser"] = "unreadable", PARSER_VERSION
@@ -885,6 +1028,18 @@ def hinted(e: dict, holders: list[Holder]) -> bool:
 
 def now_syd() -> dt.datetime:
     return dt.datetime.now(SYD)
+
+
+def mark_days(days: set, today: dt.date, hhmm: str, scanned: set, partial: dict) -> None:
+    """记录覆盖到的日子。今天在晚上 9 点前读到的只算一部分（之后还会发公告）；之前的日子都算完整。
+    （以前按“今日公告页”整页判断，周末打开时会把周五误记成只抓到一部分。）"""
+    today_iso = today.isoformat()
+    for d in days:
+        if d == today_iso and hhmm < DAY_COMPLETE_AT:
+            if d not in scanned:
+                partial[d] = hhmm
+        elif d <= today_iso:
+            scanned.add(d)
 
 
 def main() -> int:
@@ -914,24 +1069,55 @@ def main() -> int:
             continue
         pages_ok += 1
         rows.extend(got)
-        days = {r["date"] for r in got}
-        if url.endswith("todayAnns.do") and hhmm < DAY_COMPLETE_AT:
-            partial.update({d: hhmm for d in days if d not in scanned})   # 当天还没结束，之后的公告这次读不到
-        else:
-            scanned.update(days)
+        mark_days({r["date"] for r in got}, today, hhmm, scanned, partial)
+
+    backfill = {"ok": False, "from": None, "added": 0}
+    try:
+        api_rows, cov = market_rows(now)
+        rows.extend(api_rows)
+        backfill["ok"] = True
+        if cov["oldest"]:
+            # 接口按时间倒序，翻页在最早那天的中间停下，那天只拿到一部分；从第二天起才是完整的
+            first_full = cov["oldest"].date() + dt.timedelta(days=1)
+            backfill["from"] = first_full.isoformat()
+            d = first_full
+            covered = set()
+            while d <= today:
+                if d.weekday() < 5 or d.isoformat() in cov["days"]:
+                    covered.add(d.isoformat())
+                d += dt.timedelta(days=1)
+            mark_days(covered, today, hhmm, scanned, partial)
+        log(f"全市场接口：{len(api_rows)} 条大股东公告，覆盖到 {backfill['from']}")
+    except FetchError as e:
+        errors.append(f"补抓接口读取失败（只影响补回之前漏掉的日子）：{e}")
+        log(errors[-1])
     partial = {d: t for d, t in partial.items() if d not in scanned}
 
+    seen_keys = {}
+    for e in entries.values():
+        for k in dedupe_keys(e):
+            seen_keys.setdefault(k, e["id"])
     found_ids = set()
-    for r in rows:
+    for r in rows:                     # 列表页在前、接口在后：同一份公告优先保留列表页那条
         if not SUBSTANTIAL_RE.search(r["headline"]):
             continue
-        found_ids.add(r["id"])
-        if r["id"] not in entries:
-            entries[r["id"]] = {
-                **r, "type": classify(r["headline"]), "hint": headline_hint(r["headline"]),
-                "company": "", "holder_name": "", "region": "", "change_date": "", "voting_power": [],
-                "pdf_url": "", "status": "new", "attempts": 0,
-            }
+        keys = dedupe_keys(r)
+        same = next((seen_keys[k] for k in keys if k in seen_keys), None)
+        found_ids.add(same or r["id"])
+        if same or r["id"] in entries:
+            continue
+        ntype = classify(r["headline"])
+        if ntype == "other" and r.get("api_type"):
+            ntype = r["api_type"]
+        entries[r["id"]] = {
+            **{k: v for k, v in r.items() if k != "api_type"}, "type": ntype, "hint": headline_hint(r["headline"]),
+            "company": "", "holder_name": "", "region": "", "change_date": "", "voting_power": [],
+            "pdf_url": "", "status": "new", "attempts": 0,
+        }
+        if r.get("source") == "api":
+            backfill["added"] += 1
+        for k in keys:
+            seen_keys.setdefault(k, r["id"])
     found = len(found_ids)
     log(f"大股东相关公告 {found} 条")
 
@@ -941,7 +1127,7 @@ def main() -> int:
         elif e.get("status") == "noise" and not is_noise(e.get("hint", ""), holders, noise):
             e["status"], e["attempts"] = "new", 0      # 改了名单后不再算噪音的，补下载
         elif (e.get("status") in ("parsed", "unreadable") and not e.get("ocr_tried")
-              and (e.get("status") == "unreadable" or blank(e)) and ocr_available()):
+              and (e.get("status") == "unreadable" or not e.get("holder_name")) and ocr_available()):
             e["status"], e["attempts"] = "new", 0      # 之前没做成 OCR（例如那次 tesseract 没装上），现在补上
     todo = [e for e in entries.values()
             if e.get("status") in ("new", "error") and e.get("attempts", 0) < MAX_ATTEMPTS]
@@ -1011,6 +1197,7 @@ def main() -> int:
             "pdf_checked": checked,
             "skipped_noise": skipped,
             "deferred": deferred,
+            "backfill": backfill,
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],

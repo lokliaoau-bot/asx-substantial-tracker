@@ -24,6 +24,10 @@
    python scraper/scrape.py
      ├─ GET https://www.asx.com.au/asx/v2/statistics/todayAnns.do
      ├─ GET https://www.asx.com.au/asx/v2/statistics/prevBusDayAnns.do
+     ├─ GET https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements?page=N&itemsPerPage=1000
+     │     ASX 网站自己用的全市场公告接口（无公开文档），按时间倒序最多约 1 万条（两三周），用来补回没点按钮的日子；
+     │     PDF 从 …/asx-research/1.0/file/{documentKey} 下载。读不到时只记提醒，不影响列表页。
+     │     同一份公告可能挂在两个代码下（“for LM1” / “from FRS”），按 (代码或标的代码, 日期, 时间) 去重
      ├─ 新的大股东公告 → 下载 PDF（可能经过“同意条款”中间页）→ pypdf 读前 2 页
      ├─ data/all_notices.json   全部大股东公告及解析结果（内部存储，保留 35 天）
      └─ data/notices.json       按 watchlist.json 匹配后的结果（网页读取）
@@ -44,7 +48,7 @@
 | `data/all_notices.json` | 首次运行时自动生成，不用手动创建。 |
 | `.github/workflows/scrape.yml` | 抓取工作流：只有手动触发（网页按钮）。需要 `contents: write`。 |
 | `.github/workflows/test.yml` | 推送代码时自动跑离线测试。 |
-| `tests/test_scrape.py` | 67 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
+| `tests/test_scrape.py` | 85 个离线测试（模拟 ASX 列表页和 PDF + `tests/fixtures` 里的真实公告 PDF 样本，不联网；OCR 测试需要本机有 tesseract，没有时自动跳过）。 |
 | `tests/frontend_check.py` | 可选的网页端到端检查（Playwright + 模拟 GitHub API）。 |
 | `requirements.txt` / `requirements-dev.txt` | 运行依赖 / 测试依赖（版本已锁定，已在 Python 3.12 干净环境验证可安装）。 |
 | `README.md` | 给用户看的使用说明。 |
@@ -108,7 +112,7 @@ gh run watch          # 选择对应的运行
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q   # 期望：67 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
+python -m pytest -q   # 期望：85 passed（需要 tesseract：sudo apt-get install tesseract-ocr）
 ```
 
 ### 5.5 第一次真实抓取（关键）
@@ -220,7 +224,7 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 
 ## 9. 已知限制
 
-- ASX 公开的全市场列表只有当天和上一交易日，要每隔一两个交易日点一次抓取才能攒出完整的“近两周”，网页会提示还缺几天、哪天只抓到一部分。
+- 补抓依赖 ASX 网站的全市场公告接口（无公开文档，最多约 1 万条，平时约两三周，财报季可能只有一周左右）。接口改版或读不到时，退回只读当天和上一交易日的列表页，网页会提示。
 - 扫描件 PDF（约一成，多是小公司和个人申报）用 OCR 识别（400dpi、tesseract --psm 6，最多前 3 页；单次运行最多 60 份、总共 12 分钟，超出的留到下次）。字迹模糊或手写的仍读不出，识别出的数字可能有错，所以扫描件只认带 % 的比例，低于 5% 的整组丢弃。
 - 养老金只看得到自己操盘的部分；外包给基金经理的仓位以基金经理名义申报。
 - 除了澳洲 603/604/605，还能读新西兰双重上市公司的 FMC Act 表格和 James Hardie 的爱尔兰 TR-1 表格；其他自制格式可能读不出名称或比例。
@@ -315,10 +319,28 @@ iPhone：Safari 打开网址 → 分享 → 添加到主屏幕。Android：Chrom
 | 2 异常 | “打字封面信 + 扫描表格”的 PDF 有文字层，不会触发 OCR，什么都读不出。 | 文字层既没有名称也找不到第一节时，再用 OCR 读一遍。 |
 | 2 异常 | OCR 把 “of the” 认成 “ofthe”、2026 认成 2626、比例栏糊成 “te1.215”，导致日期和比例读错。 | 词间允许缺空格；丢弃离谱年份；扫描件只认带 % 的数字，低于 5% 的丢弃；新进类低于 5% 一律丢弃。 |
 
+### 第六轮（2026-11-04，抓取成功率和准确率；合并前审查三次）
+
+用 GitHub Actions 把当时全部 133 份真实公告的文字导出成语料，逐条做合理性检查（类型和表格编号是否一致、比例是否合理、变动日是否缺失或离谱、名称是否像标签），再人工核对被标出的公告。可疑项从 36 份降到 26 份，剩下的大多是原文本身就缺（花旗自制表格没有变动日、晚报的公告、扫描件字迹模糊）。
+
+| 级别 | 问题 | 修复 |
+| --- | --- | --- |
+| 高 | 只能读到当天和上一交易日的列表，没点按钮的日子永久漏掉（3 天只覆盖到 3 个交易日）。 | 接入 ASX 网站的全市场公告接口，每次点按钮往前翻约 1 万条，补回最近两三周；去重后实测从 3 个交易日补到 16 个交易日，新增 475 条大股东公告，已存的 3 天没有一条重复。 |
+| 高 | 自制表格没有 “1. Details of substantial holder” 标题时读不出申报方，漏掉了 Perennial 新进 PC Gold（PC2）。 | 支持 “Name: …” 和 “Name of Substantial Holder: …”（只在第二节之前、表格标题之后找，避免读到封面信或签名栏）。 |
+| 高 | L1 Capital 和 Platinum 合并后改用 “L1 Group Limited” 申报（GLS 13.16% → 9.16%），没匹配上。 | 名单加入 L1 Group；Tattarang 加入 Wyloo。 |
+| 高 | JPMorgan（“28/October/2026”）、Morgan Stanley（美式 “October 28, 2026”）的变动日全部读不出；方格填写的 “28 10 2026”、“28102026” 也读不出。 | 支持这些写法；美式 月/日 自动对调。 |
+| 中 | 填写内容是贴在模板上的图片时（TVL），文字层只有空白模板，又因为找得到第一节而不做 OCR。 | 文字层读不出申报方时也做 OCR，只用 OCR 补缺的字段，数字仍以文字层为准。 |
+| 中 | 名称写 “See Annexure A” 被当成申报方；扫描件把 “> 2. Details of voting power” 当成名称；扫描件把说明文字里的比例拼进变动比例（99% → 14.45%）。 | 加入标签过滤和杂字符清理；扫描件的变动比例必须出自同一行。 |
+| 中 | 美国公司 CDI 的 SEC 13G 表格读不出。 | 新增 13G/13D 解析（申报方、比例、事件日期、公司名）。 |
+| 中 | 标题类型和表格不一致（604 表格配“退出”标题）。 | PDF 开头单独一行写着 Form 603/604/605 时以表格为准。 |
+| 中 | 周末打开时，“今日公告”页上的周五公告被记成“只抓到一部分”。 | 按每条公告的日期判断，只有今天的才可能不完整。 |
+| 中 | PDF 返回 404 时被永久跳过，刚发布还没生成 PDF 的公告会漏掉。 | 404 改为下次运行重试（最多 3 次）。 |
+| 低 | 覆盖天数把周末算进去；补抓后网页提示文字不对（“过了今天就补不回来”）。 | 只算工作日；提示文字按补抓是否成功调整。 |
+
 ### 测试结果（交付时）
 
-- `python -m pytest -q`：67 passed（其中 19 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
-- `python tests/frontend_check.py`：25 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
+- `python -m pytest -q`：85 passed（其中 28 个用 `tests/fixtures` 里的真实 ASX 公告 PDF，每份只保留前两页；在只装 `requirements-dev.txt` 的 Python 3.12 干净环境里验证）。
+- `python tests/frontend_check.py`：33 项检查全部通过。覆盖桌面和手机布局、XSS 链接过滤、成功和失败的抓取流程、令牌失效回退、令牌缺权限和请求次数用完的提示、挂靠代码显示、当天只抓到一部分的提示。
 - 尚未验证：真实 ASX 页面和 PDF 的结构（开发环境无法访问 asx.com.au）、GitHub Pages 构建时间、定时任务的长期保活。
 
 ### 开发依赖里的一条无害警告

@@ -1,0 +1,1226 @@
+[
+ {
+  "code": "PLS",
+  "api_code": "PLS",
+  "date": "2026-11-04",
+  "time": "16:14",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "AustralianSuper Pty Ltd",
+   "voting_power": [
+    13.13,
+    14.23
+   ],
+   "change_date": "2026-11-02",
+   "company": "PLS Group Ltd"
+  },
+  "api": {
+   "holder_name": "AustralianSuper Pty Ltd",
+   "voting_power": [
+    13.13,
+    14.23
+   ],
+   "change_date": "2026-11-02",
+   "company": "PLS Group Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "MCP",
+  "api_code": "MCP",
+  "date": "2026-11-04",
+  "time": "16:10",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "JP MORGAN NOMINEES LTD ACF ARMYTAGE PRIVATE",
+   "voting_power": [],
+   "change_date": "2026-11-03",
+   "company": "MCPHERSON'S LIMITED (MCP)"
+  },
+  "api": {
+   "holder_name": "JP MORGAN NOMINEES LTD ACF ARMYTAGE PRIVATE",
+   "voting_power": [],
+   "change_date": "2026-11-03",
+   "company": "MCPHERSON'S LIMITED (MCP)"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "JNS",
+  "api_code": "JNS",
+  "date": "2026-11-04",
+  "time": "16:03",
+  "headline": "Ceasing to be a substantial holder",
+  "list": {
+   "holder_name": "Acorn Capital Limited",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "JNS - Janus Electric Holdings Limited"
+  },
+  "api": {
+   "holder_name": "Acorn Capital Limited",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "JNS - Janus Electric Holdings Limited"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "KAR",
+  "api_code": "KAR",
+  "date": "2026-11-04",
+  "time": "15:54",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "Comet Asia Holdings II Pte. Ltd., Comet Asia Holdings I Pte. Ltd., KKR Asia III Fund Investments Pte. Ltd. and",
+   "voting_power": [
+    5.0
+   ],
+   "change_date": "2026-11-02",
+   "company": "Karoon Energy Ltd"
+  },
+  "api": {
+   "holder_name": "Comet Asia Holdings II Pte. Ltd., Comet Asia Holdings I Pte. Ltd., KKR Asia III Fund Investments Pte. Ltd. and",
+   "voting_power": [
+    5.0
+   ],
+   "change_date": "2026-11-02",
+   "company": "Karoon Energy Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "EGY",
+  "api_code": "EGY",
+  "date": "2026-11-04",
+  "time": "14:58",
+  "headline": "Change in substantial holding from HUB",
+  "list": {
+   "holder_name": "HUB24 Limited",
+   "voting_power": [
+    9.13,
+    15.02
+   ],
+   "change_date": "2026-11-04",
+   "company": "Energy Technologies Limited (ASX: EGY)"
+  },
+  "api": {
+   "holder_name": "HUB24 Limited",
+   "voting_power": [
+    9.13,
+    15.02
+   ],
+   "change_date": "2026-11-04",
+   "company": "Energy Technologies Limited (ASX: EGY)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "HUB",
+  "api_code": "EGY",
+  "date": "2026-11-04",
+  "time": "14:58",
+  "headline": "Change in substantial holding for EGY",
+  "list": {
+   "holder_name": "HUB24 Limited",
+   "voting_power": [
+    9.13,
+    15.02
+   ],
+   "change_date": "2026-11-04",
+   "company": "Energy Technologies Limited (ASX: EGY)"
+  },
+  "api": {
+   "holder_name": "HUB24 Limited",
+   "voting_power": [
+    9.13,
+    15.02
+   ],
+   "change_date": "2026-11-04",
+   "company": "Energy Technologies Limited (ASX: EGY)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "MYG",
+  "api_code": "MYG",
+  "date": "2026-11-04",
+  "time": "14:36",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "UBS Group AG and its related bodies corporate",
+   "voting_power": [
+    5.09
+   ],
+   "change_date": "2026-11-02",
+   "company": "MAYFIELD GROUP HOLDINGS LIMITED"
+  },
+  "api": {
+   "holder_name": "UBS Group AG and its related bodies corporate",
+   "voting_power": [
+    5.09
+   ],
+   "change_date": "2026-11-02",
+   "company": "MAYFIELD GROUP HOLDINGS LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "NOL",
+  "api_code": "NOL",
+  "date": "2026-11-04",
+  "time": "12:07",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Private Portfolio Managers Ply Ltd (PPM) on behalf of Clients",
+   "voting_power": [
+    11.12
+   ],
+   "change_date": "2026-01-31",
+   "company": ""
+  },
+  "api": {
+   "holder_name": "Private Portfolio Managers Ply Ltd (PPM) on behalf of Clients",
+   "voting_power": [
+    11.12
+   ],
+   "change_date": "2026-01-31",
+   "company": ""
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "LOT",
+  "api_code": "LOT",
+  "date": "2026-11-04",
+  "time": "12:06",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "",
+   "voting_power": [],
+   "change_date": "2026-10-29",
+   "company": "Lotus Resources Limited"
+  },
+  "api": {
+   "holder_name": "",
+   "voting_power": [],
+   "change_date": "2026-10-29",
+   "company": "Lotus Resources Limited"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "BOE",
+  "api_code": "BOE",
+  "date": "2026-11-04",
+  "time": "12:05",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "",
+   "voting_power": [],
+   "change_date": "2026-10-28",
+   "company": "Boss Energy Ltd"
+  },
+  "api": {
+   "holder_name": "",
+   "voting_power": [],
+   "change_date": "2026-10-28",
+   "company": "Boss Energy Ltd"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "WAF",
+  "api_code": "WAF",
+  "date": "2026-11-04",
+  "time": "10:16",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "BlackRock Group (BlackRock Inc. and subsidiaries named in Annexures",
+   "voting_power": [],
+   "change_date": "2026-11-02",
+   "company": "WEST AFRICAN RESOURCES LTD"
+  },
+  "api": {
+   "holder_name": "BlackRock Group (BlackRock Inc. and subsidiaries named in Annexures",
+   "voting_power": [],
+   "change_date": "2026-11-02",
+   "company": "WEST AFRICAN RESOURCES LTD"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "SPG",
+  "api_code": "SPG",
+  "date": "2026-11-04",
+  "time": "09:52",
+  "headline": "Notice of Initial Substantial Holder",
+  "list": {
+   "holder_name": "Jeremy Michael Kersten Raper and Rangeley Capital LLC (together, the",
+   "voting_power": [
+    15.01
+   ],
+   "change_date": "2026-11-03",
+   "company": "SPC Global Holdings Ltd"
+  },
+  "api": {
+   "holder_name": "Jeremy Michael Kersten Raper and Rangeley Capital LLC (together, the",
+   "voting_power": [
+    15.01
+   ],
+   "change_date": "2026-11-03",
+   "company": "SPC Global Holdings Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "FOS",
+  "api_code": "FOS",
+  "date": "2026-11-04",
+  "time": "09:40",
+  "headline": "Change in substantial holding from SKM",
+  "list": {
+   "holder_name": "SKM Investment Group Pty Ltd",
+   "voting_power": [
+    38.25,
+    37.59
+   ],
+   "change_date": "2026-11-04",
+   "company": "FOS CAPITAL LTD"
+  },
+  "api": {
+   "holder_name": "SKM Investment Group Pty Ltd",
+   "voting_power": [
+    38.25,
+    37.59
+   ],
+   "change_date": "2026-11-04",
+   "company": "FOS CAPITAL LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "DUB",
+  "api_code": "DUB",
+  "date": "2026-11-04",
+  "time": "09:34",
+  "headline": "Change in substantial holding - MB",
+  "list": {
+   "holder_name": "Mr Matthew Sean Bellizia and each other individual or entity listed",
+   "voting_power": [],
+   "change_date": "2026-11-02",
+   "company": "Dubber Corporation Limited"
+  },
+  "api": {
+   "holder_name": "Mr Matthew Sean Bellizia and each other individual or entity listed",
+   "voting_power": [],
+   "change_date": "2026-11-02",
+   "company": "Dubber Corporation Limited"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "KME",
+  "api_code": "KME",
+  "date": "2026-11-04",
+  "time": "09:03",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Crimson Consulting Australia Pty Ltd ( Crimson Australia )",
+   "voting_power": [
+    91.4,
+    92.79
+   ],
+   "change_date": "2026-11-03",
+   "company": "Kip McGrath Education Centres Limited (ASX:KME) ( Company )"
+  },
+  "api": {
+   "holder_name": "Crimson Consulting Australia Pty Ltd ( Crimson Australia )",
+   "voting_power": [
+    91.4,
+    92.79
+   ],
+   "change_date": "2026-11-03",
+   "company": "Kip McGrath Education Centres Limited (ASX:KME) ( Company )"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "FLT",
+  "api_code": "FLT",
+  "date": "2026-11-04",
+  "time": "08:21",
+  "headline": "Ceasing to be a substantial holder",
+  "list": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "FLIGHT CENTRE TRAVEL GROUP LTD"
+  },
+  "api": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "FLIGHT CENTRE TRAVEL GROUP LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "DYL",
+  "api_code": "DYL",
+  "date": "2026-11-04",
+  "time": "08:20",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [
+    5.04
+   ],
+   "change_date": "2026-10-30",
+   "company": "DEEP YELLOW LTD"
+  },
+  "api": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [
+    5.04
+   ],
+   "change_date": "2026-10-30",
+   "company": "DEEP YELLOW LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "ELV",
+  "api_code": "ELV",
+  "date": "2026-11-04",
+  "time": "08:20",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [
+    5.05
+   ],
+   "change_date": "2026-10-30",
+   "company": "Elevra Lithium Ltd"
+  },
+  "api": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [
+    5.05
+   ],
+   "change_date": "2026-10-30",
+   "company": "Elevra Lithium Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "CIA",
+  "api_code": "CIA",
+  "date": "2026-11-04",
+  "time": "08:20",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [
+    5.06
+   ],
+   "change_date": "2026-10-30",
+   "company": "CHAMPION IRON LTD"
+  },
+  "api": {
+   "holder_name": "JPMorgan Chase & Co. and its affiliates",
+   "voting_power": [
+    5.06
+   ],
+   "change_date": "2026-10-30",
+   "company": "CHAMPION IRON LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "WTC",
+  "api_code": "WTC",
+  "date": "2026-11-03",
+  "time": "19:58",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    7.25,
+    6.2
+   ],
+   "change_date": "2026-10-30",
+   "company": "WISETECH GLOBAL LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    7.25,
+    6.2
+   ],
+   "change_date": "2026-10-30",
+   "company": "WISETECH GLOBAL LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "WA1",
+  "api_code": "WA1",
+  "date": "2026-11-03",
+  "time": "19:54",
+  "headline": "Ceasing to be a substantial holder",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 4 to this form",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "WA1 RESOURCES LTD"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 4 to this form",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "WA1 RESOURCES LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "PLS",
+  "api_code": "PLS",
+  "date": "2026-11-03",
+  "time": "19:53",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    12.37,
+    13.8
+   ],
+   "change_date": "2026-10-30",
+   "company": "PLS GROUP LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    12.37,
+    13.8
+   ],
+   "change_date": "2026-10-30",
+   "company": "PLS GROUP LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "OML",
+  "api_code": "OML",
+  "date": "2026-11-03",
+  "time": "19:53",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 7 to this form",
+   "voting_power": [
+    5.43
+   ],
+   "change_date": "2026-10-30",
+   "company": "OOH!MEDIA LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 7 to this form",
+   "voting_power": [
+    5.43
+   ],
+   "change_date": "2026-10-30",
+   "company": "OOH!MEDIA LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "KCN",
+  "api_code": "KCN",
+  "date": "2026-11-03",
+  "time": "19:52",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 7 to this form",
+   "voting_power": [
+    5.02
+   ],
+   "change_date": "2026-10-30",
+   "company": "KINGSGATE CONSOLIDATED LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 7 to this form",
+   "voting_power": [
+    5.02
+   ],
+   "change_date": "2026-10-30",
+   "company": "KINGSGATE CONSOLIDATED LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "GGP",
+  "api_code": "GGP",
+  "date": "2026-11-03",
+  "time": "19:51",
+  "headline": "Ceasing to be a substantial holder",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 4 to this form",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "GREATLAND RESOURCES LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 4 to this form",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "GREATLAND RESOURCES LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "FFM",
+  "api_code": "FFM",
+  "date": "2026-11-03",
+  "time": "19:43",
+  "headline": "Ceasing to be a substantial holder",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 4 to this form",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "FIREFLY METALS LTD"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 4 to this form",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "FIREFLY METALS LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "CWY",
+  "api_code": "CWY",
+  "date": "2026-11-03",
+  "time": "19:41",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    11.84,
+    13.03
+   ],
+   "change_date": "2026-10-30",
+   "company": "CLEANAWAY WASTE MANAGEMENT LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    11.84,
+    13.03
+   ],
+   "change_date": "2026-10-30",
+   "company": "CLEANAWAY WASTE MANAGEMENT LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "CYL",
+  "api_code": "CYL",
+  "date": "2026-11-03",
+  "time": "19:39",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    6.15,
+    7.37
+   ],
+   "change_date": "2026-10-30",
+   "company": "CATALYST METALS LIMITED"
+  },
+  "api": {
+   "holder_name": "State Street Corporation and subsidiaries named in paragraph 6 to this form",
+   "voting_power": [
+    6.15,
+    7.37
+   ],
+   "change_date": "2026-10-30",
+   "company": "CATALYST METALS LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "DXN",
+  "api_code": "DXN",
+  "date": "2026-11-03",
+  "time": "18:14",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "Ellerston Capital Limited (Primary Person), and its associates being those persons listed in Annexure B",
+   "voting_power": [
+    11.1
+   ],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited"
+  },
+  "api": {
+   "holder_name": "Ellerston Capital Limited (Primary Person), and its associates being those persons listed in Annexure B",
+   "voting_power": [
+    11.1
+   ],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "KAR",
+  "api_code": "KAR",
+  "date": "2026-11-03",
+  "time": "18:11",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "Superannuation and Investments HoldCo Pty Ltd",
+   "voting_power": [
+    5.0
+   ],
+   "change_date": "2026-11-02",
+   "company": "Karoon Energy Ltd"
+  },
+  "api": {
+   "holder_name": "Superannuation and Investments HoldCo Pty Ltd",
+   "voting_power": [
+    5.0
+   ],
+   "change_date": "2026-11-02",
+   "company": "Karoon Energy Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "DXN",
+  "api_code": "DXN",
+  "date": "2026-11-03",
+  "time": "18:09",
+  "headline": "Ceasing to be a substantial holder for DXN from WAM/WAA/WMI",
+  "list": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "api": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "WMI",
+  "api_code": "DXN",
+  "date": "2026-11-03",
+  "time": "18:09",
+  "headline": "Ceasing to be a substantial holder for DXN",
+  "list": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "api": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "WAA",
+  "api_code": "DXN",
+  "date": "2026-11-03",
+  "time": "18:09",
+  "headline": "Ceasing to be a substantial holder for DXN",
+  "list": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "api": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "WAM",
+  "api_code": "DXN",
+  "date": "2026-11-03",
+  "time": "18:09",
+  "headline": "Ceasing to be a substantial holder for DXN",
+  "list": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "api": {
+   "holder_name": "Wilson Asset Management Group (refer entities listed in Annexure A)",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "DXN Limited (ASX: DXN)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "DNL",
+  "api_code": "DNL",
+  "date": "2026-11-03",
+  "time": "18:01",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Janchor Partners Limited (and its associate named in section 6)",
+   "voting_power": [
+    8.94,
+    8.99
+   ],
+   "change_date": "2026-03-31",
+   "company": "Dyno Nobel Limited"
+  },
+  "api": {
+   "holder_name": "Janchor Partners Limited (and its associate named in section 6)",
+   "voting_power": [
+    8.94,
+    8.99
+   ],
+   "change_date": "2026-03-31",
+   "company": "Dyno Nobel Limited"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "NWL",
+  "api_code": "NWL",
+  "date": "2026-11-03",
+  "time": "17:42",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "Pinnacle Investment Management Group Limited (",
+   "voting_power": [
+    5.01
+   ],
+   "change_date": "2026-10-30",
+   "company": "Netwealth Group Ltd"
+  },
+  "api": {
+   "holder_name": "Pinnacle Investment Management Group Limited (",
+   "voting_power": [
+    5.01
+   ],
+   "change_date": "2026-10-30",
+   "company": "Netwealth Group Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "SIQ",
+  "api_code": "SIQ",
+  "date": "2026-11-03",
+  "time": "17:38",
+  "headline": "Ceasing to be a substantial holder",
+  "list": {
+   "holder_name": "Pinnacle Investment Management Group Limited (",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "SMARTGROUP CORP LTD"
+  },
+  "api": {
+   "holder_name": "Pinnacle Investment Management Group Limited (",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "SMARTGROUP CORP LTD"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "AMI",
+  "api_code": "AMI",
+  "date": "2026-11-03",
+  "time": "17:34",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "",
+   "voting_power": [],
+   "change_date": "",
+   "company": "4 URELIA (1 CJAC ly m1 /7TEV) ."
+  },
+  "api": {
+   "holder_name": "",
+   "voting_power": [],
+   "change_date": "",
+   "company": "4 URELIA (1 CTAC a, m1 /7TEV) ."
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": false
+ },
+ {
+  "code": "AMX",
+  "api_code": "AMX",
+  "date": "2026-11-03",
+  "time": "17:21",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Perennial Value Management Limited (PVM)",
+   "voting_power": [
+    17.57,
+    18.58
+   ],
+   "change_date": "2026-11-02",
+   "company": "Aerometrex Ltd"
+  },
+  "api": {
+   "holder_name": "Perennial Value Management Limited (PVM)",
+   "voting_power": [
+    17.57,
+    18.58
+   ],
+   "change_date": "2026-11-02",
+   "company": "Aerometrex Ltd"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "EOL",
+  "api_code": "EOL",
+  "date": "2026-11-03",
+  "time": "17:08",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Regal Partners Funds Management Pty Limited and its associates",
+   "voting_power": [
+    9.4,
+    8.15
+   ],
+   "change_date": "2026-10-30",
+   "company": "Energy One Ltd (EOL)"
+  },
+  "api": {
+   "holder_name": "Regal Partners Funds Management Pty Limited and its associates",
+   "voting_power": [
+    9.4,
+    8.15
+   ],
+   "change_date": "2026-10-30",
+   "company": "Energy One Ltd (EOL)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "RIV",
+  "api_code": "RIV",
+  "date": "2026-11-03",
+  "time": "17:06",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Regal Partners Funds Management Pty Limited and its associates",
+   "voting_power": [
+    7.39,
+    6.38
+   ],
+   "change_date": "2026-10-30",
+   "company": "Rivco Australia Ltd (RIV)"
+  },
+  "api": {
+   "holder_name": "Regal Partners Funds Management Pty Limited and its associates",
+   "voting_power": [
+    7.39,
+    6.38
+   ],
+   "change_date": "2026-10-30",
+   "company": "Rivco Australia Ltd (RIV)"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "HLO",
+  "api_code": "HLO",
+  "date": "2026-11-03",
+  "time": "16:47",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "FIL Limited and its entities listed in Annexure A (\"FIL\")",
+   "voting_power": [
+    9.34,
+    7.56
+   ],
+   "change_date": "2026-10-30",
+   "company": "HELLOWORLD TRAVEL LIMITED"
+  },
+  "api": {
+   "holder_name": "FIL Limited and its entities listed in Annexure A (\"FIL\")",
+   "voting_power": [
+    9.34,
+    7.56
+   ],
+   "change_date": "2026-10-30",
+   "company": "HELLOWORLD TRAVEL LIMITED"
+  },
+  "list_ocr": false,
+  "api_ocr": false,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "AT1",
+  "api_code": "AT1",
+  "date": "2026-11-03",
+  "time": "15:59",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "DALRAIDA HOLDINGS PTY LIMITED and JOHN KELLY",
+   "voting_power": [
+    13.11,
+    6.51
+   ],
+   "change_date": "2026-10-30",
+   "company": "AT1 - ATOMO DIAGNOSTICS LIMITED"
+  },
+  "api": {
+   "holder_name": "DALRAIDA HOLDINGS PTY LIMITED and JOHN KELLY",
+   "voting_power": [
+    13.11,
+    6.51
+   ],
+   "change_date": "2026-10-30",
+   "company": "AT1 - ATOMO DIAGNOSTICS LIMITED"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "FGR",
+  "api_code": "FGR",
+  "date": "2026-11-03",
+  "time": "15:40",
+  "headline": "Change in substantial holding",
+  "list": {
+   "holder_name": "Specialty Materials Investments, LLC, Bergen Global Opportunity Fund, LP, Bergen Asset Management, LLC,",
+   "voting_power": [
+    7.39,
+    6.38
+   ],
+   "change_date": "2026-10-30",
+   "company": "First Graphene Limited"
+  },
+  "api": {
+   "holder_name": "Specialty Materials Investments, LLC, Bergen Global Opportunity Fund, LP, Bergen Asset Management, LLC,",
+   "voting_power": [
+    7.39,
+    6.38
+   ],
+   "change_date": "2026-10-30",
+   "company": "First Graphene Limited"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ },
+ {
+  "code": "SPL",
+  "api_code": "SPL",
+  "date": "2026-11-03",
+  "time": "14:50",
+  "headline": "Becoming a substantial holder",
+  "list": {
+   "holder_name": "ARGENTO INVESTMENTS PTY LTD AND RELATED ENTITY",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "STARPHARMA HOLDINGS LIMITED"
+  },
+  "api": {
+   "holder_name": "ARGENTO INVESTMENTS PTY LTD AND RELATED ENTITY",
+   "voting_power": [],
+   "change_date": "2026-10-30",
+   "company": "STARPHARMA HOLDINGS LIMITED"
+  },
+  "list_ocr": true,
+  "api_ocr": true,
+  "list_enc": true,
+  "api_enc": true,
+  "same": true
+ }
+]

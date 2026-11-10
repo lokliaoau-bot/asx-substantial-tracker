@@ -1,0 +1,122 @@
+{
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/header": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 349,
+  "body": "{\"data\":{\"dateListed\":\"1885-08-13\",\"displayName\":\"BHP GROUP LIMITED\",\"priceAsk\":59.08,\"priceBid\":59.07,\"priceChange\":-0.7899999999999991,\"priceChangePercent\":-1.3195256388842478,\"priceLast\":59.08,\"sector\":\"Materials\",\"industryGroup\":\"Materials\",\"securityType\":1,\"symbol\":\"BHP\",\"volume\":565410,\"xid\":\"60947\",\"marketCap\":304390000887,\"statusCode\":\"\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/key-statistics": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 1229,
+  "body": "{\"data\":{\"isin\":\"AU000000BHP4\",\"priceAsk\":59.08,\"priceBid\":59.07,\"priceClose\":59.87,\"priceDayHigh\":59.27,\"priceDayLow\":58.78,\"priceFiftyTwoWeekHigh\":68.77,\"priceFiftyTwoWeekLow\":40.175,\"volumeAverage\":7585640.655556,\"dateExDate\":\"2026-09-03\",\"datePayDate\":\"2026-09-23\",\"dateRecordDate\":\"2026-09-04\",\"dividend\":1.3799,\"dividendCurrency\":\"USD\",\"dividendType\":\"F\",\"frankingPercent\":100,\"foreignCurrencyAmount\":0.99,\"cashFlow\":6943.034,\"earningsPerShare\":2.81539,\"freeCashFlowYield\":0.09307970974023316,\"priceEarningsRatio\":21.02729,\"priceToCash\":10.74348,\"enterprisevalue\":321267.8,\"totalAssets\":176871.8,\"totalLiabilities\":102672.4,\"opCashFlowRevTTM\":37.06263,\"currency\":\"USD\",\"foreignExempt\":false,\"shareDescription\":\"Ordinary Fully Paid\",\"numOfShares\":5084182410,\"yieldAnnual\":4.039418740604643,\"incomeStatement\":[{\"revenue\":58760000000,\"netIncome\":9833000000,\"period\":\"2026A\",\"fPeriodEndDate\":46203,\"curCode\":\"USD\"},{\"revenue\":51262000000,\"netIncome\":9019000000,\"period\":\"2025A\",\"fPeriodEndDate\":45838,\"curCode\":\"USD\"},{\"revenue\":55658000000,\"netIncome\":7897000000,\"period\":\"2024A\",\"fPeriodEndDate\":45473,\"curCode\":\"USD\"},{\"revenue\":53817000000,\"netIncome\":12921000000,\"period\":\"2023A\",\"fPeriodEndDate\":45107,\"curCode\":\"USD\"}]}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/SGH/header": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 361,
+  "body": "{\"data\":{\"dateListed\":\"2010-04-30\",\"displayName\":\"SGH LIMITED\",\"priceAsk\":43.99,\"priceBid\":43.96,\"priceChange\":0.3300000000000054,\"priceChangePercent\":0.7560137457044798,\"priceLast\":43.980000000000004,\"sector\":\"Industrials\",\"industryGroup\":\"Capital Goods\",\"securityType\":1,\"symbol\":\"SGH\",\"volume\":28977,\"xid\":\"23693826\",\"marketCap\":17664237171,\"statusCode\":\"\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/SGH/key-statistics": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 1218,
+  "body": "{\"data\":{\"isin\":\"AU0000364754\",\"priceAsk\":44,\"priceBid\":43.97,\"priceClose\":43.65,\"priceDayHigh\":44.050000000000004,\"priceDayLow\":43.65,\"priceFiftyTwoWeekHigh\":51.99,\"priceFiftyTwoWeekLow\":35.36,\"volumeAverage\":597579.777778,\"dateExDate\":\"2026-09-10\",\"datePayDate\":\"2026-10-09\",\"dateRecordDate\":\"2026-09-11\",\"dividend\":0.32,\"dividendCurrency\":\"AUD\",\"dividendType\":\"F\",\"frankingPercent\":100,\"foreignCurrencyAmount\":0,\"cashFlow\":442.7,\"earningsPerShare\":1.60516,\"freeCashFlowYield\":0.06841601865294332,\"priceEarningsRatio\":26.55187,\"priceToCash\":14.61646,\"enterprisevalue\":22102.72,\"totalAssets\":12898.4,\"totalLiabilities\":7696,\"opCashFlowRevTTM\":14.08443,\"currency\":\"AUD\",\"foreignExempt\":false,\"shareDescription\":\"Ordinary Fully Paid\",\"numOfShares\":404678973,\"yieldAnnual\":1.4662084765177548,\"incomeStatement\":[{\"revenue\":10589000000,\"netIncome\":689200000,\"period\":\"2026A\",\"fPeriodEndDate\":46203,\"curCode\":\"AUD\"},{\"revenue\":10743500000,\"netIncome\":522900000,\"period\":\"2025A\",\"fPeriodEndDate\":45838,\"curCode\":\"AUD\"},{\"revenue\":10617500000,\"netIncome\":464400000,\"period\":\"2024A\",\"fPeriodEndDate\":45473,\"curCode\":\"AUD\"},{\"revenue\":9626500000,\"netIncome\":596600000,\"period\":\"2023A\",\"fPeriodEndDate\":45107,\"curCode\":\"AUD\"}]}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/KAR/header": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 340,
+  "body": "{\"data\":{\"dateListed\":\"2004-06-08\",\"displayName\":\"KAROON ENERGY LTD\",\"priceAsk\":1.57,\"priceBid\":1.565,\"priceChange\":0.015000000000000124,\"priceChangePercent\":0.9646302250803939,\"priceLast\":1.57,\"sector\":\"Energy\",\"industryGroup\":\"Energy\",\"securityType\":1,\"symbol\":\"KAR\",\"volume\":358679,\"xid\":\"175807\",\"marketCap\":1084130946,\"statusCode\":\"\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/KAR/key-statistics": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 1208,
+  "body": "{\"data\":{\"isin\":\"AU000000KAR6\",\"priceAsk\":1.57,\"priceBid\":1.565,\"priceClose\":1.555,\"priceDayHigh\":1.5725,\"priceDayLow\":1.5525,\"priceFiftyTwoWeekHigh\":2.26,\"priceFiftyTwoWeekLow\":1.255,\"volumeAverage\":5962805.266667,\"dateExDate\":\"2026-09-02\",\"datePayDate\":\"2026-09-30\",\"dateRecordDate\":\"2026-09-03\",\"dividend\":0.012,\"dividendCurrency\":\"AUD\",\"dividendType\":\"I\",\"frankingPercent\":100,\"foreignCurrencyAmount\":0,\"cashFlow\":41.08994,\"earningsPerShare\":0.16115,\"freeCashFlowYield\":0.39446953708999827,\"priceEarningsRatio\":9.64915,\"priceToCash\":2.53505,\"enterprisevalue\":1466.617,\"totalAssets\":2584.295,\"totalLiabilities\":1079.849,\"opCashFlowRevTTM\":40.37509,\"currency\":\"USD\",\"foreignExempt\":false,\"shareDescription\":\"Ordinary Fully Paid\",\"numOfShares\":697190319,\"yieldAnnual\":2.765273311897106,\"incomeStatement\":[{\"revenue\":628600000,\"netIncome\":125500000,\"period\":\"2025A\",\"fPeriodEndDate\":46022,\"curCode\":\"USD\"},{\"revenue\":776500000,\"netIncome\":127500000,\"period\":\"2024A\",\"fPeriodEndDate\":45657,\"curCode\":\"USD\"},{\"revenue\":412900000,\"netIncome\":122500000,\"period\":\"2023A\",\"fPeriodEndDate\":45291,\"curCode\":\"USD\"},{\"revenue\":385074000,\"netIncome\":-64451000,\"period\":\"2022A\",\"fPeriodEndDate\":44742,\"curCode\":\"USD\"}]}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/about": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 3074,
+  "body": "{\"data\":{\"displayName\":\"BHP GROUP LIMITED\",\"issueType\":\"CS\",\"symbol\":\"BHP\",\"xid\":\"60947\",\"addressContact\":{\"address\":\"Level 18, 171 Collins Street, MELBOURNE, VIC, AUSTRALIA, 3000\",\"fax\":\"(61 3) 9609 3015\",\"phone\":\"(61) 1300 55 47 57\"},\"addressShareRegistry\":{\"address\":\"Level 1, 200 Mary Street, Brisbane, QLD, AUSTRALIA, 4000\",\"attention\":\"COMPUTERSHARE INVESTOR SERVICES PTY LIMITED\",\"phone\":\"1300 552 270\"},\"description\":\"BHP Group Limited (BHP) is a diversified natural resources company. The company's assets, operations and interests include iron ore, copper, metallurgical coal, nickel and potash.\",\"directors\":[{\"name\":\"Mr Ross McEwan\",\"title\":\"Chair, Non Exec. Director\"},{\"name\":\"Mr Brandon Craig\",\"title\":\"CEO\"},{\"name\":\"Ms Xiaoqun Clever-Steg\",\"title\":\"Non Exec. Director\"},{\"name\":\"Mr Gary Goldberg\",\"title\":\"Non Exec. Director\"},{\"name\":\"Ms Michelle Hinchliffe\",\"title\":\"Non Exec. Director\"},{\"name\":\"Mr Donald Lindsay\",\"title\":\"Non Exec. Director\"},{\"name\":\"Ms Christine O'Reilly\",\"title\":\"Non Exec. Director\"},{\"name\":\"Ms Catherine Tanna\",\"title\":\"Non Exec. Director\"},{\"name\":\"Mr Mark Vassella\",\"title\":\"Non Exec. Director\"},{\"name\":\"Mr Dion Weisler\",\"title\":\"Non Exec. Director\"},{\"name\":\"Ms Vandita Pant\",\"title\":\"CFO\"},{\"name\":\"Mr Edgar Basto\",\"title\":\"General Manager\"},{\"name\":\"Ms Caroline Cox\",\"title\":\"General Manager\"},{\"name\":\"Ms Jessica Farrell\",\"title\":\"General Manager\"},{\"name\":\"Ms Catherine Raw\",\"title\":\"General Manager\"},{\"name\":\"Ms Geraldine Slattery\",\"title\":\"General Manager\"},{\"name\":\"Mr Ragnar Udd\",\"title\":\"General Manager\"},{\"name\":\"Ms Jad Vodopija\",\"title\":\"General Manager\"},{\"name\":\"Mr Johan van Jaarsveld\",\"title\":\"General Manager\"},{\"name\":\"Ms Stefanie Wilkinson\",\"title\":\"General Counsel\"},{\"name\":\"Mr Mark Bendall\",\"title\":\"Investor Relations\"}],\"foreignExempt\":false,\"websiteUrl\":\"http://bhp.com\",\"secretaries\":[{\"name\":\"Ms Stefanie Wilkinson\",\"title\":\"Company Secretary\"}],\"indices\":[{\"symbol\":\"XMM\",\"xid\":\"5313384\",\"displayName\":\"S&P/ASX 300 Metals and Mining Index\",\"issueType\":\"IN\",\"issueTypeName\":\"Index\"},{\"symbol\":\"XKO\",\"xid\":\"574995\",\"displayName\":\"S&P/ASX 300\",\"issueType\":\"IN\",\"issueTypeName\":\"Index\"},{\"symbol\":\"XMJ\",\"xid\":\"577650\",\"displayName\":\"S&P/ASX 200 Materials (Sector)\",\"issueType\":\"IN\",\"issueTypeName\":\"Index\"},{\"symbol\":\"XJO\",\"xid\":\"583954\",\"displayName\":\"S&P/ASX 200\",\"issueType\":\"IN\",\"issueTypeName\":\"Index\",\"isin\":\"US78517D1037\"},{\"symbol\":\"XTL\",\"xid\":\"588252\",\"displayName\":\"S&P/ASX 20\",\"issueType\":\"IN\",\"issueTypeName\":\"Inde"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/announcements?count=3": {
+  "status": 200,
+  "type": "application/json; charset=utf-8",
+  "len": 1189,
+  "body": "{\"data\":{\"displayName\":\"BHP GROUP LIMITED\",\"issueType\":\"CS\",\"items\":[{\"announcementType\":\"SECURITY HOLDER DETAILS\",\"date\":\"2026-11-10T23:34:56.000Z\",\"documentKey\":\"2924-03160473-3A706291\",\"fileSize\":\"261KB\",\"headline\":\"Change of Director's Interest Notice\",\"isPriceSensitive\":false,\"url\":\"\"},{\"announcementType\":\"ISSUED CAPITAL\",\"date\":\"2026-11-10T23:31:01.000Z\",\"documentKey\":\"2924-03160472-3A706290\",\"fileSize\":\"12KB\",\"headline\":\"Notification regarding unquoted securities - BHP\",\"isPriceSensitive\":false,\"url\":\"\"},{\"announcementType\":\"NOTICE OF MEETING\",\"date\":\"2026-10-22T03:38:31.000Z\",\"documentKey\":\"2924-03151740-3A704697\",\"fileSize\":\"217KB\",\"headline\":\"Results of 2026 Annual General Meeting\",\"isPriceSensitive\":false,\"url\":\"\"},{\"announcementType\":\"CHAIRMAN'S ADDRESS\",\"date\":\"2026-10-21T22:45:40.000Z\",\"documentKey\":\"2924-03151588-3A704674\",\"fileSize\":\"138KB\",\"headline\":\"BHP 2026 AGM Addresses\",\"isPriceSensitive\":false,\"url\":\"\"},{\"announcementType\":\"QUARTERLY ACTIVITIES REPORT\",\"date\":\"2026-10-19T21:24:35.000Z\",\"documentKey\":\"2924-03150302-3A704449\",\"fileSize\":\"1192KB\",\"headline\":\"Quarterly Activities Report\",\"isPriceSensitive\":true,\"url\":\"\"}],\"symbol\":\"BHP\",\"xid\":\"60947\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/charts/BHP?timeframe=1y": {
+  "status": 404,
+  "type": "application/json; charset=utf-8",
+  "len": 100,
+  "body": "{\"error\":{\"code\":404,\"message\":\"File Not Found\",\"reason\":\"Cannot GET /1.0/charts/BHP?timeframe=1y\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/charts?timeframe=1Y": {
+  "status": 404,
+  "type": "application/json; charset=utf-8",
+  "len": 110,
+  "body": "{\"error\":{\"code\":404,\"message\":\"File Not Found\",\"reason\":\"Cannot GET /1.0/companies/BHP/charts?timeframe=1Y\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/price-history?count=260": {
+  "status": 404,
+  "type": "application/json; charset=utf-8",
+  "len": 114,
+  "body": "{\"error\":{\"code\":404,\"message\":\"File Not Found\",\"reason\":\"Cannot GET /1.0/companies/BHP/price-history?count=260\"}}"
+ },
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/BHP/prices?interval=daily&count=260": {
+  "status": 404,
+  "type": "application/json; charset=utf-8",
+  "len": 122,
+  "body": "{\"error\":{\"code\":404,\"message\":\"File Not Found\",\"reason\":\"Cannot GET /1.0/companies/BHP/prices?interval=daily&count=260\"}}"
+ },
+ "https://www.asx.com.au/asx/1/share/BHP": {
+  "status": 404,
+  "type": "application/json",
+  "len": 78,
+  "body": "{\"error_code\":\"uri-not-found\",\"error_desc\":\"Unable to find API service call.\"}"
+ },
+ "https://www.asx.com.au/asx/1/share/BHP/prices?interval=daily&count=260": {
+  "status": 404,
+  "type": "application/json",
+  "len": 78,
+  "body": "{\"error_code\":\"uri-not-found\",\"error_desc\":\"Unable to find API service call.\"}"
+ },
+ "https://www.asx.com.au/asx/1/chart/highcharts?asx_code=BHP&years=1": {
+  "status": 200,
+  "type": "application/json",
+  "len": 84962,
+  "body": "[[1477958400000,19.46497777056,7767525],[1478044800000,19.260083267712,6111127],[1478131200000,19.345455977232,8301953],[1478217600000,19.012502410104,5131030],[1478476800000,19.37960506104,7509508],[1478563200000,19.89184131816,11117892],[1478649600000,19.260083267712,16019969],[1478736000000,20.848015664784,20109836],[1478822400000,21.291953754288,14250626],[1479081600000,21.206581044768,10356768],[1479168000000,20.95900018716,10312909],[1479254400000,20.472375742896,8328853],[1479340800000,20.540673910512,9314350],[1479427200000,20.57482299432,5334524],[1479686400000,20.728493871456,6331968],[1479772800000,21.548071882848,10843115],[1479859200000,22.120069036632,11773552],[1479945600000,22.120069036632,8160822],[1480032000000,22.6237680228,25346201],[1480291200000,22.034696327112,7871556],[1480377600000,21.735891843792,9398037],[1480464000000,20.839478393832,19615715],[1480550400000,21.863950908072,14943997],[1480636800000,21.360251921904,13679529],[1480896000000,21.496848257136,7306940],[1480982400000,21.752966385696,10158882],[1481068800000,21.966398159496,6182420],[1481155200000,22.231053559008,7432951],[1481241600000,22.179829933296,6922370],[1481500800000,22.470097145664,7240785],[1481587200000,22.299351726624,9479608],[1481673600000,22.02615905616,9598747],[1481760000000,21.624907321416,10821899],[1481846400000,21.34317738,16222607],[1482105600000,21.420012818568,5913301],[1482192000000,21.266341941432,9284962],[1482278400000,21.488310986184,7266043],[1482364800000,21.462699173328,6072629],[1482451200000,21.027298354776,19287483],[1482883200000,21.718817301888,6865682],[1482969600000,21.7700409276,3558996],[1483056000000,21.394401005712,4920791],[1483401600000,21.735891843792,5395237],[1483488000000,21.863950908072,4917567],[1483574400000,21.881025449976,5352438],[1483660800000,21.7700409276,4121721],[1483920000000,21.744429114744,5706255],[1484006400000,21.650519134272,7027142],[1484092800000,22.213979017104,8362718],[1484179200000,22.504246229472,7459122],[1484265600000,22.478634416616,15898254],[1484524800000,22.854274338504,6693761],[1484611200000,22.803050712792,9357257],[1484697600000,22.640842564704,7152228],[1484784000000,22.785976170888,5569232],[1484870400000,22.49570895852,4767294],[1485129600000,22.512783500424,6119653],[1485216000000,23.059168841352,8812342],[1485302400000,23.810448685128,17387845],[1485475200000,23.494569659904,7373739],[1485734400000,23.357973324672,4700144],[1485820800000,22.743289816128,7693598],[1485907200000,23."
+ },
+ "https://query1.finance.yahoo.com/v8/finance/chart/BHP.AX?range=1y&interval=1d": {
+  "status": 200,
+  "type": "application/json;charset=utf-8",
+  "len": 28023,
+  "body": "{\"chart\":{\"result\":[{\"meta\":{\"currency\":\"AUD\",\"symbol\":\"BHP.AX\",\"exchangeName\":\"ASX\",\"fullExchangeName\":\"ASX\",\"instrumentType\":\"EQUITY\",\"firstTradeDate\":570409200,\"regularMarketTime\":1794353870,\"hasPrePostMarketData\":false,\"gmtoffset\":39600,\"timezone\":\"AEDT\",\"exchangeTimezoneName\":\"Australia/Sydney\",\"regularMarketPrice\":59.09,\"regularMarketChangePercent\":-1.303,\"fulldayPrice\":59.09,\"fulldayChange\":-0.78,\"fulldayChangePercent\":-1.303,\"fiftyTwoWeekHigh\":68.77,\"fiftyTwoWeekLow\":40.175,\"regularMarketDayHigh\":59.27,\"regularMarketDayLow\":58.78,\"regularMarketVolume\":566369,\"longName\":\"BHP Group Limited\",\"shortName\":\"BHP GROUP FPO [BHP]\",\"chartPreviousClose\":42.79,\"priceHint\":2,\"currentTradingPeriod\":{\"pre\":{\"timezone\":\"AEDT\",\"start\":1794340800,\"end\":1794351600,\"gmtoffset\":39600},\"regular\":{\"timezone\":\"AEDT\",\"start\":1794351600,\"end\":1794373920,\"gmtoffset\":39600},\"post\":{\"timezone\":\"AEDT\",\"start\":1794373920,\"end\":1794373920,\"gmtoffset\":39600}},\"dataGranularity\":\"1d\",\"range\":\"1y\",\"validRanges\":[\"1d\",\"5d\",\"1mo\",\"3mo\",\"6mo\",\"1y\",\"2y\",\"5y\",\"10y\",\"ytd\",\"max\"]},\"timestamp\":[1762815600,1762902000,1762988400,1763074800,1763334000,1763420400,1763506800,1763593200,1763679600,1763938800,1764025200,1764111600,1764198000,1764284400,1764543600,1764630000,1764716400,1764802800,1764889200,1765148400,1765234800,1765321200,1765407600,1765494000,1765753200,1765839600,1765926000,1766012400,1766098800,1766358000,1766444400,1766530800,1766962800,1767049200,1767135600,1767308400,1767567600,1767654000,1767740400,1767826800,1767913200,1768172400,1768258800,1768345200,1768431600,1768518000,1768777200,1768863600,1768950000,1769036400,1769122800,1769468400,1769554800,1769641200,1769727600,1769986800,1770073200,1770159600,1770246000,1770332400,1770591600,1770678000,1770764400,1770850800,1770937200,1771196400,1771282800,1771369200,1771455600,1771542000,1771801200,1771887600,1771974000,1772060400,1772146800,1772406000,1772492400,1772578800,1772665200,1772751600,1773010800,1773097200,1773183600,1773270000,1773356400,1773615600,1773702000,1773788400,1773874800,1773961200,1774220400,1774306800,1774393200,1774479600,1774566000,1774825200,1774911600,1774998000,1775084400,1775520000,1775606400,1775692800,1775779200,1776038400,1776124800,1776211200,1776297600,1776384000,1776643200,1776729600,1776816000,1776902400,1776988800,1777248000,1777334400,1777420800,1777507200,1777593600,1777852800,1777939200,1778025600,1778112000,1778198400,1778457600,1778544000,1778630400,1778716800,1778803200,1779062400,17791"
+ },
+ "https://stooq.com/q/d/l/?s=bhp.au&i=d": {
+  "status": 200,
+  "type": "text/html; charset=utf-8",
+  "len": 796,
+  "body": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex,nofollow\"></head><body><noscript>This site requires JavaScript to verify your browser. Please enable JavaScript and reload.</noscript><script nonce=\"cFKkW0pCmq-fQfCQfa89Bg\">\n(async()=>{const c=\"AAAAAGrzr4UTegU6p4M0kOmnDpfj5WLsNK2iYbGurOU4q63AXpDcepXFvKQ\",d=4,t=\"0\".repeat(d),e=new TextEncoder;let n=0;while(1){const h=await crypto.subtle.digest(\"SHA-256\",e.encode(c+n)),x=Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,\"0\")).join(\"\");if(x.startsWith(t))break;n++}const r=await fetch(\"/__verify\",{method:\"POST\",headers:{\"Content-Type\":\"application/x-www-form-urlencoded\"},body:\"c=\"+encodeURIComponent(c)+\"&n=\"+n,credentials:\"same-origin\"});if(r.ok)location.reload()})();\n</script></body></html>\n"
+ },
+ "_frontend_endpoints": [],
+ "_scripts": [
+  "/.rum/@adobe/helix-rum-js@%5E2/dist/micro.js",
+  "/etc.clientlibs/asx/clientlibs/clientlib-base-98.0.1.lc-84e026e139991d67251c605b56ea9e8c-lc.min.js",
+  "/etc.clientlibs/asx/clientlibs/clientlib-dependencies.lc-09b76bea3a1bc11bb99e50bc0deba119-lc.min.js",
+  "/etc.clientlibs/clientlibs/granite/jquery.lc-7842899024219bcbdb5e72c946870b79-lc.min.js",
+  "/etc.clientlibs/core/wcm/components/commons/site/clientlibs/container.lc-0a6aff292f5cc42142779cde92054524-lc.min.js",
+  "https://asx.cmfyapp.com/js/common.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://asx.cmfyapp.com/js/manifest.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://asx.cmfyapp.com/js/vendor.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://cdnjs.cloudflare.com/ajax/libs/F2/1.4.3/f2.min.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b",
+  "https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.7.0/polyfill.min.js",
+  "https://cookie-cdn.cookiepro.com/scripttemplates/otSDKStub.js",
+  "https://intercept-widget.questionpro.com.au/static/js/loader.js",
+  "https://siteimproveanalytics.com/js/siteanalyze_6054237.js",
+  "https://unpkg.com/axios@0.18.0/dist/axios.min.js",
+  "https://www.chartworks.io/content/chartworks/dist/1.4.30/js/chartworks.min.js?v=e19950a04f8ccc0638df25fe0b65bcaf8676ee3b"
+ ]
+}

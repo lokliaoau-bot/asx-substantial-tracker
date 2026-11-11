@@ -156,6 +156,7 @@ td.num, .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .i-bull { color: var(--becoming); }
 .i-bear { color: var(--ceasing); }
 .i-neutral { color: var(--muted); }
+.ins .chip { display: inline-block; margin: 3px 4px 0 0; padding: 1px 7px; border: 1px solid var(--line, #d0d7de); border-radius: 9px; font-size: 11px; color: var(--muted); white-space: nowrap; }
 .ins ul { margin: 8px 0 2px; padding-left: 1.1em; font-size: 13px; color: var(--ink); max-width: 30em; }
 .ins li { margin: 3px 0; line-height: 1.5; }
 .ins .conf { margin-top: 4px; }
@@ -563,9 +564,10 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     d.className = "ins";
     const sum = document.createElement("summary");
     sum.append(el("span", `tag i-${["bull", "bear"].includes(i.tone) ? i.tone : "neutral"}`, i.label));
+    (Array.isArray(i.tags) ? i.tags : []).slice(0, 4).forEach((t) => sum.append(el("span", "chip", String(t))));
     const ul = document.createElement("ul");
     (Array.isArray(i.reasons) ? i.reasons : []).forEach((r) => ul.append(el("li", "", String(r))));
-    d.append(sum, ul, el("div", "conf", `把握：${i.confidence || "中"}。这是按公告数字和股价位置做的推断，公告里不会写买卖原因。`));
+    d.append(sum, ul, el("div", "conf", `把握：${i.confidence || "中"}。这是按公告数字、股价、公司同期公告和它在别的股票上的动作做的推断，公告里不会写买卖原因。`));
     return d;
   }
 

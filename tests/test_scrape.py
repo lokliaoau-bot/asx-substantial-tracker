@@ -1618,3 +1618,213 @@ def test_reparse_clears_stale_detail(sandbox, monkeypatch):
 def test_judge_with_almost_no_data_is_low_confidence():
     j = insight.judge({"type": "becoming", "voting_power": [], "style": "active"})
     assert j["action"] == "build" and j["confidence"] == "低"
+
+
+# ---------------------------------------------------------------- 第八轮：公司大事、成本价、横向比较
+
+def test_company_events_from_real_page():
+    evs = scrape.parse_company_events((FIXTURES / "company_anns_ppe.html").read_text(encoding="utf-8"))
+    kinds = {e["k"] for e in evs}
+    assert {"buyback", "results"} <= kinds
+    assert any(e["d"] == "2026-08-31" and e["k"] == "results" for e in evs)            # FY26 Annual Results / Appendix 4E
+    assert sum(e["k"] == "buyback" for e in evs) == 2                                    # 几十份每日回购更新只留头尾
+    assert not any("substantial" in e["h"].lower() or "Briefing" in e["h"] or "General Meeting" in e["h"] for e in evs)
+    assert evs == sorted(evs, key=lambda e: e["d"])
+    assert scrape.parse_company_events("<html><body>Access denied</body></html>") is None
+    assert scrape.parse_company_events("<html><h2>Search results</h2><p>No announcements</p></html>") == []
+
+
+@pytest.mark.parametrize("headline,kind", [
+    ("Completion of $50m Placement", "raise"), ("Proposed issue of securities - ABC", "raise"),
+    ("Share Purchase Plan Offer Booklet", "raise"), ("Appendix 4D and Half Year Report", "results"),
+    ("Quarterly Activities Report", "results"), ("Trading Update and FY27 Guidance", "results"),
+    ("Receipt of Non-Binding Indicative Proposal", "takeover"), ("Scheme Booklet registered with ASIC", "takeover"),
+    ("Update - Notification of buy-back - ABC", "buyback"), ("Results of Annual General Meeting", ""),
+    ("Change of Director's Interest Notice", ""), ("Becoming a substantial holder", ""), ("Half Year Results Briefing Date", ""),
+])
+def test_classify_event(headline, kind):
+    assert scrape.classify_event(headline) == kind
+
+
+def test_cost_basis_moving_average():
+    recs = [{"date": "2026-01-10", "buy_qty": 1000, "sell_qty": 0, "buy_price": 1.0, "votes": [1000]},
+            {"date": "2026-03-10", "buy_qty": 1000, "sell_qty": 0, "buy_price": None, "p": 2.0, "votes": [1000, 2000]},   # 没写价格：用收盘价
+            {"date": "2026-05-10", "buy_qty": 0, "sell_qty": 1000, "votes": [2000, 1000]}]
+    c = insight.cost_basis(recs, holding=1000)
+    assert c["avg"] == 1.5 and c["cov"] == 1.0 and c["n"] == 2 and c["since"] == "2026-01-10"
+    assert insight.cost_basis(recs, holding=4000)["cov"] == 0.25
+    assert insight.cost_basis([{"date": "2026-01-10", "buy_qty": 0, "sell_qty": 500}], 1000) == {}
+    # 累计出来的股数比披露的持仓还多（中间有没看到的卖出）：压回披露数
+    c = insight.cost_basis([{"date": "2026-01-10", "buy_qty": 5000, "buy_price": 1.0, "votes": [1000]}], holding=1000)
+    assert c["avg"] == 1.0 and c["cov"] == 1.0
+
+
+def _sell(**kw):
+    n = {"type": "change", "voting_power": [8.0, 6.0], "votes": [8_000_000, 6_000_000], "style": "active", "date": "2026-11-05",
+         "change_date": "2026-11-03",
+         "trades": {"n": 4, "n_buy": 0, "n_sell": 4, "buy_qty": 0, "sell_qty": 2_000_000, "net_qty": -2_000_000, "first": "2026-10-20",
+                    "last": "2026-11-03", "days": 4, "sell_price": 2.0, "buy_price": None, "kinds": {"on_market": 2_000_000}},
+         "px": {"p": 2.0, "r1m": 0.0, "r3m": 0.02, "r6m": 0.05, "r12m": 0.05, "pos": 0.5, "hi": 2.5, "lo": 1.5, "t_lo": 1.9, "t_hi": 2.1}}
+    n.update(kw)
+    return n
+
+
+def test_judge_uses_cost_basis_for_sells():
+    assert insight.judge(_sell())["action"] == "trim"                                    # 没有成本：看不出
+    r = insight.judge(_sell(cost={"avg": 1.2, "cov": 0.8, "since": "2026-01-10", "n": 3}))
+    assert r["action"] == "trim_profit" and any("平均买入成本约 $1.20" in x and "赚钱卖" in x for x in r["reasons"])
+    r = insight.judge(_sell(cost={"avg": 3.0, "cov": 0.8, "since": "2026-01-10", "n": 3}))
+    assert r["action"] == "trim_loss" and any("亏钱卖" in x for x in r["reasons"])
+    r = insight.judge(_sell(cost={"avg": 2.05, "cov": 0.8, "since": "2026-01-10", "n": 3}))
+    assert r["action"] == "trim" and any("和成本差不多" in x for x in r["reasons"])
+    assert insight.judge(_sell(cost={"avg": 1.2, "cov": 0.2, "since": "2026-01-10", "n": 1}))["action"] == "trim"   # 已知成本的部分太少，不用
+    assert insight.judge(_sell(cost={"avg": 0.01, "cov": 0.9, "since": "2026-01-10", "n": 1}))["action"] == "trim"  # 离谱的数字不用
+
+
+def _buy(**kw):
+    n = {"type": "change", "voting_power": [6.0, 8.0], "votes": [6_000_000, 8_000_000], "style": "active", "date": "2026-11-05",
+         "change_date": "2026-11-03",
+         "trades": {"n": 3, "n_buy": 3, "n_sell": 0, "buy_qty": 2_000_000, "sell_qty": 0, "net_qty": 2_000_000, "first": "2026-10-28",
+                    "last": "2026-11-03", "days": 3, "buy_price": 2.0, "sell_price": None, "kinds": {"other": 2_000_000}},
+         "px": {"p": 2.0, "r1m": 0.0, "r3m": 0.02, "r6m": 0.05, "r12m": 0.05, "pos": 0.5, "hi": 2.5, "lo": 1.5, "t_lo": 1.9, "t_hi": 2.1}}
+    n.update(kw)
+    return n
+
+
+RAISE = [{"d": "2026-10-27", "k": "raise", "h": "Successful $40m Placement", "s": True}]
+
+
+def test_judge_infers_placement_from_event_and_volume():
+    assert insight.judge(_buy())["action"] == "add"
+    # 买的比同期全市场成交量还多 + 公司刚公告融资 → 参与配售
+    n = _buy(ev=RAISE)
+    n["px"]["t_vol"] = 900_000
+    r = insight.judge(n)
+    assert r["action"] == "add_placement" and "参与融资" in r["tags"]
+    assert any("2.2 倍" in x for x in r["reasons"]) and any("Successful $40m Placement" in x for x in r["reasons"])
+    # 有融资公告，但买入量只是成交量的一小部分：只提一句，不改结论
+    n = _buy(ev=RAISE)
+    n["px"]["t_vol"] = 50_000_000
+    r = insight.judge(n)
+    assert r["action"] == "add" and any("一部分买入可能来自认购新股" in x for x in r["reasons"])
+    # 融资公告离得太远：不提
+    r = insight.judge(_buy(ev=[{"d": "2026-06-01", "k": "raise", "h": "Placement", "s": True}]))
+    assert not any("融资" in x for x in r["reasons"])
+    # 没有融资公告，但量超过成交量：只说不是场内
+    n = _buy()
+    n["px"]["t_vol"] = 900_000
+    r = insight.judge(n)
+    assert r["action"] == "add" and any("不可能都是在场内成交" in x for x in r["reasons"])
+
+
+def test_judge_takeover_and_results_events():
+    tk = [{"d": "2026-10-15", "k": "takeover", "h": "Receipt of Non-Binding Indicative Proposal", "s": True}]
+    r = insight.judge(_buy(ev=tk, style="hedge"))
+    assert r["action"] == "arb" and r["tone"] == "neutral" and "收购相关" in r["tags"]
+    r = insight.judge(_buy(ev=tk, style="active"))
+    assert r["action"] == "add" and any("赌收购成功" in x for x in r["reasons"])
+    n = _sell(ev=tk)
+    n["px"]["r1m"] = 0.25
+    r = insight.judge(n)
+    assert r["action"] == "trim_profit" and any("借收购带来的涨价退出" in x for x in r["reasons"])
+    res = [{"d": "2026-10-26", "k": "results", "h": "Appendix 4D and Half Year Report", "s": True}]
+    r = insight.judge(_buy(ev=res))
+    assert "业绩后" in r["tags"] and any("对这份业绩的反应" in x for x in r["reasons"])
+    long = _buy(ev=res)                                    # 交易拖了几个月：不能说是对业绩的反应
+    long["trades"]["first"] = "2026-06-01"
+    assert "业绩后" not in insight.judge(long)["tags"]
+    assert insight.judge(_buy(ev=[{"bad": 1}, "x", None]))["action"] == "add"            # 坏数据不出错
+
+
+def test_passive_dilution_cites_raise():
+    n = {"type": "change", "voting_power": [8.0, 6.9], "votes": [8_000_000, 8_000_000], "style": "active", "date": "2026-11-05",
+         "change_date": "2026-11-03", "trades": {}, "px": {}, "ev": RAISE}
+    r = insight.judge(n)
+    assert r["action"] == "passive_dilute" and any("对得上" in x and "Placement" in x for x in r["reasons"])
+
+
+def _n(holder, code, action, date="2026-11-05", sector="", style="主动选股基金"):
+    return {"holder": holder, "code": code, "date": date, "sector": sector,
+            "insight": {"action": action, "style": style, "reasons": ["第一句。", f"{style}：说明。"]}}
+
+
+def test_add_context_same_fund_other_stocks():
+    ns = [_n("A", "AAA", "trim", sector="Materials"), _n("A", "BBB", "add", sector="Financials"), _n("A", "CCC", "build", sector="Financials"),
+          _n("B", "DDD", "trim"), _n("B", "EEE", "exit"), _n("B", "FFF", "trim_loss"),
+          _n("C", "GGG", "add"), _n("C", "HHH", "add", date="2026-09-01"),
+          _n("D", "III", "trim", style="养老金"), _n("D", "JJJ", "add", style="养老金")]
+    insight.add_context(ns)
+    a = ns[0]["insight"]
+    assert a["tags"] == ["换股"] and "BBB、CCC" in a["reasons"][1] and "卖的是原材料/矿业、买的多是金融，像行业轮动" in a["reasons"][1]
+    assert a["reasons"][-1].startswith("主动选股基金：")                               # 插在基金类型那句前面
+    assert ns[1]["insight"]["tags"] == ["换股"]
+    assert ns[3]["insight"]["tags"] == ["整体减仓"] and "应付赎回" in ns[3]["insight"]["reasons"][1]
+    assert "tags" not in ns[6]["insight"]                                              # 另一条隔了两个月，不算同期
+    assert not ns[8]["insight"].get("tags") and "整体并没有在撤" in ns[8]["insight"]["reasons"][1]   # 养老金：只提一句，不打“换股”标签
+
+
+def test_add_context_peers_on_same_stock():
+    ns = [_n("A", "XYZ", "add"), _n("B", "XYZ", "add_dip", date="2026-10-20"), _n("C", "XYZ", "exit_loss", date="2026-10-25"),
+          _n("E", "XYZ", "lending"), _n("F", "XYZ", "trim", date="2026-08-01")]
+    insight.add_context(ns)
+    assert ns[0]["insight"]["tags"] == ["多家同向", "有人反向"]
+    assert ns[2]["insight"]["tags"] == ["有人反向"]
+    assert "tags" not in ns[3]["insight"] and "tags" not in ns[4]["insight"]
+    insight.add_context([{"holder": "A", "code": "X", "insight": None}, {"holder": "A"}])   # 缺字段不出错
+
+
+def test_price_context_window_volume():
+    series = [[int(dt.datetime(2026, 1, 1, tzinfo=dt.timezone.utc).timestamp() * 1000) + i * 86400000, 1.0 + i * 0.001, 1000] for i in range(300)]
+    px = insight.price_context(series, "2026-10-20", "2026-10-01", "2026-10-10")
+    assert px["t_vol"] == 10_000
+    assert "t_vol" not in insight.price_context(series, "2026-10-20", "2025-06-01", "2026-10-10")   # 明细开始得比日线还早：算不全，不给
+
+
+def test_trade_rows_with_glued_side():
+    pg = "Date  Person  Consideration  Number  Class\n26/10/2026 Primary Person $145,627.04 89,799 SecuritiesBuy\n23/10/2026 Primary Person $66,327.55 42,861 SecuritiesSell\n"
+    s = insight.parse_trades([pg], "2026-10-28", "change")["summary"]
+    assert s["buy_qty"] == 89_799 and s["sell_qty"] == 42_861
+
+
+def test_history_survives_pruning_and_feeds_cost(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    page = (FIXTURES / "company_anns_ppe.html").read_text(encoding="utf-8")
+    fake = FakeASX(prices={"SLC": falling_prices()}, events={"SLC": page}, sectors={"SLC": "Communication Services"})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    hist = read(sandbox / "data" / "history.json")
+    key = next(k for k in hist["pos"] if k.endswith("|SLC"))
+    rec = hist["pos"][key][0]
+    assert rec["id"] == "1001" and rec["buy_qty"] == 2_000_000 and rec["buy_price"] == 2.05 and rec["votes"] == [10_000_000, 12_000_000]
+    out = read(sandbox / "data" / "notices.json")
+    n = next(x for x in out["notices"] if x["code"] == "SLC")
+    assert n["sector"] == "Communication Services" and out["last_run"]["insight"]["history_added"] >= 1
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert isinstance(e["ev"], list) and fake.event_calls.count("SLC") == 1
+    # 再跑不重复记、不重复取
+    scrape.main()
+    assert len(read(sandbox / "data" / "history.json")["pos"][key]) == 1 and fake.event_calls.count("SLC") == 1
+    # 公告过了保留期被清掉，持仓历史还在；之后的卖出能用上成本
+    holders, _ = scrape.load_watchlist()
+    later = {"id": "9", "date": "2027-03-01", "time": "10:00", "type": "change", "votes": [12_000_000, 9_000_000]}
+    c = scrape.cost_for(hist, key.split("|")[0], "SLC", later)
+    assert c["avg"] == 2.05 and 0.15 < c["cov"] < 0.2
+    assert scrape.cost_for(hist, key.split("|")[0], "SLC", {"id": "1001", "date": rec["date"], "time": rec["time"]}) == {}   # 不拿自己算自己
+    assert scrape.cost_for({}, "X", "Y", later) == {} and scrape.cost_for(None, "X", "Y", later) == {}
+
+
+def test_events_failure_does_not_break_run(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    fake = FakeASX(prices={"SLC": falling_prices()}, events={"SLC": "<html>blocked</html>"})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    out = read(sandbox / "data" / "notices.json")
+    n = next(x for x in out["notices"] if x["code"] == "SLC")
+    assert n["insight"]["action"] == "add_dip" and out["last_run"]["errors"] == [] and n["sector"] == ""
+
+
+def test_corrupt_history_file_is_replaced(sandbox, monkeypatch):
+    (sandbox / "data" / "history.json").write_text('["not", "a dict"]', encoding="utf-8")
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    assert scrape.main() == 0
+    assert isinstance(read(sandbox / "data" / "history.json")["pos"], dict)

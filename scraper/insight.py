@@ -781,7 +781,7 @@ def judge(n: dict) -> dict | None:
         x = tk_ev[-1]
         tags.append("收购相关")
         if direction == "buy":
-            if style == "hedge":
+            if style == "hedge" and x.get("s"):          # 只认标了“股价敏感”的收购消息
                 reasons.append(f"买入发生在收购消息（{ev_txt(x)}）之后：对冲基金这时候买，多半是做并购套利"
                                "（赚收购价和市价之间的差价），不代表看好公司本身。")
                 return done("arb")

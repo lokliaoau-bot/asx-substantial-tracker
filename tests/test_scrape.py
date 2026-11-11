@@ -181,14 +181,22 @@ PDFS = {
 
 class FakeASX:
     def __init__(self, listing=LISTING, fail_ids=(), lists_down=False, prev_listing=None, broken_ids=(),
-                 api_items=(), api_down=False, api_pdfs=None):
+                 api_items=(), api_down=False, api_pdfs=None, prices=None):
         self.listing, self.fail_ids, self.lists_down = listing, set(fail_ids), lists_down
         self.prev_listing, self.broken_ids = prev_listing, set(broken_ids)
         self.api_items, self.api_down, self.api_pdfs = list(api_items), api_down, api_pdfs or {}
         self.pdf_downloads = []
         self.api_pages = []
+        self.prices = prices or {}          # 股票代码 → 日线 [[毫秒, 收盘, 成交量], ...]；没有的代码返回 404
+        self.price_calls = []
 
     def __call__(self, url, *, max_bytes=None, tries=3, timeout=60):
+        if "/chart/highcharts" in url:
+            code = url.split("asx_code=")[1].split("&")[0]
+            self.price_calls.append(code)
+            if code not in self.prices:
+                raise scrape.FetchError("HTTP 404")
+            return scrape.Fetched(url, json.dumps(self.prices[code]).encode(), "application/json")
         if url.startswith(scrape.MARKET_API):
             if self.api_down:
                 raise scrape.FetchError("HTTP 503")
@@ -270,7 +278,14 @@ def test_watchlist_change_is_retroactive(sandbox, monkeypatch):
     fake.pdf_downloads.clear()
     scrape.main()
     codes = {n["code"] for n in read(sandbox / "data" / "notices.json")["notices"]}
-    assert "ABC" in codes and fake.pdf_downloads == []
+    assert "ABC" in codes
+    # 新命中的那一份会再下载一次，用来读交易明细（操作解读要用）；其他的不重复下载
+    assert len(fake.pdf_downloads) == 1
+    abc = next(e for e in read(sandbox / "data" / "all_notices.json")["entries"].values() if e["code"] == "ABC")
+    assert abc["detail_v"] == scrape.INSIGHT_VERSION
+    fake.pdf_downloads.clear()
+    scrape.main()
+    assert fake.pdf_downloads == []
 
 
 def test_failed_download_is_retried_then_given_up(sandbox, monkeypatch):

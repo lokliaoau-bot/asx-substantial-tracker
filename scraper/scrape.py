@@ -36,6 +36,9 @@ import requests
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import insight  # noqa: E402  操作解读：交易明细、股价背景、判断规则
+
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 SYD = ZoneInfo("Australia/Sydney")
@@ -78,6 +81,11 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
+INSIGHT_VERSION = 1                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
+TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
+TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
+DETAIL_TRIES = 3                                          # 明细读取失败最多重试几次
+PRICE_API = BASE + "/asx/1/chart/highcharts?asx_code={code}&years=2"   # ASX 日线：[[毫秒, 收盘价, 成交量], ...]
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -851,6 +859,7 @@ class Holder:
     aliases: list
     hints: list
     group: str = "主动基金"
+    style: str = "active"       # 基金类型，见 insight.STYLES
 
 
 def is_abbrev(s: str) -> bool:
@@ -876,7 +885,9 @@ def load_watchlist(path: Path | None = None) -> tuple[list[Holder], list[re.Patt
         if not h.get("name") or not aliases:
             raise SystemExit(f"watchlist.json 里有一项缺少 name 或 aliases：{h}")
         holders.append(Holder(h["name"], aliases, [word_re(x, True) for x in h.get("hints", []) if x and x.strip()],
-                              h.get("group") or "主动基金"))
+                              h.get("group") or "主动基金",
+                              h.get("style") if h.get("style") in insight.STYLES
+                              else ("super" if h.get("group") == "养老金" else "active")))
     noise = [word_re(x, True) for x in raw.get("noise_hints", []) if x and x.strip()]
     return holders, noise
 
@@ -975,7 +986,9 @@ PUBLIC_FIELDS = ("id", "code", "company", "date", "time", "headline", "url", "pd
 def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
-    for e in entries.values():
+    style_of = {h.name: h.style for h in holders}
+    last_seen: dict[tuple, dict] = {}        # (申报方, 股票) → 上一份公告的要点，给“操作解读”做参照
+    for e in sorted(entries.values(), key=lambda e: (e.get("date") or "", e.get("time") or "", str(e.get("id")))):
         holder, conf = match_entry(e, holders)
         if holder:
             item = {k: e.get(k) for k in PUBLIC_FIELDS}
@@ -985,6 +998,19 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
             item["url"] = safe_url(item.get("url") or "")
             item["pdf_url"] = safe_url(item.get("pdf_url") or "") or item["url"]
             item.update(holder=holder, group=group_of.get(holder, ""), confidence=conf, ocr=bool(e.get("ocr")))
+            key = (holder, item["code"])
+            try:
+                item["insight"] = insight.judge({
+                    "type": e.get("type"), "voting_power": e.get("voting_power") or [], "votes": e.get("votes") or [],
+                    "trades": e.get("trades") or {}, "px": e.get("px") or {}, "ocr": e.get("ocr"),
+                    "style": style_of.get(holder, "active"), "prev": last_seen.get(key), "date": e.get("date"),
+                })
+            except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
+                log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")
+                item["insight"] = None
+            vp, votes = e.get("voting_power") or [], e.get("votes") or []
+            last_seen[key] = {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None,
+                              "type": e.get("type"), "date": e.get("date")}
             out.append(item)
     out.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
     # 保险：同一份公告从列表页和接口各来一条、时间又差了一分钟时，按内容再去重一次（优先保留列表页那条）
@@ -1088,9 +1114,10 @@ def blank(result: dict | None) -> bool:
     return result is None or not (result.get("holder_name") or result.get("region"))
 
 
-def process_entry(e: dict, ocr_budget: OCRBudget | None = None) -> None:
+def process_entry(e: dict, ocr_budget: OCRBudget | None = None, want_detail=None) -> None:
     """下载并解析一份公告。文字层什么都认不出来时（扫描件，或“打字封面信 + 扫描表格”），
-    用 OCR 再读一遍。ocr_budget 为 None 时不做 OCR；名额或时间用完时抛 Deferred。"""
+    用 OCR 再读一遍。ocr_budget 为 None 时不做 OCR；名额或时间用完时抛 Deferred。
+    want_detail(e) 返回真时（命中关注名单），顺手把交易明细也读了，省得再下载一次。"""
     data, pdf_url = download_pdf(e["url"])
     e["pdf_url"] = safe_url(pdf_url)
     texts = pdf_texts(data)
@@ -1125,6 +1152,101 @@ def process_entry(e: dict, ocr_budget: OCRBudget | None = None) -> None:
         return
     e.update(result)
     e["status"], e["parser"] = "parsed", PARSER_VERSION
+    for k in ("votes", "trades", "detail_v", "px", "px_v"):      # 重新解析后，旧的明细和股价背景作废
+        e.pop(k, None)
+    if want_detail is not None and want_detail(e):
+        try:
+            add_detail(e, data, texts)
+        except Exception as ex:  # noqa: BLE001  明细读不出不能影响主体解析
+            log(f"    {e.get('code')} 交易明细读取出错：{type(ex).__name__}: {ex}")
+
+
+def trade_pages(data: bytes, max_pages: int | None = None) -> list[str]:
+    """交易明细用：前 N 页的版面文字。只在命中关注名单时才读（附件长，读起来慢）。"""
+    max_pages = TRADE_PAGES if max_pages is None else max_pages
+    t0 = time.monotonic()
+    out = []
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        if reader.is_encrypted and not reader.decrypt(""):
+            return []
+        for page in reader.pages[:max_pages]:
+            try:
+                out.append(clean_text(page.extract_text(extraction_mode="layout") or ""))
+            except Exception:  # noqa: BLE001  某一页读不出不影响其他页
+                out.append("")
+            if time.monotonic() - t0 > TRADE_SECONDS:
+                break
+    except Exception as e:  # noqa: BLE001
+        log(f"    读交易明细失败（{type(e).__name__}: {e}）")
+    return out
+
+
+def add_detail(e: dict, data: bytes, texts: list[str] | None = None) -> None:
+    """命中关注名单的公告：再读持股数量（第二节）和逐笔交易明细，供“操作解读”用。"""
+    ntype, vp = e.get("type", "other"), e.get("voting_power") or []
+    votes = []
+    if not e.get("ocr"):
+        for t in (texts if texts is not None else pdf_texts(data)):
+            votes = insight.parse_votes(voting_section(t)[0], vp, ntype)
+            if votes:
+                break
+    e["votes"] = votes
+    # 扫描件的逐笔数字靠 OCR 认，错一位就差很远，不读明细
+    e["trades"] = {} if e.get("ocr") else insight.parse_trades(trade_pages(data), e.get("date", ""), ntype)["summary"]
+    e["detail_v"] = INSIGHT_VERSION
+
+
+def enrich_entry(e: dict) -> None:
+    """给已经解析过的公告补读明细（新加进关注名单、或明细读法升级时）。"""
+    data, _ = download_pdf(e["url"])
+    add_detail(e, data)
+
+
+def target_code(e: dict) -> str:
+    """公告涉及的股票代码（申报方自己上市时，标的写在标题的 “for XXX” 里）。"""
+    return headline_target(e.get("headline", ""), e.get("code", "")) or e.get("code", "")
+
+
+def price_series(code: str) -> list:
+    r = fetch(PRICE_API.format(code=code), timeout=40, tries=2)
+    try:
+        data = json.loads(r.text)
+    except ValueError as e:
+        raise FetchError(f"股价接口返回的不是 JSON（{e}）") from e
+    if not isinstance(data, list):
+        raise FetchError("股价接口返回的格式不对")
+    return data
+
+
+def add_prices(entries: list[dict]) -> tuple[int, int]:
+    """给这些公告补上变动时的股价背景（每只股票只取一次日线）。返回 (取到的股票数, 失败的股票数)。"""
+    by_code: dict[str, list[dict]] = {}
+    for e in entries:
+        by_code.setdefault(target_code(e), []).append(e)
+
+    def one(code: str) -> bool:
+        try:
+            series = price_series(code)
+        except FetchError as ex:
+            log(f"  股价没取到 {code}：{ex}")
+            for e in by_code[code]:
+                e["px_tries"] = e.get("px_tries", 0) + 1
+            return False
+        for e in by_code[code]:
+            tr = e.get("trades") or {}
+            ref = e.get("change_date") or tr.get("last") or e.get("date", "")
+            e["px"] = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
+            e["px_v"] = INSIGHT_VERSION
+        time.sleep(PAUSE)
+        return True
+
+    codes = sorted(c for c in by_code if re.fullmatch(r"[A-Z0-9]{3,6}", c or ""))
+    if not codes:
+        return 0, 0
+    with ThreadPoolExecutor(max_workers=max(1, min(WORKERS, 4)), thread_name_prefix="px") as pool:
+        res = list(pool.map(one, codes))
+    return sum(res), len(res) - sum(res)
 
 
 def hinted(e: dict, holders: list[Holder]) -> bool:
@@ -1284,12 +1406,36 @@ def main() -> int:
         else:
             work.append(e)
 
+    def is_matched(e: dict) -> bool:
+        return bool(match_entry(e, holders)[0])
+
+    # 命中关注名单、但还没读过交易明细的旧公告（新加进名单的申报方，或明细读法升级后）：补读一次
+    in_work = {id(e) for e in work}
+    enrich = [e for e in entries.values()
+              if e.get("status") == "parsed" and id(e) not in in_work and e.get("detail_v") != INSIGHT_VERSION
+              and e.get("detail_tries", 0) < DETAIL_TRIES and is_matched(e)]
+    enrich.sort(key=lambda e: (e.get("date", ""), e.get("time", "")), reverse=True)
+    room = max(MAX_PDFS - len(work), 0)
+    deferred += max(len(enrich) - room, 0)
+    enrich = enrich[:room]
+
+    def handle_enrich(e: dict) -> bool:
+        e["detail_tries"] = e.get("detail_tries", 0) + 1
+        try:
+            enrich_entry(e)
+            return True
+        except Exception as ex:  # noqa: BLE001  补读失败只影响“操作解读”，下次再试
+            log(f"  明细补读失败 {e.get('code')} {e.get('headline')}：{type(ex).__name__}: {ex}")
+            return False
+        finally:
+            time.sleep(PAUSE)
+
     def handle(e: dict) -> str:
         """处理一份公告，返回 done / failed / deferred。每个线程只改自己手上的那条记录。"""
         e["attempts"] = e.get("attempts", 0) + 1
         result = "done"
         try:
-            process_entry(e, ocr_budget)
+            process_entry(e, ocr_budget, is_matched)
         except Deferred:
             e["attempts"] -= 1                   # 不算一次失败，下次运行再识别
             return "deferred"
@@ -1308,11 +1454,13 @@ def main() -> int:
         return result
 
     t_pdf = time.monotonic()
-    if WORKERS > 1 and len(work) > 1:
+    if WORKERS > 1 and len(work) + len(enrich) > 1:
         with ThreadPoolExecutor(max_workers=WORKERS, thread_name_prefix="pdf") as pool:
             results = list(pool.map(handle, work))
+            enriched = sum(pool.map(handle_enrich, enrich))
     else:
         results = [handle(e) for e in work]
+        enriched = sum(handle_enrich(e) for e in enrich)
     checked = sum(r != "deferred" for r in results)
     failed = results.count("failed")
     deferred += results.count("deferred")
@@ -1323,6 +1471,15 @@ def main() -> int:
     if deferred:
         log(f"本次已达下载或文字识别上限，剩余 {deferred} 份留到下次运行")
     log(f"文字识别（OCR）{ocr_budget.used} 份扫描件")
+
+    # 操作解读要用的股价背景：只给命中名单、已读过明细、还没有股价的公告取
+    t_px = time.monotonic()
+    need_px = [e for e in entries.values()
+               if e.get("status") == "parsed" and e.get("detail_v") == INSIGHT_VERSION
+               and e.get("px_v") != INSIGHT_VERSION and e.get("px_tries", 0) < DETAIL_TRIES and is_matched(e)]
+    px_ok, px_failed = add_prices(need_px)
+    if need_px:
+        log(f"股价背景：{len(need_px)} 条公告、{px_ok + px_failed} 只股票，取到 {px_ok} 只，用时 {time.monotonic() - t_px:.0f} 秒")
 
     cutoff = (today - dt.timedelta(days=KEEP_DAYS)).isoformat()
     entries = {k: v for k, v in entries.items() if (v.get("date") or "") >= cutoff}
@@ -1350,9 +1507,12 @@ def main() -> int:
             "skipped_noise": skipped,
             "deferred": deferred,
             "backfill": backfill,
+            "insight": {"detail_added": enriched + sum(1 for e in work if e.get("detail_v") == INSIGHT_VERSION),
+                        "prices_ok": px_ok, "prices_failed": px_failed},
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],
+        "styles": {h.name: insight.STYLES[h.style][0] for h in holders},
         "groups": {h.name: h.group for h in holders},
         "notices": notices,
     }

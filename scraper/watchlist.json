@@ -1,5 +1,5 @@
 {
-  "_note": "group：网页上的分组（主动基金 / 养老金）；aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。hints 和 noise_hints 里全大写的缩写（如 MS、TOP）区分大小写，其他不分。改完后，保留期内的旧公告（包括之前被当成噪音跳过的）会在下次运行时按新名单重新匹配。",
+  "_note": "group：网页上的分组（主动基金 / 养老金）；style：基金类型，用于“操作解读”——active 主动选股 / hedge 多空对冲 / strategic 战略或家族 / super 养老金 / platform 平台多经理；aliases：公告 PDF 第一节里申报方名称的写法（整词匹配，不分大小写）；hints：公告标题末尾“from XXX”里可能出现的缩写；noise_hints：直接跳过、不下载 PDF 的申报方缩写。hints 和 noise_hints 里全大写的缩写（如 MS、TOP）区分大小写，其他不分。改完后，保留期内的旧公告（包括之前被当成噪音跳过的）会在下次运行时按新名单重新匹配。",
   "holders": [
     {
       "name": "Paradice Investment Management",
@@ -11,7 +11,8 @@
         "PIM",
         "Paradice"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "active"
     },
     {
       "name": "Wilson Asset Management",
@@ -29,7 +30,8 @@
         "WAM",
         "Wilson"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "active"
     },
     {
       "name": "Regal Funds Management",
@@ -43,7 +45,8 @@
         "RPL",
         "RFM"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "hedge"
     },
     {
       "name": "L1 Capital",
@@ -56,7 +59,8 @@
         "L1C",
         "L1G"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "hedge"
     },
     {
       "name": "Perennial",
@@ -69,7 +73,8 @@
         "Perennial",
         "PVM"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "active"
     },
     {
       "name": "Celeste Funds Management",
@@ -79,7 +84,8 @@
       "hints": [
         "Celeste"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "active"
     },
     {
       "name": "Ellerston Capital",
@@ -89,7 +95,8 @@
       "hints": [
         "Ellerston"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "active"
     },
     {
       "name": "Thorney / Tiga Trading",
@@ -106,7 +113,8 @@
         "TOP",
         "TEK"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "strategic"
     },
     {
       "name": "Washington H. Soul Pattinson",
@@ -120,7 +128,8 @@
         "SOL",
         "Soul Patts"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "strategic"
     },
     {
       "name": "Tattarang (Andrew Forrest)",
@@ -134,7 +143,8 @@
         "Squadron",
         "Wyloo"
       ],
-      "group": "主动基金"
+      "group": "主动基金",
+      "style": "strategic"
     },
     {
       "name": "AustralianSuper",
@@ -146,7 +156,8 @@
         "AustralianSuper",
         "AusSuper",
         "Australian Super"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Australian Retirement Trust",
@@ -157,7 +168,8 @@
       "hints": [
         "ART",
         "Australian Retirement Trust"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Aware Super",
@@ -168,7 +180,8 @@
       "hints": [
         "Aware Super",
         "Aware"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "UniSuper",
@@ -178,7 +191,8 @@
       ],
       "hints": [
         "UniSuper"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Hostplus",
@@ -191,7 +205,8 @@
       "hints": [
         "Hostplus",
         "Host-Plus"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Cbus",
@@ -203,7 +218,8 @@
       ],
       "hints": [
         "Cbus"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "HESTA",
@@ -215,7 +231,8 @@
       ],
       "hints": [
         "HESTA"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Rest",
@@ -227,7 +244,8 @@
       "hints": [
         "REST",
         "Rest Super"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Colonial First State (CFS)",
@@ -240,7 +258,8 @@
       "hints": [
         "CFS",
         "Colonial First State"
-      ]
+      ],
+      "style": "platform"
     },
     {
       "name": "CSC（公务员和军人养老金）",
@@ -250,7 +269,8 @@
       ],
       "hints": [
         "CSC"
-      ]
+      ],
+      "style": "super"
     },
     {
       "name": "Insignia / MLC",
@@ -264,7 +284,8 @@
         "Insignia",
         "MLC",
         "IFL"
-      ]
+      ],
+      "style": "platform"
     },
     {
       "name": "Mercer",
@@ -275,7 +296,8 @@
       ],
       "hints": [
         "Mercer"
-      ]
+      ],
+      "style": "platform"
     },
     {
       "name": "Future Fund",
@@ -286,7 +308,8 @@
       ],
       "hints": [
         "Future Fund"
-      ]
+      ],
+      "style": "super"
     }
   ],
   "noise_hints": [

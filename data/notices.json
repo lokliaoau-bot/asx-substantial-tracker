@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-11T22:19:43+11:00",
- "last_success_at": "2026-11-11T22:17:50+11:00",
+ "updated_at": "2026-11-11T22:21:01+11:00",
+ "last_success_at": "2026-11-11T22:20:56+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -28,7 +28,7 @@
   "ok": true,
   "list_pages_ok": 2,
   "substantial_found": 123,
-  "pdf_checked": 146,
+  "pdf_checked": 1,
   "skipped_noise": 0,
   "deferred": 0,
   "backfill": {
@@ -38,8 +38,8 @@
    "incremental": true
   },
   "insight": {
-   "detail_added": 16,
-   "prices_ok": 13,
+   "detail_added": 0,
+   "prices_ok": 0,
    "prices_failed": 0
   },
   "errors": [

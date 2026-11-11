@@ -23,8 +23,10 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urljoin
@@ -73,6 +75,9 @@ OCR_MAX_SIDE = 5000                                       # 渲染图片最长�
 MAX_OCR = int(os.environ.get("MAX_OCR", "60"))            # 单次运行最多识别多少份扫描件，其余留到下次
 OCR_TIME_BUDGET = float(os.environ.get("OCR_TIME_BUDGET", "720"))   # 单次运行文字识别总时长上限（秒），工作流 30 分钟超时
 DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告，这之后读到的“今日公告”才算完整
+WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
+API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
+API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -266,12 +271,14 @@ API_TYPES = {"becoming a substantial holder": "becoming", "change in substantial
              "ceasing to be a substantial holder": "ceasing"}
 
 
-def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
+def market_rows(now: dt.datetime, since: dt.datetime | None = None) -> tuple[list[dict], dict]:
     """从全市场公告接口往前翻，挑出大股东公告。返回 (公告列表, 覆盖信息)。
-    覆盖信息：oldest = 翻到的最早一条的悉尼时间；reached = 是否已经翻过补抓窗口的起点；
+    since：上次已经完整同步到的时间点。给了就只翻到它之前几个小时为止（增量），不给就翻完整个补抓窗口。
+    覆盖信息：oldest = 翻到的最早一条的悉尼时间；newest = 最新一条的时间；reached = 是否翻到了预定的终点；
     days = 翻到的所有公告日期（不只大股东公告，用来判断哪些交易日有数据）。"""
     window_start = (now - dt.timedelta(days=BACKFILL_DAYS)).date()
-    rows, days, oldest, reached, warning = [], set(), None, False, ""
+    stop_at = since - dt.timedelta(hours=API_OVERLAP_HOURS) if since else None
+    rows, days, oldest, newest, reached, exhausted, warning = [], set(), None, None, False, False, ""
     for page in range(API_MAX_PAGES):
         try:
             r = fetch(f"{MARKET_API}?page={page}&itemsPerPage={API_PAGE_SIZE}", timeout=60)
@@ -285,6 +292,7 @@ def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
             warning = f"补抓只翻到第 {page} 页（{e}），更早的下次再补"     # 前面几页已经拿到的照样用
             break
         if not items:
+            exhausted = True
             break
         for it in items:
             try:
@@ -292,6 +300,7 @@ def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
             except ValueError:
                 continue
             oldest = t
+            newest = newest or t
             days.add(t.date().isoformat())
             if t.date() < window_start:
                 continue                       # 窗口以外的不补：太旧的会被保留期清掉，下次又补，白白重复下载
@@ -308,11 +317,13 @@ def market_rows(now: dt.datetime) -> tuple[list[dict], dict]:
                 "price_sensitive": bool(it.get("isPriceSensitive")), "source": "api",
                 "api_type": next((x for x in types if x), ""),
             })
-        if oldest and oldest.date() < window_start:
+        if oldest and (oldest.date() < window_start or (stop_at and oldest < stop_at)):
             reached = True
             break
         time.sleep(PAUSE)
-    return rows, {"oldest": oldest, "reached": reached, "days": days, "warning": warning}
+    # complete：这次翻到的范围是连续完整的（翻到了终点，或者接口里已经没有更早的了），可以作为下次增量的起点
+    return rows, {"oldest": oldest, "newest": newest, "reached": reached, "days": days, "warning": warning,
+                  "incremental": bool(stop_at), "complete": bool(oldest) and not warning and (reached or exhausted)}
 
 
 def dedupe_keys(e: dict) -> set:
@@ -399,23 +410,27 @@ def pdf_texts(data: bytes, pages: int = PDF_PAGES) -> list[str]:
     return out
 
 
+PDFIUM_LOCK = threading.Lock()      # pdfium 不是线程安全的，同一时间只让一个线程用
+
+
 def pdfium_texts(data: bytes, pages: int = PDF_PAGES) -> list[str] | None:
     """备用：用 pdfium 提取文字层。pdfium 打不开或没装时返回 None。"""
-    try:
-        import pypdfium2 as pdfium
-        doc = pdfium.PdfDocument(data)
-    except Exception:  # noqa: BLE001
-        return None
-    try:
-        parts = []
-        for i in range(min(pages, len(doc))):
-            tp = doc[i].get_textpage()
-            parts.append(tp.get_text_range() or "")
-            tp.close()
-    except Exception:  # noqa: BLE001
-        return None
-    finally:
-        doc.close()
+    with PDFIUM_LOCK:
+        try:
+            import pypdfium2 as pdfium
+            doc = pdfium.PdfDocument(data)
+        except Exception:  # noqa: BLE001
+            return None
+        try:
+            parts = []
+            for i in range(min(pages, len(doc))):
+                tp = doc[i].get_textpage()
+                parts.append(tp.get_text_range() or "")
+                tp.close()
+        except Exception:  # noqa: BLE001
+            return None
+        finally:
+            doc.close()
     text = clean_text("\n".join(parts).replace("\r\n", "\n").replace("\r", "\n"))
     return [text] if text else []
 
@@ -443,45 +458,63 @@ def ocr_available() -> bool:
     return _ocr_ok
 
 
+_ocr_pool = None
+_ocr_pool_lock = threading.Lock()
+
+
+def ocr_pool() -> ThreadPoolExecutor:
+    """全程序共用的 tesseract 线程池：同时跑的 tesseract 进程数不超过 CPU 核数。"""
+    global _ocr_pool
+    with _ocr_pool_lock:
+        if _ocr_pool is None:
+            _ocr_pool = ThreadPoolExecutor(max_workers=max(1, os.cpu_count() or 2), thread_name_prefix="ocr")
+        return _ocr_pool
+
+
+def tesseract_page(png: bytes, page_no: int) -> tuple[str, str]:
+    """识别一页。返回 (状态, 文字)，状态：ok / timeout / failed。"""
+    try:
+        # OMP_THREAD_LIMIT=1：tesseract 自带的多线程在多份同时跑时反而更慢，每个进程只用一个核
+        r = subprocess.run(["tesseract", "stdin", "stdout", "--psm", "6", "-l", "eng"], input=png, capture_output=True,
+                           timeout=OCR_TIMEOUT, env={**os.environ, "OMP_THREAD_LIMIT": "1"})
+    except subprocess.TimeoutExpired:
+        log(f"    第 {page_no} 页文字识别超时，跳过")
+        return "timeout", ""
+    except OSError as e:
+        log(f"    第 {page_no} 页文字识别失败：{e}")
+        return "failed", ""
+    if r.returncode != 0:
+        log(f"    第 {page_no} 页文字识别失败：{r.stderr.decode('utf-8', 'replace')[:200]}")
+        return "failed", ""
+    return "ok", r.stdout.decode("utf-8", "replace")
+
+
 def ocr_texts(data: bytes, pages: int = OCR_PAGES) -> list[str]:
-    """扫描件：把前几页渲染成图片，用 tesseract 识别文字。返回 [文字] 或 []。
+    """扫描件：把前几页渲染成图片，用 tesseract 识别文字（几页同时识别）。返回 [文字] 或 []。
     每一页 tesseract 都报错时抛 OCREnvError（环境问题，不是这份 PDF 的问题）。"""
     import pypdfium2 as pdfium
-    try:
-        doc = pdfium.PdfDocument(data)
-    except Exception as e:  # noqa: BLE001  pypdf 能打开而这里打不开：多半是加了密码，重试也没用
-        log(f"    扫描件渲染失败（{type(e).__name__}: {e}），按读不出处理")
-        return []
-    parts, failed, tried = [], 0, 0
-    try:
-        for i in range(min(pages, len(doc))):
-            page = doc[i]
-            w, h = page.get_size()                                   # 单位：点（1/72 英寸）
-            scale = min(OCR_DPI / 72, OCR_MAX_SIDE / max(w, h, 1))
-            img = page.render(scale=scale).to_pil().convert("L")
-            buf = io.BytesIO()
-            img.save(buf, "PNG")
-            tried += 1
-            try:
-                r = subprocess.run(["tesseract", "stdin", "stdout", "--psm", "6", "-l", "eng"],
-                                   input=buf.getvalue(), capture_output=True, timeout=OCR_TIMEOUT)
-            except subprocess.TimeoutExpired:
-                log(f"    第 {i + 1} 页文字识别超时，跳过")
-                continue
-            except OSError as e:
-                failed += 1
-                log(f"    第 {i + 1} 页文字识别失败：{e}")
-                continue
-            if r.returncode != 0:
-                failed += 1
-                log(f"    第 {i + 1} 页文字识别失败：{r.stderr.decode('utf-8', 'replace')[:200]}")
-                continue
-            parts.append(r.stdout.decode("utf-8", "replace"))
-    finally:
-        doc.close()
-    if tried and failed == tried:
+    pngs = []
+    with PDFIUM_LOCK:
+        try:
+            doc = pdfium.PdfDocument(data)
+        except Exception as e:  # noqa: BLE001  pypdf 能打开而这里打不开：多半是加了密码，重试也没用
+            log(f"    扫描件渲染失败（{type(e).__name__}: {e}），按读不出处理")
+            return []
+        try:
+            for i in range(min(pages, len(doc))):
+                page = doc[i]
+                w, h = page.get_size()                                   # 单位：点（1/72 英寸）
+                scale = min(OCR_DPI / 72, OCR_MAX_SIDE / max(w, h, 1))
+                img = page.render(scale=scale).to_pil().convert("L")
+                buf = io.BytesIO()
+                img.save(buf, "PNG", compress_level=1)                   # 压缩级别低一点，编码快很多
+                pngs.append(buf.getvalue())
+        finally:
+            doc.close()
+    results = list(ocr_pool().map(tesseract_page, pngs, range(1, len(pngs) + 1)))
+    if results and all(st == "failed" for st, _ in results):
         raise OCREnvError("tesseract 每一页都报错")
-    text = clean_text("\n".join(parts))
+    text = clean_text("\n".join(t for st, t in results if st == "ok"))
     return [text] if len(re.findall(r"[A-Za-z]", text)) >= 40 else []
 
 
@@ -1040,12 +1073,14 @@ class OCRBudget:
         self.left = MAX_OCR if count is None else count
         self.deadline = time.monotonic() + (OCR_TIME_BUDGET if seconds is None else seconds)
         self.used = 0
+        self.lock = threading.Lock()
 
     def take(self) -> None:
-        if self.left <= 0 or time.monotonic() > self.deadline:
-            raise Deferred()
-        self.left -= 1
-        self.used += 1
+        with self.lock:
+            if self.left <= 0 or time.monotonic() > self.deadline:
+                raise Deferred()
+            self.left -= 1
+            self.used += 1
 
 
 def blank(result: dict | None) -> bool:
@@ -1100,6 +1135,23 @@ def now_syd() -> dt.datetime:
     return dt.datetime.now(SYD)
 
 
+def api_since(store: dict, now: dt.datetime) -> dt.datetime | None:
+    """增量补抓的起点：上次完整同步到的时间。以下情况返回 None（把整个窗口重新翻一遍）：
+    从没同步过、同步点已经在窗口以外、或者距离上次整窗口翻查超过 API_FULL_EVERY_DAYS 天。"""
+    try:
+        synced = dt.datetime.fromisoformat(store.get("api_synced_at") or "")
+        full = dt.datetime.fromisoformat(store.get("api_full_at") or "")
+    except (TypeError, ValueError):
+        return None
+    if synced.tzinfo is None or full.tzinfo is None or synced > now:
+        return None
+    if now - full > dt.timedelta(days=API_FULL_EVERY_DAYS):
+        return None
+    if synced.date() <= (now - dt.timedelta(days=BACKFILL_DAYS)).date():
+        return None
+    return synced
+
+
 def mark_days(days: set, today: dt.date, hhmm: str, scanned: set, partial: dict) -> None:
     """记录覆盖到的日子。今天在晚上 9 点前读到的只算一部分（之后还会发公告）；之前的日子都算完整。
     （以前按“今日公告页”整页判断，周末打开时会把周五误记成只抓到一部分。）"""
@@ -1142,15 +1194,28 @@ def main() -> int:
         mark_days({r["date"] for r in got}, today, hhmm, scanned, partial)
 
     backfill = {"ok": False, "from": None, "added": 0}
+    since = api_since(store, now)
     try:
-        api_rows, cov = market_rows(now)
+        api_rows, cov = market_rows(now, since)
         rows.extend(api_rows)
         backfill["ok"] = True
+        backfill["incremental"] = cov["incremental"]
         if cov["oldest"]:
-            # 接口按时间倒序，翻页在最早那天的中间停下，那天只拿到一部分；从第二天起才是完整的
             window_start = (now - dt.timedelta(days=BACKFILL_DAYS)).date()
-            first_full = max(cov["oldest"].date() + dt.timedelta(days=1), window_start)
-            backfill["from"] = first_full.isoformat()
+            if cov["incremental"] and cov["reached"]:
+                # 增量：上次已经同步到 since，这次从 since 之前接着翻到现在，两段连起来是完整的。
+                # since 那天上次只拿到一部分，现在补全了；更早的日子上次已经记过
+                first_full = since.date()
+                backfill["from"] = store.get("api_from") or first_full.isoformat()
+            else:
+                # 接口按时间倒序，翻页在最早那天的中间停下，那天只拿到一部分；从第二天起才是完整的
+                first_full = max(cov["oldest"].date() + dt.timedelta(days=1), window_start)
+                backfill["from"] = first_full.isoformat()
+            if cov["complete"]:
+                store["api_synced_at"] = cov["newest"].isoformat(timespec="seconds")
+                store["api_from"] = backfill["from"]
+                if not cov["incremental"]:
+                    store["api_full_at"] = now.isoformat(timespec="seconds")
             d = first_full
             covered = set()
             while d <= today:
@@ -1207,37 +1272,51 @@ def main() -> int:
     todo.sort(key=lambda e: (e.get("date", ""), e.get("time", "")), reverse=True)   # 新的优先
     todo.sort(key=lambda e: not hinted(e, holders))                                   # 标题带关注名单缩写的更优先
 
-    checked = skipped = deferred = failed = 0
+    skipped = deferred = 0
     ocr_budget = OCRBudget()
+    work = []
     for e in todo:
         if is_noise(e.get("hint", ""), holders, noise):
             e["status"] = "noise"
             skipped += 1
-            continue
-        if checked >= MAX_PDFS:
+        elif len(work) >= MAX_PDFS:
             deferred += 1
-            continue
-        checked += 1
+        else:
+            work.append(e)
+
+    def handle(e: dict) -> str:
+        """处理一份公告，返回 done / failed / deferred。每个线程只改自己手上的那条记录。"""
         e["attempts"] = e.get("attempts", 0) + 1
+        result = "done"
         try:
             process_entry(e, ocr_budget)
         except Deferred:
             e["attempts"] -= 1                   # 不算一次失败，下次运行再识别
-            checked -= 1
-            deferred += 1
-            continue
+            return "deferred"
         except PermanentFetchError as ex:
             e["status"], e["error"] = "skipped", str(ex)
         except FetchError as ex:
             e["status"], e["error"] = "error", str(ex)
-            failed += 1
+            result = "failed"
             log(f"  ! {e['code']} {e['headline']}：{ex}")
         except Exception as ex:  # noqa: BLE001  单份公告解析出错不能拖垮整次运行
             e["status"], e["error"] = "error", f"{type(ex).__name__}: {ex}"
-            failed += 1
+            result = "failed"
             log(f"  ! {e['code']} {e['headline']}：解析出错\n{traceback.format_exc()}")
         e["checked_at"] = dt.datetime.now(SYD).isoformat(timespec="seconds")
         time.sleep(PAUSE)
+        return result
+
+    t_pdf = time.monotonic()
+    if WORKERS > 1 and len(work) > 1:
+        with ThreadPoolExecutor(max_workers=WORKERS, thread_name_prefix="pdf") as pool:
+            results = list(pool.map(handle, work))
+    else:
+        results = [handle(e) for e in work]
+    checked = sum(r != "deferred" for r in results)
+    failed = results.count("failed")
+    deferred += results.count("deferred")
+    log(f"处理 {checked} 份 PDF 用时 {time.monotonic() - t_pdf:.0f} 秒（{WORKERS} 路并行）")
 
     if failed:
         errors.append(f"{failed} 份公告 PDF 下载失败，下次运行会自动重试（每份最多 {MAX_ATTEMPTS} 次）")

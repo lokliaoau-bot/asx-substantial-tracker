@@ -233,6 +233,7 @@ def sandbox(tmp_path, monkeypatch):
     monkeypatch.setattr(scrape, "LEGACY_SEEN_FILE", tmp_path / "data" / "seen.json")
     monkeypatch.setattr(scrape, "WATCH_FILE", tmp_path / "scraper" / "watchlist.json")
     monkeypatch.setattr(scrape, "PAUSE", 0)
+    monkeypatch.setattr(scrape, "WORKERS", 1)        # 测试默认单线程，下载顺序固定；并行另有专门的测试
     return tmp_path
 
 
@@ -1197,3 +1198,130 @@ def test_change_date_is_the_change_not_when_holder_became_aware():
     t = ("There was a change in the interests of 2 November 2026\nthe substantial holder on (HUB became aware of the change on "
          "4 November 2026)\nThe previous notice was given to the 29 May 2026")
     assert scrape.parse_details(t, "change")["change_date"] == "2026-11-02"
+
+
+# ---------------------------------------------------------------- 第七轮（2026-11-11）：提速
+
+def test_parallel_workers_give_same_result_as_serial(sandbox, monkeypatch):
+    def run(workers):
+        for f in (sandbox / "data").glob("*.json"):
+            f.unlink()
+        fake = backfill_fake()
+        monkeypatch.setattr(scrape, "fetch", fake)
+        monkeypatch.setattr(scrape, "WORKERS", workers)
+        monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+        assert scrape.main() == 0
+        out = read(sandbox / "data" / "notices.json")
+        entries = read(sandbox / "data" / "all_notices.json")["entries"]
+        strip = lambda e: {k: v for k, v in e.items() if k != "checked_at"}
+        return ([{k: v for k, v in n.items()} for n in out["notices"]], {k: strip(v) for k, v in entries.items()},
+                sorted(fake.pdf_downloads), out["last_run"]["pdf_checked"])
+    assert run(1) == run(4)
+
+
+def test_parallel_ocr_budget_is_respected(sandbox, monkeypatch):
+    fake_ocr(monkeypatch, SCAN_TEXT)
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    monkeypatch.setattr(scrape, "WORKERS", 4)
+    monkeypatch.setattr(scrape, "MAX_OCR", 2)
+    scrape.main()
+    entries = read(sandbox / "data" / "all_notices.json")["entries"]
+    st = sorted(e["status"] for k, e in entries.items() if k != "1004")
+    assert st == ["new", "new", "parsed", "parsed"]            # 4 份扫描件，名额 2 份，其余留到下次
+    assert read(sandbox / "data" / "notices.json")["last_run"]["deferred"] == 2
+
+
+def many_items(n_days=20, per_day=30):
+    """接口里每天 per_day 条普通公告 + 1 条大股东公告，从 10 月 30 日往前 n_days 天。"""
+    items = []
+    for d in range(n_days):
+        day = dt.date(2026, 10, 30) - dt.timedelta(days=d)
+        for k in range(per_day):
+            items.append(api_item("AAA", "Quarterly report", f"{day.isoformat()}T0{k % 6}:{k:02d}:00.000Z", f"q-{d}-{k}"))
+        items.append(api_item(f"S{d:02d}", "Becoming a substantial holder", f"{day.isoformat()}T00:00:30.000Z", f"s-{d}",
+                              types=["Becoming a substantial holder"]))
+    items.sort(key=lambda it: it["date"], reverse=True)
+    return items
+
+
+def test_backfill_is_incremental_after_first_full_pass(sandbox, monkeypatch):
+    items = many_items()
+    pdfs = {f"s-{d}": REGAL_603 for d in range(20)}
+    fake = FakeASX(listing=EMPTY_LISTING, api_items=items, api_pdfs=pdfs)
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "API_PAGE_SIZE", 50)
+    monkeypatch.setattr(scrape, "API_MAX_PAGES", 40)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    first_pages = len(fake.api_pages)
+    out = read(sandbox / "data" / "notices.json")
+    assert first_pages >= 10 and out["last_run"]["backfill"]["incremental"] is False
+    store = read(sandbox / "data" / "all_notices.json")
+    assert store["api_synced_at"].startswith("2026-10-30") and store["api_full_at"]
+
+    # 第二天：接口里多了一天的公告。只需要翻最前面一两页
+    day = dt.date(2026, 10, 31)
+    new = [api_item("AAA", "Quarterly report", f"{day.isoformat()}T01:{k:02d}:00.000Z", f"n-{k}") for k in range(20)]
+    new.append(api_item("NEW", "Becoming a substantial holder", f"{day.isoformat()}T02:00:00.000Z", "s-new",
+                        types=["Becoming a substantial holder"]))
+    fake.api_items = sorted(new + items, key=lambda it: it["date"], reverse=True)
+    fake.api_pdfs["s-new"] = REGAL_603
+    fake.api_pages.clear()
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 31, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert len(fake.api_pages) <= 2 < first_pages
+    assert out["last_run"]["backfill"]["incremental"] is True and out["last_run"]["backfill"]["added"] == 1
+    assert "mk-s-new" in read(sandbox / "data" / "all_notices.json")["entries"]
+    assert {"2026-10-30", "2026-10-31"} <= set(out["scanned_days"]) and out["partial_days"] == {}
+
+
+def test_incremental_backfill_completes_yesterdays_partial_day(sandbox, monkeypatch):
+    items = many_items()
+    fake = FakeASX(listing=EMPTY_LISTING, api_items=items, api_pdfs={f"s-{d}": REGAL_603 for d in range(20)})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 15, 0, tzinfo=scrape.SYD))   # 下午 3 点：当天只抓到一部分
+    scrape.main()
+    assert read(sandbox / "data" / "notices.json")["partial_days"] == {"2026-10-30": "15:00"}
+    late = api_item("LATE", "Becoming a substantial holder", "2026-10-30T08:30:00.000Z", "s-late")           # 悉尼 19:30 发的
+    fake.api_items = sorted([late] + items, key=lambda it: it["date"], reverse=True)
+    fake.api_pdfs["s-late"] = REGAL_603
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 11, 2, 9, 0, tzinfo=scrape.SYD))       # 周一早上
+    scrape.main()
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["backfill"]["incremental"] is True
+    assert out["partial_days"] == {"2026-11-02": "09:00"} and "2026-10-30" in out["scanned_days"]
+    assert "mk-s-late" in read(sandbox / "data" / "all_notices.json")["entries"]
+
+
+def test_full_window_rescan_every_week_and_after_failed_sync(sandbox, monkeypatch):
+    items = many_items()
+    fake = FakeASX(listing=EMPTY_LISTING, api_items=items, api_pdfs={f"s-{d}": REGAL_603 for d in range(20)})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 11, 8, 21, 30, tzinfo=scrape.SYD))      # 9 天后
+    scrape.main()
+    assert read(sandbox / "data" / "notices.json")["last_run"]["backfill"]["incremental"] is False
+    store = read(sandbox / "data" / "all_notices.json")
+    assert store["api_full_at"].startswith("2026-11-08")
+    # 同步点坏掉（比如手工改坏了）时退回整窗口
+    assert scrape.api_since({"api_synced_at": "garbage", "api_full_at": store["api_full_at"]},
+                            dt.datetime(2026, 11, 9, 9, 0, tzinfo=scrape.SYD)) is None
+    assert scrape.api_since({}, dt.datetime(2026, 11, 9, 9, 0, tzinfo=scrape.SYD)) is None
+
+
+def test_failed_later_page_does_not_advance_sync_point(sandbox, monkeypatch):
+    fake = backfill_fake()
+    real_call = fake.__call__
+
+    def flaky(url, **kw):
+        if url.startswith(scrape.MARKET_API) and "page=3&" in url:
+            raise scrape.FetchError("HTTP 502")
+        return real_call(url, **kw)
+
+    monkeypatch.setattr(scrape, "fetch", flaky)
+    monkeypatch.setattr(scrape, "API_PAGE_SIZE", 1)
+    monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
+    scrape.main()
+    assert "api_synced_at" not in read(sandbox / "data" / "all_notices.json")     # 下次还是从头翻

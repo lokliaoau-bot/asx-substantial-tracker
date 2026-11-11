@@ -58,19 +58,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 ## 当前进度（每次更新这里）
 
-**2026-11-11 第七轮：Fable 重审 + 提速 + 操作解读 —— 进行中，分支 `dev-fable`（已推送）**
+**2026-11-11 第七轮（Fable 重审 + 提速 + 操作解读）：已完成并合并到 `main`。**
 
-已完成（128 个测试通过）：
-- 提速：4 路并行处理 PDF（`WORKERS`）、OCR 多页同时识别、补抓改增量（`api_synced_to`，每 7 天全量一次）
-- 准确率：日期新写法、比例怪写法（“6,93%”、“25. 9 3 %”、只有一个带 %）、名称标签夹在多行名称中间、TR-1 名称在下一行；`PARSER_VERSION = 8`
-- 操作解读后端：`insight.py` 全部、`scrape.py` 里的 `add_detail / enrich_entry / add_prices`、`build_notices` 输出 `insight`
-- 真实语料验证：77 条命中公告逐条看过结论；4 份样本“持股数变化 = 逐笔净额”完全对上
+- 提速：4 路并行处理 PDF（`WORKERS`）、OCR 多页同时识别、补抓改增量（`api_synced_to`，每 7 天全量一次）。实测 300 份 PDF 约 5 分钟（以前约 15 分钟）
+- 准确率：`PARSER_VERSION = 8`（日期和比例的怪写法、多行名称、TR-1 名称）
+- 操作解读：`insight.py` + `add_detail / enrich_entry / add_prices` + 网页“操作解读”列；`INSIGHT_VERSION = 1`
+- 验证：129 个测试、36 项网页检查；`dev-fable` 上真实运行三批（743 份全部重读，79 条命中全部有解读，81 只股票股价全部取到）；
+  和正式版逐条对比只有预期内的变化
+- 交接文件：`HANDOVER.md`
 
-还没做（按顺序）：
-1. ~~网页显示操作解读~~ 已完成（表格“操作解读”列，网页检查 36 项通过）
-2. 更新 `README.md` / `DEPLOY.md`
-3. 推 `dev-fable` 后用 `scrape.yml` 在该分支真实运行（PARSER 升级要重读全部，可能要跑两三次），核对 `data/notices.json` 里的 `insight`
-4. 三轮审查后合并 `main`，再在 main 上跑一次
-5. 写 `HANDOVER.md`（给其他 AI 的交接文件）并发给用户，附代码 zip
+下一步候选见 `HANDOVER.md` 第 9 节（回测判断规则、多家基金同向、公告后走势……）。目前没有进行到一半的工作。
 
-临时分支（可删）：`debug-fable`、`debug-fable-out`、`debug-fable-out2`、以及更早的 `dev-*` / `debug-*`。
+临时分支（可删，用户需在 GitHub 网页上删）：`dev-*`、`debug-*`。

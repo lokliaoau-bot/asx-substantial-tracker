@@ -1,0 +1,107 @@
+605 Page 1 of 2 15 July 2001
+Form 605
+Corporations Act 2001
+Section 671B
+Notice of ceasing to be a substantial holder
+To Company Name/Scheme ZIP CO LIMITED..
+ACN/ARSN 139 546 428
+1. Details of substantial holder (1)
+Name Australian Retirement Trust Pty LTD ATF Australian Retirement Trust
+ACN/ARSN (if applicable) 010 720 840
+The holder ceased to be a substantial holder on 23/10/2026
+The previous notice was given to the company on 16/10/2026
+The previous notice was dated 16/10/2026
+2. Changes in relevant interests
+Particulars of each change in, or change in the nature of, a relevant interest (2) of the substantial holder or an associate (3) in voting securities
+of the company or scheme, since the substantial holder was last required to give a substantial holding notice to the company or scheme are as
+follows:
+Date of Person whose Nature of change (4) Consideration given in Class (6) and Person's votes
+change relevant interest relation to change (5) number of affected
+changed securities affected
+Refer to
+Annexure
+A
+3. Changes in association
+The persons who have become associates (3) of, ceased to be associates of, or have changed the nature of their association (7) with, the
+substantial holder in relation to voting interests in the company or scheme are as follows:
+Name and ACN/ARSN (if applicable) Nature of association
+Not Applicable Not Applicable
+4. Addresses
+The addresses of persons named in this form are as follows:
+Name Address
+Australian Retirement
+Trust Pty LTD ATF 266 George Street, Brisbane, Queensland 4000
+Australian Retirement
+Trust
+
+605 Page 2 of 2 15 July 2001
+Signature
+print name Kristy Huxtable capacity Company Secretary
+sign here date 27/10/2026
+DIRECTIONS
+(1) If there are a number of substantial holders with similar or related relevant interests (eg. a corporation and its related corporations, or the
+manager and trustee of an equity trust), the names could be included in an annexure to the form. If the relevant interests of a group of
+persons are essentially similar, they may be referred to throughout the form as a specifically named group if the membership of each group,
+with the names and addresses of members is clearly set out in paragraph 4 of the form.
+(2) See the definition of "relevant interest" in sections 608 and 671B(7) of the Corporations Act 2001.
+(3) See the definition of "associate" in section 9 of the Corporations Act 2001.
+(4) Include details of:
+(a) any relevant agreement or other circumstances because of which the change in relevant interest occurred. If subsection 671B(4 )
+applies, a copy of any document setting out the terms of any relevant agreement, and a statement by the person giving full an d
+accurate details of any contract, scheme or arrangement, m ust accompany this form, together with a written statement certifying
+this contract, scheme or arrangement; and
+(b) any qualification of the power of a person to exercise, control the exercise of, or influence the exercise of, the voting pow ers or
+disposal of the securities to which the relevant interest relates (indicating clearly the particular securities to which the qualification
+applies).
+See the definition of "relevant agreement" in section 9 of the Corporations Act 2001.
+(5) Details of the consideration must include any and all benefits, money and other, that any person from whom a relevant interes t was
+acquired has, or may, become entitled to receive in relation to that acquisition. Details must be included even if the benefi t is conditional on
+the happening or not of a contingency. Details must be included of any benefit paid on behalf of the substantial holder or i ts associate in
+relation to the acquisitions, even if they are not paid directly to the person from whom the re levant interest was acquired.
+(6) The voting shares of a company constitute one class unless divided into separate classes.
+(7) Give details, if appropriate, of the present association and any change in that association since the last substantial holdin g notice.
+
+Page 1 of 1
+Annexure A
+Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust ACN 010 720 840
+This is Annexure A of 1 page referred to in Form 605, Notice of ceasing to be a substantial holder
+Kristy Huxtable
+Company Secretary Date: 27/10/2026
+Consideration
+given in relation to Class and number of Person's votes
+Date of change Person whose relevant interest changed Nature of change change securities affected affected
+16/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust SELL 3,181.05 Ordinary Fully Paid 1,500 1,500
+19/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust SELL 6,338.43 Ordinary Fully Paid 3,014 3,014
+22/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust SELL 1,064.30 Ordinary Fully Paid 505 505
+22/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust BUY 412,696.47 Ordinary Fully Paid 193,160 193,160
+23/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust SELL 1,224.99 Ordinary Fully Paid 611 611
+23/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust BUY 398,197.00 Ordinary Fully Paid 193,257 193,257
+23/10/2026 Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust SELL 4,160,269.94 Ordinary Fully Paid 3,296,784 3,296,784
+
+Annexure B - Disclosure under Takeovers Panel Guidance Note 20 - Equity Derivatives
+Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust ACN 010 720 840
+The notice is provided pursuant to Guidance Note 20: Equity Derivatives, issued by the Australian Takeovers Panel. Terms not defined in this notice have the meanings
+given to them in Guidance Note 20.
+Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust (ABN 88 010 720 840) discloses that as at 23/10/2026:
+it holds an economic interest in shares in ZIP CO LIMITED.. as set out below.
+The key terms are as follows:
+Identity of the taker Australian Retirement Trust Pty Ltd ATF Australian Retirement Trust
+Relevant security Ordinary Fully Paid in ZIP CO LIMITED..
+Price (Including reference price, strike price, option
+price etc. as appropriate) Not Applicable
+Entry date and number of securities to which the
+derivative relates The derivatives relate to a short position of 1,030,216 Ordinary Fully Paid as at 23/10/2026.
+Type of derivative Cash-settled equity basket swap
+Any material changes to information previously
+disclosed to the market Not Applicable
+Long equity derivative positions held by the taker and Relevant Interest: 59,940,315 Ordinary Fully Paid
+its associates, its relevant interest and its associates' Economic Interest (under cash-settled equity swaps): 0 shares
+relevant interests Total Long Position (Relevant Interest + Economic Interest): 59,940,315 Ordinary Fully Paid
+Short equity derivative positions that offset long
+positions 1,030,216 ordinary fully paid (short position)
+Short positions of more than 1% that have been
+acquired after a long position is disclosed, whether by
+notice or substantial holding notice None
+This is Annexure B of 1 page referred to in Form 605, Notice of change of interests of substantial holder
+Kristy Huxtable
+Company Secretary Date: 27/10/2026

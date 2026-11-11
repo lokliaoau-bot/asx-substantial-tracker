@@ -1,0 +1,48 @@
+Form 604
+Corporations Act 2001
+Section 671B
+Notice of change of interests of substantial holder
+To Company Name/Scheme Aerometrex Ltd
+ACN/ARSN: 153 103 925 Source: Australian Business Register
+1. Details of substantial holder (1)
+Name: Perennial Value Management Limited (PVM)
+ACN/ARSN (if applicable) 090 879 904
+There was a change in the interest of the substantial holder on 9 November 2026
+The previous notice was given to the company on 3 November 2026
+The previous notice was dated 3 November 2026
+2. Previous and present voting power
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme that the substantial holder or an associate (2) had a relavant interest (3) in
+when last required, and when now required to give a substantial holding notice to the company or scheme, are as follows:
+Class of securities (4) Previous notice Present notice
+Person's votes Voting Power (%) (5) Person's votes Voting Power (%) (5)
+Ordinary 17,644,814 18.58 8,150,859 8.58
+3. Changes in relevant interests
+Particulars of each change in, or change in the nature of, a relevant interest of the substantial holder or an associate in voting securities of the company or scheme, since the substantial
+holder was last required to give a substantial holding notice to the company or scheme are as follows:
+Date of change Person whose relevant Nature of change (6) Consideration given in Class & number of Person's votes affected
+interest changed relation to change (7) securities affected
+03/11/2026 HSBC Buy on the Market $ 1,126.85 3,819 3,819
+04/11/2026 HSBC Buy on the Market $ 375.08 1,250 1,250
+05/11/2026 HSBC Buy on the Market $ 11.80 40 40
+09/11/2026 HSBC Sell on the Market $ 3,222,576.46 9,499,064 9,499,064
+4. Present Relevant Interests
+Particulars of each relevant interest of the substantial holder in voting securities after the change are as follows:
+Holder of relevant interest Registered holder of Person entitled to be Nature of relevant Class & number of Person's votes
+securities registered as holder (8) interest (6) securities (Ord)
+Perennial Value Management HSBC HSBC 8,150,859 8,150,859 8,150,859
+Limited
+5. Changes in association
+The persons who have become associates (2) of, ceased to be associates of, or have changed the nature of their association (9) with, the substantial holder in relation to voting interests
+in the company or scheme are as follows:
+Name & ACN Nature of association
+Not applicable
+6. Addresses
+The addresses of persons named in this form as as follows:
+Name Address
+Perennial Value Management Ltd Level 27, 88 Phillip St
+Sydney NSW 2000
+Aerometrex Ltd Aerometrex Ltd 51-53 Glynburn Road, Glynde, SA 5070
+Signature
+Print Name Bill Anastasopoulos Capacity Company Secretary
+Sign Here Date 10/11/2026
+

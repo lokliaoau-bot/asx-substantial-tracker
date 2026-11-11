@@ -1,0 +1,161 @@
+Form 603
+Corporations Act 2001
+Section 671B
+Notice of initial substantial holder
+ToCompany Name/ Scheme MINERAL RESOURCES LIMITED
+ACN/ ARSN 118 549 910
+1. Details of substantial holder (1)
+N a me L1 Capital Pty Ltd and each of the entities set out in Annexure A
+ACN/ ARSN (if applicable) L1 Capital Pty Ltd (125 378 145) and L1 Capital Strategic Equity Management Pty Ltd (648 751 928)
+The holder became a substantial holder on 21/10/2026
+2. Details of voting power
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme that the substantial holder or an associate (2) had a relevant interest (3)
+in on the date the substantial holder became a substantial holder are as follows:
+Class of securities (4) Number of securities Person's votes (5) Voting power (6)
+FPO 10,989,713 10,989,713 5.53%
+*Based on issued capital of 198,614,518 shares
+3. Details of relevant interests
+The nature of the relevant interest the substantial holder or an associate had in the following voting securities on the date the substantial holder became a substantial holder are as
+follows:
+Holder of relevant interest Nature of relevant interest (7) Class and number of securities
+See Annexure A
+4. Details of present registered holders
+The persons registered as holders of the securities referred to in paragraph 3 above are as follows:
+Person entitled to be
+Holder of relevant interest Registered Holder of securities registered as holder (8) Class and number of securities
+See Annexure A
+5. Consideration
+The consideration paid for each relevant interest referred to in paragraph 3 above, and acquired in the four months prior to the day that the substantial holder became a substantial
+holder is as follows:
+Consideration (9)
+Holder of relevant Date of
+interest acquisition Cash Non-cash Class and number of securities
+See Annexure B
+6. Associates
+The reasons the persons named in paragraph 3 above are associates of the substantial holder are as follows:
+Name and ACN/ ARSN (if applicable) Nature of association
+N/A
+7. Addresses
+The addresses of persons named in this form are as follows:
+N a me Address
+L1 Capital Pty Ltd Level 45, 101 Collins Street, Melbourne, VIC, 3000
+L1 Capital Strategic Equity Management Pty Ltd Level 45, 101 Collins Street, Melbourne, VIC, 3000
+
+Signature
+Print name CapacityJane StewartHead of Legal & Compliance
+Sign here Date23/10/2026
+DIRECTIONS
+(1)
+If there are a number of substantial holders with similar or related relevant interests (eg. a corporation and its related corporations, or the manager and trustee of an equity trust), the names could be included in an
+annexure to the form. If the relevant interests of a group of persons are essentially similar, they may be referred to throughout the form as a specifically named group if the membership of each group, with the names
+and addresses of members is clearly set out in paragraph 7 of the form.
+(2) See the definition of "associate" in section 9 of the Corporations Act 2001.
+(3) See the definition of "relevant interest" in sections 608 and 671B(7) of the Corporations Act 2001.
+(4) The voting shares of a company constitute one class unless divided into separate classes.
+(5)
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme (if any) that the person or an associate has a relevant
+(6) The person's votes divided by the total votes in the body corporate or scheme multiplied by 100.
+(7) Include details of:
+(a)
+any relevant agreement or other circumstances by which the relevant interest was acquired. If subsection 671B(4) applies, a copy of any document setting out the terms of any relevant
+agreement, and a statement by the person giving full and accurate details of any contract, scheme or arrangement, must accompany this form, together with a written statement certifying
+this contract, scheme or arrangement; and
+(b)
+any qualification of the power of a person to exercise, control the exercise of, or influence the exercise of, the voting powers or disposal of the securities to which the relevant interest relates
+(indicating clearly the particular securities to which the qualification applies).
+See the definition of "relevant agreement" in section 9 of the Corporations Act 2001.
+(8)
+If the substantial holder is unable to determine the identity of the person ( eg. if the relevant interest arises because of an option) write "unknown".
+(9)
+Details of the consideration must include any and all benefits, money and other, that any person from whom a relevant interest was acquired has, or may, become entitled to receive in relation to that acquisition.
+Details must be included even if the benefit is conditional on the happening or not of a contingency. Details must be included of any benefit paid on behalf of the substantial holder or its associate in relation to the
+acquisitions, even if they are not paid directly to the person from whom the relevant interest was acquired.
+
+Annexure A
+L1 Capital Pty Ltd (ACN 125 378 145) and L1 Capital Strategic Equity Pty Ltd (ACN 648 751 928 ) notice of initial substantial holding in Mineral Resources Limited
+This is Annexure "A" of 1 page referred to in the Form 603 (Notice of initial substantial holder)
+Print Name Jane Stewart Capacity Head of Legal & Compliance
+Sign Here Date23/10/2026
+Details of present relevant interests
+Holder of relevant interest Registered holder of securities Persons entitled to be a registered Nature of relevant Class and number of securities
+holder interest
+Power to (or to control)
+exercise vote and/or dispose of
+the securities as discretionary
+investment managers or
+L1 Capital Pty Ltd Morgan Stanley & Co. International PLC Morgan Stanley & Co. International PLC advisers of superannuation FPO1,980,688
+funds, pooled superannuation
+trusts, managed investment
+schemes and investment
+management agreements.
+L1 Capital Pty Ltd Goldman Sachs International Goldman Sachs International as above 2,188,462 FPO
+L1 Capital Pty Ltd Merrill Lynch (Australia) Nominees Pty Ltd Merrill Lynch (Australia) Nominees Pty Ltd as above 1,171,740 FPO
+L1 Capital Pty Ltd JPMorgan Chase Bank, N.A. JPMorgan Chase Bank, N.A. as above 1,988,203 FPO
+L1 Capital Strategic Equity Management Pty Ltd Citicorp Nominees Pty Ltd Citicorp Nominees Pty Ltd as above 2,727,889 FPO
+L1 Capital Strategic Equity Management Pty Ltd State Street Australia Limited (SSAL) State Street Australia Limited (SSAL) as above 47,983 FPO
+L1 Capital Strategic Equity Management Pty Ltd JPMorgan Chase Bank, N.A. JPMorgan Chase Bank, N.A. as above 884,748FPO
+
+Annexure B
+L1 Capital Pty Ltd (ACN 125 378 145) and L1 Capital Strategic Equity Pty Ltd (ACN 648 751 928 ) notice of initial substantial holding in Mineral Resources Limited
+This is Annexure "B" of 2 pages referred to in the Form 603 (Notice of initial substantial holder)
+Print Name Jane Stewart Capacity Head of Legal & Compliance
+Sign Here Date23/10/2026
+Changes in relevant interests
+Class and number of securities Person's votes
+Date of change Person whose relevant interest changed Nature of change (6) Consideration given in relation to change (7) affected affected
+26/06/2026 On-Market Purchase $ 90,100.78 1,427 FPO 1,427 L1 Capital Strategic Equity Management Pty Ltd
+29/06/2026 L1 Capital Pty Ltd On-Market Purchase $ 8,018,446.10 128,707 FPO 128,707
+30/06/2026 L1 Capital Strategic Equity Management Pty Ltd On-Market Purchase $ 12,542,518.87 205,335 FPO 205,335
+1/07/2026 On-Market Purchase $ 492,437.07 7,913 FPO 7,913 L1 Capital Strategic Equity Management Pty Ltd
+1/07/2026 On-Market Purchase $ 1,731,732.69 27,449 FPO 27,449 L1 Capital Pty Ltd
+2/07/2026 On-Market Sale $ 748,223.60 11,735 FPO 11,735 L1 Capital Strategic Equity Management Pty Ltd
+8/07/2026 On-Market Purchase $ 3,607,862.45 L1 Capital Pty Ltd 61,554 FPO 61,554
+21/07/2026 On-Market Purchase $ 2,313,255.59 43,139 FPO 43,139 L1 Capital Pty Ltd
+22/07/2026 L1 Capital Pty Ltd On-Market Purchase $ 1,071,956.44 19,988 FPO 19,988
+23/07/2026 L1 Capital Pty Ltd On-Market Purchase $ 4,077,231.65 74,183 FPO 74,183
+24/07/2026 On-Market Purchase $ 2,140,213.37 40,000 FPO 40,000 L1 Capital Pty Ltd
+27/07/2026 On-Market Purchase $ 278,149.50 5,085 FPO 5,085 L1 Capital Strategic Equity Management Pty Ltd
+27/07/2026 On-Market Purchase $ 6,547,411.38 120,000 FPO 120,000 L1 Capital Pty Ltd
+29/07/2026 On-Market Sale $ 10,797,597.02 194,470 FPO 194,470 L1 Capital Pty Ltd
+30/07/2026 On-Market Sale $ 32,805,302.86 566,479 FPO 566,479 L1 Capital Pty Ltd
+31/07/2026 On-Market Purchase $ 905,251.00 15,606 FPO 15,606 L1 Capital Pty Ltd
+3/08/2026 On-Market Purchase $ 886,559.61 15,357 FPO 15,357 L1 Capital Strategic Equity Management Pty Ltd
+6/08/2026 L1 Capital Strategic Equity Management Pty Ltd On-Market Purchase $ 112,970.40 1,828 FPO 1,828
+10/08/2026 L1 Capital Pty Ltd On-Market Sale $ 2,992,632.28 46,100 FPO 46,100
+
+12/08/2026 L1 Capital Pty Ltd On-Market Sale $ 10,540,803.50 161,236 FPO 161,236
+17/08/2026 On-Market Sale $ 6,093,474.76 90,535 FPO 90,535 L1 Capital Strategic Equity Management Pty Ltd
+18/08/2026 On-Market Sale $ 2,173,170.60 33,630 FPO 33,630 L1 Capital Pty Ltd
+18/08/2026 On-Market Sale $ 3,302,000.00 50,000 FPO 50,000 L1 Capital Strategic Equity Management Pty Ltd
+19/08/2026 On-Market Sale $ 5,036,141.58 76,989 FPO 76,989 L1 Capital Pty Ltd
+20/08/2026 On-Market Sale $ 1,965,736.38 30,000 FPO 30,000 L1 Capital Pty Ltd
+21/08/2026 L1 Capital Strategic Equity Management Pty Ltd On-Market Sale $ 2,610,425.36 39,137 FPO 39,137
+21/08/2026 L1 Capital Pty Ltd On-Market Sale $ 14,370,717.07 215,454 FPO 215,454
+24/08/2026 On-Market Sale $ 1,692,180.32 24,498 FPO 24,498 L1 Capital Strategic Equity Management Pty Ltd
+24/08/2026 On-Market Sale $ 9,397,962.52 136,056 FPO 136,056 L1 Capital Pty Ltd
+25/08/2026 On-Market Sale $ 285,827.13 4,246 FPO 4,246 L1 Capital Strategic Equity Management Pty Ltd
+25/08/2026 On-Market Sale $ 1,570,972.16 23,337 FPO 23,337 L1 Capital Pty Ltd
+26/08/2026 On-Market Sale $ 681,858.37 L1 Capital Strategic Equity Management Pty Ltd 10,138 FPO 10,138
+26/08/2026 On-Market Sale $ 3,814,720.19 56,718 FPO 56,718 L1 Capital Pty Ltd
+27/08/2026 On-Market Sale $ 618,221.04 8,870 FPO 8,870 L1 Capital Strategic Equity Management Pty Ltd
+27/08/2026 On-Market Sale $ 6,963,458.30 103,032 FPO 103,032 L1 Capital Pty Ltd
+28/08/2026 On-Market Sale $ 496,489.65 7,631 FPO 7,631 L1 Capital Pty Ltd
+31/08/2026 On-Market Sale $ 376,846.50 5,740 FPO 5,740 L1 Capital Strategic Equity Management Pty Ltd
+31/08/2026 On-Market Sale $ 2,108,961.68 32,123 FPO 32,123 L1 Capital Pty Ltd
+1/09/2026 On-Market Sale $ 2,563,089.33 39,257 FPO 39,257 L1 Capital Strategic Equity Management Pty Ltd
+1/09/2026 On-Market Sale $ 14,307,520.02 219,138 FPO 219,138 L1 Capital Pty Ltd
+11/09/2026 On-Market Purchase $ 494,552.10 8,330 FPO 8,330 L1 Capital Strategic Equity Management Pty Ltd
+11/09/2026 On-Market Purchase $ 653,604.33 11,009 FPO 11,009 L1 Capital Pty Ltd
+16/09/2026 L1 Capital Pty Ltd On-Market Sale $ 18,596,565.92 344,506 FPO 344,506
+17/09/2026 On-Market Sale $ 235,876.00 4,360 FPO 4,360 L1 Capital Strategic Equity Management Pty Ltd
+28/09/2026 On-Market Sale $ 1,197,352.92 23,106 FPO 23,106 L1 Capital Strategic Equity Management Pty Ltd
+30/09/2026 On-Market Purchase $ 843,382.79 16,140 FPO 16,140 L1 Capital Pty Ltd
+12/10/2026 On-Market Purchase $ 597,843.48 12,181 FPO 12,181 L1 Capital Strategic Equity Management Pty Ltd
+14/10/2026 L1 Capital Pty Ltd On-Market Purchase $ 20,963,069.12 448,908 FPO 448,908
+15/10/2026 On-Market Purchase $ 12,762,710.24 286,639 FPO 286,639 L1 Capital Pty Ltd
+16/10/2026 On-Market Purchase $ 18,066,151.47 408,207 FPO 408,207 L1 Capital Pty Ltd
+19/10/2026 On-Market Purchase $ 9,251,548.66 209,878 FPO 209,878 L1 Capital Pty Ltd
+20/10/2026 On-Market Purchase $ 1,252,377.54 27,549 FPO 27,549 L1 Capital Pty Ltd
+21/10/2026 L1 Capital Pty Ltd On-Market Purchase $ 9,507,197.04 208,640 FPO 208,640
+22/10/2026 On-Market Purchase $ 20,411,344.49 459,957 FPO 459,957 L1 Capital Pty Ltd
+23/10/2026 L1 Capital Pty Ltd On-Market Purchase $ 20,037,410.64 472,691 FPO 472,691

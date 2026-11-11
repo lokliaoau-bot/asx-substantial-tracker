@@ -1,0 +1,69 @@
+604 page 1 /2
+Form 604
+Corporations Act 2001
+Section 671B
+Notice of change of interests of substantial holder
+Company Name/Scheme Computershare Limited
+ACN/ARSN 005 485 825
+1. Details of Substantial Holder (1)
+Name AustralianSuper Pty Ltd
+ACN/ARSN (if applicable) 006 457 987
+There was a change in the interests of the
+substantial holder on 22 / 10 / 2026
+The previous notice was given to the company on 09 / 10 / 2026
+The previous notice was dated 07 / 10 / 2026
+2. Previous and present voting power
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme that the substantial holder or an associate (2) had a relevant interest (3)
+in when last required, and when now required, to give a substantial holding notice to the company or scheme, are as follows:
+Class of securities (4) Previous notice Present notice
+Person's votes Voting power (5) Person's votes Voting power (5)
+ORDINARY 63,112,396 10.91% 57,253,539 9.90%
+3. Changes in relevant interests
+Particulars of each change in, or change in the nature of, a relevant interest of the substantial holder or an associate in voting securities of the company or scheme, since the substantial
+holder was last required to give a substantial holding notice to the company or scheme are as follows:
+Date of change Person whose Nature Consideration Class and number Person's votes
+relevant interest of change given in relation of securities affected
+changed (6) to change (7) affected
+See Annexure ‘A’
+4. Present relevant interests
+Particulars of each relevant interest of the substantial holder in voting securities after the change are as follows:
+Holder of relevant Registered holder Person entitled Nature of Class and number of Person's votes
+interest of securities to be registered as relevant securities
+holder (8) interest (6)
+AustralianSuper Pty JPMorgan Nominees JPMorgan Nominees Shareholder ORD 57,253,539 57,253,539
+Ltd Australia Ltd Australia Ltd
+
+5. Changes in association
+The persons who have become associates (2) of, ceased to be associates of, or have changed the nature of their association (9) with, the substantial holder in relation to voting interests in the
+company or scheme are as follows:
+Name and ACN/ARSN (if applicable) Nature of association
+N/A
+6. Addresses
+The addresses of persons named in this form are as follows:
+Name Address
+AustralianSuper Pty Ltd Level 30, 130 Lonsdale Street Melbourne VIC 3000
+Signature
+print name Amar Rashid capacity Principal, Portfolio Compliance
+Fund Services
+sign here date 26/10/2026
+
+Annexure A
+This is Annexure A of 1 page referred to in form 604 Notice of change of interests of substantial shareholder.
+Authorised Signatory: Amar Rashid Date: 26/10/2026
+Date of change Person whose relevant interest changed Nature of Consideration given in Class and number of Person's votes
+change (6) relation to change (7) securities affected affected
+8/10/2026 JPMorgan Nominees Australia Ltd SELL 15,996,521.89 ORD -396,037 -396,037
+9/10/2026 JPMorgan Nominees Australia Ltd SELL 36,966,700.64 ORD -915,496 -915,496
+12/10/2026 JPMorgan Nominees Australia Ltd SELL 4,983,728.14 ORD -124,377 -124,377
+13/10/2026 JPMorgan Nominees Australia Ltd SELL 18,414,823.46 ORD -453,668 -453,668
+14/10/2026 JPMorgan Nominees Australia Ltd SELL 14,442,066.49 ORD -356,512 -356,512
+14/10/2026 JPMorgan Nominees Australia Ltd BUY 9,957.74 ORD 246 246
+15/10/2026 JPMorgan Nominees Australia Ltd SELL 26,721,785.79 ORD -647,970 -647,970
+15/10/2026 JPMorgan Nominees Australia Ltd SELL 2,204.97 ORD -54 -54
+16/10/2026 JPMorgan Nominees Australia Ltd SELL 14,527,558.08 ORD -343,713 -343,713
+19/10/2026 JPMorgan Nominees Australia Ltd SELL 10,056,752.75 ORD -236,986 -236,986
+20/10/2026 JPMorgan Nominees Australia Ltd SELL 9,593,883.07 ORD -227,302 -227,302
+21/10/2026 JPMorgan Nominees Australia Ltd BUY 879,943.62 ORD 20,756 20,756
+21/10/2026 JPMorgan Nominees Australia Ltd SELL 15,610,416.27 ORD -368,606 -368,606
+21/10/2026 JPMorgan Nominees Australia Ltd SELL 35,889.01 ORD -853 -853
+22/10/2026 JPMorgan Nominees Australia Ltd SELL 77,191,541.21 ORD -1,808,285 -1,808,285

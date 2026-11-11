@@ -1,0 +1,108 @@
+Form 604
+Corporations Act 2001
+Section 671B
+Notice of change of interests of substantial holder
+To Company Name/ Scheme BMC Minerals Ltd
+ACN/ ARSN ARBN 647 860 124
+1. Details of substantial holder (1)
+Name L1 Capital Pty Ltd
+ACN/ ARSN (if applicable) 125 378 145
+There was a change in the interests of the substantial holder on 6/11/2026
+The previous notice was given to the company on 25/09/2026
+The previous notice was dated 25/09/2026
+2. Previous and present voting power
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme that the substantial holder or an associate (2) had a relevant interest (3)
+in when last required, and when now required, to give a substantial holding notice to the company or scheme, are as follows:
+Previous notice Present notice
+Class of securities (4) Person's votes Voting power (5) Person's votes Voting power (5)
+FPO 43,785,787 15.94% 47,097,318 17.15%
+*Based on issued capital of 274,639,795 shares *Based on issued capital of 274,639,795 shares
+3. Changes in relevant interests
+Particulars of each change in, or change in the nature of, a relevant interest of the substantial holder or an associate in voting securities of the company or scheme, since the
+substantial holder was last required to give a substantial holding notice to the company or scheme are as follows:
+Date of Person whose relevant interest Consideration given in Class and number of
+change changed Nature of change (6) relation to change (7) securities affected Person's votes affected
+See
+Annexure A
+4. Present relevant interests
+Particulars of each relevant interest of the substantial holder in voting securities after the change are as follows:
+Holder of
+relevant Person entitled to be Class and number of
+interest Registered Holder of securities registered as holder (8) Nature of relevant interest securities Person's votes
+See
+Annexure B
+5. Changes in association
+The persons who have become associates (2) of, ceased to be associates of, or have changed the nature of their association (9) with, the substantial holder in relation to voting
+interests in the company or scheme are as follows:
+Name and ACN/ ARSN (if applicable) Nature of association
+N/A
+6. Addresses
+The addresses of persons named in this form are as follows:
+Name Address
+L1 Capital Pty Ltd Level 45, 101 Collins Street, Melbourne, VIC, 3000
+
+Signature
+Print name CapacityJane StewartHead of Legal and Compliance
+Sign here Date10/11/2026
+DIRECTIONS
+(1) If there are a number of substantial holders with similar or related relevant interests (eg. a corporation and its related corporations, or the manager and trustee of an
+equity trust), the names could be included in an annexure to the form. If the relevant interests of a group of persons are essentially similar, they may be referred to
+throughout the form as a specifically named group if the membership of each group, with the names and addresses of members is clearly set out in paragraph 6 of the
+form.
+(2) See the definition of "associate" in section 9 of the Corporations Act 2001.
+(3) See the definition of "relevant interest" in sections 608 and 671B(7) of the Corporations Act 2001.
+(4) The voting shares of a company constitute one class unless divided into separate classes.
+(5) The person's votes divided by the total votes in the body corporate or scheme multiplied by 100.
+(6) Include details of:
+(a)
+any relevant agreement or other circumstances because of which the change in relevant interest occurred. If subsection 671B(4) applies, a copy of any document setting out the terms of any
+relevant agreement, and a statement by the person giving full and accurate details of any contract, scheme or arrangement, must accompany this form, together with a written statement
+certifying this contract, scheme or arrangement; and
+(b) any qualification of the power of a person to exercise, control the exercise of, or influence the exercise of, the voting powers or disposal of the securities to which the relevant interest relates
+(indicating clearly the particular securities to which the qualification applies).
+See the definition of "relevant agreement" in section 9 of the Corporations Act 2001.
+(7)
+Details of the consideration must include any and all benefits, money and other, that any person from whom a relevant interest was acquired has, or may, become entitled to receive in relation to that
+acquisition. Details must be included even if the benefit is conditional on the happening or not of a contingency. Details must be included of any benefit paid on behalf of the substantial holder or its associate in
+relation to the acquisitions, even if they are not paid directly to the person from whom the relevant interest was acquired.
+(8) If the substantial holder is unable to determine the identity of the person (eg. if the relevant interest arises because of an option) write "unknown".
+(9) Give details, if appropriate, of the present association and any change in that association since the last substantial holding notice.
+
+Annexure A
+L1 Capital Pty (ACN 125 378 145) change in substantial holding in BMC Minerals Ltd.
+This is Annexure "A" of 1 page referred to in the Form 604 (Notice of Change of interests of Substantial Holder)
+Print Name Jane Stewart Capacity Head of Legal and Compliance
+Sign Here Date 10/11/2026
+Changes in relevant interests
+Date of change Person whose relevant interest changed Nature of change (6) Consideration given in relation to change (7) Class and number of securities affected Person's votes affected
+30/09/2026 L1 Capital Pty Ltd On-Market Purchase 2,805.62$ 1,030 FPO 1,030
+1/10/2026 L1 Capital Pty Ltd On-Market Purchase 410.40$ 152 FPO 152
+2/10/2026 L1 Capital Pty Ltd On-Market Purchase 2,803.67$ 1,033 FPO 1,033
+12/10/2026 L1 Capital Pty Ltd On-Market Purchase 9,036.72$ 3,361 FPO 3,361
+14/10/2026 L1 Capital Pty Ltd On-Market Purchase 191,992.08$ 74,016 FPO 74,016
+15/10/2026 L1 Capital Pty Ltd On-Market Purchase 93,952.90$ 38,392 FPO 38,392
+16/10/2026 L1 Capital Pty Ltd On-Market Purchase 5,481,611.24$ 2,192,701 FPO 2,192,701
+19/10/2026 L1 Capital Pty Ltd On-Market Purchase 1,820.40$ 740 FPO 740
+20/10/2026 L1 Capital Pty Ltd On-Market Purchase 260.76$ 106 FPO 106
+6/11/2026 L1 Capital Pty Ltd On-Market Purchase 2,330,000.00$ 1,000,000 FPO 1,000,000
+
+Annexure B
+L1 Capital Pty (ACN 125 378 145) change in substantial holding in BMC Minerals Ltd.
+This is Annexure "B" of 1 page referred to in the Form 604 (Notice of Change of interests of Substantial Holder)
+Print Name Jane Stewart Capacity Head of Legal and Compliance
+Sign Here Date10/11/2026
+Details of present relevant interests
+Holder of relevant interest Registered holder of securities Persons entitled to be a registered holder Nature of relevant interest Class and number of securities
+Power to (or to control)
+exercise vote and/or dispose of
+the securities as discretionary
+investment managers or
+L1 Capital Pty Ltd JPMorgan Chase Bank, N.A. JPMorgan Chase Bank, N.A. advisers of superannuation FPO13,006,816
+funds, pooled superannuation
+trusts, managed investment
+schemes and investment
+management agreements.
+L1 Capital Pty Ltd Goldman Sachs International Goldman Sachs International as above 13,505,639 FPO
+L1 Capital Pty Ltd Morgan Stanley & Co. International PLC Morgan Stanley & Co. International PLC as above 9,627,336 FPO
+L1 Capital Pty Ltd UBS Nominees Pty Ltd UBS Nominees Pty Ltd as above 7,982,397 FPO
+L1 Capital Pty Ltd Merrill Lynch (Australia) Nominees Pty Limited Merrill Lynch (Australia) Nominees Pty Limited as above 2,975,130 FPO

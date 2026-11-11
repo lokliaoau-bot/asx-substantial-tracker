@@ -1,0 +1,55 @@
+Form 604
+Corporations Act 2001
+Section 671B
+Notice of change of interests of substantial holder
+Company Name/Scheme Reliance Worldwide Corporation Limited
+ACN/ARSN 610 855 877
+1. Details of Substantial Holder (1)
+Name AustralianSuper Pty Ltd
+ACN/ARSN (if applicable) 006 457 987
+There was a change in the interests of the substantial holder on 22 / 10 / 2026
+The previous notice was given to the company on 21 / 10 / 2026
+The previous notice was dated 20 / 10 / 2026
+2. Previous and present voting power
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme that the substantial holder or an associate (2) had a relevant interest (3)
+in when last required, and when now required, to give a substantial holding notice to the company or scheme, are as follows:
+Class of securities (4) Previous notice Present notice
+Person's votes Voting power (5) Person's votes Voting power (5)
+ORDINARY 121,028,821 16.18% 135,193,558 18.07%
+3. Changes in relevant interests
+Particulars of each change in, or change in the nature of, a relevant interest of the substantial holder or an associate in voting securities of the company or scheme, since the
+substantial holder was last required to give a substantial holding notice to the company or scheme are as follows:
+Date of change Person Nature of Consideration Class and Person's votes
+whose change (6) given in relation number of affected
+relevant to change (7) securities
+interest affected
+See Annexure ‘A’ changed
+4. Present relevant interests
+Particulars of each relevant interest of the substantial holder in voting securities after the change are as follows:
+Holder of Registered holder of Person entitled to be Nature of Class and number Person's votes
+relevant interest securities registered as holder (8) relevant of securities
+interest (6)
+AustralianSuper JPMorgan Nominees JPMorgan Nominees Shareholder ORD 135,193,558 135,193,558
+Pty Ltd Australia Ltd Australia Ltd
+
+5. Changes in association
+The persons who have become associates (2) of, ceased to be associates of, or have changed the nature of their association (9) with, the substantial holder in relation to voting
+interests in the company or scheme are as follows:
+Name and ACN/ARSN (if applicable) Nature of association
+N/A
+6. Addresses
+The addresses of persons named in this form are as follows:
+Name Address
+AustralianSuper Pty Ltd Level 30, 130 Lonsdale Street Melbourne VIC 3000
+Signature
+print name Amar Rashid capacity Principal, Portfolio Compliance
+Investments
+sign here date 23/10/2026
+
+Annexure A
+This is Annexure A of 1 page referred to in form 604 Notice of change of interests of substantial shareholder.
+Authorised Signatory: Amar Rashid Date: 23/10/2026
+Date of change Person whose relevant interest changed Nature of Consideration given in Class and number of Person's votes
+change (6) relation to change (7) securities affected affected
+21/10/2026 JPMorgan Nominees Australia Ltd BUY 27,072,107.97 ORD 6,252,790 6,252,790
+22/10/2026 JPMorgan Nominees Australia Ltd BUY 34,263,462.88 ORD 7,911,947 7,911,947

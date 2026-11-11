@@ -52,7 +52,9 @@ SAMPLE = {
         {"id": "5", "code": "SGH", "lodged_code": "", "company": "SGH Ltd", "date": day(0), "time": "18:00",
          "headline": "Change in substantial holding", "url": "https://www.asx.com.au/e", "pdf_url": "https://www.asx.com.au/e.pdf",
          "price_sensitive": False, "type": "change", "change_date": day(3), "voting_power": [6.06, 7.11],
-         "holder": "AustralianSuper", "group": "养老金", "confidence": "高", "ocr": True},
+         "holder": "AustralianSuper", "group": "养老金", "confidence": "高", "ocr": True,
+         "insight": {"action": "add_dip", "label": "逢低加仓", "tone": "bull", "confidence": "中", "style": "养老金",
+                     "reasons": ["持股比例 6.06% → 7.11%，持股数增加 420 万股。", "<img src=x onerror=window.__xss=1>买入时股价处在低位。"]}},
         {"id": "3", "code": "OLD", "company": "Old Co", "date": day(25), "time": "10:00", "headline": "Ceasing to be a substantial holder",
          "url": "https://www.asx.com.au/c", "pdf_url": "", "price_sensitive": False, "type": "ceasing",
          "change_date": day(26), "voting_power": [], "holder": "Regal Funds Management", "confidence": "低"},
@@ -135,6 +137,12 @@ def main():
         check("12 个投资者（10 家主动基金、2 家养老金）" in pg.inner_text("#lede"), "标题里的人数按关注名单和分组计算")
         check(pg.locator("#holders .group-title").count() == 2, "申报方卡片按主动基金 / 养老金分两组")
         check("扫描件·文字识别" in pg.inner_text("#rows"), "扫描件识别出来的记录有标注")
+        check(pg.locator("#rows details.ins").count() == 1 and "逢低加仓" in pg.inner_text("#rows details.ins summary"),
+              "有操作解读的公告显示标签，没有的显示 —")
+        pg.click("#rows details.ins summary")
+        check("持股数增加 420 万股" in pg.inner_text("#rows details.ins") and "推断" in pg.inner_text("#rows details.ins"),
+              "点开标签能看到理由，并说明这是推断")
+        check(pg.evaluate("window.__xss") is None and pg.locator("#rows details.ins img").count() == 0, "理由里的 HTML 不会被执行")
         pg.click("#groupSeg button[data-group='养老金']")
         check(pg.locator("#rows tr").count() == 1 and "AustralianSuper" in pg.inner_text("#rows"), "只看养老金")
         check(pg.locator("#holders .holder").count() == 2, "只看养老金时只显示养老金的卡片")

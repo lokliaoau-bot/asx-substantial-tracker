@@ -147,6 +147,18 @@ td.num, .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .t-becoming { color: var(--becoming); }
 .t-change { color: var(--change); }
 .t-ceasing { color: var(--ceasing); }
+/* 操作解读 */
+.ins summary { cursor: pointer; list-style: none; }
+.ins summary::-webkit-details-marker { display: none; }
+.ins summary::after { content: " ▾"; color: var(--muted); font-size: 12px; }
+.ins[open] summary::after { content: " ▴"; }
+.ins .tag { white-space: normal; text-align: left; border-radius: 10px; }
+.i-bull { color: var(--becoming); }
+.i-bear { color: var(--ceasing); }
+.i-neutral { color: var(--muted); }
+.ins ul { margin: 8px 0 2px; padding-left: 1.1em; font-size: 13px; color: var(--ink); max-width: 30em; }
+.ins li { margin: 3px 0; line-height: 1.5; }
+.ins .conf { margin-top: 4px; }
 .t-other { color: var(--muted); }
 .up { color: var(--becoming); }
 .down { color: var(--ceasing); }
@@ -239,6 +251,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
           <th>类型</th>
           <th>持股比例</th>
           <th>变动日</th>
+          <th>操作解读</th>
           <th>公告</th>
         </tr>
       </thead>
@@ -262,7 +275,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   </details>
 
   <footer>
-    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。标着“扫描件·文字识别”的，是把扫描的图片 PDF 用 OCR 识别出来的，数字可能认错，请以原文为准。养老金只看得到它们自己操盘的部分；交给外部基金经理管理的钱，会以基金经理的名义申报。每次抓取会同时读 ASX 的当日公告列表和全市场公告接口，自动补回最近两三周里没点按钮那几天的公告。本工具只做信息整理，不构成投资建议。
+    持股比例和变动日由脚本从公告 PDF 里自动识别，可能识别错或漏，请以原文为准。“可信度：中”表示没能直接读出申报方名称、是在公告第一节的文字里找到的；“可信度：低”表示 PDF 读不出文字，只根据公告标题里的 “from …” 判断，建议点开核对。标着“扫描件·文字识别”的，是把扫描的图片 PDF 用 OCR 识别出来的，数字可能认错，请以原文为准。养老金只看得到它们自己操盘的部分；交给外部基金经理管理的钱，会以基金经理的名义申报。“操作解读”是程序根据基金类型、公告里的买卖明细和当时的股价位置推断出来的（点标签看理由），不是基金自己的说法，也可能判断错。每次抓取会同时读 ASX 的当日公告列表和全市场公告接口，自动补回最近两三周里没点按钮那几天的公告。本工具只做信息整理，不构成投资建议。
   </footer>
 </main>
 
@@ -542,6 +555,20 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     return span;
   }
 
+  // 操作解读：标签 + 点开看理由。全部用 textContent，不拼 HTML
+  function renderInsight(n) {
+    const i = n.insight;
+    if (!i || !i.label) return document.createTextNode("—");
+    const d = document.createElement("details");
+    d.className = "ins";
+    const sum = document.createElement("summary");
+    sum.append(el("span", `tag i-${["bull", "bear"].includes(i.tone) ? i.tone : "neutral"}`, i.label));
+    const ul = document.createElement("ul");
+    (Array.isArray(i.reasons) ? i.reasons : []).forEach((r) => ul.append(el("li", "", String(r))));
+    d.append(sum, ul, el("div", "conf", `把握：${i.confidence || "中"}。这是按公告数字和股价位置做的推断，公告里不会写买卖原因。`));
+    return d;
+  }
+
   function renderRows() {
     const tbody = $("rows");
     const list = filtered();
@@ -550,7 +577,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       const has = state.data && state.data.notices && state.data.notices.length;
       const td = el("td", "empty", has ? "当前筛选条件下没有记录。换个申报方或时间范围试试。"
         : "这段时间里还没有关注名单里的公告。点右上角“抓取最新公告”更新数据。");
-      td.colSpan = 7;
+      td.colSpan = 8;
       const tr = document.createElement("tr");
       tr.append(td);
       return tbody.replaceChildren(tr);
@@ -574,6 +601,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
         el("td", "", el("span", `tag t-${TYPE_LABEL[n.type] ? n.type : "other"}`, TYPE_LABEL[n.type] || "其他"), "类型"),
         el("td", "num", renderPct(n), "持股比例"),
         el("td", "nowrap", fmtDate(n.change_date) || "—", "变动日"),
+        el("td", "", renderInsight(n), "解读"),
         el("td", "headline", link(n.pdf_url || n.url, n.headline || "打开公告"), "公告"),
       );
       return tr;

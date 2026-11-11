@@ -67,7 +67,7 @@ python -m pytest -q -p no:warnings                      # 全部离线
 - 真实语料验证：77 条命中公告逐条看过结论；4 份样本“持股数变化 = 逐笔净额”完全对上
 
 还没做（按顺序）：
-1. `index.html` 显示操作解读（表格加一列：标签 + 可展开的理由），`tests/frontend_check.py` 补检查
+1. ~~网页显示操作解读~~ 已完成（表格“操作解读”列，网页检查 36 项通过）
 2. 更新 `README.md` / `DEPLOY.md`
 3. 推 `dev-fable` 后用 `scrape.yml` 在该分支真实运行（PARSER 升级要重读全部，可能要跑两三次），核对 `data/notices.json` 里的 `insight`
 4. 三轮审查后合并 `main`，再在 main 上跑一次

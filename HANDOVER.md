@@ -1,0 +1,186 @@
+# 大股东公告雷达 — 交接文件（给接手的 AI）
+
+> 版本：2026-11-11（第七轮完成后）。把这份文件和代码一起交给接手的 AI 即可。
+> 用户 Lok 是会计师，不写代码，用中文沟通，喜欢大白话和例子。所有对用户的说明都要用中文、少术语。
+
+## 1. 一句话说明
+
+一个手机上用的网页：点一下按钮，抓取 ASX 的大股东公告（Form 603 新进 / 604 变动 / 605 退出），
+只留下关注名单（10 家主动基金 + 13 家养老金）的记录，并给每条记录一个“操作解读”
+（新进建仓、逢低加仓、获利了结、止损、调仓、被动稀释……），点开能看到理由。
+
+- 仓库：`lokliaoau-bot/asx-substantial-tracker`（GitHub，公开）
+- 网页：`https://lokliaoau-bot.github.io/asx-substantial-tracker/`（GitHub Pages，根目录的 `index.html`）
+- 运行：网页按钮 → GitHub API `workflow_dispatch` → GitHub Actions 跑 `scraper/scrape.py` → 把结果提交回仓库的 `data/` → 网页读 `data/notices.json`
+- 不用服务器、不用数据库、抓取过程不用任何 AI
+
+## 2. 用户定下的规矩（必须遵守）
+
+1. **只在用户点按钮时抓取，不要加定时任务。**
+2. **改动先在测试分支做，测试并审查三轮（①逐行正确性 ②异常和边界 ③GitHub 真实环境）通过后，才合并到 `main`。** 正式版一动，用户手机上马上就变。
+3. 宁缺毋错：读不准的数字留空，不要显示可能错的值。
+4. 用户在聊天里发过一个 GitHub 令牌。不要使用它，不要写进任何文件。网页上的令牌由用户自己填，只存在他的浏览器里。
+5. 开工先读 `CLAUDE.md`（代码地图 + 当前进度），不要从头读代码；每做完一步更新它并提交。
+
+## 3. 文件清单
+
+| 文件 | 作用 |
+| --- | --- |
+| `index.html` | 单文件网页，原生 JS，无构建。所有外部数据用 `textContent` 渲染（防 XSS），链接只允许 asx.com.au 和 markitdigital |
+| `scraper/scrape.py` | 抓取主程序（列表页、全市场接口、PDF 解析、OCR、匹配、输出） |
+| `scraper/insight.py` | 操作解读：逐笔明细、持股数、股价背景、判断规则 |
+| `scraper/watchlist.json` | 关注名单和噪音名单（用户改名单只改这个文件） |
+| `.github/workflows/scrape.yml` | 抓取工作流（只有 `workflow_dispatch`；装 tesseract；跑完把 `data/` 提交回当前分支） |
+| `.github/workflows/test.yml` | 推送时跑 pytest |
+| `data/all_notices.json` | 内部存储：35 天内全部大股东公告的解析结果 |
+| `data/notices.json` | 网页用的结果：只含命中名单的 |
+| `tests/test_scrape.py` | 129 个离线测试 |
+| `tests/fixtures/` | 真实公告样本（PDF 只留前几页；`insight_samples.json` 是 10 份真实公告的文字 + 对应股价） |
+| `tests/frontend_check.py` | Playwright 网页检查（36 项），含 GitHub API 的模拟 |
+| `README.md` | 给用户的使用说明 |
+| `DEPLOY.md` | 最初的部署说明 + 历次审查记录（第一到第七轮，查某个 bug 的来历看这里） |
+| `CLAUDE.md` | 给 AI 的工作笔记：代码地图、规矩、当前进度 |
+
+## 4. 抓取流程（`scrape.py` 的 `main()`）
+
+```
+1 读名单 load_watchlist，读存储 load_store
+2 列表页  todayAnns.do / prevBusDayAnns.do            → parse_listing
+3 全市场接口 asx.api.markitdigital.com/…/markets/announcements?page=N&itemsPerPage=1000
+            → market_rows（增量：api_since；每 7 天全量翻 16 天窗口；最多约 1 万条）
+4 只留标题含 substantial holder/holding/shareholder 的；去重 dedupe_keys（同一份公告会挂在两个代码下）
+5 标题 “from XXX” 是噪音缩写（大行、指数基金）的直接跳过，不下载
+6 其余 4 路并行 process_entry：
+     download_pdf（列表页链接要过一个“同意条款”中间页；接口的 PDF 从 …/file/{documentKey} 下，AES 加密、空密码）
+     pdf_texts   前 2 页，版面模式 + 默认模式各读一遍（两种互补）
+     analyse_texts  申报方 / 公司 / 比例 / 变动日；每个字段取第一个读得出的
+     读不出申报方 → OCR（tesseract 400dpi，前 3 页，单次运行最多 60 份、12 分钟）
+     命中名单 → add_detail：第二节的持股数 parse_votes + 前 40 页的逐笔明细 parse_trades
+7 enrich：命中名单但还没读过明细的旧公告，重新下载补读
+8 add_prices：给命中的公告取 ASX 日线（每只股票一次），算股价背景 price_context
+9 build_notices：match_entry → insight.judge → 内容去重 → drop_superseded（更正版盖掉原件）
+10 写 data/*.json
+```
+
+匹配的三档可信度：**高** = 解析出的申报方名称命中别名；**中** = 名称没读出，但第一节原文里出现别名；**低** = PDF 读不出，只靠标题里的 “from XXX” 缩写。
+
+版本号（升级后旧数据自动重读）：
+- `PARSER_VERSION`（现在 8）：解析规则变了就加 1，全部公告重读一遍（约 700 份，单次运行上限 300 份，要跑两三次——**先在测试分支跑完再合并**）
+- `INSIGHT_VERSION`（现在 1）：只改逐笔明细的读法时加 1，只重读命中名单的公告
+- 只改 `judge()` 的判断规则：不用加版本，每次运行都重新算
+
+## 5. 操作解读是怎么判断的（`insight.py`）
+
+输入（都存在 `all_notices.json` 的 entry 里）：
+
+| 字段 | 来源 | 例子 |
+| --- | --- | --- |
+| `voting_power` | 第二节 | `[11.36, 9.52]` |
+| `votes` | 第二节同一行的持股数 | `[76406237, 64019970]` |
+| `trades` | 第三节 / 附件的逐笔明细汇总 | `{n, buy_qty, sell_qty, net_qty, buy_price, sell_price, first, last, kinds, kind_rows}` |
+| `px` | ASX 日线 `www.asx.com.au/asx/1/chart/highcharts?asx_code=XXX&years=2` | `{p, r1m, r3m, r6m, r12m, hi, lo, pos, adv, t_lo, t_hi}` |
+| `style` | `watchlist.json` | `active / hedge / strategic / super / platform` |
+| `prev` | 同一申报方同一股票的上一份公告 | `{vp, votes, type, date}` |
+
+判断顺序（`judge()`）：
+
+1. **不是真买卖**
+   - 倒推总股本前后差几倍 → 股份合并/拆分
+   - 持股数几乎没变但比例变了 → 被动稀释（增发）/ 被动上升（回购）。判据：自己买卖带来的百分点 ≤ 比例变化的 25%
+   - 明细里一半以上是收购要约、证券借贷/抵押、划转 → 对应标签
+2. **方向**：603 = 买，605 = 卖，604 看持股数（没有就看比例）
+3. **在 5% 线附近来回**：上次只比 5% 高一点、这次只卖了一点就跌破 → “小幅卖出，刚好跌破 5% 线”；45 天内刚跌破又回来 → “又回到 5% 以上”
+4. **边买边卖**：少的一边 ≥ 多的一边的 60% → “像调仓”（603 不用这个标签，只在理由里说明）
+5. **买**：配售为主 → 参与配售；603 里近 4 个月净买入 ≤ 现持仓 35% → “加仓越过 5% 线”（早有底仓）；
+   股价在低位且近 3 个月跌 ≥10%（或跌 ≥20%）→ 逢低；高位且近 3 个月涨 ≥15% → 顺势
+6. **卖**：同一份明细里卖出均价比买入均价高 ≥15%，或卖前大涨且在高位 → 像获利了结；
+   大跌或在低位 → 像止损；都不是 → 减仓（原因不明）
+
+把握（高/中/低）是打分：明细和持股数对得上 +1，股价证据明确 +1，主动/战略型基金 +1，平台型或扫描件 −1。≥3 高，≤0 低。
+
+保护措施：
+- 明细净额和持股数变化差 5% 以上 → 方向和幅度以持股数为准，并在理由里说明“对不上”
+- 明细里的均价和当时市场价差太远（<0.6× 最低或 >1.6× 最高）→ 不用这个均价
+- 603 里 4 个月净买入比总持仓还多 → 整段明细作废
+- 扫描件不读逐笔明细（OCR 错一位差很远）
+- 公司自己的增发行（“Issue of 67,938,918 shares”）、期初/期末余额行不算交易
+
+**验证方法（很有用）**：604 的“持股数变化”和“逐笔净额”是两处独立读出来的，能对上就说明两边都读对了。
+`tests` 里 4 份真实样本要求完全相等。
+
+## 6. 数据格式
+
+`data/notices.json`：
+
+```json
+{
+  "schema": 2, "updated_at": "…", "last_success_at": "…",
+  "scanned_days": ["2026-11-10"], "partial_days": {"2026-11-11": "14:05"},
+  "last_run": {"ok": true, "list_pages_ok": 2, "substantial_found": 584, "pdf_checked": 12, "skipped_noise": 3, "deferred": 0,
+               "backfill": {"ok": true, "from": "2026-10-26", "added": 0, "incremental": true},
+               "insight": {"detail_added": 2, "prices_ok": 2, "prices_failed": 0}, "errors": []},
+  "watchlist": ["…"], "groups": {"AustralianSuper": "养老金"}, "styles": {"AustralianSuper": "养老金"},
+  "notices": [{
+    "id": "03160080", "code": "BAP", "lodged_code": "", "company": "Bapcor Limited",
+    "date": "2026-10-30", "time": "17:02", "headline": "Change in substantial holding",
+    "url": "…", "pdf_url": "…", "price_sensitive": false,
+    "type": "change", "change_date": "2026-10-28", "voting_power": [11.36, 9.52],
+    "holder": "Hostplus", "group": "养老金", "confidence": "高", "ocr": false,
+    "insight": {"action": "trim_loss", "label": "低位减仓，像止损", "tone": "bear", "confidence": "中",
+                "style": "养老金", "reasons": ["持股比例 11.36% → 9.52%，持股数减少 1,239 万股（相当于原持仓的 16%）。", "…"]}
+  }]
+}
+```
+
+- `code` 是公告涉及的股票；申报方自己上市时公告挂在申报方代码下（标题 “… for EOL”），那时 `lodged_code` 是挂靠代码
+- `tone`：`bull` / `bear` / `neutral`；`action` 的全部取值见 `insight.LABELS`
+- entry 的 `status`：`new`（待处理）/ `parsed` / `noise`（噪音跳过）/ `unreadable`（读不出文字）/ `error`（会重试，最多 3 次）/ `skipped`（文件太大）
+
+## 7. 怎么开发和验证
+
+```bash
+python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
+sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
+python -m pytest -q                             # 129 passed，全部离线
+python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
+```
+
+**开发环境通常连不上 ASX**（包括 Claude 的云端沙箱）。看真实数据的办法：
+- 在 `debug-xxx` 分支放一个 `on: push: branches: [debug-xxx]` 的临时工作流，让 GitHub 的机器去下载，把结果 `git push -f` 到 `debug-xxx-out` 分支，再拉下来分析。不要动 main。
+- `scrape.yml` 已经在 main 上，可以对任何分支触发：`POST /repos/…/actions/workflows/scrape.yml/dispatches`，body `{"ref":"dev-xxx"}`，数据提交回那个分支，不影响正式版。
+- 合并用 fast-forward（测试分支带着重读好的 `data/`，合并后用户不用等重读）。
+
+三轮审查的做法（历次都抓到过只靠测试发现不了的问题）：
+1. 正确性：逐行读 diff；拿真实语料做新旧对比，逐条确认每个变化是改对了。
+2. 异常：网络出错、PDF 打不开、OCR 没装、接口改版、数量上限、时间上限。
+3. 真实环境：在测试分支上真跑。例：本地 PDF 都没加密，线上接口的 PDF 全是 AES 加密，第一次真跑全军覆没。
+
+## 8. 已知限制
+
+- 补抓依赖 ASX 网站内部用的全市场接口（无公开文档，最多约 1 万条 ≈ 两三周）。改版时网页会提示，退回只读当天和上一交易日。
+- 股价接口同样是 ASX 网站内部接口；取不到时操作解读照常给出，只是少了“高位/低位”的判断（最多重试 3 次）。价格是复权价，和明细里的成交价在除权前后会有小差异。
+- 扫描件（约 15%，多是小公司和个人）靠 OCR，申报方大多能认出，数字不可靠时留空；不读逐笔明细。
+- 逐笔明细的版式很杂：字间带空格的 PDF（Regal 的 RG1/RG8）读不出明细，只能用持股数；附件超过 40 页或 25 秒的只读前面部分。
+- 养老金只看得到自营部分；605（退出）不披露剩余持仓，是否清仓看不出来。
+- 操作解读是规则推断，阈值（15%、25%、60% 等）是按 77 条真实公告调的，没有做过回测。
+
+## 9. 可以继续做的事（按价值排序的建议）
+
+1. **回测判断规则**：把“解读”和公告后 1/3/6 个月的股价对比，看哪类标签真有信号，再调阈值。
+2. **同一只股票多家基金同向**：例如两家主动基金同一个月都在加仓同一只股票，单独标出来。
+3. **字间带空格的 PDF 的明细**（RG1/RG8）：先把文字去空格再解析。
+4. **公告后的走势**：在网页上显示“公告后至今 +x%”（需要每次运行为显示中的股票取一次价，约多 30 秒）。
+5. **养老金半年度持仓披露**：每年两次的完整持仓（6/30、12/31，90 天内公布），做半年对比。各家格式不同，工作量大。
+6. 清理 GitHub 上的临时分支（`dev-*`、`debug-*`；需要用户在网页上删，或用有权限的令牌）。
+
+## 10. 踩过的坑（省你的时间）
+
+- ASX 很多 603/604 是模板上“填空”的 PDF：默认文字提取会把标签和内容拆开，要用版面模式；但版面模式有时把字拆散，所以两种都读。
+- 同一份公告在全市场接口里会出现两条（挂在申报方代码下 “for XXX”、挂在标的代码下 “from XXX”），时间相同。
+- 标题里全大写的缩写要区分大小写（“from Ms Smith” 不是 Morgan Stanley）。
+- 表头写 `Voting power (%)` 时数字不带 %；有的把股数和比例粘在一起 `25,887,0385.02%`；有的用欧式逗号 `6,93%`。
+- 变动日有十几种写法（美式、方格、月份全称带斜杠…），见 `parse_date` 的测试。
+- 标题类型会写错（604 表格配“Ceasing”标题），以 PDF 里单独一行的 `Form 60x` 为准。
+- 原件发出后又发更正版（标题带 Amended）：只显示更正版。
+- GitHub：手动触发只对默认分支上已有的工作流有效；Pages 和分支删除要用户自己在网页上操作。
+- 测试依赖里 reportlab 会顺带装上 Pillow，正式依赖没有就会线上才报错——新增依赖后要用只装 `requirements.txt` 的干净环境验证一次。

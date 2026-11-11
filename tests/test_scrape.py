@@ -1600,3 +1600,8 @@ def test_reparse_clears_stale_detail(sandbox, monkeypatch):
     scrape.main()
     e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
     assert e["parser"] == scrape.PARSER_VERSION and e["px"].get("p") != 123 and e["detail_v"] == scrape.INSIGHT_VERSION
+
+
+def test_judge_with_almost_no_data_is_low_confidence():
+    j = insight.judge({"type": "becoming", "voting_power": [], "style": "active"})
+    assert j["action"] == "build" and j["confidence"] == "低"

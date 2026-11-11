@@ -486,6 +486,8 @@ def judge(n: dict) -> dict | None:
 
     def done(action: str, conf: str | None = None) -> dict:
         nonlocal score
+        if not vp and not rows_ok:
+            score -= 2                      # 比例和明细都没读到（多半是 PDF 读不出），只能按公告类型说个大概
         if style in ("active", "strategic"):
             score += 1
         if style == "platform" or ocr:

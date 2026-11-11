@@ -1340,3 +1340,263 @@ def test_failed_later_page_does_not_advance_sync_point(sandbox, monkeypatch):
     monkeypatch.setattr(scrape, "now_syd", lambda: dt.datetime(2026, 10, 30, 21, 30, tzinfo=scrape.SYD))
     scrape.main()
     assert "api_synced_at" not in read(sandbox / "data" / "all_notices.json")     # 下次还是从头翻
+
+
+# ---------------------------------------------------------------- 第七轮（2026-11-11）：准确率
+
+def test_more_date_formats_round7():
+    assert scrape.parse_date("on October / 21 / 2026") == "2026-10-21"          # Bank of Nova Scotia
+    assert scrape.parse_date("holder on / /05 11 2026") == "2026-11-05"         # BlackRock：方格前面带斜杠
+    assert scrape.parse_date(": 13 October2026") == "2026-10-13"                 # 月份和年份粘在一起
+    assert scrape.parse_date("27th of October 2026") == "2026-10-27"
+    assert scrape.parse_date("ACN 062 576 238") == "" and scrape.parse_date("Level 45, 101 Collins Street") == ""
+
+
+def test_percentage_odd_spellings():
+    pick = lambda seg, t="change": scrape.pick_voting_power("2. Previous and present voting power\n" + seg + "\n3. Changes in relevant", t, True)
+    assert pick("Ful ly pai d ordi nary shar es 36, 338, 793 25. 9 3 % 36, 903, 079 22. 95%") == [25.93, 22.95]   # 以前读成 [3.0, 95.0]
+    assert pick("Ordinary Shares 4,458,618 9.31%* 6,031,726 12. 60%*") == [9.31, 12.6]                              # 以前读成 [9.31, 60.0]
+    assert pick("88,192,952 88,192,952 6,93%", "becoming") == [6.93]                                              # 欧式逗号，以前读成 93%
+    assert pick("CDIs over fully paid ordinary 10,671,838 7.54 9,986,838 7.04%") == [7.54, 7.04]                  # 只有一个带 %
+    assert pick("Ordinary shares 38,231,831 18.26% 40,553,764 19.26") == [18.26, 19.26]
+    assert pick("Ordinary Shares 76,406,237 11.36% 64,019,970 9.52%") == [11.36, 9.52]                            # 正常写法不受影响
+    assert pick("ORD 1,000,000 6.10% 1,200,000 7.20% $2.50") == [6.1, 7.2]
+
+
+def test_prose_percentages_are_not_a_voting_power_table():
+    letter = ("Voting power consists of the shareholder's own relevant interest.\nobtains voting power of 5% or more in\n"
+              "subsequent voting power change of 1 % or more\nHolder A 19.90% 19.90%")
+    assert scrape.parse_details(letter, "change")["voting_power"] == []
+
+
+def test_name_label_in_the_middle_of_a_multi_line_name():
+    t = ("1. Details of substantial holder (1)\nAckland Investments No.1 Pty Limited as trustee for Ackland Investments No.1 Trust (Ackland)\n"
+         "Goodman Limited (Goodman), Goodman Funds Management Limited\nName and Goodman Logistics (HK) Limited and each of their controlled entities\n"
+         "ACN 703 706 174\nThe holder became a substantial holder on 9/11/2026\n2. Details of voting power")
+    assert scrape.parse_holder_section(t)[0].startswith("Ackland Investments No.1 Pty Limited")
+
+
+def test_tr1_name_on_the_line_after_the_labels():
+    t = ("NOTIFICATION OF MAJOR HOLDINGS\n1. Identity of the issuer:\nJAMES HARDIE INDUSTRIES PLC\n"
+         "3. Details of person subject to the notification obligationiv :\nName: City and country of registered office (if applicable):\n"
+         "FMR LLC Wilmington, USA\n5. Date on which the threshold was crossed or reachedvi:\n27th of October 2026\n"
+         "Resulting situation\non the date on which 7.1589% 0.0000% 7.1589% 5\nPosition of previous\nnotification 6.0444% 0% 6.0444%")
+    r = scrape.parse_other_forms(t, "change")
+    assert r["holder_name"] == "FMR LLC Wilmington, USA" and r["change_date"] == "2026-10-27" and r["voting_power"] == [6.0444, 7.1589]
+
+
+# ---------------------------------------------------------------- 操作解读（insight.py）
+
+import insight  # noqa: E402
+
+SAMPLES = json.loads((FIXTURES / "insight_samples.json").read_text(encoding="utf-8"))
+STYLE = {h.name: h.style for h in HOLDERS}
+
+
+def sample(name: str, prev: dict | None = None) -> tuple[dict, dict, dict]:
+    """返回 (明细汇总, 判断结果, 中间数据)。完全离线：文字和股价都来自真实公告的存档。"""
+    s = SAMPLES["samples"][name]
+    votes = insight.parse_votes(scrape.voting_section(s["text"])[0], s["voting_power"], s["type"])
+    tr = insight.parse_trades(s["pages"], s["date"], s["type"])["summary"]
+    px = insight.price_context(SAMPLES["prices"][s["code"]], s["change_date"] or tr.get("last") or s["date"],
+                               tr.get("first", ""), tr.get("last", ""))
+    j = insight.judge({"type": s["type"], "voting_power": s["voting_power"], "votes": votes, "trades": tr, "px": px,
+                       "style": STYLE[s["holder"]], "prev": prev, "date": s["date"]})
+    return tr, j, {"votes": votes, "px": px}
+
+
+def test_votes_and_trades_reconcile_exactly_on_real_notices():
+    # 第二节的持股数量变化 = 附件里逐笔交易的净额。两边独立读出来还能对上，说明都读对了
+    for name in ("bap_hostplus_604", "amx_perennial_604", "nol_regal_604", "fpr_art_604"):
+        tr, _, mid = sample(name)
+        assert tr["net_qty"] == mid["votes"][1] - mid["votes"][0], name
+
+
+def test_real_sell_into_weakness_hostplus_bap():
+    tr, j, mid = sample("bap_hostplus_604")
+    assert mid["votes"] == [76406237, 64019970]
+    assert (tr["n"], tr["buy_qty"], tr["sell_qty"], tr["first"], tr["last"]) == (8, 0, 12386267, "2026-09-17", "2026-10-26")
+    assert tr["sell_price"] == pytest.approx(0.821, abs=0.001)          # 对价带负号：-$9,397.80 / -12,000
+    assert j["action"] == "trim_loss" and j["tone"] == "bear" and j["style"] == "养老金"
+    assert any("1,239 万股" in r for r in j["reasons"])
+
+
+def test_real_profit_taking_perennial_amx():
+    tr, j, _ = sample("amx_perennial_604")
+    assert tr["sell_qty"] == 9499064 and tr["sell_price"] == pytest.approx(0.3393, abs=0.001)
+    assert j["action"] == "trim_profit" and j["confidence"] == "高"
+    assert any("四成以上" in r for r in j["reasons"])
+
+
+def test_real_603_rows_with_holder_name_before_the_date():
+    tr, j, mid = sample("mp1_art_603")                                 # “… Trust 26/06/2026 365,077.25 Ordinary Fully Paid 17,848”
+    assert tr["n"] == 52 and tr["buy_qty"] == 2462905 and tr["sell_qty"] == 0
+    assert tr["buy_price"] == pytest.approx(18.68, abs=0.01)           # 对价是总金额，要除以股数
+    assert j["action"] == "cross_up"                                   # 4 个月只买了现有持仓的两成：早有底仓
+
+
+def test_real_issuer_share_issue_row_is_not_a_trade():
+    tr, j, mid = sample("flx_perennial_603")                           # “Issue of 67,938,918 fully paid ordinary shares …”
+    assert tr["buy_qty"] == 6411118 and tr["kind_rows"]["dilution"] == 1
+    assert tr["buy_qty"] < mid["votes"][0]
+
+
+def test_real_dilution_l1_gls():
+    tr, j, mid = sample("gls_l1_604")
+    assert mid["votes"] == [79710074, 79710074] and tr["n"] == 0
+    assert j["action"] == "passive_dilute" and j["tone"] == "neutral" and j["confidence"] == "高"
+
+
+def test_real_collateral_is_not_a_sale_cbus_acl():
+    tr, j, _ = sample("acl_cbus_605")                                  # “Collateral Posted … 649,625-”，以及期初/期末余额行
+    assert tr["n"] == 1 and tr["sell_qty"] == 649625 and tr["kinds"] == {"lending": 649625}
+    assert j["action"] == "lending" and j["tone"] == "neutral"
+
+
+def test_real_new_position_ellerston_dxn():
+    tr, j, mid = sample("dxn_ellerston_603")
+    assert tr["n"] == 23 and tr["buy_qty"] == 42325943
+    assert j["action"] == "build" and j["tone"] == "bull"
+
+
+def test_real_two_way_trading_regal_nol():
+    tr, j, _ = sample("nol_regal_604")
+    assert tr["buy_qty"] == 14491130 and tr["sell_qty"] == 16005756
+    assert j["action"] == "rotate" and j["style"] == "多空对冲基金"
+    assert any("2025/10/23" in r for r in j["reasons"])                # 跨年的明细带上年份
+
+
+def test_real_sold_higher_than_bought_art_fpr():
+    _, j, _ = sample("fpr_art_604")
+    assert j["action"] == "trim_profit" and any("卖出均价比买入均价高" in r for r in j["reasons"])
+
+
+def test_slipping_just_under_the_line_and_coming_back():
+    _, j, _ = sample("kar_cfs_605", prev={"vp": 5.0, "votes": 34880000, "type": "becoming", "date": "2026-11-09"})
+    assert j["action"] == "slip" and j["confidence"] == "低"           # 平台/多经理，信号最弱
+    back = insight.judge({"type": "becoming", "voting_power": [5.0], "votes": [34880000], "style": "platform",
+                          "prev": {"vp": None, "votes": None, "type": "ceasing", "date": "2026-11-05"}, "date": "2026-11-09"})
+    assert back["action"] == "back"
+
+
+def base_note(**kw):
+    n = {"type": "change", "voting_power": [10.0, 8.0], "votes": [10_000_000, 8_000_000], "style": "active", "date": "2026-11-10"}
+    n.update(kw)
+    return n
+
+
+def test_judge_special_cases():
+    j = insight.judge(base_note(voting_power=[6.0, 7.5], votes=[6_000_000, 6_000_000]))
+    assert j["action"] == "passive_up"                                                    # 股数没变、比例上升：回购
+    j = insight.judge(base_note(voting_power=[13.71, 10.24], votes=[345_266_739, 23_017_782]))
+    assert j["action"] == "restructure"                                                   # 股份合并
+    tr = {"n": 3, "buy_qty": 2_000_000, "sell_qty": 0, "net_qty": 2_000_000, "first": "2026-10-01", "last": "2026-10-02",
+          "kinds": {"placement": 1_800_000, "on_market": 200_000}, "kind_rows": {"placement": 1, "on_market": 2}}
+    j = insight.judge(base_note(voting_power=[8.0, 10.0], votes=[8_000_000, 10_000_000], trades=tr))
+    assert j["action"] == "add_placement" and j["tone"] == "bull"
+    tr = {"n": 2, "buy_qty": 0, "sell_qty": 2_000_000, "net_qty": -2_000_000, "first": "2026-10-01", "last": "2026-10-02",
+          "kinds": {"takeover": 2_000_000}, "kind_rows": {"takeover": 2}}
+    assert insight.judge(base_note(trades=tr))["action"] == "takeover"
+    assert insight.judge({"type": "other"}) is None
+
+
+def test_judge_uses_holdings_when_rows_do_not_add_up():
+    tr = {"n": 5, "buy_qty": 0, "sell_qty": 300_000, "net_qty": -300_000, "first": "2026-10-01", "last": "2026-10-09",
+          "kinds": {"on_market": 300_000}, "kind_rows": {"on_market": 5}}
+    j = insight.judge(base_note(trades=tr))                            # 明细只读到一部分
+    assert j["tone"] == "bear" and any("对不上" in r for r in j["reasons"]) and any("200 万股" in r for r in j["reasons"])
+
+
+def test_judge_drops_prices_that_disagree_with_the_market():
+    tr = {"n": 3, "buy_qty": 0, "sell_qty": 2_000_000, "net_qty": -2_000_000, "first": "2026-10-01", "last": "2026-10-09",
+          "sell_price": 99.0, "kinds": {"on_market": 2_000_000}, "kind_rows": {"on_market": 3}}
+    px = {"p": 2.0, "r3m": 0.0, "r6m": 0.0, "r12m": 0.0, "pos": 0.5, "hi": 2.5, "lo": 1.5, "t_lo": 1.9, "t_hi": 2.1}
+    j = insight.judge(base_note(trades=tr, px=px))
+    assert j["action"] == "trim" and not any("$99" in r for r in j["reasons"])
+
+
+def test_ocr_and_platform_lower_confidence():
+    assert insight.judge(base_note(ocr=True, votes=[]))["confidence"] == "低"
+    assert insight.judge(base_note(style="platform", votes=[]))["confidence"] == "低"
+
+
+def test_price_context_basic():
+    day = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
+    d0 = dt.date(2025, 10, 1)
+    series = [[day(d0 + dt.timedelta(days=i)), 3.0 - i / 400, 1000 + i] for i in range(400) if (d0 + dt.timedelta(days=i)).weekday() < 5]
+    px = insight.price_context(series, "2026-10-28", "2026-10-20", "2026-10-27")
+    assert px["p"] == pytest.approx(3.0 - 392 / 400, abs=0.01) and px["pos"] < 0.05 and px["r3m"] < -0.08 and px["r12m"] < -0.25
+    assert px["t_lo"] <= px["t_hi"] and px["adv"] > 1000
+    assert insight.price_context(series, "2027-06-01") == {}           # 参考日之后很久没有数据
+    assert insight.price_context([], "2026-10-28") == {} and insight.price_context(series, "") == {}
+
+
+TRADE_604 = ["Form 604", "To Company Name/Scheme Superloop Limited", "1. Details of substantial holder (1)",
+             "Name Paradice Investment Management Pty Ltd", "There was a change in the interests of the",
+             "substantial holder on 28/10/2026", "The previous notice was dated 01/09/2026",
+             "2. Previous and present voting power", "Ordinary 10,000,000 6.10% 12,000,000 7.20%",
+             "3. Changes in relevant interests",
+             "20/10/2026 Paradice On market purchase $2,100,000.00 1,000,000 1,000,000",
+             "27/10/2026 Paradice On market purchase $2,000,000.00 1,000,000 1,000,000",
+             "4. Present relevant interests"]
+
+
+def falling_prices():
+    day = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
+    d0 = dt.date(2025, 10, 1)
+    return [[day(d0 + dt.timedelta(days=i)), round(3.0 - i / 400, 4), 50_000] for i in range(400)
+            if (d0 + dt.timedelta(days=i)).weekday() < 5]
+
+
+def test_insight_end_to_end(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    fake = FakeASX(prices={"SLC": falling_prices()})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["votes"] == [10_000_000, 12_000_000] and e["trades"]["buy_qty"] == 2_000_000 and e["trades"]["buy_price"] == 2.05
+    assert e["detail_v"] == scrape.INSIGHT_VERSION and e["px"]["pos"] < 0.1
+    out = read(sandbox / "data" / "notices.json")
+    n = next(x for x in out["notices"] if x["code"] == "SLC")
+    assert n["insight"]["action"] == "add_dip" and n["insight"]["label"] == "逢低加仓" and n["insight"]["confidence"] == "高"
+    assert out["styles"]["Paradice Investment Management"] == "主动选股基金"
+    assert out["last_run"]["insight"]["prices_ok"] == 1
+    # 没命中名单的公告不读明细、不取股价
+    other = read(sandbox / "data" / "all_notices.json")["entries"]["1002"]
+    assert "detail_v" not in other and "ABC" not in fake.price_calls
+    # 第二次运行：不重复下载，也不重复取已经有的股价
+    fake.pdf_downloads.clear()
+    n_calls = fake.price_calls.count("SLC")
+    scrape.main()
+    assert fake.pdf_downloads == [] and fake.price_calls.count("SLC") == n_calls
+
+
+def test_price_failure_is_retried_a_few_times_then_dropped(sandbox, monkeypatch):
+    fake = FakeASX()                                                   # 没有任何股价
+    monkeypatch.setattr(scrape, "fetch", fake)
+    for _ in range(5):
+        assert scrape.main() == 0
+    assert fake.price_calls.count("SLC") == scrape.DETAIL_TRIES
+    out = read(sandbox / "data" / "notices.json")
+    assert out["last_run"]["ok"] and out["last_run"]["errors"] == []
+    n = next(x for x in out["notices"] if x["code"] == "SLC")
+    assert n["insight"]["action"] == "build"                           # 没有股价也能给出基本判断
+
+
+def test_real_pdf_trade_table_end_to_end():
+    data = (FIXTURES / "604_trades_perennial_amx.pdf").read_bytes()
+    e = {"type": "change", "voting_power": [18.58, 8.58], "date": "2026-11-10", "ocr": False}
+    scrape.add_detail(e, data)
+    assert e["votes"] == [17644814, 8150859] and e["trades"]["net_qty"] == -9493955
+
+
+def test_reparse_clears_stale_detail(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", FakeASX(prices={"SLC": falling_prices()}))
+    scrape.main()
+    store = read(sandbox / "data" / "all_notices.json")
+    store["entries"]["1001"]["parser"] = scrape.PARSER_VERSION - 1
+    store["entries"]["1001"]["px"] = {"p": 123}
+    (sandbox / "data" / "all_notices.json").write_text(json.dumps(store), encoding="utf-8")
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["parser"] == scrape.PARSER_VERSION and e["px"].get("p") != 123 and e["detail_v"] == scrape.INSIGHT_VERSION

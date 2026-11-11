@@ -70,7 +70,7 @@ MAX_PDFS = int(os.environ.get("MAX_PDFS", "300"))         # 单次运行最多�
 MAX_PDF_BYTES = 25 * 1024 * 1024                          # 超过 25MB 的 PDF 不下载
 MAX_ATTEMPTS = 3                                          # 下载失败的公告最多重试几次
 SCHEMA = 2
-PARSER_VERSION = 7   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
+PARSER_VERSION = 8   # 解析规则改进后加 1，已解析的旧记录会在下次运行时按新规则重读一次
 OCR_DPI = 400                                             # 扫描件按 400dpi 渲染再识别（300dpi 会把 Name 认成 tame）
 OCR_PAGES = 3                                             # 扫描件可能第一页是封面信，多看一页
 OCR_TIMEOUT = 90                                          # 单页识别超时（秒）
@@ -608,6 +608,10 @@ def parse_holder_section(text: str, first_line: bool = True, ocr: bool = False) 
         if not nm:
             continue
         # 名称可能在同一行，也可能因为 PDF 按列排版被挤到后面几行，或者被识别到标题那一行
+        first = clean_name(nm.group(1))
+        if i > 0 and re.match(r"(?:and|&)\b", first, re.I) and looks_like_name(clean_name(lines[0])):
+            # 名称有好几行，“Name” 标签排在中间：“Ackland … (Ackland)\n…\nName and Goodman Logistics …”
+            return clean_name(" ".join(lines[:i] + [first]))[:200], region
         for cand in [nm.group(1)] + lines[i + 1: i + 5] + [head_rest]:
             val = clean_name(cand)
             if looks_like_name(val):
@@ -638,10 +642,10 @@ EVENT_RE = re.compile(                                  # 词间用 \s*：扫描
     re.I,
 )
 DATE_NUM_RE = re.compile(r"(?<!\d)(\d{1,2})\s?[/.\-]\s?(\d{1,2})\s?[/.\-]\s?(\d{4}|\d{2})(?!\d)")   # 兼容“29 /10/2026”这种多了空格的写法
-DATE_SP_RE = re.compile(r"(?<![\d/])(\d{1,2})\s+(\d{1,2})\s+(20\d{2})(?!\d)")     # 方格填写：“28 10 2026”
+DATE_SP_RE = re.compile(r"(?<!\d)(?<!\d/)(\d{1,2})\s+(\d{1,2})\s+(20\d{2})(?!\d)")   # 方格填写：“28 10 2026”“/ /05 11 2026”
 DATE_8_RE = re.compile(r"(?<!\d)(\d{2})(\d{2})(20\d{2})(?!\d)")                   # 方格填写：“28102026”
-DATE_TXT_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?[\s\-/.,]+([A-Za-z]{3,9})\.?[\s,\-/.]+(\d{4})")   # 28 Oct 2026、28/October/2026
-DATE_US_RE = re.compile(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})")              # October 28, 2026（美式）
+DATE_TXT_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?(?:\s+of)?[\s\-/.,]*([A-Za-z]{3,9})\.?[\s,\-/.]*(\d{4})")   # 28 Oct 2026、28/October/2026、13 October2026、27th of October 2026
+DATE_US_RE = re.compile(r"\b([A-Za-z]{3,9})\.?[\s/.\-]+(\d{1,2})(?:st|nd|rd|th)?,?[\s/.\-]+(\d{4})")   # October 28, 2026、October / 21 / 2026（美式）
 
 
 def plausible(d: dt.date) -> bool:
@@ -698,11 +702,29 @@ def voting_section(text: str) -> tuple[str, bool]:
     return (seg[: s3.start()], True) if s3 else (seg[:1500], False)
 
 
+SPACED_NUM_RE = re.compile(r"\d\s?\.\s+\d|\d\s+\.\s?\d")                      # “25. 9 3 %”：字间带空格的 PDF
+COMMA_DEC_RE = re.compile(r"(?<![\d,.])(\d{1,2}),(\d{1,3})(?=\s?%)")            # “6,93%”：欧式小数逗号
+
+
+def normalise_pct_line(ln: str) -> str:
+    """把比例的怪写法改成普通写法：欧式逗号小数、数字中间带空格。"""
+    if SPACED_NUM_RE.search(ln):
+        ln = re.sub(r"(?<=[\d.,])\s+(?=[\d.,%])", "", ln)      # 结果里股数和比例会粘在一起，由 GLUED_PCT_RE 接手
+    return COMMA_DEC_RE.sub(r"\1.\2", ln)
+
+
 def pct_rows(seg: str, allow_bare: bool = True) -> list[tuple[str, list[float]]]:
+    seg = "\n".join(normalise_pct_line(ln) for ln in seg.split("\n"))
     bare = allow_bare and not PCT_RE.search(seg) and not GLUED_PCT_RE.search(seg)
     rows = []
     for ln in seg.split("\n"):
         vals = [float(x) for x in (BARE_PCT_RE if bare else PCT_RE).findall(ln)]
+        if not bare and allow_bare and len(vals) == 1:
+            # 前后两个比例只有一个带 %：“10,671,838 7.54 9,986,838 7.04%”
+            both = sorted([(m.start(), float(m.group(1))) for m in PCT_RE.finditer(ln)]
+                          + [(m.start(), float(m.group(1))) for m in BARE_PCT_RE.finditer(ln)])
+            if len(both) == 2 and all(4.5 <= v <= 100 for _, v in both):
+                vals = [v for _, v in both]
         if not vals and not bare:
             vals = [float(x) for x in GLUED_PCT_RE.findall(ln)]
         vals = [v for v in vals if 0 < v <= 100]
@@ -735,7 +757,7 @@ def _pick(rows: list[tuple[str, list[float]]], ntype: str, bounded: bool, ocr: b
         pairs = [v for _, v in rows if len(v) >= 2]
         if pairs:
             return max(pairs, key=lambda v: max(v[:2]))[:2]
-        return [] if ocr else flat[:2]     # 扫描件不跨行拼数字（会把说明文字里的比例拼进来）
+        return [] if (ocr or not bounded) else flat[:2]   # 扫描件、或没找到第二节边界时不跨行拼数字（会把说明文字里的比例拼进来）
     if totals:
         return [totals[-1][-1]]
     return [max(flat)] if bounded else flat[:1]   # 没截到第三节时不取最大值，免得读到后面的 “100%”
@@ -748,7 +770,10 @@ def parse_details(text: str, ntype: str, ocr: bool = False) -> dict:
         out["change_date"] = parse_date(text[m.end(): m.end() + 250])
     if ntype != "ceasing":
         seg, bounded = voting_section(text)
-        out["voting_power"] = pick_voting_power(seg, ntype, bounded, ocr)
+        vp = pick_voting_power(seg, ntype, bounded, ocr)
+        if ntype == "change" and len(vp) == 2 and vp[0] == vp[1] and not bounded and not SEC2_RE.search(text):
+            vp = []            # 没有第二节标题、前后又一模一样：多半是公司说明信里的数字，不是表格
+        out["voting_power"] = vp
     return out
 
 
@@ -815,7 +840,12 @@ def parse_other_forms(text: str, ntype: str) -> dict:
         cur, prev = TR1_RESULT_RE.search(text), TR1_PREV_RE.search(text)
         date = TR1_DATE_RE.search(text)
         comp = TR1_COMPANY_RE.search(text)
-        return {"holder_name": clean_name(name.group(1))[:200] if name else "",
+        holder = clean_name(name.group(1)) if name else ""
+        if name and re.match(r"city\s+and\s+country", holder, re.I):
+            # 两栏表头排在同一行，名称在下一行：“Name: City and country of registered office:\nFMR LLC Wilmington, USA”
+            nxt = text[name.end():].lstrip("\n").split("\n", 1)[0]
+            holder = clean_name(nxt) if looks_like_name(clean_name(nxt)) else ""
+        return {"holder_name": holder[:200],
                 "voting_power": vp(float(cur.group(1)) if cur else None, float(prev.group(1)) if prev else None),
                 "change_date": parse_date(date.group(1)) if date else "",
                 "company": comp.group(1).strip()[:120] if comp else ""}

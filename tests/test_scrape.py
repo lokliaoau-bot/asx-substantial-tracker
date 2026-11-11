@@ -181,7 +181,7 @@ PDFS = {
 
 class FakeASX:
     def __init__(self, listing=LISTING, fail_ids=(), lists_down=False, prev_listing=None, broken_ids=(),
-                 api_items=(), api_down=False, api_pdfs=None, prices=None):
+                 api_items=(), api_down=False, api_pdfs=None, prices=None, events=None, sectors=None):
         self.listing, self.fail_ids, self.lists_down = listing, set(fail_ids), lists_down
         self.prev_listing, self.broken_ids = prev_listing, set(broken_ids)
         self.api_items, self.api_down, self.api_pdfs = list(api_items), api_down, api_pdfs or {}
@@ -189,6 +189,7 @@ class FakeASX:
         self.api_pages = []
         self.prices = prices or {}          # 股票代码 → 日线 [[毫秒, 收盘, 成交量], ...]；没有的代码返回 404
         self.price_calls = []
+        self.events, self.sectors, self.event_calls = events or {}, sectors or {}, []
 
     def __call__(self, url, *, max_bytes=None, tries=3, timeout=60):
         if "/chart/highcharts" in url:
@@ -197,6 +198,17 @@ class FakeASX:
             if code not in self.prices:
                 raise scrape.FetchError("HTTP 404")
             return scrape.Fetched(url, json.dumps(self.prices[code]).encode(), "application/json")
+        if "announcements.do?by=asxCode" in url:
+            code = url.split("asxCode=")[1].split("&")[0]
+            self.event_calls.append(code)
+            if code not in self.events:
+                raise scrape.FetchError("HTTP 404")
+            return scrape.Fetched(url, self.events[code].encode(), "text/html; charset=utf-8")
+        if "/companies/" in url and url.endswith("/header"):
+            code = url.split("/companies/")[1].split("/")[0]
+            if code not in self.sectors:
+                raise scrape.FetchError("HTTP 404")
+            return scrape.Fetched(url, json.dumps({"data": {"sector": self.sectors[code]}}).encode(), "application/json")
         if url.startswith(scrape.MARKET_API):
             if self.api_down:
                 raise scrape.FetchError("HTTP 503")
@@ -238,6 +250,7 @@ def sandbox(tmp_path, monkeypatch):
     monkeypatch.setattr(scrape, "DATA_DIR", tmp_path / "data")
     monkeypatch.setattr(scrape, "NOTICES_FILE", tmp_path / "data" / "notices.json")
     monkeypatch.setattr(scrape, "STORE_FILE", tmp_path / "data" / "all_notices.json")
+    monkeypatch.setattr(scrape, "HISTORY_FILE", tmp_path / "data" / "history.json")
     monkeypatch.setattr(scrape, "LEGACY_SEEN_FILE", tmp_path / "data" / "seen.json")
     monkeypatch.setattr(scrape, "WATCH_FILE", tmp_path / "scraper" / "watchlist.json")
     monkeypatch.setattr(scrape, "PAUSE", 0)

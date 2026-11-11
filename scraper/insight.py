@@ -45,6 +45,7 @@ SELL_RE = re.compile(
 # 公司自己的股本变化（不是申报方的买卖）：这种行里的数字是公司发了多少股，不能算进申报方的买卖量
 ISSUER_RE = re.compile(r"dilut\w+|diloution|issue\s+of\s+[\d,]+\s|total\s+shares\s+on\s+issue|increase\s+in\s+(?:the\s+)?(?:company'?s\s+)?"
                        r"(?:issued|share)\s+capital|change\s+in\s+(?:issued|share)\s+capital|issue\s+of\s+shares\s+by\s+the\s+company", re.I)
+GLUED_SIDE_RE = re.compile(r"(?<=[a-z])(Buy|Sell|Sale|Purchase)\b")
 CONT_STOP_RE = re.compile(r"^\W*(?:annexure|this\s+is|signature|print\s*name|sign\s*here|page\s+\d|\d+\s*\.\s+[A-Z])", re.I)
 KIND_RES = (            # 顺序有意义：先认特殊性质，再认普通场内交易
     ("lending", re.compile(r"securit(?:y|ies)\s+lend|stock\s+lend|\bborrow|\bloan(?:ed)?\b|\blent\b|collateral|recall|rehypothec|prime\s+brok", re.I)),
@@ -176,6 +177,9 @@ def parse_trades(pages: list[str], notice_date: str = "", ntype: str = "") -> di
         b, s_ = bool(BUY_RE.search(r["rest"])), bool(SELL_RE.search(r["rest"]))
         if not (b or s_):
             b, s_ = bool(BUY_RE.search(text)), bool(SELL_RE.search(text))
+        if not (b or s_):                           # “SecuritiesBuy”：两栏粘在一起
+            g = GLUED_SIDE_RE.search(r["rest"])
+            b, s_ = bool(g and g.group(1) in ("Buy", "Purchase")), bool(g and g.group(1) in ("Sell", "Sale"))
         side = "sell" if (neg or (s_ and not b)) else "buy" if (b and not s_) else ""
         cons = money[0] if money else None
         if cons is None:
@@ -347,6 +351,9 @@ def price_context(series: list, ref: str, first: str = "", last: str = "") -> di
         win = [x[1] for x in pts if f - dt.timedelta(days=3) <= x[0] <= l + dt.timedelta(days=3)]
         if win:
             out["t_lo"], out["t_hi"] = round(min(win), 4), round(max(win), 4)
+        vol = [x[2] for x in pts if f <= x[0] <= l]
+        if vol and pts[0][0] <= f and sum(vol) > 0:
+            out["t_vol"] = int(sum(vol))          # 交易明细那段时间全市场的成交量（股）
     except (TypeError, ValueError):
         pass
     return out
@@ -368,7 +375,7 @@ LABELS = {
     "exit": "减到 5% 以下", "slip": "小幅卖出，刚好跌破 5% 线", "back": "又回到 5% 以上（在线附近来回）",
     "rotate": "边买边卖，像调仓", "passive_dilute": "被动稀释（没怎么卖）",
     "passive_up": "被动上升（没怎么买）", "takeover": "收购/并购方案引起", "lending": "证券借贷/抵押变动",
-    "transfer": "划转或换管理人", "restructure": "股份合并/拆分", "unknown": "看不出来",
+    "transfer": "划转或换管理人", "arb": "收购消息后买入，像并购套利", "restructure": "股份合并/拆分", "unknown": "看不出来",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
@@ -414,11 +421,156 @@ def pos_word(pos: float) -> str:
     return "低位" if pos <= 0.25 else "中低位" if pos <= 0.45 else "中间" if pos < 0.6 else "中高位" if pos < 0.8 else "高位"
 
 
+def _shift(iso: str, days: int) -> str:
+    try:
+        return (dt.date.fromisoformat(iso) + dt.timedelta(days=days)).isoformat()
+    except (TypeError, ValueError):
+        return iso or ""
+
+
 def _days_between(a: str | None, b: str | None) -> int:
     try:
         return abs((dt.date.fromisoformat(b) - dt.date.fromisoformat(a)).days)
     except (TypeError, ValueError):
         return 10 ** 6
+
+
+COST_MIN_COVER = 0.4      # 已知成本的股数至少占持仓的四成，才拿来判断赚还是亏
+
+
+def cost_basis(records: list[dict], holding: int | None = None) -> dict:
+    """由同一（申报方, 股票）之前各份公告里的买卖，按“移动平均成本”推算平均买入价。
+    records：按时间升序，每条 {date, buy_qty, sell_qty, buy_price, sell_price, p（变动日收盘价）, votes}。
+    没写价格的买入用当时的收盘价顶替。holding：这次变动之前的持股数，用来算“已知成本的部分占多少”。
+    返回 {avg, cov, since, n}；一笔有效买入都没有时返回 {}。"""
+    shares = cost = 0.0
+    since, used = "", 0
+    for r in records:
+        bq, sq = r.get("buy_qty") or 0, r.get("sell_qty") or 0
+        price = r.get("buy_price") or r.get("p")
+        if bq > 0 and price and price > 0:
+            cost += bq * price
+            shares += bq
+            since = since or (r.get("first") or r.get("date") or "")
+            used += 1
+        if sq > 0 and shares > 0:
+            keep = max(1 - sq / shares, 0.0)        # 卖出按平均成本同比例减掉
+            shares, cost = shares * keep, cost * keep
+        v = r.get("votes") or []
+        if v and shares > v[-1] * 1.05:             # 累计出来的股数比披露的持仓还多：中间有没看到的卖出，按比例压回去
+            k = v[-1] / shares
+            shares, cost = shares * k, cost * k
+    if shares < 1 or not used:
+        return {}
+    cov = min(shares / holding, 1.0) if holding and holding > 0 else None
+    return {"avg": round(cost / shares, 4), "cov": round(cov, 3) if cov is not None else None, "since": since, "n": used}
+
+
+def history_record(e: dict) -> dict:
+    """把一条公告压成“持仓历史”里的一行（长期保存，用来累计买入成本）。读得不可靠的买卖数字不记。"""
+    tr, px, votes = dict(e.get("trades") or {}), e.get("px") or {}, e.get("votes") or []
+    buy, sell = tr.get("buy_qty") or 0, tr.get("sell_qty") or 0
+    if e.get("type") == "becoming" and votes and buy - sell > votes[0] * 1.05:
+        buy = sell = 0
+    bp, sp = tr.get("buy_price"), tr.get("sell_price")
+    if px.get("t_lo") and px.get("t_hi"):
+        ok = lambda v: v is not None and px["t_lo"] * 0.6 <= v <= px["t_hi"] * 1.6
+        bp, sp = (bp if ok(bp) else None), (sp if ok(sp) else None)
+    return {"id": e.get("id"), "date": e.get("date") or "", "time": e.get("time") or "", "type": e.get("type"),
+            "cd": e.get("change_date") or "", "vp": list(e.get("voting_power") or []), "votes": list(votes),
+            "buy_qty": int(buy), "sell_qty": int(sell), "buy_price": bp, "sell_price": sp, "p": px.get("p"),
+            "first": tr.get("first") or ""}
+
+
+BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement"}
+SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit"}
+CTX_DAYS = 21             # “同期”：前后三周
+PEER_DAYS = 30
+
+
+def _add_reason(ins: dict, text: str, tag: str = "") -> None:
+    """把一条理由插到“基金类型”那句前面，并记一个小标签给网页用。"""
+    rs = ins["reasons"]
+    idx = next((i for i, r in enumerate(rs) if r.startswith(ins.get("style", "\0") + "：")), len(rs))
+    rs.insert(idx, text)
+    if tag:
+        ins.setdefault("tags", []).append(tag)
+
+
+def _names(xs: list[str], limit: int = 4, unit: str = "只") -> str:
+    xs = sorted(set(xs))
+    return "、".join(xs[:limit]) + (f"（共 {len(xs)} {unit}）" if len(xs) > limit else "")
+
+
+SECTORS = {"Materials": "原材料/矿业", "Energy": "能源", "Financials": "金融", "Industrials": "工业", "Health Care": "医疗",
+           "Information Technology": "科技", "Consumer Discretionary": "可选消费", "Consumer Staples": "必需消费",
+           "Communication Services": "通信传媒", "Real Estate": "房地产", "Utilities": "公用事业"}
+SINGLE_VIEW = ("主动选股基金", "多空对冲基金", "战略/家族投资者")      # 这几类的持仓是一个团队管的，“换股”才说得通
+
+
+def _main_sector(ns: list[dict]) -> str:
+    """这些公告里（按股票去重）占多数的行业；不够集中返回空。"""
+    by_code = {n["code"]: n.get("sector") or "" for n in ns}
+    secs = [v for v in by_code.values() if v]
+    if len(secs) < 2:
+        return secs[0] if len(secs) == 1 and len(by_code) == 1 else ""
+    top = max(set(secs), key=secs.count)
+    return top if secs.count(top) * 2 > len(by_code) else ""
+
+
+def add_context(notices: list[dict]) -> None:
+    """横向比较（原地修改 notices 里的 insight）：
+    1. 同一家基金前后三周在别的股票上做了什么——都在卖像整体降仓/应付赎回，有买有卖像换股；
+    2. 同一只股票上，名单里别的基金最近是同向还是反向。"""
+    def side(n):
+        a = (n.get("insight") or {}).get("action")
+        return "buy" if a in BUY_ACTIONS else "sell" if a in SELL_ACTIONS else ""
+
+    def gap(a, b):
+        return _days_between(a.get("date"), b.get("date"))
+
+    def sec(name):
+        return SECTORS.get(name, name)
+
+    dated = [n for n in notices if n.get("insight") and side(n) and n.get("date") and n.get("code")]
+    plan = []                                     # 先全部算完再写，避免前面加的理由影响后面的判断
+    for n in dated:
+        me, ins = side(n), n["insight"]
+        single = ins.get("style") in SINGLE_VIEW
+        others = [o for o in dated if o is not n and o["holder"] == n["holder"] and o["code"] != n["code"] and gap(n, o) <= CTX_DAYS]
+        buys = [o for o in others if side(o) == "buy"]
+        ob = sorted({o["code"] for o in buys})
+        sells = [o for o in others if side(o) == "sell" and o["code"] not in ob]
+        os_ = sorted({o["code"] for o in sells})
+        mine = n.get("sector") or ""
+        if me == "sell":
+            if len(os_) >= 2 and not ob:
+                plan.append((ins, f"前后三周它在 {_names(os_)} 也在减仓，没看到加仓：更像整体降仓或应付赎回，不一定是单独看空这一只。", "整体减仓"))
+            elif ob:
+                to = _main_sector(buys)
+                rot = (f"卖的是{sec(mine)}、买的多是{sec(to)}，像行业轮动。" if mine and to and to != mine
+                       else "而且是同一个行业里换，像是挑了更看好的那只。" if mine and to == mine else "")
+                plan.append((ins, f"前后三周它在 {_names(ob)} 加仓：这边卖、那边买，" + ("像是换股（调仓）。" if single else "整体并没有在撤。") + rot,
+                             "换股" if single else ""))
+        else:
+            if len(ob) >= 2 and not os_:
+                plan.append((ins, f"前后三周它在 {_names(ob)} 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。", "整体加仓"))
+            elif os_:
+                frm = _main_sector(sells)
+                rot = (f"卖的多是{sec(frm)}、买的是{sec(mine)}，像行业轮动。" if mine and frm and frm != mine
+                       else "而且是同一个行业里换，像是挑了更看好的这只。" if mine and frm == mine else "")
+                plan.append((ins, f"前后三周它在 {_names(os_)} 减仓：" + ("像是把钱从那边挪到这只（调仓）。" if single else "有买有卖，属于正常调整。") + rot,
+                             "换股" if single else ""))
+        peers = [o for o in dated if o is not n and o["holder"] != n["holder"] and o["code"] == n["code"] and gap(n, o) <= PEER_DAYS]
+        same = sorted({o["holder"] for o in peers if side(o) == me})
+        opp = sorted({o["holder"] for o in peers if side(o) != me} - set(same))
+        word = "加仓" if me == "buy" else "减仓"
+        if same:
+            plan.append((ins, f"同一只股票上，名单里的 {_names(same, 3, '家')} 最近一个月也在{word}：多家同向，信号更强。", "多家同向"))
+        if opp:
+            plan.append((ins, f"同一只股票上，名单里的 {_names(opp, 3, '家')} 最近一个月却在{'减仓' if me == 'buy' else '加仓'}：机构之间看法不一。", "有人反向"))
+    for ins, text, tag in plan:
+        _add_reason(ins, text, tag)
 
 
 def judge(n: dict) -> dict | None:
@@ -437,8 +589,11 @@ def judge(n: dict) -> dict | None:
     style = n.get("style") or "active"
     ocr = bool(n.get("ocr"))
     prev = n.get("prev") or {}            # 同一申报方在同一只股票上的上一份公告：{vp, votes, type, date}
+    cost = n.get("cost") or {}            # 之前公告里累计出来的平均买入成本：{avg, cov, since, n}（见 cost_basis）
     reasons: list[str] = []
+    tags: list[str] = []
     score = 0
+    ev = [x for x in (n.get("ev") or []) if isinstance(x, dict) and x.get("d") and x.get("k")]
 
     rows_ok = bool(tr.get("n"))
     buy, sell = (tr.get("buy_qty") or 0), (tr.get("sell_qty") or 0)
@@ -484,6 +639,19 @@ def judge(n: dict) -> dict | None:
         reasons.append("持股比例降到 5% 以下" + (f"（上一次披露是 {prev['vp']:g}%）" if prev.get("vp") else "")
                        + "。之后的买卖不用再公告，是否清仓看不出来。")
 
+    # 这份公告覆盖的时间段：第一笔交易 → 变动日
+    w0 = tr.get("first") or n.get("change_date") or n.get("date") or ""
+    w1 = max(n.get("change_date") or "", tr.get("last") or "") or n.get("date") or ""
+
+    def evs(kind: str, before: int, after: int) -> list[dict]:
+        if not (w0 and w1):
+            return []
+        lo, hi = _shift(w0, -before), _shift(w1, after)
+        return [x for x in ev if x["k"] == kind and lo <= x["d"] <= hi]
+
+    def ev_txt(x: dict) -> str:
+        return f"{md(x['d'])}「{x.get('h', '')}」"
+
     def done(action: str, conf: str | None = None) -> dict:
         nonlocal score
         if not vp and not rows_ok:
@@ -498,7 +666,7 @@ def judge(n: dict) -> dict | None:
         if ocr:
             rs.append("这份是扫描件，数字靠文字识别，可能有错。")
         return {"action": action, "label": LABELS[action], "tone": TONE.get(action, "neutral"), "confidence": c,
-                "reasons": rs, "style": name}
+                "reasons": rs, "style": name, "tags": tags}
 
     # ---- 1. 不是真买卖的情况
     if so_chg is not None and (so_chg > 2 or so_chg < -0.66):
@@ -508,8 +676,14 @@ def judge(n: dict) -> dict | None:
         if dvp < 0:
             reasons.append(f"持股数几乎没动，比例却掉了 {abs(dvp):.2f} 个百分点：公司总股本变大了约 {so_chg * 100:.0f}%"
                            "（增发、配售或期权行权），它没有跟着买，所以被摊薄。")
+            x = evs("raise", 45, 5)
+            if x:
+                reasons.append(f"对得上：公司在 {ev_txt(x[-1])} 公告了融资。")
             return done("passive_dilute", "高")
         reasons.append(f"持股数几乎没动，比例却升了 {dvp:.2f} 个百分点：公司总股本变小了约 {abs(so_chg) * 100:.0f}%（回购或注销）。")
+        x = evs("buyback", 200, 5)
+        if x:
+            reasons.append(f"对得上：公司这段时间在回购股票（{ev_txt(x[-1])}）。")
         return done("passive_up", "高")
     if dsh is None and not rows_ok and row_share("dilution") >= 0.5:
         reasons.append("公告里写的变动原因是公司股本变化（Dilution），不是它自己买卖。")
@@ -552,10 +726,26 @@ def judge(n: dict) -> dict | None:
             reasons.append(line)
         if reconciled or (t != "change" and tr["n"] >= 2):
             score += 1
+    # 买卖量和同期全市场成交量比：看它急不急、是不是在场内做的
+    offmkt = False
+    t_vol, days, big = px.get("t_vol"), tr.get("days") or 0, max(buy, sell)
+    if rows_ok and t_vol and big and (reconciled or t != "change"):
+        part = big / t_vol
+        verb = "买入" if buy >= sell else "卖出"
+        if part > 1.0:
+            offmkt = True
+            reasons.append(f"它{verb}的量是同期整个市场成交量的 {min(part, 99):.1f} 倍：不可能都是在场内成交的，"
+                           "大部分应该是配售、大宗交易或场外转让。")
+        elif part >= 0.25:
+            reasons.append(f"它{verb}的量占了同期全市场成交量的 {part * 100:.0f}%：是这段时间最主要的{'买家' if buy >= sell else '卖家'}之一，"
+                           f"{'买' if buy >= sell else '卖'}得很坚决。")
+        elif part <= 0.03 and days >= 5:
+            reasons.append(f"分 {days} 天慢慢{verb}，只占同期成交量的 {max(part * 100, 0.1):.1g}% 左右，不着急。")
     churn = min(buy, sell) / max(buy, sell) if rows_ok and max(buy, sell) else 0.0
     placement = rows_ok and buy and share("placement") * gross >= 0.5 * buy
 
     # ---- 4. 股价位置
+    placement_said = False
     r3, r6, r12, pos = px.get("r3m"), px.get("r6m"), px.get("r12m"), px.get("pos")
     if px.get("p"):
         bits = [f"{lab} {fr(v)}" for lab, v in (("近 1 个月", px.get("r1m")), ("3 个月", r3), ("6 个月", r6), ("12 个月", r12)) if v is not None]
@@ -569,6 +759,41 @@ def judge(n: dict) -> dict | None:
     down = (r6 is not None and r6 <= -0.25) or (r3 is not None and r3 <= -0.20) or (r12 is not None and r12 <= -0.35)
     high = pos is not None and pos >= 0.65
     low = pos is not None and pos <= 0.3
+
+    # ---- 4b. 公司同期的大事（来自这家公司的公告标题）
+    tk_sell = False
+    raise_ev = evs("raise", 10, 5)
+    if direction == "buy" and raise_ev:
+        x = raise_ev[-1]
+        if placement:
+            reasons.append(f"对得上：公司在 {ev_txt(x)} 公告了融资。")
+            tags.append("参与融资")
+        elif offmkt or (so_chg is not None and so_chg >= 0.03):
+            placement = True
+            placement_said = True
+            reasons.append(f"公司在 {ev_txt(x)} 公告了融资" + (f"，同期总股本增加了约 {so_chg * 100:.0f}%" if so_chg and so_chg >= 0.03 else "")
+                           + "：这次买入很可能主要是认购新股（参与融资，价格通常比市价低），不是在市场上抢筹。")
+            tags.append("参与融资")
+        else:
+            reasons.append(f"期间公司公告过融资（{ev_txt(x)}），一部分买入可能来自认购新股。")
+    tk_ev = evs("takeover", 60, 0)
+    if tk_ev and churn < 0.6:
+        x = tk_ev[-1]
+        tags.append("收购相关")
+        if direction == "buy":
+            if style == "hedge":
+                reasons.append(f"买入发生在收购消息（{ev_txt(x)}）之后：对冲基金这时候买，多半是做并购套利"
+                               "（赚收购价和市价之间的差价），不代表看好公司本身。")
+                return done("arb")
+            reasons.append(f"买入发生在收购消息（{ev_txt(x)}）之后：可能在赌收购成功，或者赌有人出更高的价。")
+        else:
+            tk_sell = True
+            reasons.append(f"卖出发生在收购消息（{ev_txt(x)}）之后：像是借收购带来的涨价退出，不等最终结果。")
+    if w0 and w1 and _days_between(w0, w1) <= 30:
+        res_ev = [x for x in ev if x.get("k") == "results" and _shift(w0, -6) <= x.get("d", "") <= _shift(w0, 2)]
+        if res_ev:
+            reasons.append(f"{'买入' if direction == 'buy' else '卖出'}紧跟在公司 {ev_txt(res_ev[-1])} 之后：像是对这份业绩的反应。")
+            tags.append("业绩后")
 
     # ---- 5. 结论
     # 在 5% 披露线附近来回：这份公告本身只是很小的一步
@@ -593,7 +818,8 @@ def judge(n: dict) -> dict | None:
 
     if direction == "buy":
         if placement:
-            reasons.append("买入的大部分来自配售、增发或认购新股，通常比市价便宜一些，属于参与公司融资。")
+            if not placement_said:
+                reasons.append("买入的大部分来自配售、增发或认购新股，通常比市价便宜一些，属于参与公司融资。")
             score += 1
             return done("build_placement" if t == "becoming" else "add_placement")
         new_name = "build"
@@ -606,6 +832,12 @@ def judge(n: dict) -> dict | None:
                 new_name = "cross_up"
             else:
                 reasons.append(f"现有持仓里约 {built * 100:.0f}% 是最近 4 个月净买入的。")
+        buy_p = bp or px.get("p")
+        if t == "change" and cost.get("avg") and buy_p and (cost.get("cov") or 0) >= COST_MIN_COVER:
+            d = buy_p / cost["avg"] - 1
+            if -0.9 < d < 4 and abs(d) >= 0.10:
+                reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}，这次买入价约 {fp(buy_p)}，"
+                               + (f"比成本低 {abs(d) * 100:.0f}%：在摊低成本。" if d < 0 else f"比成本高 {d * 100:.0f}%：已经赚钱了还在加，是加码。"))
         if (low and (r3 is not None and r3 <= -0.10)) or (r3 is not None and r3 <= -0.20):
             reasons.append("买入时股价处在低位或刚跌过一轮，属于越跌越买。")
             score += 1
@@ -628,6 +860,25 @@ def judge(n: dict) -> dict | None:
             reasons.append("减掉的不到原持仓的一成多，属于小幅减仓。")
     if own_gain is not None and own_gain >= 0.15:
         reasons.append(f"同一份明细里，卖出均价比买入均价高 {own_gain * 100:.0f}%，是赚钱卖的。")
+        score += 1
+        return done(base + "_profit")
+    # 之前的公告里累计出来的买入成本（只在已知成本的部分够多时才用）
+    sale_p = sp or px.get("p")
+    if cost.get("avg") and sale_p and (cost.get("cov") or 0) >= COST_MIN_COVER:
+        gain = sale_p / cost["avg"] - 1
+        if -0.9 < gain < 4:
+            known = f"（按 {md(cost.get('since'), True)} 以来的公告累计，覆盖了卖出前持仓的 {min(cost['cov'], 1) * 100:.0f}%）"
+            if gain >= 0.10:
+                reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，高出 {gain * 100:.0f}%：是赚钱卖的。")
+                score += 2
+                return done(base + "_profit")
+            if gain <= -0.10:
+                reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，低了 {abs(gain) * 100:.0f}%：是亏钱卖的。")
+                score += 2
+                return done(base + "_loss")
+            reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，和成本差不多：不像获利了结，也谈不上止损。")
+            return done(base)
+    if tk_sell and ((r3 is not None and r3 >= 0.10) or (px.get("r1m") is not None and px["r1m"] >= 0.10)):
         score += 1
         return done(base + "_profit")
     if up and high:

@@ -81,10 +81,12 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
-INSIGHT_VERSION = 1                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
+INSIGHT_VERSION = 2                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
 DETAIL_TRIES = 3                                          # 明细读取失败最多重试几次
+COMPANY_ANNS = BASE + "/asx/v2/statistics/announcements.do?by=asxCode&asxCode={code}&timeframe=D&period=M6"   # 这家公司近 6 个月的公告
+COMPANY_HEADER = "https://asx.api.markitdigital.com/asx-research/1.0/companies/{code}/header"                  # 行业、市值
 PRICE_API = BASE + "/asx/1/chart/highcharts?asx_code={code}&years=2"   # ASX 日线：[[毫秒, 收盘价, 成交量], ...]
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -92,6 +94,8 @@ DATA_DIR = ROOT / "data"
 NOTICES_FILE = DATA_DIR / "notices.json"      # 网页读取（只含关注名单的记录）
 STORE_FILE = DATA_DIR / "all_notices.json"    # 内部存储（全部大股东公告）
 LEGACY_SEEN_FILE = DATA_DIR / "seen.json"     # 第一版的文件，迁移后删除
+HISTORY_FILE = DATA_DIR / "history.json"      # 命中名单的公告要点，长期保存（算买入成本用），不随 KEEP_DAYS 清掉
+HISTORY_DAYS = int(os.environ.get("HISTORY_DAYS", "1100"))   # 持仓历史留 3 年
 WATCH_FILE = ROOT / "scraper" / "watchlist.json"
 
 SUBSTANTIAL_RE = re.compile(r"substantial\s+(?:holder|holding|shareholder)", re.I)
@@ -1013,7 +1017,51 @@ PUBLIC_FIELDS = ("id", "code", "company", "date", "time", "headline", "url", "pd
 # code：公告涉及的股票；lodged_code：公告实际挂在哪个代码下（申报方自己是上市公司时才有）
 
 
-def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
+def pos_key(holder: str, code: str) -> str:
+    return f"{holder}|{code}"
+
+
+def update_history(history: dict, entries: dict, holders: list[Holder], today: dt.date) -> int:
+    """把命中名单、已读过明细的公告记进持仓历史（同一份公告重复来的只记一次；重读后会覆盖旧的一行）。返回新增行数。"""
+    pos = history.setdefault("pos", {})
+    added = 0
+    for e in sorted(entries.values(), key=lambda e: str(e.get("id", "")).startswith("mk-")):   # 列表页那条优先
+        if e.get("status") != "parsed" or e.get("detail_v") != INSIGHT_VERSION or e.get("type") not in ("becoming", "change", "ceasing"):
+            continue
+        holder, _ = match_entry(e, holders)
+        if not holder:
+            continue
+        rec = insight.history_record(e)
+        rows = pos.setdefault(pos_key(holder, target_code(e)), [])
+        same = lambda r: (r.get("type"), r.get("cd"), r.get("vp")) == (rec["type"], rec["cd"], rec["vp"]) and rec["cd"] and rec["vp"]
+        idx = next((i for i, r in enumerate(rows) if r.get("id") == rec["id"]), None)
+        if idx is not None:
+            rows[idx] = rec
+        elif not any(same(r) for r in rows):
+            rows.append(rec)
+            added += 1
+    cutoff = (today - dt.timedelta(days=HISTORY_DAYS)).isoformat()
+    for k in list(pos):
+        pos[k] = sorted((r for r in pos[k] if (r.get("date") or "") >= cutoff), key=lambda r: (r.get("date") or "", r.get("time") or "", str(r.get("id"))))
+        if not pos[k]:
+            del pos[k]
+    history["schema"] = 1
+    return added
+
+
+def cost_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
+    """这份公告之前，这家基金在这只股票上累计出来的平均买入成本。"""
+    rows = ((history or {}).get("pos") or {}).get(pos_key(holder, code)) or []
+    me = (e.get("date") or "", e.get("time") or "", str(e.get("id")))
+    before = [r for r in rows if r.get("id") != e.get("id") and (r.get("date") or "", r.get("time") or "", str(r.get("id"))) < me]
+    if not before:
+        return {}
+    votes = e.get("votes") or []
+    holding = votes[0] if e.get("type") == "change" and len(votes) == 2 else next((r["votes"][-1] for r in reversed(before) if r.get("votes")), None)
+    return insight.cost_basis(before, holding)
+
+
+def build_notices(entries: dict, holders: list[Holder], history: dict | None = None) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
     style_of = {h.name: h.style for h in holders}
@@ -1027,13 +1075,16 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
             item["company"] = clean_company(item.get("company") or "")
             item["url"] = safe_url(item.get("url") or "")
             item["pdf_url"] = safe_url(item.get("pdf_url") or "") or item["url"]
-            item.update(holder=holder, group=group_of.get(holder, ""), confidence=conf, ocr=bool(e.get("ocr")))
+            item.update(holder=holder, group=group_of.get(holder, ""), confidence=conf, ocr=bool(e.get("ocr")),
+                        sector=e.get("sector") or "")
             key = (holder, item["code"])
             try:
                 item["insight"] = insight.judge({
                     "type": e.get("type"), "voting_power": e.get("voting_power") or [], "votes": e.get("votes") or [],
                     "trades": e.get("trades") or {}, "px": e.get("px") or {}, "ocr": e.get("ocr"),
                     "style": style_of.get(holder, "active"), "prev": last_seen.get(key), "date": e.get("date"),
+                    "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
+                    "change_date": e.get("change_date"),
                 })
             except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
                 log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")
@@ -1052,7 +1103,12 @@ def build_notices(entries: dict, holders: list[Holder]) -> list[dict]:
         seen.add(key)
         uniq.append(n)
     uniq.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
-    return drop_superseded(uniq)
+    final = drop_superseded(uniq)
+    try:
+        insight.add_context(final)
+    except Exception as ex:  # noqa: BLE001  横向比较出错不能影响公告本身
+        log(f"  横向比较出错：{type(ex).__name__}: {ex}")
+    return final
 
 
 AMENDED_RE = re.compile(r"\b(?:amend\w*|correct\w*|replace\w*|revised|updated)\b", re.I)
@@ -1249,8 +1305,100 @@ def price_series(code: str) -> list:
     return data
 
 
+EVENT_KINDS = (     # 顺序有意义：先认更具体的
+    ("buyback", re.compile(r"buy[- ]?back", re.I)),
+    ("takeover", re.compile(r"takeover|take-over|scheme\s+(?:of\s+arrangement|booklet|meeting|implementation|consideration|becomes)"
+                            r"|bidder'?s?\s+statement|target'?s?\s+statement|(?:non[- ]binding|indicative|unsolicited|conditional|revised)\s+"
+                            r"(?:indicative\s+)?(?:proposal|offer)|proposal\s+(?:from|to\s+acquire|received)|acquisition\s+proposal"
+                            r"|off[- ]market\s+(?:takeover\s+)?bid|\bmerger\b|compulsory\s+acquisition", re.I)),
+    ("raise", re.compile(r"placement|capital\s+raising|equity\s+raising|entitlement\s+offer|rights\s+issue|share\s+purchase\s+plan|\bSPP\b"
+                         r"|proposed\s+issue\s+of\s+securities|institutional\s+offer|retail\s+offer|\braises?\s+\$|\braising\b"
+                         r"|prospectus|recapitali[sz]ation|convertible\s+note", re.I)),
+    ("results", re.compile(r"appendix\s+4[DE]\b|half[- ]?year(?:ly)?\s+(?:results?|report|accounts|financial)|full[- ]?year\s+(?:results?|financial)"
+                           r"|annual\s+results?|\b[FH1-4QY]{1,2}Y?\d{2,4}\s+(?:results?|financial\s+results?)|quarterly\s+(?:activit|report|cash|update)"
+                           r"|appendix\s+4C\b|appendix\s+5B\b|trading\s+update|guidance|profit\s+(?:update|downgrade|upgrade|warning)"
+                           r"|earnings\s+(?:update|guidance)|business\s+update|results?\s+announcement", re.I)),
+)
+EVENT_SKIP_RE = re.compile(r"results?\s+of\s+(?:annual\s+general\s+)?meeting|results?\s+briefing|results?\s+(?:call|webcast|date)|date\s+of|notice\s+of"
+                           r"|presentation\s+date|investor\s+call\s+details", re.I)
+MAX_EVENTS = 60
+
+
+def classify_event(headline: str) -> str:
+    if EVENT_SKIP_RE.search(headline) or SUBSTANTIAL_RE.search(headline):
+        return ""
+    return next((k for k, rx in EVENT_KINDS if rx.search(headline)), "")
+
+
+def parse_company_events(html: str) -> list[dict] | None:
+    """读“某公司近 6 个月公告”页面，挑出融资、业绩、收购、回购这几类。返回 [{d, k, h, s}]（按日期升序）；页面认不出返回 None。"""
+    soup = BeautifulSoup(html, "html.parser")
+    out, rows = [], 0
+    for tr in soup.find_all("tr"):
+        tds = tr.find_all("td")
+        a = tr.find("a", href=re.compile(r"idsId|displayAnnouncement|asxpdf", re.I))
+        if len(tds) < 3 or a is None:
+            continue
+        dm = DATE_RE.search(tds[0].get_text(" ", strip=True))
+        if not dm:
+            continue
+        try:
+            d = dt.date(int(dm.group(3)), int(dm.group(2)), int(dm.group(1)))
+        except ValueError:
+            continue
+        rows += 1
+        headline = TAIL_RE.sub("", a.get_text(" ", strip=True)).strip()
+        k = classify_event(headline)
+        if k:
+            out.append({"d": d.isoformat(), "k": k, "h": headline[:90], "s": is_price_sensitive(tr, tds)})
+    if not rows and not re.search(r"no\s+announcements|Search\s+results", html, re.I):
+        return None
+    # 回购期间每天一份“Update - Notification of buy-back”：同一类同一天只留一条，回购只留头尾
+    seen, uniq = set(), []
+    for ev in sorted(out, key=lambda x: (x["d"], not x["s"])):
+        if (ev["d"], ev["k"]) in seen:
+            continue
+        seen.add((ev["d"], ev["k"]))
+        uniq.append(ev)
+    bb = [e for e in uniq if e["k"] == "buyback"]
+    if len(bb) > 2:
+        keep = {id(bb[0]), id(bb[-1])}
+        bb[-1]["n"] = len(bb)
+        uniq = [e for e in uniq if e["k"] != "buyback" or id(e) in keep]
+    return uniq[-MAX_EVENTS:]
+
+
+def company_events(code: str) -> list[dict]:
+    r = fetch(COMPANY_ANNS.format(code=code), timeout=40, tries=2)
+    evs = parse_company_events(r.text)
+    if evs is None:
+        raise FetchError("公司公告页面认不出来")
+    return evs
+
+
+def company_sector(code: str) -> str:
+    r = fetch(COMPANY_HEADER.format(code=code), timeout=30, tries=2)
+    try:
+        return str(((json.loads(r.text) or {}).get("data") or {}).get("sector") or "")[:40]
+    except (ValueError, AttributeError) as e:
+        raise FetchError(f"公司信息接口返回的不是 JSON（{e}）") from e
+
+
+def events_near(evs: list[dict], e: dict) -> list[dict]:
+    """只留这份公告用得上的事件：从最早一笔交易前 45 天，到公告当天。"""
+    tr = e.get("trades") or {}
+    try:
+        end = dt.date.fromisoformat(e.get("date") or "")
+        start = dt.date.fromisoformat(tr.get("first") or e.get("change_date") or e.get("date") or "")
+    except ValueError:
+        return []
+    lo, hi = (start - dt.timedelta(days=45)).isoformat(), end.isoformat()
+    return [x for x in evs if lo <= x["d"] <= hi][-20:]
+
+
 def add_prices(entries: list[dict]) -> tuple[int, int]:
-    """给这些公告补上变动时的股价背景（每只股票只取一次日线）。返回 (取到的股票数, 失败的股票数)。"""
+    """给这些公告补上变动时的股价背景、公司同期的大事（融资/业绩/收购/回购）和所属行业（每只股票只取一次）。
+    返回 (取到的股票数, 失败的股票数)。大事和行业取不到不算失败，只是解读里少一条依据。"""
     by_code: dict[str, list[dict]] = {}
     for e in entries:
         by_code.setdefault(target_code(e), []).append(e)
@@ -1268,6 +1416,20 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
             ref = e.get("change_date") or tr.get("last") or e.get("date", "")
             e["px"] = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
             e["px_v"] = INSIGHT_VERSION
+        time.sleep(PAUSE)
+        try:
+            evs = company_events(code)
+            for e in by_code[code]:
+                e["ev"] = events_near(evs, e)
+        except Exception as ex:  # noqa: BLE001
+            log(f"  公司公告没取到 {code}：{type(ex).__name__}: {ex}")
+        time.sleep(PAUSE)
+        try:
+            sector = company_sector(code)
+            for e in by_code[code]:
+                e["sector"] = sector
+        except Exception as ex:  # noqa: BLE001
+            log(f"  行业没取到 {code}：{type(ex).__name__}: {ex}")
         time.sleep(PAUSE)
         return True
 
@@ -1511,6 +1673,11 @@ def main() -> int:
     if need_px:
         log(f"股价背景：{len(need_px)} 条公告、{px_ok + px_failed} 只股票，取到 {px_ok} 只，用时 {time.monotonic() - t_px:.0f} 秒")
 
+    history = load_json(HISTORY_FILE, {})
+    if not isinstance(history, dict) or not isinstance(history.get("pos"), dict):
+        history = {"pos": {}}
+    hist_added = update_history(history, entries, holders, today)
+
     cutoff = (today - dt.timedelta(days=KEEP_DAYS)).isoformat()
     entries = {k: v for k, v in entries.items() if (v.get("date") or "") >= cutoff}
     store.update(
@@ -1522,7 +1689,7 @@ def main() -> int:
     if pages_ok:
         store["last_success_at"] = now.isoformat(timespec="seconds")
 
-    notices = build_notices(entries, holders)
+    notices = build_notices(entries, holders, history)
     out = {
         "schema": SCHEMA,
         "updated_at": dt.datetime.now(SYD).isoformat(timespec="seconds"),
@@ -1538,7 +1705,8 @@ def main() -> int:
             "deferred": deferred,
             "backfill": backfill,
             "insight": {"detail_added": enriched + sum(1 for e in work if e.get("detail_v") == INSIGHT_VERSION),
-                        "prices_ok": px_ok, "prices_failed": px_failed},
+                        "prices_ok": px_ok, "prices_failed": px_failed,
+                        "history_added": hist_added, "positions": len(history["pos"])},
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],
@@ -1547,6 +1715,7 @@ def main() -> int:
         "notices": notices,
     }
     write_json(STORE_FILE, store)
+    write_json(HISTORY_FILE, history)
     write_json(NOTICES_FILE, out, pretty=True)
     if LEGACY_SEEN_FILE.exists():
         LEGACY_SEEN_FILE.unlink()

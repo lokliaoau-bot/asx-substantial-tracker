@@ -1,0 +1,175 @@
+{
+ "px_XJO": [
+  2549,
+  [
+   1474898400000,
+   5431.42,
+   5431.4,
+   5372.3,
+   5405.892,
+   1419039449414
+  ],
+  [
+   1794315600000,
+   9129,
+   9153.2,
+   9084.7,
+   9153.2,
+   2771143176072
+  ]
+ ],
+ "px_XAO": [
+  2549,
+  [
+   1474898400000,
+   5519.111,
+   5519.1,
+   5462.1,
+   5493.698,
+   1615805472745
+  ],
+  [
+   1794315600000,
+   9267.8,
+   9291.3,
+   9220.7,
+   9291.3,
+   3121144499333
+  ]
+ ],
+ "px_XSO": [
+  2549,
+  [
+   1474898400000,
+   2453.231,
+   2453.2,
+   2434,
+   2443.979,
+   151956844941
+  ],
+  [
+   1794315600000,
+   3305,
+   3327.9,
+   3274.5,
+   3322.1,
+   291050117719
+  ]
+ ],
+ "px_XKO": [
+  2549,
+  [
+   1474898400000,
+   5396.965,
+   5397,
+   5339.4,
+   5371.84,
+   1457620712032
+  ],
+  [
+   1794315600000,
+   9037.2,
+   9060.5,
+   8992.4,
+   9060.5,
+   2852434544142
+  ]
+ ],
+ "px_IOZ": [
+  2539,
+  [
+   1477958400000,
+   21.63,
+   87202
+  ],
+  [
+   1794355200000,
+   36.69,
+   288046
+  ]
+ ],
+ "px_VAS": [
+  2539,
+  [
+   1477958400000,
+   67.3,
+   53631
+  ],
+  [
+   1794355200000,
+   113.39,
+   170392
+  ]
+ ],
+ "px_STW": [
+  2539,
+  [
+   1477958400000,
+   49.45,
+   141468
+  ],
+  [
+   1794355200000,
+   81.93,
+   167923
+  ]
+ ],
+ "px_A200": [
+  2159,
+  [
+   1525737600000,
+   100.74,
+   5064
+  ],
+  [
+   1794355200000,
+   153.19,
+   577591
+  ]
+ ],
+ "https://asx.api.markitdigital.com/asx-research/1.0/markets/indices/XJO/chart?range=2y": "ERR HTTP 404（https://asx.api.markitdigital.com/asx-research/1.0/markets/indices/XJO/chart?range=2y）",
+ "https://asx.api.markitdigital.com/asx-research/1.0/companies/XJO/header": "{\"data\":{\"displayName\":\"S&P/ASX 200\",\"priceChange\":-8.600000000000364,\"priceChangePercent\":-0.09395621203513922,\"priceLast\":9144.6,\"securityType\":null,\"symbol\":\"XJO\",\"volume\":493157167,\"xid\":\"583954\",\"marketCap\":-32768,\"statusCode\":\"\"}}",
+ "https://asx.api.markitdigital.com/asx-research/1.0/etfs/VAS/header": "{\"data\":{\"dateAdmitted\":\"2009-05-08\",\"displayName\":\"VANGUARD AUSTRALIAN SHARES INDEX ETF\",\"fundType\":\"Equity Australia Large Blend\",\"netAssets\":27003460000,\"shareClassNetAssets\":27003460000,\"priceAsk\":113.42,\"priceBid\":113.41,\"priceChange\":0.030000000000001137,\"priceChangePercent\":0.02645735955551736,\"premiumDiscountAverageOneMonthPercent\":-0.04,\"priceLast\":113.42,\"securityType\":7,\"status\":\"\",\"sym",
+ "report_WAM": {
+  "id": "03164489",
+  "date": "2026-11-11",
+  "time": "09:38",
+  "headline": "October 2026 Investment Update",
+  "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03164489"
+ },
+ "report_WMI": {
+  "id": "03152058",
+  "date": "2026-10-14",
+  "time": "09:15",
+  "headline": "September 2026 Investment Update",
+  "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03152058"
+ },
+ "report_LSF": {
+  "id": "03163668",
+  "date": "2026-11-09",
+  "time": "14:35",
+  "headline": "Monthly Report - October 2026",
+  "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03163668"
+ },
+ "report_RF1": {
+  "id": "03151752",
+  "date": "2026-10-13",
+  "time": "15:23",
+  "headline": "Unitholder Monthly Report for September 2026",
+  "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151752"
+ },
+ "report_PIC": {
+  "id": "03152201",
+  "date": "2026-10-14",
+  "time": "11:15",
+  "headline": "PIC Monthly Investment Update - September 2026",
+  "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03152201"
+ },
+ "report_PL8": {
+  "id": "03154707",
+  "date": "2026-10-20",
+  "time": "16:48",
+  "headline": "September 2026 Investment update",
+  "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03154707"
+ }
+}

@@ -947,6 +947,7 @@ def judge(n: dict) -> dict | None:
 
 BASELINE = 0.7
 MARGIN = 0.05
+TIE = 0.15
 SHORT_DAYS = 60
 PURPOSE_NAMES = {
     "buy": {"base": "普通加仓", "dip": "逢低买入", "mom": "顺势追加", "plc": "参与融资", "arb": "并购套利",
@@ -1107,14 +1108,19 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
     ranked = score_purposes(f, ctx)
     top = ranked[0]
     base = next(x for x in ranked if x["k"] == "base")
+    close = False
     if top["k"] != "base" and top["s"] < base["s"] + MARGIN:
         top = base
-    action = PURPOSE_ACTION.get((f["side"], top["k"]), {}).get(f["base"], f["base"])
+    elif top["k"] != "base" and any(x["k"] not in ("base", top["k"]) and x["s"] >= top["s"] - TIE for x in ranked):
+        close = True                                       # 有另一种目的和它几乎同分：分不出主次，不硬贴标签
+    action = f["base"] if close else PURPOSE_ACTION.get((f["side"], top["k"]), {}).get(f["base"], f["base"])
     pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= 0.45 else 0) + (1 if top["k"] != "base" and top["p"] >= 0.7 else 0)
     conf = "高" if pts >= 3 else "低" if pts <= 0 else "中"
     shown = [top] + [x for x in ranked if x is not top][:2]
     word = "加仓" if f["side"] == "buy" else "减仓"
-    if top["k"] == "base":
+    if close:
+        line = f"综合打分：几种目的的可能性接近，分不出主次，先按普通{word}看。最高的是「{top['name']}」（{top['p'] * 100:.0f}%）"
+    elif top["k"] == "base":
         line = f"综合打分：没有哪种特别的目的明显占上风，按普通{word}看（{top['p'] * 100:.0f}%）"
     else:
         line = f"综合打分：最像「{top['name']}」（{top['p'] * 100:.0f}%）" + (f"，依据：{'；'.join(top['why'][:3])}" if top["why"] else "")

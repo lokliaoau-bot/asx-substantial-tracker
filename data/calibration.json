@@ -1,27 +1,30 @@
 {
  "buy:base": {
-  "n": 20,
-  "n3": 13,
-  "avg3": 0.102,
-  "up3": 0.462,
-  "n_next": 17,
-  "same_next": 0.588
+  "n": 16,
+  "n3": 10,
+  "avg3": -0.052,
+  "up3": 0.4,
+  "n_next": 13,
+  "same_next": 0.615,
+  "rev_next": 0.077
  },
  "buy:dip": {
-  "n": 81,
-  "n3": 43,
-  "avg3": 0.158,
-  "up3": 0.651,
-  "n_next": 58,
-  "same_next": 0.69
+  "n": 75,
+  "n3": 39,
+  "avg3": 0.152,
+  "up3": 0.641,
+  "n_next": 52,
+  "same_next": 0.673,
+  "rev_next": 0.135
  },
  "buy:mom": {
-  "n": 44,
-  "n3": 30,
-  "avg3": 0.128,
-  "up3": 0.567,
-  "n_next": 40,
-  "same_next": 0.825
+  "n": 42,
+  "n3": 28,
+  "avg3": 0.146,
+  "up3": 0.571,
+  "n_next": 38,
+  "same_next": 0.816,
+  "rev_next": 0.105
  },
  "buy:plc": {
   "n": 2,
@@ -29,7 +32,26 @@
   "avg3": null,
   "up3": null,
   "n_next": 0,
-  "same_next": null
+  "same_next": null,
+  "rev_next": null
+ },
+ "buy:prog": {
+  "n": 5,
+  "n3": 3,
+  "avg3": 0.075,
+  "up3": 0.333,
+  "n_next": 4,
+  "same_next": 1.0,
+  "rev_next": 0.0
+ },
+ "buy:pull": {
+  "n": 8,
+  "n3": 6,
+  "avg3": 0.373,
+  "up3": 0.833,
+  "n_next": 8,
+  "same_next": 0.625,
+  "rev_next": 0.125
  },
  "buy:short": {
   "n": 2,
@@ -37,7 +59,8 @@
   "avg3": 0.044,
   "up3": 1.0,
   "n_next": 2,
-  "same_next": 0.5
+  "same_next": 0.5,
+  "rev_next": 0.5
  },
  "sell:base": {
   "n": 3,
@@ -45,7 +68,17 @@
   "avg3": -0.08,
   "up3": 0.0,
   "n_next": 1,
-  "same_next": 1.0
+  "same_next": 1.0,
+  "rev_next": 0.0
+ },
+ "sell:bounce": {
+  "n": 3,
+  "n3": 0,
+  "avg3": null,
+  "up3": null,
+  "n_next": 2,
+  "same_next": 1.0,
+  "rev_next": 0.0
  },
  "sell:profit": {
   "n": 33,
@@ -53,14 +86,25 @@
   "avg3": -0.034,
   "up3": 0.273,
   "n_next": 26,
-  "same_next": 0.692
+  "same_next": 0.692,
+  "rev_next": 0.154
  },
  "sell:stop": {
-  "n": 18,
+  "n": 14,
   "n3": 3,
   "avg3": 0.137,
   "up3": 0.667,
-  "n_next": 8,
-  "same_next": 0.875
+  "n_next": 6,
+  "same_next": 0.833,
+  "rev_next": 0.0
+ },
+ "sell:wind": {
+  "n": 1,
+  "n3": 0,
+  "avg3": null,
+  "up3": null,
+  "n_next": 0,
+  "same_next": null,
+  "rev_next": null
  }
 }

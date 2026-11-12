@@ -66,11 +66,13 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 | # | 内容 | 状态 |
 | --- | --- | --- |
-| 1 | 回补持仓历史：每份 604/605 里写了“上一份公告的日期”（`prev_notice`），顺着它到该公司的全年公告页（`timeframe=Y&year=`）找到上一份 → 读 → 记进 history.json → 再往前追，直到 603 或 3 年前。每次运行有上限（`BACKFILL_PDFS`），没追完的下次接着追（`history["meta"]`） | 未开始 |
-| 2 | 逐笔时间线：`trades.daily`（每天净买卖和均价）+ 日线 → `tl`（多少买在下跌日、越买越多还是越少、买的过程中股价涨跌）→ 进打分 | 未开始 |
-| 3 | 验证：history 记录里存够重新判断用的字段（px、trades）和之后 1/3/6 个月涨跌 `fwd`；每次运行算一份 `data/calibration.json`（每种目的：样本数、之后平均涨跌、它自己下一步是否同向）；网页在解读里显示“历史上这类判断之后…” | 未开始 |
-| 4 | 探路：基金月报（LIC 的月度更新）标题和格式，能否摘出提到某只股票的句子 | 探路中（`debug-r10`） |
-| 5 | 用回补出来的样本检查并调整权重；测试、三轮审查、真实运行、文档、合并 | 未开始 |
+| 1 | 回补持仓历史：`scrape.Backfill`（`chase` 顺着 `prev_notice` 到公司全年公告页 `COMPANY_YEAR` 找上一份；`history["meta"][key].done` 记进度；上限 `BACKFILL_PDFS=150` / `BACKFILL_SECONDS=480`） | 代码 + 测试完成，真实运行中 |
+| 2 | 逐笔时间线：`trades.daily` → `insight.timeline` → entry 的 `tl` → 打分（买在下跌日 → 逢低 +0.7 等） | 代码 + 测试完成 |
+| 3 | 验证：history 记录带 `px/tr/tl/fwd`；`scrape.calibrate` → `data/calibration.json` + notices.json 的 `calibration`；网页样本 ≥8 时显示“回头看” | 代码 + 测试完成 |
+| 4 | 基金月报：探路结果——标题很规整（WAM/WMI/WAX “Investment Update”、LSF “Monthly Report”、RF1 “Unitholder Monthly Report”、PIC “PIC Monthly Investment Update”、RPL “Funds Under Management Update”），正文还没读。**留到下一轮** | 只探了路 |
+| 5 | 真实运行（可能要连跑几次才能追完）→ 看 calibration → 调权重 → 文档 → 合并 | **进行中** |
+
+`INSIGHT_VERSION = 4`。股价接口实际给 10 年日线（`years=` 参数不起作用），所以回补的旧公告也有股价背景。
 
 ### 第九轮（2026-11-12，已完成并合并到 `main`）：目的打分公式
 

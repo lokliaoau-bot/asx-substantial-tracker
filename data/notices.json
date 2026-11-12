@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-12T16:33:52+11:00",
- "last_success_at": "2026-11-12T16:33:42+11:00",
+ "updated_at": "2026-11-12T16:47:33+11:00",
+ "last_success_at": "2026-11-12T16:42:35+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -25,13 +25,13 @@
   "2026-11-12"
  ],
  "partial_days": {
-  "2026-11-12": "16:33"
+  "2026-11-12": "16:42"
  },
  "last_run": {
   "ok": true,
   "list_pages_ok": 2,
   "substantial_found": 107,
-  "pdf_checked": 0,
+  "pdf_checked": 1,
   "skipped_noise": 0,
   "deferred": 0,
   "backfill": {
@@ -41,13 +41,14 @@
    "incremental": true
   },
   "insight": {
-   "detail_added": 0,
-   "prices_ok": 0,
+   "detail_added": 3,
+   "prices_ok": 3,
    "prices_failed": 0,
    "history_added": 0,
    "positions": 69,
-   "backfill_read": 0,
+   "backfill_read": 150,
    "backfill_added": 0,
+   "history_refreshed": 136,
    "backfill_pending": 0
   },
   "errors": []
@@ -129,31 +130,31 @@
  },
  "calibration": {
   "buy:base": {
-   "n": 18,
-   "n3": 11,
-   "avg3": 0.031,
-   "up3": 0.545,
-   "n_next": 14,
-   "same_next": 0.714,
-   "rev_next": 0.071
+   "n": 22,
+   "n3": 14,
+   "avg3": 0.005,
+   "up3": 0.5,
+   "n_next": 18,
+   "same_next": 0.667,
+   "rev_next": 0.056
   },
   "buy:dip": {
-   "n": 76,
-   "n3": 41,
-   "avg3": 0.16,
-   "up3": 0.659,
-   "n_next": 54,
-   "same_next": 0.667,
-   "rev_next": 0.13
+   "n": 75,
+   "n3": 40,
+   "avg3": 0.163,
+   "up3": 0.65,
+   "n_next": 53,
+   "same_next": 0.679,
+   "rev_next": 0.132
   },
   "buy:mom": {
-   "n": 39,
-   "n3": 26,
-   "avg3": 0.135,
-   "up3": 0.538,
-   "n_next": 35,
-   "same_next": 0.8,
-   "rev_next": 0.114
+   "n": 37,
+   "n3": 24,
+   "avg3": 0.159,
+   "up3": 0.583,
+   "n_next": 33,
+   "same_next": 0.818,
+   "rev_next": 0.121
   },
   "buy:plc": {
    "n": 2,
@@ -165,11 +166,11 @@
    "rev_next": null
   },
   "buy:prog": {
-   "n": 6,
+   "n": 5,
    "n3": 3,
    "avg3": -0.146,
    "up3": 0.0,
-   "n_next": 5,
+   "n_next": 4,
    "same_next": 1.0,
    "rev_next": 0.0
   },

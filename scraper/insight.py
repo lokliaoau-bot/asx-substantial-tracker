@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import bisect
 import datetime as dt
+import math
 import re
 import statistics
 
@@ -398,11 +399,14 @@ LABELS = {
     "exit": "减到 5% 以下", "slip": "小幅卖出，刚好跌破 5% 线", "back": "又回到 5% 以上（在线附近来回）",
     "rotate": "边买边卖，像调仓", "passive_dilute": "被动稀释（没怎么卖）",
     "passive_up": "被动上升（没怎么买）", "takeover": "收购/并购方案引起", "lending": "证券借贷/抵押变动",
-    "transfer": "划转或换管理人", "arb": "收购消息后买入，像并购套利", "restructure": "股份合并/拆分", "unknown": "看不出来",
+    "transfer": "划转或换管理人", "arb": "收购消息后买入，像并购套利",
+    "add_flow": "加仓（多只股票一起加，像有新资金）", "swap_in": "换股调入（卖别的、买这只）", "short_in": "卖出不久又买回，像短线来回",
+    "trim_flow": "减仓（多只股票一起减，像应付赎回）", "exit_flow": "减到 5% 以下（多只一起减，像应付赎回）",
+    "swap_out": "换股调出（卖这只、买别的）", "trim_rebal": "涨多了减一点，像仓位管理", "short_out": "买入不久就卖出，像短线交易", "restructure": "股份合并/拆分", "unknown": "看不出来",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
-        "exit_loss": "bear", "exit": "bear"}
+        "exit_loss": "bear", "exit": "bear", "add_flow": "bull", "swap_in": "bull", "swap_out": "bear"}
 
 
 def fq(n: float) -> str:
@@ -547,7 +551,10 @@ def add_context(notices: list[dict]) -> None:
     1. 同一家基金前后三周在别的股票上做了什么——都在卖像整体降仓/应付赎回，有买有卖像换股；
     2. 同一只股票上，名单里别的基金最近是同向还是反向。"""
     def side(n):
-        a = (n.get("insight") or {}).get("action")
+        ins = n.get("insight") or {}
+        if ins.get("_f"):
+            return ins["_f"]["side"]
+        a = ins.get("action")
         return "buy" if a in BUY_ACTIONS else "sell" if a in SELL_ACTIONS else ""
 
     def gap(a, b):
@@ -558,8 +565,11 @@ def add_context(notices: list[dict]) -> None:
 
     dated = [n for n in notices if n.get("insight") and side(n) and n.get("date") and n.get("code")]
     plan = []                                     # 先全部算完再写，避免前面加的理由影响后面的判断
+    ctxs = []
     for n in dated:
         me, ins = side(n), n["insight"]
+        ctx = {}
+        ctxs.append((ins, ctx))
         single = ins.get("style") in SINGLE_VIEW
         others = [o for o in dated if o is not n and o["holder"] == n["holder"] and o["code"] != n["code"] and gap(n, o) <= CTX_DAYS]
         buys = [o for o in others if side(o) == "buy"]
@@ -567,6 +577,9 @@ def add_context(notices: list[dict]) -> None:
         sells = [o for o in others if side(o) == "sell" and o["code"] not in ob]
         os_ = sorted({o["code"] for o in sells})
         mine = n.get("sector") or ""
+        ctx.update(nb=len(ob), ns=len(os_))
+        other_sec = _main_sector(buys if me == "sell" else sells)
+        ctx["rot"] = bool(single and mine and other_sec and other_sec != mine)
         if me == "sell":
             if len(os_) >= 2 and not ob:
                 plan.append((ins, f"前后三周它在 {_names(os_)} 也在减仓，没看到加仓：更像整体降仓或应付赎回，不一定是单独看空这一只。", "整体减仓"))
@@ -589,12 +602,15 @@ def add_context(notices: list[dict]) -> None:
         same = sorted({o["holder"] for o in peers if side(o) == me})
         opp = sorted({o["holder"] for o in peers if side(o) != me} - set(same))
         word = "加仓" if me == "buy" else "减仓"
+        ctx.update(peer_same=len(same), peer_opp=len(opp))
         if same:
             plan.append((ins, f"同一只股票上，名单里的 {_names(same, 3, '家')} 最近一个月也在{word}：多家同向，信号更强。", "多家同向"))
         if opp:
             plan.append((ins, f"同一只股票上，名单里的 {_names(opp, 3, '家')} 最近一个月却在{'减仓' if me == 'buy' else '加仓'}：机构之间看法不一。", "有人反向"))
     for ins, text, tag in plan:
         _add_reason(ins, text, tag)
+    for ins, ctx in ctxs:                         # 有了横向证据，重新打一次分
+        finalize(ins, ctx)
 
 
 def judge(n: dict) -> dict | None:
@@ -753,8 +769,9 @@ def judge(n: dict) -> dict | None:
     # 买卖量和同期全市场成交量比：看它急不急、是不是在场内做的
     offmkt = False
     t_vol, days, big = px.get("t_vol"), tr.get("days") or 0, max(buy, sell)
+    vol_part = None
     if rows_ok and t_vol and big and (reconciled or t != "change"):
-        part = big / t_vol
+        vol_part = part = big / t_vol
         verb = "买入" if buy >= sell else "卖出"
         if part > 1.0:
             offmkt = True
@@ -786,6 +803,7 @@ def judge(n: dict) -> dict | None:
 
     # ---- 4b. 公司同期的大事（来自这家公司的公告标题）
     tk_sell = False
+    res_j = None
     raise_ev = evs("raise", 10, 5)
     if direction == "buy" and raise_ev:
         x = raise_ev[-1]
@@ -811,8 +829,8 @@ def judge(n: dict) -> dict | None:
             if style == "hedge":
                 reasons.append(f"买入发生在收购消息（{what}）之后：对冲基金这时候买，多半是做并购套利"
                                "（赚收购价和市价之间的差价），不代表看好公司本身。")
-                return done("arb")
-            reasons.append(f"买入发生在收购消息（{what}）之后：可能在赌收购成功，或者赌有人出更高的价。")
+            else:
+                reasons.append(f"买入发生在收购消息（{what}）之后：可能在赌收购成功，或者赌有人出更高的价。")
         else:
             tk_sell = True
             reasons.append(f"卖出发生在收购消息（{what}）之后：像是借收购带来的涨价退出，不等最终结果。")
@@ -825,6 +843,7 @@ def judge(n: dict) -> dict | None:
             move = f"（公布后股价 {fr(x['j'])}）" if abs(x.get("j") or 0) >= 0.03 else ""
             reasons.append(f"{'买入' if direction == 'buy' else '卖出'}紧跟在公司 {ev_txt(x)}{move}之后：像是对这份业绩的反应。")
             tags.append("业绩后")
+            res_j = x.get("j") or 0.0
 
     # ---- 5. 结论
     # 在 5% 披露线附近来回：这份公告本身只是很小的一步
@@ -847,78 +866,265 @@ def judge(n: dict) -> dict | None:
                        "不是一路只买。" if buy >= sell else "这 4 个月里卖的比买的还多，能到 5% 靠的是更早的底仓。")
         score -= 1
 
+    # ---- 6. 打分：把上面的证据汇总成“最可能的目的”
+    seq = n.get("seq") or {}
+    verb = "加仓" if direction == "buy" else "减仓"
+    if seq.get("same"):
+        reasons.append(f"这是它近 4 个月在这只股票上连续第 {seq['same'] + 1} 次{verb}。")
+        tags.append("连续" + verb)
+    if seq.get("opp_days") is not None and seq["opp_days"] <= SHORT_DAYS:
+        reasons.append(f"它 {seq['opp_days']} 天前的公告还是{'减仓' if direction == 'buy' else '加仓'}，这么快就掉头。")
+    f = {"side": direction, "t": t, "style": style, "size": None, "part": None if offmkt else vol_part, "offmkt": offmkt,
+         "f_up": _trend(r3, r6, r12, 1), "f_down": _trend(r3, r6, r12, -1), "u3": _clip((r3 or 0) / 0.15, 0, 1.3),
+         "lowpos": _clip((0.45 - pos) / 0.3, 0, 1) if pos is not None else 0.0,
+         "highpos": _clip((pos - 0.5) / 0.3, 0, 1) if pos is not None else 0.0,
+         "plc": 0.0, "raise": bool(raise_ev), "so_up": bool(so_chg is not None and so_chg >= 0.03), "plc_inferred": placement_said,
+         "target": bool(tk_ev and churn < 0.6), "res_j": res_j, "cost_d": None, "gain": None, "own_gain": None,
+         "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
+    if rows_ok and buy and gross:
+        f["plc"] = _clip(share("placement") * gross / buy, 0, 1)
+    if chg_frac is not None and t == "change":
+        f["size"] = abs(chg_frac)
+
     if direction == "buy":
-        if placement:
-            if not placement_said:
-                reasons.append("买入的大部分来自配售、增发或认购新股，通常比市价便宜一些，属于参与公司融资。")
-            score += 1
-            return done("build_placement" if t == "becoming" else "add_placement")
-        new_name = "build"
+        f["base"] = "build" if t == "becoming" else "add"
         if t == "becoming" and rows_ok and votes and buy:
             built = max(buy - sell, 0) / votes[0]
+            f["size"] = min(built, 1.0)
             if built >= 0.6:
                 reasons.append(f"现有持仓的 {min(built, 1) * 100:.0f}% 是最近 4 个月净买入的，属于快速建仓。")
             elif built <= 0.35:
                 reasons.append(f"最近 4 个月净买入的只占现有持仓的 {built * 100:.0f}%：早就有底仓，这次只是加到了 5% 披露线以上。")
-                new_name = "cross_up"
+                f["base"] = "cross_up"
             else:
                 reasons.append(f"现有持仓里约 {built * 100:.0f}% 是最近 4 个月净买入的。")
         buy_p = bp or px.get("p")
         if t == "change" and cost.get("avg") and buy_p and (cost.get("cov") or 0) >= COST_MIN_COVER:
             d = buy_p / cost["avg"] - 1
             if -0.9 < d < 4 and abs(d) >= 0.10:
+                f["cost_d"] = round(d, 3)
                 reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}，这次买入价约 {fp(buy_p)}，"
                                + (f"比成本低 {abs(d) * 100:.0f}%：在摊低成本。" if d < 0 else f"比成本高 {d * 100:.0f}%：已经赚钱了还在加，是加码。"))
-        if (low and (r3 is not None and r3 <= -0.10)) or (r3 is not None and r3 <= -0.20):
-            reasons.append("买入时股价处在低位或刚跌过一轮，属于越跌越买。")
-            score += 1
-            return done(new_name if t == "becoming" else "add_dip")
-        if high and (r3 is not None and r3 >= 0.15):
-            reasons.append("买入时股价在高位并且还在涨，属于顺着趋势追加。")
-            score += 1
-            return done(new_name if t == "becoming" else "add_chase")
-        return done(new_name if t == "becoming" else "add")
+    else:
+        f["base"] = "exit" if t == "ceasing" else "trim"
+        if t == "ceasing" and rows_ok and prev.get("votes") and sell > buy:
+            f["size"] = min((sell - buy) / prev["votes"], 1.0)
+        if chg_frac is not None and t == "change":
+            if abs(chg_frac) >= 0.4:
+                reasons.append("一次减掉了四成以上的持仓，幅度很大。")
+            elif abs(chg_frac) <= 0.12:
+                reasons.append("减掉的不到原持仓的一成多，属于小幅减仓。")
+        if bp and sp and buy >= 0.2 * sell:
+            f["own_gain"] = round(sp / bp - 1, 3)
+            if f["own_gain"] >= 0.15:
+                reasons.append(f"同一份明细里，卖出均价比买入均价高 {f['own_gain'] * 100:.0f}%，是赚钱卖的。")
+        # 之前的公告里累计出来的买入成本（只在已知成本的部分够多时才用）
+        sale_p = sp or px.get("p")
+        if cost.get("avg") and sale_p and (cost.get("cov") or 0) >= COST_MIN_COVER:
+            gain = sale_p / cost["avg"] - 1
+            if -0.9 < gain < 4:
+                f["gain"] = round(gain, 3)
+                known = f"（按 {md(cost.get('since'), True)} 以来的公告累计，覆盖了卖出前持仓的 {min(cost['cov'], 1) * 100:.0f}%）"
+                head = f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，"
+                reasons.append(head + (f"高出 {gain * 100:.0f}%：是赚钱卖的。" if gain >= 0.10 else
+                                       f"低了 {abs(gain) * 100:.0f}%：是亏钱卖的。" if gain <= -0.10 else
+                                       "和成本差不多：不像获利了结，也谈不上止损。"))
+        f["tk_sell"] = tk_sell
+    # 数据质量分（和目的无关）：明细对得上、基金类型、扫描件
+    q = score + (1 if style in ("active", "strategic") else 0) - (1 if style == "platform" or ocr else 0) - (2 if not vp and not rows_ok else 0)
+    f["q"] = q
+    ins = done(f["base"])
+    ins["_f"] = f
+    finalize(ins)
+    return ins
 
-    # 卖出
-    own_gain = None
-    if bp and sp and buy >= 0.2 * sell:
-        own_gain = sp / bp - 1
-    base = "exit" if t == "ceasing" else "trim"
-    if chg_frac is not None and t == "change":
-        if abs(chg_frac) >= 0.4:
-            reasons.append("一次减掉了四成以上的持仓，幅度很大。")
-        elif abs(chg_frac) <= 0.12:
-            reasons.append("减掉的不到原持仓的一成多，属于小幅减仓。")
-    if own_gain is not None and own_gain >= 0.15:
-        reasons.append(f"同一份明细里，卖出均价比买入均价高 {own_gain * 100:.0f}%，是赚钱卖的。")
-        score += 1
-        return done(base + "_profit")
-    # 之前的公告里累计出来的买入成本（只在已知成本的部分够多时才用）
-    sale_p = sp or px.get("p")
-    if cost.get("avg") and sale_p and (cost.get("cov") or 0) >= COST_MIN_COVER:
-        gain = sale_p / cost["avg"] - 1
-        if -0.9 < gain < 4:
-            known = f"（按 {md(cost.get('since'), True)} 以来的公告累计，覆盖了卖出前持仓的 {min(cost['cov'], 1) * 100:.0f}%）"
-            if gain >= 0.10:
-                reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，高出 {gain * 100:.0f}%：是赚钱卖的。")
-                score += 2
-                return done(base + "_profit")
-            if gain <= -0.10:
-                reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，低了 {abs(gain) * 100:.0f}%：是亏钱卖的。")
-                score += 2
-                return done(base + "_loss")
-            reasons.append(f"它之前的平均买入成本约 {fp(cost['avg'])}{known}，这次卖出价约 {fp(sale_p)}，和成本差不多：不像获利了结，也谈不上止损。")
-            return done(base)
-    if tk_sell:
-        score += 1
-        return done(base + "_profit")
-    if up and high:
-        reasons.append("卖出前股价已经涨了一大段，而且在一年区间的高位，更像是获利了结。")
-        score += 1
-        return done(base + "_profit")
-    if down or (low and (r3 is not None and r3 <= -0.10)):
-        reasons.append("卖出时股价已经跌了不少、处在低位，更像是止损或者看法变了。")
-        score += 1
-        return done(base + "_loss")
-    reasons.append("股价既不在明显的高位也不在低位，看不出是获利了结还是止损，可能只是调仓或应付赎回。")
-    return done(base)
+
+# ---------------------------------------------------------------- 目的打分
+#
+# 每个候选目的一个分数：分数 = 先验（基金类型）+ Σ 证据的加减分。分数过 softmax 变成概率。
+# “普通加仓/减仓”是基准线（BASELINE）；别的目的要比基准线高出 MARGIN 才会成为标签。
+# 权重是按 2026 年 10–11 月的 79 条真实公告、对照旧规则调的，还没有回测过——改权重只改这里。
+
+BASELINE = 0.7
+MARGIN = 0.05
+SHORT_DAYS = 60
+PURPOSE_NAMES = {
+    "buy": {"base": "普通加仓", "dip": "逢低买入", "mom": "顺势追加", "plc": "参与融资", "arb": "并购套利",
+            "flow": "整体加仓（资金流入）", "swap": "换股调入", "short": "短线来回"},
+    "sell": {"base": "普通减仓", "profit": "获利了结", "stop": "止损或看法变差", "flow": "整体减仓（应付赎回）",
+             "swap": "换股调出", "rebal": "仓位管理（涨多了减一点）", "short": "短线交易"},
+}
+PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用基础标签（新进建仓 / 加仓越过 5% 线 / 加仓 / 减仓 / 减到 5% 以下）
+    ("buy", "dip"): {"add": "add_dip"}, ("buy", "mom"): {"add": "add_chase"},
+    ("buy", "plc"): {"add": "add_placement", "build": "build_placement", "cross_up": "build_placement"},
+    ("buy", "arb"): {"add": "arb", "build": "arb", "cross_up": "arb"},
+    ("buy", "flow"): {"add": "add_flow"}, ("buy", "swap"): {"add": "swap_in", "build": "swap_in"},
+    ("buy", "short"): {"add": "short_in", "build": "short_in", "cross_up": "short_in"},
+    ("sell", "profit"): {"trim": "trim_profit", "exit": "exit_profit"}, ("sell", "stop"): {"trim": "trim_loss", "exit": "exit_loss"},
+    ("sell", "flow"): {"trim": "trim_flow", "exit": "exit_flow"}, ("sell", "swap"): {"trim": "swap_out", "exit": "swap_out"},
+    ("sell", "rebal"): {"trim": "trim_rebal"}, ("sell", "short"): {"trim": "short_out", "exit": "short_out"},
+}
+
+
+def _clip(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+
+def _trend(r3, r6, r12, sign: int) -> float:
+    """之前涨（sign=1）或跌（sign=-1）得有多明显：1.0 = 刚好达到“明显”的门槛（3 个月 20% / 6 个月 25% / 12 个月 40%·35%），最多 1.3。"""
+    cuts = (0.20, 0.25, 0.40 if sign > 0 else 0.35)
+    vals = [sign * r / c for r, c in zip((r3, r6, r12), cuts) if r is not None]
+    return _clip(max(vals), 0.0, 1.3) if vals else 0.0
+
+
+def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
+    """f：单只股票的证据（judge 里算的）；ctx：横向证据（add_context 里算的，可以没有）。
+    返回按概率从高到低排的 [{k, name, s: 分数, p: 概率, why: [加分的依据]}]。"""
+    ctx = ctx or {}
+    side, style = f["side"], f.get("style") or "active"
+    single = style in ("active", "hedge", "strategic")
+    S: dict[str, float] = {}
+    why: dict[str, list[tuple[float, str]]] = {}
+
+    def add(k: str, pts: float, text: str = "") -> None:
+        if not pts:
+            return
+        S[k] = S.get(k, 0.0) + pts
+        if text and pts > 0:
+            why.setdefault(k, []).append((pts, text))
+
+    size, part = f.get("size"), f.get("part")
+    nb, ns = ctx.get("nb", 0), ctx.get("ns", 0)
+    opp = f.get("opp_days")
+    S["base"] = BASELINE
+    if side == "buy":
+        for k, prior in (("dip", -0.3), ("mom", -0.3), ("plc", -1.5), ("arb", -2.0), ("flow", -1.0), ("swap", -1.0), ("short", -1.2)):
+            S[k] = prior
+        add("dip", 1.2 * f["f_down"], "买之前股价跌了一轮")
+        add("dip", 1.0 * f["lowpos"], "股价在一年区间的低位")
+        add("mom", 1.0 * f["u3"], "近 3 个月股价在涨")
+        add("mom", 1.0 * f["highpos"] if f["u3"] > 0 else 0, "股价在一年区间的高位")
+        if f.get("cost_d") is not None:
+            add("dip", 0.8 if f["cost_d"] < 0 else -0.5, "买入价低于自己的成本")
+            add("mom", 0.4 if f["cost_d"] > 0 else -0.4, "已经赚钱了还在加")
+        if f.get("res_j") is not None:
+            add("dip", 0.6 if f["res_j"] <= -0.08 else 0, "业绩后股价大跌时买入")
+            add("mom", 0.6 if f["res_j"] >= 0.08 else 0, "业绩后股价大涨时买入")
+        add("plc", 4.5 * f.get("plc", 0.0), "明细里写的是配售/认购新股")
+        if f.get("plc", 0.0) >= 0.5:
+            add("dip", -1.0)
+            add("mom", -1.0)
+        if f.get("raise"):
+            strong = f.get("offmkt") or f.get("so_up")
+            add("plc", 3.0 if strong else 0.6, "公司同期公告了融资" + ("，而且买入量超过场内成交量或总股本明显增加" if strong else ""))
+            if strong:                       # 认购新股的价格是公司定的，谈不上“逢低”或“追涨”
+                add("dip", -1.0)
+                add("mom", -1.0)
+        elif f.get("offmkt"):
+            add("plc", 0.5, "买入量超过同期场内成交量")
+        if f.get("target"):
+            add("arb", 3.2 if style == "hedge" else 1.6, "买入发生在公司被收购的消息之后")
+        if nb >= 2 and ns == 0:
+            add("flow", 1.0 + 0.3 * (min(nb, 5) - 2), f"同期在另外 {nb} 只股票上也只买不卖")
+            add("flow", {"super": 0.3, "platform": 0.5}.get(style, 0.0))
+            add("flow", 0.3 if size is not None and size < 0.10 else 0, "这次加的幅度不大")
+        if ns >= 1:
+            add("swap", (1.2 if single else 0.5) + 0.3 * (min(ns, 4) - 1), f"同期在另外 {ns} 只股票上减仓")
+            add("swap", 0.3 if ctx.get("rot") else 0, "卖的和买的不在一个行业")
+        if opp is not None and opp <= SHORT_DAYS:
+            add("short", 2.0 + (0.4 if style == "hedge" else 0), f"{opp} 天前还在减仓")
+    else:
+        for k, prior in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2)):
+            S[k] = prior
+        add("profit", 1.0 * f["f_up"], "卖之前股价涨了一大段")
+        add("profit", 1.0 * f["highpos"] if f["f_up"] > 0 else 0, "股价在一年区间的高位")
+        add("stop", 1.2 * f["f_down"], "卖之前股价跌了不少")
+        add("stop", 1.0 * f["lowpos"] if f["f_down"] > 0 else 0, "股价在一年区间的低位")
+        g = f.get("gain")
+        if g is not None:
+            if g >= 0.10:
+                add("profit", 1.2 + _clip((g - 0.1) / 0.3, 0, 1), "卖出价高于自己的买入成本")
+                add("stop", -2.0)
+            elif g <= -0.10:
+                add("stop", 1.2 + _clip((-g - 0.1) / 0.3, 0, 1), "卖出价低于自己的买入成本")
+                add("profit", -2.0)
+            else:
+                add("profit", -1.0)
+                add("stop", -1.0)
+        if (f.get("own_gain") or 0) >= 0.15:
+            add("profit", 1.5, "同一份明细里卖出均价比买入均价高")
+        if f.get("tk_sell"):
+            add("profit", 1.5, "借收购消息带来的涨价卖出")
+        if f.get("res_j") is not None and f["res_j"] <= -0.08:
+            add("stop", 0.6, "业绩后股价大跌时卖出")
+        if size is not None and size >= 0.4:
+            add("stop", 0.3 if f["f_down"] > 0 else 0, "一次减掉四成以上")
+        if ns >= 2 and nb == 0:
+            add("flow", 1.2 + 0.3 * (min(ns, 5) - 2), f"同期在另外 {ns} 只股票上也只卖不买")
+            add("flow", {"super": 0.3, "platform": 0.5}.get(style, 0.0))
+            add("flow", 0.3 if size is not None and size < 0.15 else 0, "这次减的幅度不大")
+        if nb >= 1:
+            add("swap", (1.2 if single else 0.5) + 0.3 * (min(nb, 4) - 1), f"同期在另外 {nb} 只股票上加仓")
+            add("swap", 0.3 if ctx.get("rot") else 0, "卖的和买的不在一个行业")
+        if size is not None and size <= 0.15 and f["f_up"] > 0:
+            add("rebal", 0.8, "只减了一小部分")
+            add("rebal", 0.6 * min(f["f_up"], 1.0), "股价涨过一段")
+            add("rebal", 0.3 if style in ("super", "platform") else 0)
+            add("rebal", 0.3 if part is not None and part <= 0.05 else 0, "卖得很慢")
+        if opp is not None and opp <= SHORT_DAYS:
+            add("short", 2.0 + (0.4 if style == "hedge" else 0), f"{opp} 天前还在加仓")
+    z = sum(math.exp(v) for v in S.values())
+    out = [{"k": k, "name": PURPOSE_NAMES[side][k], "s": round(v, 2), "p": round(math.exp(v) / z, 3),
+            "why": [t for _, t in sorted(why.get(k, []), reverse=True)]} for k, v in S.items()]
+    out.sort(key=lambda x: -x["s"])
+    return out
+
+
+def strength_of(f: dict, ctx: dict | None = None) -> int | None:
+    """这次动作的力度（0–100）：幅度 40%、占同期成交量 30%、连续同向 20%、别的名单基金同向 10%。没有的项不算，按剩下的折算。"""
+    ctx = ctx or {}
+    parts = []
+    if f.get("size") is not None:
+        parts.append((0.4, _clip(f["size"] / 0.3, 0, 1)))
+    if f.get("offmkt"):
+        parts.append((0.3, 1.0))
+    elif f.get("part") is not None:
+        parts.append((0.3, _clip(f["part"] / 0.3, 0, 1)))
+    parts.append((0.2, _clip(f.get("seq_same", 0) / 2, 0, 1)))
+    if "peer_same" in ctx:
+        parts.append((0.1, 1.0 if ctx["peer_same"] else 0.0))
+    w = sum(a for a, _ in parts)
+    if f.get("size") is None:         # 不知道这次动了持仓的多大一部分：不给
+        return None
+    return round(100 * sum(a * b for a, b in parts) / w)
+
+
+def finalize(ins: dict, ctx: dict | None = None) -> None:
+    """按当前证据（可带横向证据）给出最终标签、把握、目的概率和力度。judge 结束时调一次，add_context 有了横向证据后再调一次。"""
+    f = ins.get("_f")
+    if not f:
+        return
+    ranked = score_purposes(f, ctx)
+    top = ranked[0]
+    base = next(x for x in ranked if x["k"] == "base")
+    if top["k"] != "base" and top["s"] < base["s"] + MARGIN:
+        top = base
+    action = PURPOSE_ACTION.get((f["side"], top["k"]), {}).get(f["base"], f["base"])
+    pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= 0.45 else 0) + (1 if top["k"] != "base" and top["p"] >= 0.7 else 0)
+    conf = "高" if pts >= 3 else "低" if pts <= 0 else "中"
+    shown = [top] + [x for x in ranked if x is not top][:2]
+    word = "加仓" if f["side"] == "buy" else "减仓"
+    if top["k"] == "base":
+        line = f"综合打分：没有哪种特别的目的明显占上风，按普通{word}看（{top['p'] * 100:.0f}%）"
+    else:
+        line = f"综合打分：最像「{top['name']}」（{top['p'] * 100:.0f}%）" + (f"，依据：{'；'.join(top['why'][:3])}" if top["why"] else "")
+    rest = [f"「{x['name']}」{x['p'] * 100:.0f}%" for x in shown[1:] if x["p"] >= 0.08]
+    line += ("。其次是" + "、".join(rest) if rest else "") + "。"
+    rs = ins["reasons"]
+    idx = next((i for i, r in enumerate(rs) if r.startswith("综合打分：")), None)
+    if idx is not None:
+        rs[idx] = line
+    else:
+        rs.insert(next((i for i, r in enumerate(rs) if r.startswith(ins.get("style", "\0") + "：")), len(rs)), line)
+    ins.update(action=action, label=LABELS[action], tone=TONE.get(action, "neutral"), confidence=conf,
+               purposes=[{"k": x["k"], "name": x["name"], "p": x["p"]} for x in shown], strength=strength_of(f, ctx))

@@ -1061,6 +1061,54 @@ def cost_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
     return insight.cost_basis(before, holding)
 
 
+SEQ_DAYS = 120
+
+
+def _rec_dir(r: dict) -> str:
+    if r.get("type") == "becoming":
+        return "buy"
+    if r.get("type") == "ceasing":
+        return "sell"
+    v, vp = r.get("votes") or [], r.get("vp") or []
+    d = (v[1] - v[0]) if len(v) == 2 else (vp[1] - vp[0]) if len(vp) == 2 else (r.get("buy_qty") or 0) - (r.get("sell_qty") or 0)
+    return "buy" if d > 0 else "sell" if d < 0 else ""
+
+
+def sequence_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
+    """这家基金在这只股票上之前的公告方向：same = 近 4 个月里紧挨着这份、方向相同的连续几份；
+    opp_days = 上一份方向相反的公告离现在多少天（没有就是 None）。方向用这份公告自己的数字判断。"""
+    rows = ((history or {}).get("pos") or {}).get(pos_key(holder, code)) or []
+    me_key = (e.get("date") or "", e.get("time") or "", str(e.get("id")))
+    mine = _rec_dir({"type": e.get("type"), "votes": e.get("votes"), "vp": e.get("voting_power")})
+    if not mine:
+        return {}
+    try:
+        today = dt.date.fromisoformat(e.get("date") or "")
+    except ValueError:
+        return {}
+    same, opp_days = 0, None
+    counting = True
+    for r in sorted((r for r in rows if r.get("id") != e.get("id")
+                     and (r.get("date") or "", r.get("time") or "", str(r.get("id"))) < me_key),
+                    key=lambda r: (r.get("date") or "", r.get("time") or ""), reverse=True):
+        try:
+            age = (today - dt.date.fromisoformat(r.get("date") or "")).days
+        except ValueError:
+            continue
+        d = _rec_dir(r)
+        if not d:
+            continue
+        if d == mine and counting and age <= SEQ_DAYS:
+            same += 1
+        elif d != mine:
+            if opp_days is None:
+                opp_days = age
+            counting = False
+        if age > SEQ_DAYS:
+            break
+    return {"same": same, "opp_days": opp_days}
+
+
 def build_notices(entries: dict, holders: list[Holder], history: dict | None = None) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
@@ -1084,7 +1132,7 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
                     "trades": e.get("trades") or {}, "px": e.get("px") or {}, "ocr": e.get("ocr"),
                     "style": style_of.get(holder, "active"), "prev": last_seen.get(key), "date": e.get("date"),
                     "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
-                    "change_date": e.get("change_date"),
+                    "change_date": e.get("change_date"), "seq": sequence_for(history, holder, item["code"], e),
                 })
             except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
                 log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")
@@ -1108,6 +1156,9 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
         insight.add_context(final)
     except Exception as ex:  # noqa: BLE001  横向比较出错不能影响公告本身
         log(f"  横向比较出错：{type(ex).__name__}: {ex}")
+    for n in final:
+        if n.get("insight"):
+            n["insight"].pop("_f", None)          # 打分用的中间数据不输出
     return final
 
 

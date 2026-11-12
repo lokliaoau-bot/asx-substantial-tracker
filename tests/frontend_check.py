@@ -55,6 +55,8 @@ SAMPLE = {
          "holder": "AustralianSuper", "group": "养老金", "confidence": "高", "ocr": True,
          "insight": {"action": "add_dip", "label": "逢低加仓", "tone": "bull", "confidence": "中", "style": "养老金",
                      "tags": ["多家同向", "<b>换股</b>"],
+                     "purposes": [{"k": "dip", "name": "逢低买入", "p": 0.62}, {"k": "base", "name": "<i>普通加仓</i>", "p": 0.2},
+                                  {"k": "flow", "name": "整体加仓", "p": 0.02}], "strength": 71,
                      "reasons": ["持股比例 6.06% → 7.11%，持股数增加 420 万股。", "<img src=x onerror=window.__xss=1>买入时股价处在低位。"]}},
         {"id": "3", "code": "OLD", "company": "Old Co", "date": day(25), "time": "10:00", "headline": "Ceasing to be a substantial holder",
          "url": "https://www.asx.com.au/c", "pdf_url": "", "price_sensitive": False, "type": "ceasing",
@@ -143,6 +145,9 @@ def main():
         check(pg.locator("#rows details.ins summary .chip").count() == 2 and "多家同向" in pg.inner_text("#rows details.ins summary")
               and pg.locator("#rows details.ins summary b").count() == 0, "解读的小标签显示出来，且不会被当成 HTML")
         pg.click("#rows details.ins summary")
+        check(pg.locator("#rows details.ins .prow").count() == 2 and "62%" in pg.inner_text("#rows details.ins .purposes")
+              and "力度：强（71/100）" in pg.inner_text("#rows details.ins .purposes") and pg.locator("#rows details.ins .purposes i").count() == 0,
+              "目的概率条和力度显示出来（低于 5% 的不显示，名字不会被当成 HTML）")
         check("持股数增加 420 万股" in pg.inner_text("#rows details.ins") and "推断" in pg.inner_text("#rows details.ins"),
               "点开标签能看到理由，并说明这是推断")
         check(pg.evaluate("window.__xss") is None and pg.locator("#rows details.ins img").count() == 0, "理由里的 HTML 不会被执行")

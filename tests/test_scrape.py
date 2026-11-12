@@ -1849,3 +1849,119 @@ def test_event_moves():
     assert "j" not in evs[2] and "j" not in evs[3]               # 日线范围以外
     insight.event_moves([], [{"d": "2026-10-04"}])
     insight.event_moves([["x"], None], [{"d": "2026-10-04"}])
+
+
+# ---------------------------------------------------------------- 第九轮：目的打分
+
+def _f(side="buy", **kw):
+    f = {"side": side, "t": "change", "style": "active", "size": 0.1, "part": None, "offmkt": False, "f_up": 0.0, "f_down": 0.0,
+         "u3": 0.0, "lowpos": 0.0, "highpos": 0.0, "plc": 0.0, "raise": False, "so_up": False, "target": False, "res_j": None,
+         "cost_d": None, "gain": None, "own_gain": None, "seq_same": 0, "opp_days": None, "base": "add" if side == "buy" else "trim", "q": 2}
+    f.update(kw)
+    return f
+
+
+def top(f, ctx=None):
+    r = insight.score_purposes(f, ctx)
+    assert abs(sum(x["p"] for x in r) - 1) < 0.02 and r == sorted(r, key=lambda x: -x["s"])
+    return r[0]["k"]
+
+
+def test_score_baseline_wins_without_evidence():
+    assert top(_f("buy")) == "base" and top(_f("sell")) == "base"
+    assert top(_f("buy", lowpos=1.0)) == "base"                       # 只是在低位、没跌过：不算逢低
+    assert top(_f("sell", f_up=1.0)) == "base"                        # 只是涨过、不在高位：分数刚好和基准线持平
+
+
+def test_score_price_patterns():
+    assert top(_f("buy", f_down=1.0)) == "dip" and top(_f("buy", f_down=0.5, lowpos=0.5)) == "dip"
+    assert top(_f("buy", u3=1.0, highpos=0.5)) == "mom"
+    assert top(_f("sell", f_up=1.0, highpos=0.5)) == "profit"
+    assert top(_f("sell", f_down=1.0)) == "stop" and top(_f("sell", f_down=0.5, lowpos=0.5)) == "stop"
+
+
+def test_score_cost_overrides_price_pattern():
+    # 股价在高位、涨了很多，但它自己是亏钱卖的：止损
+    assert top(_f("sell", f_up=1.0, highpos=1.0, gain=-0.3)) == "stop"
+    assert top(_f("sell", f_down=1.0, lowpos=1.0, gain=0.4)) == "profit"
+    assert top(_f("sell", f_up=1.0, highpos=0.5, gain=0.02)) == "base"          # 和成本差不多
+
+
+def test_score_mechanism_beats_timing():
+    # 跌了一轮之后买，但其实是认购新股：参与融资，不是逢低
+    assert top(_f("buy", f_down=1.3, lowpos=1.0, **{"raise": True, "so_up": True})) == "plc"
+    assert top(_f("buy", f_down=1.3, lowpos=1.0, **{"raise": True})) == "dip"   # 只有融资公告，没有别的佐证
+    assert top(_f("buy", plc=1.0, u3=1.3, highpos=1.0)) == "plc"
+    assert top(_f("buy", target=True, style="hedge")) == "arb" and top(_f("buy", target=True, style="active")) == "base"
+
+
+def test_score_cross_stock_context():
+    assert top(_f("sell"), {"ns": 3, "nb": 0}) == "flow" and top(_f("sell"), {"ns": 1, "nb": 0}) == "base"
+    assert top(_f("sell"), {"ns": 0, "nb": 3}) == "swap" and top(_f("sell", style="super"), {"ns": 0, "nb": 3}) == "base"
+    assert top(_f("buy"), {"nb": 5, "ns": 0}) == "flow" and top(_f("buy"), {"nb": 2, "ns": 0}) == "base"
+    assert top(_f("buy"), {"nb": 0, "ns": 4}) == "swap"
+    assert top(_f("sell", f_down=1.3, lowpos=1.0), {"ns": 3, "nb": 0}) == "stop"   # 个股证据强的时候不被横向证据盖过
+
+
+def test_score_short_term_and_rebalance():
+    assert top(_f("sell", opp_days=20)) == "short" and top(_f("sell", opp_days=90)) == "base"
+    assert top(_f("buy", opp_days=10, style="hedge")) == "short"
+    assert top(_f("sell", size=0.08, f_up=0.9, part=0.02, style="super")) == "rebal"
+    assert top(_f("sell", size=0.5, f_up=0.9)) == "base"
+
+
+def test_finalize_label_confidence_and_summary():
+    n = _sell(cost={"avg": 1.2, "cov": 0.8, "since": "2026-01-10", "n": 3})
+    r = insight.judge(n)
+    assert r["action"] == "trim_profit" and r["purposes"][0]["k"] == "profit" and r["purposes"][0]["p"] > 0.5
+    assert len(r["purposes"]) == 3 and sum(1 for x in r["reasons"] if x.startswith("综合打分：")) == 1
+    assert any("最像「获利了结」" in x and "卖出价高于自己的买入成本" in x for x in r["reasons"])
+    plain = insight.judge(_sell())
+    assert plain["action"] == "trim" and any("按普通减仓看" in x for x in plain["reasons"]) and plain["confidence"] == "中"
+    assert isinstance(plain["strength"], int) and 0 <= plain["strength"] <= 100
+    # 横向证据来了以后重新打分：只留一条“综合打分”
+    insight.finalize(plain, {"ns": 4, "nb": 0, "peer_same": 1})
+    assert plain["action"] == "trim_flow" and plain["tone"] == "neutral" and sum(1 for x in plain["reasons"] if x.startswith("综合打分：")) == 1
+    assert plain["reasons"][-1].startswith("主动选股基金：")
+    insight.finalize({"action": "rotate", "reasons": []})                 # 没有打分数据的不动
+
+
+def test_add_context_rescores_and_build_notices_strips_internal(sandbox, monkeypatch):
+    ns = [{"holder": "A", "code": k, "date": "2026-11-05", "sector": "", "insight": insight.judge(_sell(date="2026-11-05"))}
+          for k in ("AAA", "BBB", "CCC", "DDD", "EEE")]
+    insight.add_context(ns)
+    assert all(n["insight"]["action"] == "trim_flow" and "整体减仓" in n["insight"]["tags"] for n in ns)
+    two = [{"holder": "B", "code": k, "date": "2026-11-05", "sector": "", "insight": insight.judge(_sell(date="2026-11-05"))} for k in ("AAA", "BBB", "CCC")]
+    insight.add_context(two)
+    assert all(n["insight"]["action"] == "trim" and "整体减仓" in n["insight"]["tags"] for n in two)   # 只有三只：提一句，但不够改标签
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    monkeypatch.setattr(scrape, "fetch", FakeASX(prices={"SLC": falling_prices()}))
+    assert scrape.main() == 0
+    n = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] == "SLC")
+    assert "_f" not in n["insight"] and n["insight"]["purposes"][0]["k"] == "dip" and n["insight"]["strength"] is not None
+
+
+def test_sequence_for():
+    hist = {"pos": {"A|XYZ": [
+        {"id": "1", "date": "2026-06-01", "time": "", "type": "becoming", "votes": [100]},
+        {"id": "2", "date": "2026-09-01", "time": "", "type": "change", "votes": [100, 80]},
+        {"id": "3", "date": "2026-10-01", "time": "", "type": "change", "votes": [80, 120]},
+        {"id": "4", "date": "2026-10-20", "time": "", "type": "change", "vp": [6.0, 7.0], "votes": []}]}}
+    e = {"id": "5", "date": "2026-11-05", "time": "10:00", "type": "change", "votes": [150, 180]}
+    assert scrape.sequence_for(hist, "A", "XYZ", e) == {"same": 2, "opp_days": 65}
+    sell = {"id": "6", "date": "2026-11-05", "time": "10:00", "type": "ceasing"}
+    assert scrape.sequence_for(hist, "A", "XYZ", sell) == {"same": 0, "opp_days": 16}
+    assert scrape.sequence_for(hist, "A", "NOPE", e) == {"same": 0, "opp_days": None}
+    assert scrape.sequence_for(hist, "A", "XYZ", {"id": "7", "date": "bad", "type": "becoming"}) == {}
+    assert scrape.sequence_for(None, "A", "XYZ", {"id": "8", "date": "2026-11-05", "type": "change", "votes": [5, 5]}) == {}
+    r = insight.judge(_buy(seq={"same": 2, "opp_days": None}))
+    assert "连续加仓" in r["tags"] and any("连续第 3 次加仓" in x for x in r["reasons"])
+    r = insight.judge(_sell(seq={"same": 0, "opp_days": 12}))
+    assert r["action"] == "short_out" and any("12 天前的公告还是加仓" in x for x in r["reasons"])
+
+
+def test_strength():
+    assert insight.strength_of(_f(size=None)) is None
+    assert insight.strength_of(_f(size=0.3, part=0.3, seq_same=2), {"peer_same": 1}) == 100
+    assert insight.strength_of(_f(size=0.03, part=0.01)) < 15
+    assert insight.strength_of(_f(size=0.3, offmkt=True)) > 70

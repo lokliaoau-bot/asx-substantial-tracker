@@ -157,6 +157,14 @@ td.num, .nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .i-bear { color: var(--ceasing); }
 .i-neutral { color: var(--muted); }
 .ins .chip { display: inline-block; margin: 3px 4px 0 0; padding: 1px 7px; border: 1px solid var(--line, #d0d7de); border-radius: 9px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.ins .purposes { margin: 8px 0 2px; font-size: 12.5px; max-width: 30em; }
+.ins .prow { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+.ins .pname { flex: 0 0 11.5em; color: var(--ink); }
+.ins .pbar { flex: 1 1 auto; height: 6px; border-radius: 3px; background: rgba(127,127,127,.22); overflow: hidden; min-width: 40px; }
+.ins .pfill { display: block; height: 100%; background: var(--muted); border-radius: 3px; }
+.ins .prow:first-child .pfill { background: var(--ink); }
+.ins .ppct { flex: 0 0 2.8em; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ins .pstrength { margin-top: 5px; color: var(--muted); }
 .ins ul { margin: 8px 0 2px; padding-left: 1.1em; font-size: 13px; color: var(--ink); max-width: 30em; }
 .ins li { margin: 3px 0; line-height: 1.5; }
 .ins .conf { margin-top: 4px; }
@@ -567,6 +575,26 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     (Array.isArray(i.tags) ? i.tags : []).slice(0, 4).forEach((t) => sum.append(el("span", "chip", String(t))));
     const ul = document.createElement("ul");
     (Array.isArray(i.reasons) ? i.reasons : []).forEach((r) => ul.append(el("li", "", String(r))));
+    const ps = Array.isArray(i.purposes) ? i.purposes.filter((x) => x && typeof x.p === "number" && x.p >= 0.05).slice(0, 3) : [];
+    if (ps.length) {
+      const box = el("div", "purposes", "");
+      ps.forEach((x) => {
+        const row = el("div", "prow", "");
+        const pct = Math.round(Math.max(0, Math.min(1, x.p)) * 100);
+        const bar = el("span", "pbar", "");
+        const fill = el("span", "pfill", "");
+        fill.style.width = pct + "%";
+        bar.append(fill);
+        row.append(el("span", "pname", String(x.name || "")), bar, el("span", "ppct", pct + "%"));
+        box.append(row);
+      });
+      if (typeof i.strength === "number") {
+        const s = Math.round(i.strength);
+        box.append(el("div", "pstrength", `这次动作的力度：${s >= 60 ? "强" : s >= 30 ? "中" : "弱"}（${s}/100）`));
+      }
+      d.append(sum, box, ul, el("div", "conf", `把握：${i.confidence || "中"}。百分比是按公告数字、股价、公司同期公告和它在别的股票上的动作打分推断出来的可能性，不是事实；公告里不会写买卖原因。`));
+      return d;
+    }
     d.append(sum, ul, el("div", "conf", `把握：${i.confidence || "中"}。这是按公告数字、股价、公司同期公告和它在别的股票上的动作做的推断，公告里不会写买卖原因。`));
     return d;
   }

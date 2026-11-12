@@ -62,17 +62,18 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第十轮（2026-11-12 开始）：提高准确率 —— 分支 `dev-r10`，进行中
+### 第十轮（2026-11-12，已完成并合并到 `main`）：回补历史 + 逐笔时间线 + 回头看
 
-| # | 内容 | 状态 |
-| --- | --- | --- |
-| 1 | 回补持仓历史：`scrape.Backfill`（`chase` 顺着 `prev_notice` 到公司全年公告页 `COMPANY_YEAR` 找上一份；`history["meta"][key].done` 记进度；上限 `BACKFILL_PDFS=150` / `BACKFILL_SECONDS=480`） | 代码 + 测试完成，真实运行中 |
-| 2 | 逐笔时间线：`trades.daily` → `insight.timeline` → entry 的 `tl` → 打分（买在下跌日 → 逢低 +0.7 等） | 代码 + 测试完成 |
-| 3 | 验证：history 记录带 `px/tr/tl/fwd`；`scrape.calibrate` → `data/calibration.json` + notices.json 的 `calibration`；网页样本 ≥8 时显示“回头看” | 代码 + 测试完成 |
-| 4 | 基金月报：探路结果——标题很规整（WAM/WMI/WAX “Investment Update”、LSF “Monthly Report”、RF1 “Unitholder Monthly Report”、PIC “PIC Monthly Investment Update”、RPL “Funds Under Management Update”），正文还没读。**留到下一轮** | 只探了路 |
-| 5 | 真实运行（可能要连跑几次才能追完）→ 看 calibration → 调权重 → 文档 → 合并 | **进行中** |
+- `scrape.Backfill`（顺着 `prev_notice` 追上一份公告，进度在 `history["meta"]`，每次最多 150 份 / 8 分钟）：68 个持仓 250 条记录，全部追完（50 个到 603、11 个超 3 年、7 个找不到）
+- `insight.timeline`（`trades.daily` 对日线 → `tl`）进打分；`insight.forward_returns` → `fwd`
+- `scrape.calibrate` → `data/calibration.json` + 网页“回头看”
+- `INSIGHT_VERSION = 4`；173 个测试、39 项网页检查；`dev-r10` 真实运行三次
+- 细节在 `HANDOVER.md` 第 5 节“第十轮”
 
-`INSIGHT_VERSION = 4`。股价接口实际给 10 年日线（`years=` 参数不起作用），所以回补的旧公告也有股价背景。
+目前没有进行到一半的工作。下一步候选（`HANDOVER.md` 第 9 节）：基金月报原话（标题已探明，见下）、ASIC 做空数据、样本攒多后校准权重。
+
+基金月报标题（探路结果，`debug-r10-out`）：WAM/WMI/WAX “<月份> Investment Update”、LSF “Monthly Report - <月份>”、RF1 “Unitholder Monthly Report for <月份>”、
+PIC “PIC Monthly Investment Update - <月份>”、PL8 “<月份> Investment update”、RPL “<月份> Funds Under Management Update”。正文还没读过。
 
 ### 第九轮（2026-11-12，已完成并合并到 `main`）：目的打分公式
 

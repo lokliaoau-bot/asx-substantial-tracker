@@ -213,7 +213,7 @@ history 记录为此多存了 `px`、`tr`（明细汇总）、`tl`、`fwd`（`{1
     "url": "…", "pdf_url": "…", "price_sensitive": false,
     "type": "change", "change_date": "2026-10-28", "voting_power": [11.36, 9.52],
     "holder": "Hostplus", "group": "养老金", "confidence": "高", "ocr": false, "sector": "Consumer Discretionary",
-    "insight": {"action": "trim_loss", "label": "低位减仓，像止损", "tone": "bear", "confidence": "中",
+    "insight": {"action": "trim_loss", "label": "减仓，像止损", "tone": "bear", "confidence": "中",
                 "style": "养老金", "tags": ["多家同向"], "strength": 72,
                 "purposes": [{"k": "stop", "name": "止损或看法变差", "p": 0.46}, {"k": "profit", "name": "获利了结", "p": 0.24}, {"k": "base", "name": "普通减仓", "p": 0.18}],
                 "reasons": ["持股比例 11.36% → 9.52%，持股数减少 1,239 万股（相当于原持仓的 16%）。", "…"]}

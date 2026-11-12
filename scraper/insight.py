@@ -464,7 +464,7 @@ STYLES = {
 }
 LABELS = {
     "build": "新进建仓", "cross_up": "加仓越过 5% 线", "build_placement": "参与配售建仓", "add_dip": "逢低加仓", "add_chase": "顺势加仓", "add": "加仓",
-    "add_placement": "参与配售加仓", "trim_profit": "高位减仓，像获利了结", "trim_loss": "低位减仓，像止损",
+    "add_placement": "参与配售加仓", "trim_profit": "减仓，像获利了结", "trim_loss": "减仓，像止损",
     "trim": "减仓", "exit_profit": "减到 5% 以下，像获利了结", "exit_loss": "减到 5% 以下，像止损离场",
     "exit": "减到 5% 以下", "slip": "小幅卖出，刚好跌破 5% 线", "back": "又回到 5% 以上（在线附近来回）",
     "rotate": "边买边卖，像调仓", "passive_dilute": "被动稀释（没怎么卖）",

@@ -143,10 +143,13 @@ def parse_trades(pages: list[str], notice_date: str = "", ntype: str = "") -> di
     for pg in pages:
         lines.extend(ln for ln in (pg or "").split("\n"))
     raw = []
+    last_row = -1
     for idx, ln in enumerate(lines):
         m = row_start(ln)
         if not m or NOT_TRADE_RE.search(ln):
             continue
+        if not ln[m.end():].strip() and m.start() <= 3:
+            continue                                  # 单独一行只有日期（折行说明里的“29 Jan 2026”）：不是交易行
         cands = [d for d in date_candidates(m.group(1)) if ndate - dt.timedelta(days=1100) <= d <= ndate + dt.timedelta(days=1)]
         if not cands:
             continue
@@ -157,11 +160,18 @@ def parse_trades(pages: list[str], notice_date: str = "", ntype: str = "") -> di
         if m2:
             rest = rest[m2.end():]
         cont = []
-        for nxt in lines[idx + 1: idx + 4]:           # 折行的性质说明
+        for nxt in lines[idx + 1: idx + 4]:           # 折行的性质说明（写在日期行下面）
             if row_start(nxt) or CONT_STOP_RE.match(nxt):
                 break
             cont.append(nxt)
-        raw.append({"tok": m.group(1), "cands": cands, "rest": rest, "cont": " ".join(cont), "lead": lead})
+        pre = []
+        for back in range(idx - 1, max(last_row, idx - 6), -1):   # 有的表格把说明写在日期行上面（单元格顶端对齐）
+            prv = lines[back]
+            if row_start(prv) or CONT_STOP_RE.match(prv) or NOT_TRADE_RE.search(prv):
+                break
+            pre.insert(0, prv)
+        last_row = idx
+        raw.append({"tok": m.group(1), "cands": cands, "rest": rest, "cont": " ".join(cont), "pre": " ".join(pre), "lead": lead})
         if len(raw) >= MAX_TRADE_ROWS:
             break
     if not raw:
@@ -169,11 +179,15 @@ def parse_trades(pages: list[str], notice_date: str = "", ntype: str = "") -> di
 
     # 整份公告用同一种日期写法：只要有一行只能按 月/日 解释，就全部按 月/日
     us = any(len(r["cands"]) == 1 and re.match(r"\d{1,2}\s?[/.\-]\s?(1[3-9]|2\d|3[01])\s?[/.\-]", r["tok"]) for r in raw)
+    # 说明写在日期行的上面还是下面：看哪一边能给更多“自己这行没写买卖”的行找到买卖方向，整份公告用同一种
+    side_rx = lambda x: bool(BUY_RE.search(x) or SELL_RE.search(x))
+    bare = [r for r in raw if not side_rx(r["lead"] + " " + r["rest"])]
+    above = sum(side_rx(r["pre"]) for r in bare) > sum(side_rx(r["cont"]) for r in bare)
     rows = []
     for r in raw:
         c = r["cands"]
         date = c[-1] if (us and len(c) == 2) else c[0]
-        text = r["lead"] + " " + r["rest"] + " " + r["cont"]
+        text = (r["pre"] + " " + r["lead"] + " " + r["rest"]) if above else (r["lead"] + " " + r["rest"] + " " + r["cont"])
         money, nums = _row_numbers(r["rest"])
         ints = [(v, neg) for v, neg in nums if v >= 1 and float(v).is_integer()]
         qty = neg = None
@@ -201,7 +215,11 @@ def parse_trades(pages: list[str], notice_date: str = "", ntype: str = "") -> di
         own = r["lead"] + " " + r["rest"]
         kind = _kind(own)
         if kind == "other":
-            kind = _kind(text)                      # 这一行自己没写性质，再看折到下一行的说明
+            kind = _kind(text)                      # 这一行自己没写性质，再看折行的说明
+        if kind == "other" and r["cont"]:
+            # 一句话被拆成两行，中间还夹着金额和股数：“…pursuant of the Capital 6,832,300.50 ORD 9,109,734 / raising announced …”
+            words = re.sub(r"(?<!\w)[-$]*[\d,.]+%?(?!\w)|\b(?:ORD|FPO|FPOS|ORDINARY)\b", " ", own, flags=re.I)
+            kind = _kind(" ".join(words.split()) + " " + r["cont"][:60])
         if ISSUER_RE.search(text):
             kind, qty, cons, side = "dilution", None, None, ""
         rows.append({"date": date.isoformat(), "side": side, "kind": kind, "qty": qty, "cons": cons})

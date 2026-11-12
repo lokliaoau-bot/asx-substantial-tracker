@@ -2486,3 +2486,83 @@ def test_fund_quotes_skip_boilerplate_and_own_products():
     store = {"reports": [dict(rep(junk, "2026-10-13", "1"), holder="Wilson Asset Management"), dict(rep(junk, "2026-09-13", "2"), holder="Wilson Asset Management")]}
     q = scrape.fund_quotes(store, "Wilson Asset Management", "EOL", "Energy One Limited", "2026-10-20")
     assert len(q) == 1 and q[0]["text"] == "" and q[0]["date"] == "2026-10-13"       # 只在表格里：只提最新一份
+
+
+# ---------------------------------------------------------------- 第十三轮：说明写在日期行上面的表格
+
+HOSTPLUS_LAYOUT = """Annexure 1
+Date of change Person whose Nature of change Consideration given Class and number of Person's
+Citicorp Nominees Pty
+Limited ACF Host- Plus
+Pty Limited ATF the
+Hostplus Superannuation Purchase of
+18/09/2025 Fund ordinary shares $4,907.76 143 143
+Citicorp Nominees Pty
+Limited ACF Host- Plus
+Pty Limited ATF the
+Hostplus Pooled Sale of
+19/09/2025 Superannuation Trust shares -$55,212.84 -1,626 -1,626
+Citicorp Nominees Pty
+Limited ACF Host- Plus
+Pty Limited ATF the
+Hostplus Pooled Purchase of
+19/09/2025 Superannuation Trust ordinary shares $873,397.41 25,682 25,682
+Citicorp Nominees Pty
+Limited ACF Host- Plus
+Pty Limited ATF the
+Hostplus Pooled Purchase of
+22/09/2025 Superannuation Trust ordinary shares $700,000.00 20,360 20,360
+"""
+
+AUSSUPER_LAYOUT = """3/02/2026 JPMorgan Nominees Australia Ltd SELL 24,559.58 ORD -32,862 -32,862
+
+Acquisition of shares
+JPMorgan Nominees Australia Ltd pursuant of the Capital
+4/02/2026 raising announced 5,978,262.00 ORD 7,971,016 7,971,016
+29 Jan 2026
+4/02/2026 JPMorgan Nominees Australia Ltd SELL 50,541.66 ORD -67,914 -67,914
+4/02/2026 JPMorgan Nominees Australia Ltd BUY 2,792.80 ORD 3,730 3,730
+13/03/2026 JPMorgan Nominees Australia Ltd BUY 46,189.97 ORD 84,983 84,983
+Acquisition of shares
+16/03/2026 JPMorgan Nominees Australia Ltd pursuant of the Capital 6,832,300.50 ORD 9,109,734 9,109,734
+raising announced 29
+Jan 2026
+16/03/2026 JPMorgan Nominees Australia Ltd BUY 7,506.85 ORD 13,800 13,800
+"""
+
+
+def test_trade_description_above_the_date_line():
+    s = insight.parse_trades([HOSTPLUS_LAYOUT], "2025-10-01", "change")["summary"]
+    assert s["n"] == 4 and s["n_unknown"] == 0
+    assert s["buy_qty"] == 143 + 25_682 + 20_360 and s["sell_qty"] == 1_626
+
+
+def test_split_placement_description_and_date_only_line():
+    res = insight.parse_trades([AUSSUPER_LAYOUT], "2026-03-20", "change")
+    s = res["summary"]
+    assert s["n_unknown"] == 0 and s["kinds"].get("placement") == 7_971_016 + 9_109_734
+    assert all(r["qty"] for r in res["rows"])                     # “29 Jan 2026” 那行不算一笔交易
+    assert s["buy_qty"] == 7_971_016 + 3_730 + 84_983 + 9_109_734 + 13_800 and s["sell_qty"] == 32_862 + 67_914
+
+
+def test_history_records_reread_with_new_reader(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    monkeypatch.setitem(PDFS, "02001234", OLD_604)
+    hist = {"pos": {"Paradice Investment Management|SLC": [
+        {"id": "mk-2924-02001234-2A9", "date": "2026-09-01", "time": "16:00", "type": "change", "cd": "2026-08-31", "vp": [5.2, 6.1],
+         "votes": [8_500_000, 10_000_000], "buy_qty": 1, "sell_qty": 0, "fwd": {"1m": 0.05}, "bf": 1},
+        {"id": "x-no-number", "date": "2026-08-01", "type": "change", "vp": [5.1, 5.2], "votes": []}]},
+        "meta": {"Paradice Investment Management|SLC": {"done": "start"}}, "schema": 1}
+    (sandbox / "data" / "history.json").write_text(json.dumps(hist), encoding="utf-8")
+    fake = FakeASX(prices={"SLC": falling_prices()})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    rows = read(sandbox / "data" / "history.json")["pos"]["Paradice Investment Management|SLC"]
+    old = next(r for r in rows if r["id"] == "mk-2924-02001234-2A9")
+    assert old["buy_qty"] == 1_500_000 and old["dv"] == scrape.INSIGHT_VERSION and "1m" in old["fwd"] and old["bf"] == 1
+    assert next(r for r in rows if r["id"] == "x-no-number")["dv_tries"] == 9
+    assert next(r for r in rows if r["id"] == "1001")["dv"] == scrape.INSIGHT_VERSION
+    assert read(sandbox / "data" / "notices.json")["last_run"]["insight"]["history_refreshed"] == 1
+    before = len(fake.pdf_downloads)
+    scrape.main()
+    assert len(fake.pdf_downloads) == before                                   # 都是新读法了：不再重读

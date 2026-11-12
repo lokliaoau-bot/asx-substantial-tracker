@@ -81,7 +81,7 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
-INSIGHT_VERSION = 4                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
+INSIGHT_VERSION = 5                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
 DETAIL_TRIES = 3                                          # 明细读取失败最多重试几次
@@ -1041,7 +1041,7 @@ def update_history(history: dict, entries: dict, holders: list[Holder], today: d
         holder, _ = match_entry(e, holders)
         if not holder:
             continue
-        rec = insight.history_record(e)
+        rec = dict(insight.history_record(e), dv=e.get("detail_v"))
         rows = pos.setdefault(pos_key(holder, target_code(e)), [])
         same = lambda r: (r.get("type"), r.get("cd"), r.get("vp")) == (rec["type"], rec["cd"], rec["vp"]) and rec["cd"] and rec["vp"]
         idx = next((i for i, r in enumerate(rows) if r.get("id") == rec["id"]), None)
@@ -1300,7 +1300,7 @@ class Backfill:
         self.deadline = time.monotonic() + (BACKFILL_SECONDS if seconds is None else seconds)
         self.lists: dict[tuple, list] = {}
         self.series: dict[str, list] = {}
-        self.read = self.added = 0
+        self.read = self.added = self.refreshed = 0
         self.cutoff = (today - dt.timedelta(days=HISTORY_DAYS)).isoformat()
 
     def out_of_budget(self) -> bool:
@@ -1371,7 +1371,7 @@ class Backfill:
                     if series:
                         e["px"] = insight.price_context(series, e.get("change_date") or tr.get("last") or e["date"], tr.get("first", ""), tr.get("last", ""))
                         add_timeline(e, series)
-                    rec = dict(insight.history_record(e), bf=1)
+                    rec = dict(insight.history_record(e), bf=1, dv=INSIGHT_VERSION)
                     dest = self.h["pos"].setdefault(pos_key(who, code), [])
                     if not any(x.get("id") == rec["id"] for x in dest):
                         dest.append(rec)
@@ -1384,6 +1384,46 @@ class Backfill:
                 meta["done"] = "not_found"
                 return
             meta["tried"] = meta.get("tried", [])[-12:]
+
+    def refresh_old(self) -> int:
+        """用旧读法（INSIGHT_VERSION 更早）读的历史记录，重新下载按现在的读法读一遍。返回重读了几份。"""
+        heads = {"becoming": "Becoming a substantial holder", "ceasing": "Ceasing to be a substantial holder"}
+        done = 0
+        for key in sorted(self.h.get("pos", {}), key=lambda k: self.h["pos"][k][-1].get("date") or "", reverse=True):
+            holder, code = key.split("|", 1)
+            rows = self.h["pos"][key]
+            for idx, r in enumerate(rows):
+                if self.out_of_budget():
+                    return done
+                if r.get("dv") == INSIGHT_VERSION or r.get("dv_tries", 0) >= 2:
+                    continue
+                m = re.search(r"(?:^|-)(\d{8})(?:-|$)", str(r.get("id") or ""))
+                if not m:
+                    r["dv_tries"] = 9
+                    continue
+                url = BASE + "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=" + m.group(1)
+                row = {"id": r["id"], "date": r.get("date") or "", "time": r.get("time") or "", "url": url,
+                       "headline": heads.get(r.get("type"), "Change in substantial holding")}
+                e = self.read_notice(row, code)
+                who = match_entry(e, self.holders)[0] if e else None
+                if not e or who != holder or target_code(e) != code:
+                    r["dv_tries"] = r.get("dv_tries", 0) + 1
+                    continue
+                series = self.prices(code)
+                tr = e.get("trades") or {}
+                if series:
+                    e["px"] = insight.price_context(series, e.get("change_date") or tr.get("last") or e["date"], tr.get("first", ""), tr.get("last", ""))
+                    add_timeline(e, series)
+                new = dict(insight.history_record(e), dv=INSIGHT_VERSION)
+                for k in ("bf", "fwd"):
+                    if r.get(k) and not new.get(k):
+                        new[k] = r[k]
+                if isinstance(r.get("px"), dict) and r["px"].get("m") and isinstance(new.get("px"), dict):
+                    new["px"]["m"] = r["px"]["m"]
+                rows[idx] = new
+                done += 1
+                self.refreshed += 1
+        return done
 
     def run(self) -> None:
         # 先追最近有动作的持仓
@@ -2329,12 +2369,13 @@ def main() -> int:
     t_bf = time.monotonic()
     try:
         bf.run()
+        bf.refresh_old()
         bf.refresh_forward()
     except Exception as ex:  # noqa: BLE001  回补出错不能影响当天的抓取
         log(f"回补持仓历史出错：{type(ex).__name__}: {ex}")
     pending = sum(1 for k in history["pos"] if not (history.get("meta", {}).get(k) or {}).get("done"))
     if bf.read:
-        log(f"回补持仓历史：读了 {bf.read} 份旧公告，补进 {bf.added} 条，还有 {pending} 个持仓没追完，用时 {time.monotonic() - t_bf:.0f} 秒")
+        log(f"回补持仓历史：读了 {bf.read} 份旧公告，补进 {bf.added} 条，按新读法重读 {bf.refreshed} 条，还有 {pending} 个持仓没追完，用时 {time.monotonic() - t_bf:.0f} 秒")
     try:
         n_mkt = add_market(entries, history)
         if n_mkt:
@@ -2385,7 +2426,7 @@ def main() -> int:
             "insight": {"detail_added": enriched + sum(1 for e in work if e.get("detail_v") == INSIGHT_VERSION),
                         "prices_ok": px_ok, "prices_failed": px_failed,
                         "history_added": hist_added, "positions": len(history["pos"]),
-                        "backfill_read": bf.read, "backfill_added": bf.added, "backfill_pending": pending},
+                        "backfill_read": bf.read, "backfill_added": bf.added, "history_refreshed": bf.refreshed, "backfill_pending": pending},
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],

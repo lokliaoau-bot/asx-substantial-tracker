@@ -1970,7 +1970,7 @@ def test_strength():
 def test_close_call_keeps_generic_label():
     f = _f("buy", f_down=0.9)                      # 逢低 0.78
     ins = {"reasons": ["主动选股基金：x。"], "style": "主动选股基金", "_f": f}
-    insight.finalize(ins, {"nb": 4, "ns": 0})     # 整体加仓 0.9：两种目的几乎同分
+    insight.finalize(ins, {"nb": 5, "ns": 0})     # 整体加仓 0.9：两种目的几乎同分
     assert ins["action"] == "add" and "分不出主次" in ins["reasons"][0] and ins["purposes"][0]["k"] in ("flow", "dip")
     insight.finalize(ins, {"nb": 0, "ns": 0})     # 没有横向证据时，逢低是唯一高过基准线的
     assert ins["action"] == "add_dip" and "最像「逢低买入」" in ins["reasons"][0] and len(ins["reasons"]) == 2

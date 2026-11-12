@@ -1,0 +1,66 @@
+{
+ "buy:base": {
+  "n": 16,
+  "n3": 9,
+  "avg3": 0.203,
+  "up3": 0.556,
+  "n_next": 13,
+  "same_next": 0.615
+ },
+ "buy:dip": {
+  "n": 65,
+  "n3": 28,
+  "avg3": 0.195,
+  "up3": 0.714,
+  "n_next": 42,
+  "same_next": 0.714
+ },
+ "buy:mom": {
+  "n": 38,
+  "n3": 26,
+  "avg3": 0.176,
+  "up3": 0.577,
+  "n_next": 34,
+  "same_next": 0.824
+ },
+ "buy:plc": {
+  "n": 2,
+  "n3": 0,
+  "avg3": null,
+  "up3": null,
+  "n_next": 0,
+  "same_next": null
+ },
+ "buy:short": {
+  "n": 2,
+  "n3": 2,
+  "avg3": 0.044,
+  "up3": 1.0,
+  "n_next": 2,
+  "same_next": 0.5
+ },
+ "sell:base": {
+  "n": 2,
+  "n3": 1,
+  "avg3": -0.01,
+  "up3": 0.0,
+  "n_next": 1,
+  "same_next": 1.0
+ },
+ "sell:profit": {
+  "n": 29,
+  "n3": 19,
+  "avg3": -0.015,
+  "up3": 0.316,
+  "n_next": 22,
+  "same_next": 0.682
+ },
+ "sell:stop": {
+  "n": 15,
+  "n3": 1,
+  "avg3": 0.413,
+  "up3": 1.0,
+  "n_next": 5,
+  "same_next": 1.0
+ }
+}

@@ -31,6 +31,7 @@
 | `scraper/watchlist.json` | 关注名单：`name / group（主动基金·养老金）/ style（active·hedge·strategic·super·platform）/ aliases / hints`，以及 `noise_hints` |
 | `index.html` | 单文件网页（无构建）。读 `data/notices.json`，按钮调 GitHub API 触发抓取并轮询 |
 | `data/all_notices.json` | 内部存储：所有大股东公告的解析结果（35 天） |
+| `data/history.json` | 持仓历史：`pos["基金|代码"] = [每份公告的买卖要点]`，留 3 年，不随 35 天清理 |
 | `data/notices.json` | 网页用：只含命中名单的公告 + `insight` |
 | `tests/test_scrape.py` | 离线测试（假 ASX：`FakeASX`；真实样本在 `tests/fixtures/`） |
 | `tests/frontend_check.py` | Playwright 网页检查（用 `/usr/local/bin/python3` 跑） |
@@ -41,11 +42,12 @@
    `download_pdf` → `pdf_texts`（版面 + 默认两种文字）→ `analyse_texts`（申报方 `parse_holder_section`、比例 `pick_voting_power`、
    变动日 `parse_date`、其他格式 `parse_other_forms`）→ 读不出时 OCR（`ocr_texts`，有名额 `OCRBudget`）
    → 命中名单的顺手 `add_detail`（持股数 + 交易明细）
-3. 命中名单但没读过明细的旧公告：`enrich_entry` 补读；然后 `add_prices` 取 ASX 日线算股价背景
-4. `build_notices`：`match_entry`（高 = 名称命中别名，中 = 第一节原文命中，低 = 标题 from 缩写）→ `insight.judge` → `drop_superseded`
+3. 命中名单但没读过明细的旧公告：`enrich_entry` 补读；然后 `add_prices`（每只股票一次）取 ASX 日线算股价背景、公司近 6 个月的大事 `ev`、行业 `sector`
+4. `update_history`：命中名单的公告要点记进 `data/history.json`（长期保存，算成本用）
+5. `build_notices`：`match_entry`（高 = 名称命中别名，中 = 第一节原文命中，低 = 标题 from 缩写）→ `insight.judge`（带 `cost`、`ev`）→ `drop_superseded` → `insight.add_context`（横向比较）
 
 `entry` 的关键字段：`status`（new/parsed/noise/unreadable/error/skipped）、`parser`、`type`、`holder_name`、`region`、
-`voting_power`、`change_date`、`ocr`、`votes`、`trades`、`detail_v`、`px`、`px_v`。
+`voting_power`、`change_date`、`ocr`、`votes`、`trades`、`detail_v`、`px`（含 `t_vol`）、`px_v`、`ev`、`sector`。
 
 ## 本地怎么跑
 
@@ -66,13 +68,16 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 | # | 内容 | 状态 |
 | --- | --- | --- |
-| 1 | 公司同期事件：配股/融资、业绩、收购、回购（来自 ASX 该公司的公告列表）→ `ev` 字段 → judge | 未开始（先探接口，见下） |
-| 2 | 成本价：命中名单的公告长期存进 `data/history.json`（不随 35 天清掉），算每个（基金, 股票）的平均买入价 → 卖出时判断赚还是亏 | 未开始 |
-| 3 | 同一家基金同期在其他股票上的动作（都在卖 = 像应付赎回；有买有卖 = 调仓）+ 多家基金同向 | 未开始 |
-| 4 | 交易性质读细（明细里 “other” 的行占 23%）+ 买卖量相当于日均成交量的几倍 | 未开始 |
-| 5 | 测试、三轮审查、`dev-r8` 真实运行、合并 main、更新 HANDOVER/README/DEPLOY | 未开始 |
+| 1 | 公司同期事件（融资/业绩/收购/回购）：`company_events` 读该公司近 6 个月公告页 → `classify_event` → entry 的 `ev`（含消息后股价变动 `j`，`insight.event_moves`）→ judge 第 4b 节 | 代码 + 测试完成 |
+| 2 | 成本价：`data/history.json`（`update_history` / `cost_for` / `insight.cost_basis`，留 3 年）→ 卖出时判断赚还是亏，买入时说摊低成本/加码 | 代码 + 测试完成 |
+| 3 | 横向比较 `insight.add_context`：同一基金前后三周在别的股票（整体减仓/整体加仓/换股，行业来自 `company_sector`）+ 同一股票多家同向/反向；`insight.tags` 在网页显示成小标签 | 代码 + 测试完成 |
+| 4 | 买卖量占同期全市场成交量（`px.t_vol`）：超过 1 倍 = 不是场内成交；“SecuritiesBuy” 粘连修复。（查过：明细里的 “other” 行其实都是没写性质的普通现金买卖，不用另外处理） | 代码 + 测试完成 |
+| 5 | 三轮审查 + `dev-r8` 真实运行 + 合并 main + 更新 HANDOVER/README/DEPLOY | **进行中**：第一次真实运行（11/11）发现并修了：并购公告分不清谁收购谁（改用“消息后股价涨 8% 以上才算被收购方”）、行业轮动说得太满、措辞。`INSIGHT_VERSION = 3`。下一步：再跑一次 dev-r8 → 看结果 → 写文档 → 合并 |
 
-探路：`debug-r8` 分支（`tools/probe.py` + `.github/workflows/debug-r8.yml`，结果在 `debug-r8-out` 分支的 `out/`）。
+已验证可用的接口（探路结果在 `debug-r8-out`）：
+- 公司近 6 个月公告：`/asx/v2/statistics/announcements.do?by=asxCode&asxCode=XXX&timeframe=D&period=M6`（HTML；`timeframe=Y&year=2026` 是全年，里面也有更早的大股东公告，以后可用来回补持仓历史）
+- 行业/市值：`asx.api.markitdigital.com/asx-research/1.0/companies/XXX/header`
+- ASIC 每日做空：`https://download.asic.gov.au/short-selling/RRyyyymmdd-001-SSDailyAggShortPos.csv`（T+4，还没接入，留作下一轮）
 
 ### 第七轮（2026-11-11，已完成并合并到 `main`）
 

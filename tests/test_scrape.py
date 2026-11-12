@@ -1640,7 +1640,7 @@ def test_company_events_from_real_page():
     ("Quarterly Activities Report", "results"), ("Trading Update and FY27 Guidance", "results"),
     ("Receipt of Non-Binding Indicative Proposal", "takeover"), ("Scheme Booklet registered with ASIC", "takeover"),
     ("Update - Notification of buy-back - ABC", "buyback"), ("Results of Annual General Meeting", ""),
-    ("Change of Director's Interest Notice", ""), ("Becoming a substantial holder", ""), ("Half Year Results Briefing Date", ""),
+    ("Updated - Sep 2026 Quarterly Activities Report Advisory", ""), ("Change of Director's Interest Notice", ""), ("Becoming a substantial holder", ""), ("Half Year Results Briefing Date", ""),
 ])
 def test_classify_event(headline, kind):
     assert scrape.classify_event(headline) == kind
@@ -1718,18 +1718,21 @@ def test_judge_infers_placement_from_event_and_volume():
 
 
 def test_judge_takeover_and_results_events():
-    tk = [{"d": "2026-10-15", "k": "takeover", "h": "Receipt of Non-Binding Indicative Proposal", "s": True}]
+    tk = [{"d": "2026-10-15", "k": "takeover", "h": "Receipt of Non-Binding Indicative Proposal", "s": True, "j": 0.31}]
     r = insight.judge(_buy(ev=tk, style="hedge"))
     assert r["action"] == "arb" and r["tone"] == "neutral" and "收购相关" in r["tags"]
     r = insight.judge(_buy(ev=tk, style="active"))
     assert r["action"] == "add" and any("赌收购成功" in x for x in r["reasons"])
-    n = _sell(ev=tk)
-    n["px"]["r1m"] = 0.25
-    r = insight.judge(n)
-    assert r["action"] == "trim_profit" and any("借收购带来的涨价退出" in x for x in r["reasons"])
-    res = [{"d": "2026-10-26", "k": "results", "h": "Appendix 4D and Half Year Report", "s": True}]
+    r = insight.judge(_sell(ev=tk))
+    assert r["action"] == "trim_profit" and any("借收购带来的涨价退出" in x and "+31%" in x for x in r["reasons"])
+    # 并购公告后股价没涨：公司多半是出手收购的一方（或还没定），不能说是套利
+    quiet = [{"d": "2026-10-15", "k": "takeover", "h": "BET: BetMakers enters Scheme Implementation Deed with TAH", "s": True, "j": 0.01}]
+    r = insight.judge(_buy(ev=quiet, style="hedge"))
+    assert r["action"] == "add" and "收购相关" not in r["tags"] and any("不据此下结论" in x for x in r["reasons"])
+    assert insight.judge(_buy(ev=[dict(quiet[0], j=None)], style="hedge"))["action"] == "add"
+    res = [{"d": "2026-10-26", "k": "results", "h": "Appendix 4D and Half Year Report", "s": True, "j": -0.18}]
     r = insight.judge(_buy(ev=res))
-    assert "业绩后" in r["tags"] and any("对这份业绩的反应" in x for x in r["reasons"])
+    assert "业绩后" in r["tags"] and any("对这份业绩的反应" in x and "公布后股价 -18%" in x for x in r["reasons"])
     long = _buy(ev=res)                                    # 交易拖了几个月：不能说是对业绩的反应
     long["trades"]["first"] = "2026-06-01"
     assert "业绩后" not in insight.judge(long)["tags"]
@@ -1755,7 +1758,7 @@ def test_add_context_same_fund_other_stocks():
           _n("D", "III", "trim", style="养老金"), _n("D", "JJJ", "add", style="养老金")]
     insight.add_context(ns)
     a = ns[0]["insight"]
-    assert a["tags"] == ["换股"] and "BBB、CCC" in a["reasons"][1] and "卖的是原材料/矿业、买的多是金融，像行业轮动" in a["reasons"][1]
+    assert a["tags"] == ["换股"] and "BBB、CCC" in a["reasons"][1] and "行业" not in ns[1]["insight"]["reasons"][1] and "卖的是原材料/矿业、买的多是金融，像行业轮动" in a["reasons"][1]
     assert a["reasons"][-1].startswith("主动选股基金：")                               # 插在基金类型那句前面
     assert ns[1]["insight"]["tags"] == ["换股"]
     assert ns[3]["insight"]["tags"] == ["整体减仓"] and "应付赎回" in ns[3]["insight"]["reasons"][1]
@@ -1828,3 +1831,15 @@ def test_corrupt_history_file_is_replaced(sandbox, monkeypatch):
     monkeypatch.setattr(scrape, "fetch", FakeASX())
     assert scrape.main() == 0
     assert isinstance(read(sandbox / "data" / "history.json")["pos"], dict)
+
+
+def test_event_moves():
+    day = lambda i: int(dt.datetime(2026, 10, 1, tzinfo=dt.timezone.utc).timestamp() * 1000) + i * 86400000
+    series = [[day(i), p, 1000] for i, p in enumerate([1.0, 1.0, 1.0, 1.3, 1.32, 1.3])]      # 10/1..10/6
+    evs = [{"d": "2026-10-04", "k": "takeover"}, {"d": "2026-10-03", "k": "results"}, {"d": "2026-09-01", "k": "raise"},
+           {"d": "2026-12-01", "k": "raise"}]
+    insight.event_moves(series, evs)
+    assert evs[0]["j"] == 0.32 and evs[1]["j"] == 0.3            # 前一天收盘 → 公告日后第二个收盘
+    assert "j" not in evs[2] and "j" not in evs[3]               # 日线范围以外
+    insight.event_moves([], [{"d": "2026-10-04"}])
+    insight.event_moves([["x"], None], [{"d": "2026-10-04"}])

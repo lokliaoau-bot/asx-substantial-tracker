@@ -81,7 +81,7 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
-INSIGHT_VERSION = 2                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
+INSIGHT_VERSION = 3                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
 DETAIL_TRIES = 3                                          # 明细读取失败最多重试几次
@@ -1320,7 +1320,7 @@ EVENT_KINDS = (     # 顺序有意义：先认更具体的
                            r"|earnings\s+(?:update|guidance)|business\s+update|results?\s+announcement", re.I)),
 )
 EVENT_SKIP_RE = re.compile(r"results?\s+of\s+(?:annual\s+general\s+)?meeting|results?\s+briefing|results?\s+(?:call|webcast|date)|date\s+of|notice\s+of"
-                           r"|presentation\s+date|investor\s+call\s+details", re.I)
+                           r"|presentation\s+date|investor\s+call\s+details|\badvisory\b|\bto\s+be\s+released", re.I)
 MAX_EVENTS = 60
 
 
@@ -1412,6 +1412,7 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
                 e["px_tries"] = e.get("px_tries", 0) + 1
             return False
         for e in by_code[code]:
+            e.pop("ev", None)
             tr = e.get("trades") or {}
             ref = e.get("change_date") or tr.get("last") or e.get("date", "")
             e["px"] = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
@@ -1419,6 +1420,7 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
         time.sleep(PAUSE)
         try:
             evs = company_events(code)
+            insight.event_moves(series, evs)
             for e in by_code[code]:
                 e["ev"] = events_near(evs, e)
         except Exception as ex:  # noqa: BLE001

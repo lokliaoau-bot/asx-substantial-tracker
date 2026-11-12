@@ -1730,6 +1730,12 @@ def test_judge_takeover_and_results_events():
     r = insight.judge(_buy(ev=quiet, style="hedge"))
     assert r["action"] == "add" and "收购相关" not in r["tags"] and any("不据此下结论" in x for x in r["reasons"])
     assert insight.judge(_buy(ev=[dict(quiet[0], j=None)], style="hedge"))["action"] == "add"
+    # 近期只有走流程的公告，但更早那条消息让股价跳涨过：仍然算被收购方
+    both = [{"d": "2026-06-01", "k": "takeover", "h": "Takeover proposal from XYZ", "s": True, "j": 0.4},
+            {"d": "2026-10-12", "k": "takeover", "h": "Lodgement of Scheme Booklet with ASIC", "s": False, "j": 0.0}]
+    r = insight.judge(_buy(ev=both, style="hedge"))
+    assert r["action"] == "arb" and any("Takeover proposal from XYZ" in x for x in r["reasons"])
+    assert insight.judge(_buy(ev=both[:1], style="hedge"))["action"] == "add"            # 只有半年前那条、近期没有后续：不算
     res = [{"d": "2026-10-26", "k": "results", "h": "Appendix 4D and Half Year Report", "s": True, "j": -0.18}]
     r = insight.judge(_buy(ev=res))
     assert "业绩后" in r["tags"] and any("对这份业绩的反应" in x and "公布后股价 -18%" in x for x in r["reasons"])

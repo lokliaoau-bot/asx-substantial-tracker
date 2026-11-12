@@ -801,7 +801,8 @@ def judge(n: dict) -> dict | None:
         else:
             reasons.append(f"期间公司公告过融资（{ev_txt(x)}），一部分买入可能来自认购新股。")
     tk_all = evs("takeover", 60, 0)
-    tk_ev = [x for x in tk_all if (x.get("j") or 0) >= TARGET_JUMP]       # 消息一出股价跳涨：公司是被收购的一方
+    # 消息一出股价跳涨：公司是被收购的一方。近期只有走流程的公告（寄出方案手册之类）时，往前找当初那条让股价跳涨的消息
+    tk_ev = [x for x in ev if x["k"] == "takeover" and x["d"] <= (w1 or "9") and (x.get("j") or 0) >= TARGET_JUMP] if tk_all else []
     if tk_ev and churn < 0.6:
         x = tk_ev[-1]
         what = f"{ev_txt(x)}，消息出来后股价 {fr(x['j'])}"

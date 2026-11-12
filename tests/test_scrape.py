@@ -2474,3 +2474,15 @@ def test_fund_quotes_skip_table_junk():
                           "url": "", "text": "The portfolio decreased in October. " + junk}]}
     q = scrape.fund_quotes(store, "Wilson Asset Management", "EOL", "Energy One Limited", "2026-11-05")
     assert q == [{"fund": "WAM", "title": "October 2026 Investment Update", "date": "2026-11-11", "url": "", "text": ""}]   # 只在表格里出现：不摘句，只说在持仓表里
+
+
+def test_fund_quotes_skip_boilerplate_and_own_products():
+    rep = lambda text, d="2026-10-13", i="1": {"id": i, "holder": "Regal Funds Management", "fund": "RF1", "date": d, "title": "Unitholder Monthly Report", "url": "", "text": text}
+    store = {"reports": [rep("Equity Trustees is a subsidiary of EQT Holdings Limited (ABN 22 607 797 615), a publicly listed company on the Australian Securities Exchange (ASX: EQT). Markets fell.")]}
+    assert scrape.fund_quotes(store, "Regal Funds Management", "EQT", "EQT Holdings Limited", "2026-10-20") == []
+    store = {"reports": [rep("The Regal Investment Fund NAV decreased in September. Regal Asian Investments also fell during the month overall.")]}
+    assert scrape.fund_quotes(store, "Regal Funds Management", "RG1", "Regal Asian Investments Limited", "2026-10-20") == []
+    junk = "Top holdings 4.1% 3.9% 3.5% 3.2% 3.0% 2.9% Energy One 2.8% 2.7% 2.6% 2.5% 2.4% 2.3% 2.2% 2.1% 2.0% 1.9% end."
+    store = {"reports": [dict(rep(junk, "2026-10-13", "1"), holder="Wilson Asset Management"), dict(rep(junk, "2026-09-13", "2"), holder="Wilson Asset Management")]}
+    q = scrape.fund_quotes(store, "Wilson Asset Management", "EOL", "Energy One Limited", "2026-10-20")
+    assert len(q) == 1 and q[0]["text"] == "" and q[0]["date"] == "2026-10-13"       # 只在表格里：只提最新一份

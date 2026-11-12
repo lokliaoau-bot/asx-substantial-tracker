@@ -1,6 +1,6 @@
 # 大股东公告雷达 — 交接文件（给接手的 AI）
 
-> 版本：2026-11-12（第十一轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
+> 版本：2026-11-12（第十二轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
 > 用户 Lok 是会计师，不写代码，用中文沟通，喜欢大白话和例子。所有对用户的说明都要用中文、少术语。
 
 ## 1. 一句话说明
@@ -35,8 +35,9 @@
 | `data/all_notices.json` | 内部存储：35 天内全部大股东公告的解析结果 |
 | `data/history.json` | 持仓历史（第八轮）：`pos["基金|代码"]` = 每份公告的买卖要点，保留 3 年，用来算买入成本。**不要删**，删了成本要从头攒 |
 | `data/calibration.json` | 回头看的统计（第十轮），每次运行重算 |
+| `data/fund_reports.json` | 名单基金上市产品的月报正文（第十二轮），找“基金自己怎么说” |
 | `data/notices.json` | 网页用的结果：只含命中名单的 |
-| `tests/test_scrape.py` | 186 个离线测试 |
+| `tests/test_scrape.py` | 192 个离线测试 |
 | `tools/replay.py` | 离线回放：按当前规则重判 history 和近期公告，和旧代码逐条对比（第十一轮） |
 | `tests/fixtures/` | 真实公告样本（PDF 只留前几页；`insight_samples.json` 是 10 份真实公告的文字 + 对应股价） |
 | `tests/frontend_check.py` | Playwright 网页检查（39 项），含 GitHub API 的模拟 |
@@ -232,6 +233,23 @@ history 记录为此多存了 `px`、`tr`（明细汇总）、`tl`、`fwd`（`{1
 坏数据保护：`stage_for` / `habits` 遇到 history.json 里的坏数据返回 `{}`；`judge` 对三个新字段先做类型检查（`_checked`），不合格就当没有。
 用 2 万次随机坏输入和 3000 次随机损坏的 history 试过，不会让解读出错。
 
+### 第十二轮：相对大盘、基金月报原话
+
+**相对大盘（`scrape.add_market` + `insight.market_returns`）**。指数日线和股票用同一个接口：`…/chart/highcharts?asx_code=XJO`（行是 `[时间, 开, 高, 低, 收, 量]`，取第 5 个；XAO、XSO 也能取）。
+每次运行只在“有 `px` 但没有 `px["m"]`”时取一次，给近期公告和 history 记录都补上 `px["m"] = {m1, m3, m6, m12}`（大盘在变动日之前 1/3/6/12 个月的涨跌）。
+`judge` 里显示的仍是股票自己的涨跌，但打分用的 `r1/r3/r6/r12` 先减掉大盘（所以逢低、顺势、回调、反弹、获利、止损这些“涨了/跌了”的判断都是相对大盘的）；
+大盘 3 个月动了 ≥6% 或 12 个月 ≥12% 时多写一句说明。位置（一年区间百分位）没有调整。取不到指数就照旧用绝对涨跌。
+2026-11 大盘基本横盘，所以上线时 82 条公告的标签一条没变；它是为大盘大涨大跌的时候准备的。
+
+**基金月报原话（`update_fund_reports` / `fund_quotes`）**。`watchlist.json` 里给基金加 `report_codes`（它旗下在 ASX 上市、每月发月报的产品）：
+Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代码近 6 个月的公告页，标题匹配 `REPORT_RE`（investment update / monthly report / unitholder monthly）的，
+每份只下载一次，前 6 页文字存进 `data/fund_reports.json`（留 200 天，每次最多新读 30 份，现在 43 份约 450KB）。
+**月报的 PDF 要在单独的进程里读（`report_text`：限 1.5GB 内存、45 秒）**——第一次真实运行时某份月报把内存吃光，整个任务被系统杀掉（exit 137），本地和测试都复现不了。
+`fund_quotes(基金, 代码, 公司名, 公告日)`：在公告前 100 天到后 60 天的月报里找带 `(ASX: 代码)` 或公司名（`name_key`：去掉 Limited/Group 等后的前两个词，至少 7 个字符）的句子，
+带代码的那句之后 5 句里用简称接着讲的也带上；过滤掉表格/坐标轴读成的“句子”（数字太多）、免责声明类（`BOILER_RE`）、以及基金自己家的产品。最多两份月报，放进 `insight.quotes`，理由里加一句英文原文，小标签“有基金原话”。
+**不参与打分**（程序读不懂英文句子的意思）。2026-11 实测命中 4 条：Wilson 的 DXN（两份月报都说是 contributor）、L1 的 WGX 和 MIN。
+局限：月报每月只点评两三只股票，命中率低；L1、Regal 的月报不带代码，只能靠公司名；Perennial、Paradice、Celeste、Ellerston 没有上市产品，没有月报可读。
+
 （旧）把握（高/中/低）是打分：明细和持股数对得上 +1，股价证据明确 +1，主动/战略型基金 +1，平台型或扫描件 −1。≥3 高，≤0 低。
 
 保护措施：
@@ -279,7 +297,7 @@ history 记录为此多存了 `px`、`tr`（明细汇总）、`tl`、`fwd`（`{1
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 186 passed，全部离线
+python -m pytest -q                             # 192 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
 ```
@@ -308,10 +326,10 @@ python tests/frontend_check.py                  # 需要 playwright + chromium�
 
 ## 9. 可以继续做的事（按价值排序的建议）
 
--1. **相对大盘的涨跌**：现在“逢低/顺势/回调/反弹”用的都是股票自己的涨跌。大盘一起跌 20% 时买，不算这只股票的“逢低”。
-   需要一条指数日线（先在 debug 分支试 `…/chart/highcharts?asx_code=XJO`，没验证过能不能取到），取不到就照旧用绝对涨跌。
+-1. **相对行业/小盘指数**：第十二轮已经做了相对 ASX 200；小盘股更该和小盘指数（XSO，已验证能取）或同行业比。
+-1. **让月报原话参与打分**：现在只是摘出来给人看。可以认几个固定说法（contributor / detractor / exited / added to / initiated a position）给对应目的加减分。
 
-0. **基金月报里的原话**：名单里几家有上市产品，每月在 ASX 发月报（标题已探明：WAM/WMI/WAX “… Investment Update”、LSF “Monthly Report - …”、RF1 “Unitholder Monthly Report …”、PIC “PIC Monthly Investment Update - …”、RPL “… Funds Under Management Update”）。读正文，搜这只股票的名字，把那句话摘到解读里，也能当打分的标准答案。
+0. **基金规模变化**：Regal 母公司 RPL 每月发 “Funds Under Management Update”（标题已探明），规模缩水时“整体减仓（应付赎回）”更可信。
 0. **用回头看的结果校准权重**：现在样本约 250 条，够看趋势但不够拟合；攒到上千条后可以按目的分组看 `same_next` 和 `avg3`，再调 `score_purposes` 里的数。
 0. **做空数据**：ASIC 每日做空 CSV（地址见 `CLAUDE.md`，已验证能下载），可以判断对冲基金是真看多还是在对冲/平空仓。
 0. **董事买卖**（Appendix 3Y）：公司公告页里已经能看到标题，方向要读 PDF。

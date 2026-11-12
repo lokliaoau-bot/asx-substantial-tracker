@@ -1538,6 +1538,8 @@ def update_fund_reports(store: dict, today: dt.date) -> int:
     return new
 
 
+BOILER_RE = re.compile(r"subsidiary|responsible\s+entity|\bABN\b|\bAFSL?\b|disclaimer|past\s+performance|investment\s+manager|trustee"
+                       r"|fund\s+information|management\s+fee|registered\s+office|unit\s+registry", re.I)
 NAME_DROP_RE = re.compile(r"\b(limited|ltd|group|holdings?|corporation|corp|company|co|nl|plc|inc|the|australia|australian)\b\.?", re.I)
 
 
@@ -1550,8 +1552,10 @@ def name_key(company: str) -> str:
 
 def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: str, limit: int = 2) -> list[dict]:
     """这家基金自己的月报里提到这只股票的句子（公告前 100 天到后 60 天之间发的月报）。"""
-    out = []
+    out, table_only = [], []
     if not (store and code and date):
+        return out
+    if holder.split()[0].lower() in (company or "").lower():       # 这只“股票”就是基金自己家的产品：月报里到处是它的名字
         return out
     lo, hi = insight._shift(date, -100), insight._shift(date, 60)
     tick = re.compile(rf"\(\s*ASX\s*:\s*{re.escape(code)}\s*\)", re.I)
@@ -1566,7 +1570,7 @@ def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: 
         sents = re.split(r"(?<=[.!?])\s+(?=[A-Z])", r["text"])
 
         def prose(x: str) -> bool:            # 表格、图表坐标轴被读成的“句子”不要
-            return 25 <= len(x) <= 600 and sum(c.isdigit() for c in x) <= 0.12 * len(x)
+            return 25 <= len(x) <= 600 and sum(c.isdigit() for c in x) <= 0.12 * len(x) and not BOILER_RE.search(x)
 
         ticked = [i for i, x in enumerate(sents) if tick.search(x) and prose(x)]
         named = [i for i, x in enumerate(sents) if name and name.search(x) and prose(x)]
@@ -1575,8 +1579,8 @@ def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: 
             start = ticked[0]
             hits = sorted(set(hits) | {i for i in range(start + 1, min(start + 6, len(sents))) if first_word.search(sents[i]) and prose(sents[i])})
         if not hits:
-            if tick.search(r["text"]) or (name and name.search(r["text"])):
-                out.append({"fund": r.get("fund"), "title": r.get("title"), "date": r.get("date"), "url": safe_url(r.get("url") or ""), "text": ""})
+            if not table_only and any((tick.search(x) or (name and name.search(x))) and not BOILER_RE.search(x) for x in sents):
+                table_only.append({"fund": r.get("fund"), "title": r.get("title"), "date": r.get("date"), "url": safe_url(r.get("url") or ""), "text": ""})
             continue
         text = " ".join(sents[i].strip() for i in hits[:3])
         if len(text) > 520:
@@ -1584,7 +1588,7 @@ def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: 
         out.append({"fund": r.get("fund"), "title": r.get("title"), "date": r.get("date"), "url": safe_url(r.get("url") or ""), "text": text})
         if len(out) >= limit:
             break
-    return out
+    return out or table_only          # 只在持仓表里出现过：只提最新的一份
 
 
 def calibrate(history: dict, holders: list[Holder]) -> dict:

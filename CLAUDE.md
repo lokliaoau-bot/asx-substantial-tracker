@@ -32,6 +32,7 @@
 | `index.html` | 单文件网页（无构建）。读 `data/notices.json`，按钮调 GitHub API 触发抓取并轮询 |
 | `data/all_notices.json` | 内部存储：所有大股东公告的解析结果（35 天） |
 | `data/history.json` | 持仓历史：`pos["基金|代码"] = [每份公告的买卖要点]`，留 3 年，不随 35 天清理 |
+| `data/fund_reports.json` | 名单基金上市产品的月报正文（留 200 天） |
 | `data/notices.json` | 网页用：只含命中名单的公告 + `insight` |
 | `tests/test_scrape.py` | 离线测试（假 ASX：`FakeASX`；真实样本在 `tests/fixtures/`） |
 | `tests/frontend_check.py` | Playwright 网页检查（用 `/usr/local/bin/python3` 跑） |
@@ -63,13 +64,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第十二轮（2026-11-12 开始）：相对大盘 + 基金月报原话 —— 分支 `dev-r12`，进行中
+### 第十二轮（2026-11-12，已完成并合并到 `main`）：相对大盘 + 基金月报原话
 
-| # | 内容 | 状态 |
-| --- | --- | --- |
-| 1 | 相对大盘：`scrape.add_market`（取一次 XJO 日线，给没有的 `px` 补 `px["m"] = {m1,m3,m6,m12}`，history 记录也补）；`insight.judge` 打分用“股票涨跌 − 大盘涨跌”，显示仍是股票自己的 | 代码 + 测试完成 |
-| 2 | 基金月报原话：`watchlist.json` 的 `report_codes`（Wilson: WAM/WAX/WMI/WLE/WAA，L1: LSF，Regal: RF1）→ `update_fund_reports` 存正文到 `data/fund_reports.json`（每份只下一次，留 200 天，每次最多新读 30 份）→ `fund_quotes` 按 “(ASX: 代码)” 或公司名摘句 → `insight.quotes` + 理由 + 小标签“有基金原话”。不参与打分 | 代码 + 测试完成 |
-| 3 | `dev-r12` 真实运行 → `tools/replay.py` 和 main 对比 → 文档 → 合并 | **进行中** |
+- 相对大盘：`scrape.add_market`（XJO 日线，补 `px["m"]`）；`insight.judge` 打分用“股票涨跌 − 大盘涨跌”
+- 基金月报：`watchlist.json` 的 `report_codes` → `update_fund_reports`（`data/fund_reports.json`）→ `fund_quotes` → `insight.quotes`；不参与打分
+- **月报 PDF 必须在子进程里读（`report_text`）**：真实运行时有月报把内存吃光，任务被杀（exit 137）
+- 192 个测试、39 项网页检查；`dev-r12` 真实运行通过；标签和上一版一致（大盘横盘），4 条公告有基金原话
+- 细节在 `HANDOVER.md` 第 5 节“第十二轮”
+
+目前没有进行到一半的工作。下一步候选见 `HANDOVER.md` 第 9 节（相对小盘指数/行业、让月报原话参与打分、RPL 的规模月报、做空数据）。
 
 ### 第十一轮（2026-11-12，已完成并合并到 `main`）：趋势结构 + 持仓阶段 + 基金习惯 + 交易形状
 

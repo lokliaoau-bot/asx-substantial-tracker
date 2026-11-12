@@ -259,6 +259,7 @@ def sandbox(tmp_path, monkeypatch):
     monkeypatch.setattr(scrape, "STORE_FILE", tmp_path / "data" / "all_notices.json")
     monkeypatch.setattr(scrape, "HISTORY_FILE", tmp_path / "data" / "history.json")
     monkeypatch.setattr(scrape, "CALIBRATION_FILE", tmp_path / "data" / "calibration.json")
+    monkeypatch.setattr(scrape, "REPORTS_FILE", tmp_path / "data" / "fund_reports.json")
     monkeypatch.setattr(scrape, "LEGACY_SEEN_FILE", tmp_path / "data" / "seen.json")
     monkeypatch.setattr(scrape, "WATCH_FILE", tmp_path / "scraper" / "watchlist.json")
     monkeypatch.setattr(scrape, "PAUSE", 0)
@@ -2377,3 +2378,90 @@ def test_calibrate_reports_quick_reversals():
     sell = next(v for k, v in cal.items() if k.startswith("sell:"))
     assert buy["n"] == 2 and buy["n_next"] == 1 and buy["same_next"] == 0 and buy["rev_next"] == 1.0       # 31 天后就反向
     assert sell["n_next"] == 1 and sell["rev_next"] == 0.0                                                  # 反向了，但隔了 7 个月
+
+
+# ---------------------------------------------------------------- 第十二轮：相对大盘、基金月报原话
+
+def test_market_returns_and_excess_scoring():
+    pts = [((dt.date(2025, 10, 1) + dt.timedelta(days=i)).isoformat(), 100 - i * 0.05) for i in range(400)]
+    m = insight.market_returns(pts, "2026-10-28")
+    assert m["m3"] < -0.05 and m["m12"] < -0.15 and set(m) == {"m1", "m3", "m6", "m12"}
+    assert insight.market_returns(pts, "2030-01-01") == {} and insight.market_returns([], "2026-10-28") == {}
+    assert "m12" not in insight.market_returns(pts[300:], "2026-10-28")
+    # 股票 3 个月跌 22%：单看是逢低；但大盘同期也跌了 20%，就不算这只股票的逢低
+    n = _buy()
+    n["px"].update(r3m=-0.22, r6m=-0.22, r12m=-0.22, pos=0.5)
+    assert insight.judge(n)["action"] == "add_dip"
+    n["px"]["m"] = {"m1": -0.05, "m3": -0.20, "m6": -0.20, "m12": -0.20}
+    r = insight.judge(n)
+    assert r["action"] == "add" and any("同期大盘（ASX 200）3 个月 -20%" in x for x in r["reasons"])
+    n["px"]["m"] = {"m3": "bad", "m6": None, "m12": 99}                   # 坏数据：当没有
+    assert insight.judge(n)["action"] == "add_dip"
+    n["px"]["m"] = "x"
+    assert insight.judge(n)["action"] == "add_dip"
+
+
+def test_add_market_only_fetches_when_needed(sandbox, monkeypatch):
+    day = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
+    idx = [[day(dt.date(2025, 6, 1) + dt.timedelta(days=i)), 0, 0, 0, 8000 + i, 1] for i in range(600)]
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    fake = FakeASX(prices={"SLC": falling_prices(), "XJO": idx})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["px"]["m"]["m3"] > 0 and fake.price_calls.count("XJO") == 1
+    hist = read(sandbox / "data" / "history.json")
+    assert all("m" in r["px"] for rows in hist["pos"].values() for r in rows if r.get("px", {}).get("p"))
+    scrape.main()
+    assert fake.price_calls.count("XJO") == 1                              # 都补过了：不再取
+    # 指数取不到：照常跑，用股票自己的涨跌
+    fake2 = FakeASX(prices={"SLC": falling_prices()})
+    monkeypatch.setattr(scrape, "fetch", fake2)
+    (sandbox / "data" / "all_notices.json").unlink()
+    (sandbox / "data" / "history.json").unlink()
+    assert scrape.main() == 0 and read(sandbox / "data" / "notices.json")["last_run"]["errors"] == []
+
+
+REPORT_TEXT = ["Investment Update October 2026 ASX: WAM",
+               "The WAM Capital investment portfolio decreased in October. Diversified investor WAM Research (ASX: WAX) was a contributor",
+               "to the investment portfolio performance while Maas Group Holdings (ASX: MGH) was a detractor. WAM Research's share price",
+               "increased after the company upgraded its earnings expectations. We remain confident in the medium-term outlook.",
+               "Dividends since inception are shown below."]
+
+
+def test_fund_report_quotes_end_to_end(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "3001", REPORT_TEXT)
+    monkeypatch.setitem(PDFS, "3002", ["Appendix 3Y"])
+    page = year_page([("28/10/2026", "9:38 am", "October 2026 Investment Update", "3001"),
+                      ("27/10/2026", "9:00 am", "Change of Director's Interest Notice", "3002"),
+                      ("01/02/2026", "9:00 am", "January 2026 Investment Update", "3003")])     # 太旧，不读
+    fake = FakeASX(events={"WAM": page})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    store = read(sandbox / "data" / "fund_reports.json")
+    assert [r["id"] for r in store["reports"]] == ["3001"] and "(ASX: WAX)" in store["reports"][0]["text"]
+    n = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] == "WAX")
+    q = n["insight"]["quotes"][0]
+    assert q["fund"] == "WAM" and "was a contributor" in q["text"] and "Dividends since inception" not in q["text"]
+    assert "有基金原话" in n["insight"]["tags"] and any(r.startswith("基金自己的说法（WAM《October 2026 Investment Update》") for r in n["insight"]["reasons"])
+    assert n["insight"]["reasons"][-1].startswith(n["insight"]["style"] + "：") or n["ocr"]
+    other = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] != "WAX")
+    assert "quotes" not in (other["insight"] or {})
+    before = len(fake.pdf_downloads)
+    scrape.main()
+    assert "3001" not in [str(u) for u in fake.pdf_downloads[before:]] and len(read(sandbox / "data" / "fund_reports.json")["reports"]) == 1
+
+
+def test_fund_quotes_matching():
+    store = {"reports": [
+        {"id": "1", "holder": "L1 Capital", "fund": "LSF", "date": "2026-11-09", "title": "Monthly Report - October 2026", "url": "https://www.asx.com.au/x",
+         "text": "Key detractors included Mineral Resources and Lloyds. Mineral Resources fell 15.7% over the month as prices weakened. Other text here."},
+        {"id": "2", "holder": "L1 Capital", "fund": "LSF", "date": "2026-03-09", "title": "Monthly Report - February 2026", "url": "", "text": "Mineral Resources rose."},
+        {"id": "3", "holder": "Regal Funds Management", "fund": "RF1", "date": "2026-11-09", "title": "x", "url": "", "text": "Mineral Resources was sold."}]}
+    q = scrape.fund_quotes(store, "L1 Capital", "MIN", "Mineral Resources Limited", "2026-11-05")
+    assert len(q) == 1 and q[0]["text"].startswith("Key detractors included Mineral Resources") and "fell 15.7%" in q[0]["text"]
+    assert scrape.fund_quotes(store, "L1 Capital", "BHP", "BHP Group Limited", "2026-11-05") == []      # 名字太短太泛：不搜
+    assert scrape.fund_quotes(store, "Hostplus", "MIN", "Mineral Resources Limited", "2026-11-05") == []
+    assert scrape.fund_quotes({}, "L1 Capital", "MIN", "Mineral Resources Limited", "2026-11-05") == []
+    assert scrape.fund_quotes({"reports": ["x", {"holder": "L1 Capital"}]}, "L1 Capital", "MIN", "Mineral Resources", "2026-11-05") == []
+    assert scrape.name_key("The Lottery Corporation Limited") == "Lottery" and scrape.name_key("Data#3 Limited") == "" and scrape.name_key("Maas Group Holdings") == ""

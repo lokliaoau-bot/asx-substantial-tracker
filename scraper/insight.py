@@ -417,6 +417,20 @@ def timeline(series: list, daily: list, side: str) -> dict:
             "accel": round(_clip(second / first, 0, 9.99), 2) if first > 0 else None}
 
 
+def market_returns(pts: list[tuple[str, float]], ref: str) -> dict:
+    """大盘在 ref 之前 1/3/6/12 个月的涨跌。pts：按日期排好的 (日期, 收盘)。算不出的不给。"""
+    days = [d for d, _ in pts]
+    i = bisect.bisect_right(days, ref or "") - 1
+    if i < 0 or _days_between(days[i], ref) > 10:
+        return {}
+    out = {}
+    for k, n in (("m1", 30), ("m3", 91), ("m6", 182), ("m12", 365)):
+        j = bisect.bisect_right(days, _shift(ref, -n)) - 1
+        if j >= 0 and _days_between(days[j], _shift(ref, -n)) <= 10:
+            out[k] = round(pts[i][1] / pts[j][1] - 1, 3)
+    return out
+
+
 def forward_returns(series: list, ref: str) -> dict:
     """ref 之后 1/3/6 个月股价涨跌（还没到的不给）。"""
     pts = _points(series)
@@ -914,6 +928,18 @@ def judge(n: dict) -> dict | None:
         if pos is not None:
             line += f"，处在一年区间（{fp(px['lo'])}–{fp(px['hi'])}）的{pos_word(pos)}"
         reasons.append(line + "。")
+    # 第十二轮：判断“涨了/跌了”时扣掉大盘同期的涨跌——大盘一起跌 20% 时买，不算这只股票的“逢低”
+    mk = px.get("m") if isinstance(px.get("m"), dict) else {}
+    mk = {k: v for k, v in mk.items() if isinstance(v, (int, float)) and not isinstance(v, bool) and -0.9 < v < 5}
+    r1x = px.get("r1m")
+    if mk:
+        r3 = r3 - mk["m3"] if r3 is not None and "m3" in mk else r3
+        r6 = r6 - mk["m6"] if r6 is not None and "m6" in mk else r6
+        r12 = r12 - mk["m12"] if r12 is not None and "m12" in mk else r12
+        r1x = r1x - mk["m1"] if r1x is not None and "m1" in mk else r1x
+        if abs(mk.get("m3", 0)) >= 0.06 or abs(mk.get("m12", 0)) >= 0.12:
+            bits = [f"{lab} {fr(mk[k])}" for lab, k in (("3 个月", "m3"), ("12 个月", "m12")) if k in mk]
+            reasons.append("同期大盘（ASX 200）" + "、".join(bits) + "：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。")
     up = (r6 is not None and r6 >= 0.25) or (r12 is not None and r12 >= 0.40) or (r3 is not None and r3 >= 0.20)
     down = (r6 is not None and r6 <= -0.25) or (r3 is not None and r3 <= -0.20) or (r12 is not None and r12 <= -0.35)
     high = pos is not None and pos >= 0.65
@@ -1061,7 +1087,7 @@ def judge(n: dict) -> dict | None:
                                        "和成本差不多：不像获利了结，也谈不上止损。"))
         f["tk_sell"] = tk_sell
     # ---- 6b. 第十一轮的四类新证据：趋势结构、持仓阶段、基金习惯、交易形状
-    r1 = px.get("r1m")
+    r1 = r1x
     lt_up = _ratio_max(((r12, 0.40), (r6, 0.25)))
     lt_dn = _ratio_max(((r12, -0.30), (r6, -0.25)))
     st_dn = _ratio_max(((r3, -0.15), (r1, -0.15)))

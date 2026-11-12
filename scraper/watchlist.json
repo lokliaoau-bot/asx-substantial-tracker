@@ -31,7 +31,14 @@
         "Wilson"
       ],
       "group": "主动基金",
-      "style": "active"
+      "style": "active",
+      "report_codes": [
+        "WAM",
+        "WAX",
+        "WMI",
+        "WLE",
+        "WAA"
+      ]
     },
     {
       "name": "Regal Funds Management",
@@ -46,7 +53,10 @@
         "RFM"
       ],
       "group": "主动基金",
-      "style": "hedge"
+      "style": "hedge",
+      "report_codes": [
+        "RF1"
+      ]
     },
     {
       "name": "L1 Capital",
@@ -60,7 +70,10 @@
         "L1G"
       ],
       "group": "主动基金",
-      "style": "hedge"
+      "style": "hedge",
+      "report_codes": [
+        "LSF"
+      ]
     },
     {
       "name": "Perennial",

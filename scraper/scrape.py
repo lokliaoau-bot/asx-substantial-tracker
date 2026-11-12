@@ -99,6 +99,12 @@ COMPANY_YEAR = BASE + "/asx/v2/statistics/announcements.do?by=asxCode&asxCode={c
 BACKFILL_PDFS = int(os.environ.get("BACKFILL_PDFS", "150"))      # 回补持仓历史：单次运行最多读多少份旧公告
 BACKFILL_SECONDS = float(os.environ.get("BACKFILL_SECONDS", "480"))
 CALIBRATION_FILE = DATA_DIR / "calibration.json"
+INDEX_CODE = "XJO"                                   # 大盘：S&P/ASX 200（同一个日线接口，行是 [时间, 开, 高, 低, 收, 量]）
+REPORTS_FILE = DATA_DIR / "fund_reports.json"        # 名单里有上市产品的基金，它们月报的正文（找“基金自己怎么说这只股票”）
+REPORT_RE = re.compile(r"investment\s+update|monthly\s+report|unitholder\s+monthly", re.I)
+REPORT_KEEP_DAYS = 200
+REPORT_MAX_NEW = int(os.environ.get("REPORT_MAX_NEW", "30"))
+REPORT_CHARS = 14000
 HISTORY_DAYS = int(os.environ.get("HISTORY_DAYS", "1100"))   # 持仓历史留 3 年
 WATCH_FILE = ROOT / "scraper" / "watchlist.json"
 
@@ -1417,6 +1423,129 @@ class Backfill:
                     r["fwd_tries"] = r.get("fwd_tries", 0) + 1
 
 
+def index_points() -> list[tuple[str, float]]:
+    pts = []
+    for row in price_series(INDEX_CODE):
+        try:
+            d = dt.datetime.fromtimestamp(row[0] / 1000, dt.timezone.utc).date().isoformat()
+            p = float(row[4] if len(row) >= 5 else row[1])
+        except (TypeError, ValueError, IndexError, OverflowError, OSError):
+            continue
+        if p > 0:
+            pts.append((d, p))
+    pts.sort()
+    return pts
+
+
+def add_market(entries: dict, history: dict) -> int:
+    """给还没有大盘对照的股价背景补上 px["m"]（大盘同期涨跌）。只在有需要时取一次指数日线。返回补了几条。"""
+    todo = []
+    for e in entries.values():
+        px = e.get("px")
+        if isinstance(px, dict) and px.get("p") and "m" not in px:
+            todo.append((px, e.get("change_date") or (e.get("trades") or {}).get("last") or e.get("date") or ""))
+    for rows in (history.get("pos") or {}).values():
+        for r in rows:
+            px = r.get("px")
+            if isinstance(px, dict) and px.get("p") and "m" not in px:
+                todo.append((px, r.get("cd") or r.get("date") or ""))
+    if not todo:
+        return 0
+    pts = index_points()
+    if len(pts) < 50:
+        raise FetchError("指数日线太短")
+    for px, ref in todo:
+        px["m"] = insight.market_returns(pts, ref)
+    return len(todo)
+
+
+def report_codes() -> dict[str, list[str]]:
+    """watchlist.json 里每家基金的 report_codes：它旗下在 ASX 上市、每月发月报的产品代码。"""
+    try:
+        raw = json.loads(WATCH_FILE.read_text(encoding="utf-8"))
+        return {h["name"]: [str(c).upper() for c in h.get("report_codes") or [] if re.fullmatch(r"[A-Za-z0-9]{3,4}", str(c))]
+                for h in raw.get("holders", []) if h.get("report_codes")}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return {}
+
+
+def update_fund_reports(store: dict, today: dt.date) -> int:
+    """把名单基金最近几个月的月报正文存下来（每份只下载一次）。返回新读了几份。"""
+    reports = [r for r in store.get("reports") or [] if isinstance(r, dict) and r.get("id")]
+    keep_from = (today - dt.timedelta(days=REPORT_KEEP_DAYS)).isoformat()
+    reports = [r for r in reports if (r.get("date") or "") >= keep_from]
+    seen = {r["id"] for r in reports}
+    new = 0
+    for holder, codes in report_codes().items():
+        for code in codes:
+            if new >= REPORT_MAX_NEW:
+                break
+            try:
+                rows = parse_company_rows(fetch(COMPANY_ANNS.format(code=code), timeout=40, tries=2).text) or []
+            except FetchError as ex:
+                log(f"  月报列表没取到 {code}：{ex}")
+                continue
+            time.sleep(PAUSE)
+            for row in rows:
+                if new >= REPORT_MAX_NEW:
+                    break
+                if row["id"] in seen or row["date"] < keep_from or not REPORT_RE.search(row["headline"]):
+                    continue
+                seen.add(row["id"])
+                rec = {"id": row["id"], "holder": holder, "fund": code, "date": row["date"], "title": row["headline"][:80], "url": row["url"], "text": ""}
+                try:
+                    data, _ = download_pdf(row["url"])
+                    text = re.sub(r"[ \t]+", " ", "\n".join(trade_pages(data, 6)))
+                    rec["text"] = re.sub(r"\s*\n\s*", " ", text)[:REPORT_CHARS]
+                except Exception as ex:  # noqa: BLE001
+                    log(f"  月报没读出 {code} {row['date']}：{type(ex).__name__}: {ex}")
+                reports.append(rec)          # 读不出的也记下（text 为空），免得每次都重试
+                new += 1
+                time.sleep(PAUSE)
+    store["reports"] = sorted(reports, key=lambda r: (r.get("date") or "", r["id"]))
+    return new
+
+
+NAME_DROP_RE = re.compile(r"\b(limited|ltd|group|holdings?|corporation|corp|company|co|nl|plc|inc|the|australia|australian)\b\.?", re.I)
+
+
+def name_key(company: str) -> str:
+    """公司名里用来在月报里搜的那一截（去掉 Limited / Group 之类）。太短太泛的不用。"""
+    words = [w for w in re.sub(r"[^A-Za-z0-9#&' ]", " ", NAME_DROP_RE.sub(" ", company or "")).split() if w]
+    key = " ".join(words[:2])
+    return key if len(key) >= 7 else ""
+
+
+def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: str, limit: int = 2) -> list[dict]:
+    """这家基金自己的月报里提到这只股票的句子（公告前 100 天到后 60 天之间发的月报）。"""
+    out = []
+    if not (store and code and date):
+        return out
+    lo, hi = insight._shift(date, -100), insight._shift(date, 60)
+    tick = re.compile(rf"\(\s*ASX\s*:\s*{re.escape(code)}\s*\)", re.I)
+    key = name_key(company)
+    name = re.compile(rf"(?<![A-Za-z]){re.escape(key)}(?![a-z])", re.I) if key else None
+    for r in sorted((r for r in store.get("reports") or [] if isinstance(r, dict)), key=lambda r: r.get("date") or "", reverse=True):
+        if r.get("holder") != holder or not (lo <= (r.get("date") or "") <= hi) or not r.get("text"):
+            continue
+        sents = re.split(r"(?<=[.!?])\s+(?=[A-Z])", r["text"])
+        hits = [i for i, s in enumerate(sents) if tick.search(s) or (name and name.search(s))]
+        if not hits:
+            continue
+        picked, used = [], set()
+        for i in hits[:3]:
+            if i not in used:
+                used.add(i)
+                picked.append(sents[i].strip())
+        text = " ".join(picked)
+        if len(text) > 520:
+            text = text[:517].rsplit(" ", 1)[0] + "…"
+        out.append({"fund": r.get("fund"), "title": r.get("title"), "date": r.get("date"), "url": safe_url(r.get("url") or ""), "text": text})
+        if len(out) >= limit:
+            break
+    return out
+
+
 def calibrate(history: dict, holders: list[Holder]) -> dict:
     """回头看：把持仓历史里每份公告按现在的公式重新判断一遍（只用单只股票的证据），再对照之后发生的事——
     公告后 3 个月股价涨跌、它自己下一份公告是同向还是反向。按“方向:目的”汇总。只是统计，不会自动改权重。"""
@@ -1477,7 +1606,7 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
     return out
 
 
-def build_notices(entries: dict, holders: list[Holder], history: dict | None = None) -> list[dict]:
+def build_notices(entries: dict, holders: list[Holder], history: dict | None = None, reports: dict | None = None) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
     style_of = {h.name: h.style for h in holders}
@@ -1531,6 +1660,19 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
         insight.add_context(final)
     except Exception as ex:  # noqa: BLE001  横向比较出错不能影响公告本身
         log(f"  横向比较出错：{type(ex).__name__}: {ex}")
+    for n in final:
+        if n.get("insight") and reports:
+            try:
+                quotes = fund_quotes(reports, n.get("holder") or "", n.get("code") or "", n.get("company") or "", n.get("date") or "")
+            except Exception as ex:  # noqa: BLE001
+                log(f"  月报摘句出错：{type(ex).__name__}: {ex}")
+                quotes = []
+            if quotes:
+                ins = n["insight"]
+                ins["quotes"] = quotes
+                ins.setdefault("tags", []).append("有基金原话")
+                for q in quotes:
+                    insight._add_reason(ins, f"基金自己的说法（{q['fund']}《{q['title']}》，{q['date']}，英文原文）：“{q['text']}”")
     for n in final:
         if n.get("insight"):
             f = n["insight"].pop("_f", None)      # 打分用的中间数据不输出
@@ -2145,6 +2287,21 @@ def main() -> int:
     if bf.read:
         log(f"回补持仓历史：读了 {bf.read} 份旧公告，补进 {bf.added} 条，还有 {pending} 个持仓没追完，用时 {time.monotonic() - t_bf:.0f} 秒")
     try:
+        n_mkt = add_market(entries, history)
+        if n_mkt:
+            log(f"大盘对照：补了 {n_mkt} 条")
+    except Exception as ex:  # noqa: BLE001  取不到指数就照旧用股票自己的涨跌
+        log(f"大盘指数没取到：{type(ex).__name__}: {ex}")
+    reports = load_json(REPORTS_FILE, {})
+    if not isinstance(reports, dict):
+        reports = {}
+    try:
+        n_rep = update_fund_reports(reports, today)
+        if n_rep:
+            log(f"基金月报：新读了 {n_rep} 份，共存 {len(reports.get('reports') or [])} 份")
+    except Exception as ex:  # noqa: BLE001
+        log(f"基金月报出错：{type(ex).__name__}: {ex}")
+    try:
         calibration = calibrate(history, holders)
     except Exception as ex:  # noqa: BLE001
         log(f"回测统计出错：{type(ex).__name__}: {ex}")
@@ -2161,7 +2318,7 @@ def main() -> int:
     if pages_ok:
         store["last_success_at"] = now.isoformat(timespec="seconds")
 
-    notices = build_notices(entries, holders, history)
+    notices = build_notices(entries, holders, history, reports)
     out = {
         "schema": SCHEMA,
         "updated_at": dt.datetime.now(SYD).isoformat(timespec="seconds"),
@@ -2190,6 +2347,7 @@ def main() -> int:
     }
     write_json(STORE_FILE, store)
     write_json(HISTORY_FILE, history)
+    write_json(REPORTS_FILE, reports)
     write_json(CALIBRATION_FILE, calibration, pretty=True)
     write_json(NOTICES_FILE, out, pretty=True)
     if LEGACY_SEEN_FILE.exists():

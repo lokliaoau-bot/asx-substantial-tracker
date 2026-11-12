@@ -63,6 +63,14 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
+### 第十二轮（2026-11-12 开始）：相对大盘 + 基金月报原话 —— 分支 `dev-r12`，进行中
+
+| # | 内容 | 状态 |
+| --- | --- | --- |
+| 1 | 相对大盘：`scrape.add_market`（取一次 XJO 日线，给没有的 `px` 补 `px["m"] = {m1,m3,m6,m12}`，history 记录也补）；`insight.judge` 打分用“股票涨跌 − 大盘涨跌”，显示仍是股票自己的 | 代码 + 测试完成 |
+| 2 | 基金月报原话：`watchlist.json` 的 `report_codes`（Wilson: WAM/WAX/WMI/WLE/WAA，L1: LSF，Regal: RF1）→ `update_fund_reports` 存正文到 `data/fund_reports.json`（每份只下一次，留 200 天，每次最多新读 30 份）→ `fund_quotes` 按 “(ASX: 代码)” 或公司名摘句 → `insight.quotes` + 理由 + 小标签“有基金原话”。不参与打分 | 代码 + 测试完成 |
+| 3 | `dev-r12` 真实运行 → `tools/replay.py` 和 main 对比 → 文档 → 合并 | **进行中** |
+
 ### 第十一轮（2026-11-12，已完成并合并到 `main`）：趋势结构 + 持仓阶段 + 基金习惯 + 交易形状
 
 代码是另一边（连不上 GitHub 的聊天环境）做的，以 zip 交回；这边核对了 diff、跑了 186 个测试和 39 项网页检查，

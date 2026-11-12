@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-12T11:20:25+11:00",
- "last_success_at": "2026-11-12T11:18:58+11:00",
+ "updated_at": "2026-11-12T11:22:17+11:00",
+ "last_success_at": "2026-11-12T11:22:12+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -25,14 +25,14 @@
   "2026-11-12"
  ],
  "partial_days": {
-  "2026-11-12": "11:18"
+  "2026-11-12": "11:22"
  },
  "last_run": {
   "ok": true,
   "list_pages_ok": 2,
-  "substantial_found": 113,
-  "pdf_checked": 11,
-  "skipped_noise": 1,
+  "substantial_found": 112,
+  "pdf_checked": 0,
+  "skipped_noise": 0,
   "deferred": 0,
   "backfill": {
    "ok": true,
@@ -41,8 +41,8 @@
    "incremental": true
   },
   "insight": {
-   "detail_added": 81,
-   "prices_ok": 58,
+   "detail_added": 0,
+   "prices_ok": 0,
    "prices_failed": 0,
    "history_added": 0,
    "positions": 64

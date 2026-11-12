@@ -1,6 +1,6 @@
 # 大股东公告雷达 — 交接文件（给接手的 AI）
 
-> 版本：2026-11-12（第十三轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
+> 版本：2026-11-12（第十四轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
 > 用户 Lok 是会计师，不写代码，用中文沟通，喜欢大白话和例子。所有对用户的说明都要用中文、少术语。
 
 ## 1. 一句话说明
@@ -37,7 +37,7 @@
 | `data/calibration.json` | 回头看的统计（第十轮），每次运行重算 |
 | `data/fund_reports.json` | 名单基金上市产品的月报正文（第十二轮），找“基金自己怎么说” |
 | `data/notices.json` | 网页用的结果：只含命中名单的 |
-| `tests/test_scrape.py` | 196 个离线测试 |
+| `tests/test_scrape.py` | 209 个离线测试 |
 | `tools/replay.py` | 离线回放：按当前规则重判 history 和近期公告，和旧代码逐条对比（第十一轮） |
 | `tests/fixtures/` | 真实公告样本（PDF 只留前几页；`insight_samples.json` 是 10 份真实公告的文字 + 对应股价） |
 | `tests/frontend_check.py` | Playwright 网页检查（39 项），含 GitHub API 的模拟 |
@@ -267,6 +267,26 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 
 **还对不上的 4 份**：Regal 的 TTT、RIV 是 PDF 自己没列全（逐笔加起来和持股变化差一截）；L1 的 GLS、Regal 的 RG1/RG8 明细在别的地方或字间带空格。605 没有持股数是格式本来如此。
 
+### 第十四轮：逐条审查正式版 82 条解读后修的判断
+
+做法：把正式版每条解读连同证据（股价、明细、打分）导出来逐条读，找“明显说错”的，再回到规则上改。改完用 `tools/replay.py` 思路离线重判、逐条对比，再上测试分支真跑。
+找到并修了 5 类问题（括号里是真实例子）：
+
+1. **自家产品当成选股**（Regal 持有 RG1/RG8、L1 持有 GLS）：`scrape.is_own_product`——代码在 `watchlist.json` 这家基金的 `report_codes` 或新字段 `own_codes` 里，
+   或者（只限 active/hedge 型）公司名以基金品牌的第一个词开头（排除 Australian、Colonial 这类泛词）。`judge` 收到 `own: True` 直接给 `own_product`（“自家旗下产品的持股变化（不是选股）”，中性），不打分。
+2. **603 明细比 4 个月长**（Perennial 的 3PL、CYG、CYM 列的是建仓以来全部交易，逐笔净额正好等于现有持仓）：第一笔交易比变动日早 `LONG_603 = 135` 天以上时，
+   不再说“成为大股东前 4 个月”，改说“这份 603 列出的明细（比规定的 4 个月更长）”；净额等于持仓时说“这个仓位是那时候从零建起来的”；
+   “最近 4 个月净买入占持仓多少”只用 `trades.daily` 里最近 123 天的净额（以前用整段，3PL 被说成“100% 是最近 4 个月买的，快速建仓”，实际是 37%）。
+3. **收购方向只看股价**（RWC 和 Brookfield 签收购协议、TTT/PPC 发方案手册，当天股价没涨 8%，就说“看不出是被收购方”）：`insight.target_by_headline(标题, 代码)`——
+   标题开头是别家代码（“BET: …”挂在 TAH 下）或含 to acquire / acquisition of 等 → 出手收购的一方；含 scheme booklet / implementation deed / proposal from / rejects / non-binding 等 → 被收购方。
+   被收购方 = 股价跳涨 ≥8%（且标题不说明是收购方）**或** 标题说明是被收购方。理由里优先引用让股价跳涨的那条。`judge` 因此需要 `code` 字段。
+4. **收购消息后亏着卖被判“分不出主次”**（Regal 卖 RTH：收购消息后股价 +85%，但仍比它的成本低 14%）：卖出新目的 `deal`“借收购消息退出”（先验 −1.5；收购后卖出 +2.6，
+   同时 获利 +0.5、止损 −1.0、仓位管理 −1.0、整体减仓 −0.5），标签 `trim_deal` / `exit_deal`（中性）。和 获利/止损/分批减仓 兼容（`COMPATIBLE`）。
+5. **“在 5% 线附近来回”漏认**（ART 的 EOS、ZIP：两三周前 603 刚到 5.05%，这次小卖跌破）：上一份公告只在近期 35 天的存储里找，603 已经被清掉了。
+   现在找不到时用 `scrape.prev_from_history` 从 history.json 取。
+
+结果（2026-11-12 真实运行）：84 条里 8 条标签变化，都是上面这几类。只改判断规则，版本号没动。
+
 （旧）把握（高/中/低）是打分：明细和持股数对得上 +1，股价证据明确 +1，主动/战略型基金 +1，平台型或扫描件 −1。≥3 高，≤0 低。
 
 保护措施：
@@ -314,7 +334,7 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 196 passed，全部离线
+python -m pytest -q                             # 209 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
 ```
@@ -343,6 +363,7 @@ python tests/frontend_check.py                  # 需要 playwright + chromium�
 
 ## 9. 可以继续做的事（按价值排序的建议）
 
+-1. **定期做一次“逐条审查”**（第十四轮的做法）：每隔一两周把正式版解读导出来逐条读，最能找到规则漏掉的情况。
 -1. **相对行业/小盘指数**：第十二轮已经做了相对 ASX 200；小盘股更该和小盘指数（XSO，已验证能取）或同行业比。
 -1. **让月报原话参与打分**：现在只是摘出来给人看。可以认几个固定说法（contributor / detractor / exited / added to / initiated a position）给对应目的加减分。
 

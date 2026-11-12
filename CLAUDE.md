@@ -64,14 +64,16 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第十四轮（2026-11-12 开始）：逐条审查正式版 82 条解读后修判断 —— 分支 `dev-r14`，进行中
+### 第十四轮（2026-11-12，已完成并合并到 `main`）：逐条审查正式版 82 条解读后修判断
 
 - 自家产品：`scrape.is_own_product`（`watchlist.json` 的 `report_codes` + 新字段 `own_codes`，或公司名以基金品牌开头，限 active/hedge）→ `judge` 的 `own` → 标签 `own_product`（RG1、RG8、GLS）
 - 603 明细比 4 个月长（Perennial 列的是建仓以来全部）：`LONG_603`，照实说跨度，“最近 4 个月净买入”只用 `trades.daily` 里最近 123 天
 - 收购方向看标题：`insight.target_by_headline`（`TARGET_WORDS` / `BIDDER_WORDS` / 别家代码前缀）；`judge` 需要 `code`（build_notices 传入）
 - 新目的 `deal`（借收购消息退出，标签 `trim_deal` / `exit_deal`）：收购消息后卖出 deal +2.6、获利 +0.5、止损 −1.0；和 获利/止损/分批 兼容
 - 上一份公告：近期找不到时 `scrape.prev_from_history`（修了 EOS、ZIP 没认出“5% 线附近”的问题）
-- 209 个测试、39 项网页检查通过。离线回放：82 条里 10 条标签变化（都逐条看过）。**下一步：`dev-r14` 真实运行 → 文档 → 合并**
+- 209 个测试、39 项网页检查；`dev-r14` 真实运行通过，84 条里 8 条标签变化（都逐条看过）。细节在 `HANDOVER.md` 第 5 节“第十四轮”
+
+目前没有进行到一半的工作。下一步候选见 `HANDOVER.md` 第 9 节（定期逐条审查、相对小盘指数、月报原话进打分、做空数据）。
 
 ### 第十三轮（2026-11-12，已完成并合并到 `main`）：逐笔明细读准
 

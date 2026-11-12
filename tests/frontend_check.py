@@ -38,6 +38,7 @@ SAMPLE = {
                                         "Perennial", "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading",
                                         "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)"]},
                "AustralianSuper": "养老金", "UniSuper": "养老金"},
+    "calibration": {"buy:dip": {"n": 20, "n3": 12, "avg3": 0.084, "up3": 0.667, "n_next": 10, "same_next": 0.7}},
     "notices": [
         {"id": "1", "code": "SLC", "company": "Superloop Limited", "date": day(0), "time": "16:10", "headline": "Becoming a substantial holder",
          "url": "https://www.asx.com.au/a", "pdf_url": "https://www.asx.com.au/a.pdf", "price_sensitive": False, "type": "becoming",
@@ -55,6 +56,7 @@ SAMPLE = {
          "holder": "AustralianSuper", "group": "养老金", "confidence": "高", "ocr": True,
          "insight": {"action": "add_dip", "label": "逢低加仓", "tone": "bull", "confidence": "中", "style": "养老金",
                      "tags": ["多家同向", "<b>换股</b>"],
+                     "side": "buy",
                      "purposes": [{"k": "dip", "name": "逢低买入", "p": 0.62}, {"k": "base", "name": "<i>普通加仓</i>", "p": 0.2},
                                   {"k": "flow", "name": "整体加仓", "p": 0.02}], "strength": 71,
                      "reasons": ["持股比例 6.06% → 7.11%，持股数增加 420 万股。", "<img src=x onerror=window.__xss=1>买入时股价处在低位。"]}},
@@ -145,6 +147,8 @@ def main():
         check(pg.locator("#rows details.ins summary .chip").count() == 2 and "多家同向" in pg.inner_text("#rows details.ins summary")
               and pg.locator("#rows details.ins summary b").count() == 0, "解读的小标签显示出来，且不会被当成 HTML")
         pg.click("#rows details.ins summary")
+        check("过去 12 次被判为“逢低买入”的，公告后 3 个月股价平均 +8%，67% 的次数上涨；它自己下一步继续同方向的占 70%" in pg.inner_text("#rows details.ins .purposes"),
+              "有足够样本时显示回头看的统计")
         check(pg.locator("#rows details.ins .prow").count() == 2 and "62%" in pg.inner_text("#rows details.ins .purposes")
               and "力度：强（71/100）" in pg.inner_text("#rows details.ins .purposes") and pg.locator("#rows details.ins .purposes i").count() == 0,
               "目的概率条和力度显示出来（低于 5% 的不显示，名字不会被当成 HTML）")

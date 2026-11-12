@@ -81,7 +81,7 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
-INSIGHT_VERSION = 3                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
+INSIGHT_VERSION = 4                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
 DETAIL_TRIES = 3                                          # 明细读取失败最多重试几次
@@ -95,6 +95,10 @@ NOTICES_FILE = DATA_DIR / "notices.json"      # 网页读取（只含关注名�
 STORE_FILE = DATA_DIR / "all_notices.json"    # 内部存储（全部大股东公告）
 LEGACY_SEEN_FILE = DATA_DIR / "seen.json"     # 第一版的文件，迁移后删除
 HISTORY_FILE = DATA_DIR / "history.json"      # 命中名单的公告要点，长期保存（算买入成本用），不随 KEEP_DAYS 清掉
+COMPANY_YEAR = BASE + "/asx/v2/statistics/announcements.do?by=asxCode&asxCode={code}&timeframe=Y&year={year}"   # 某公司某一年的全部公告
+BACKFILL_PDFS = int(os.environ.get("BACKFILL_PDFS", "150"))      # 回补持仓历史：单次运行最多读多少份旧公告
+BACKFILL_SECONDS = float(os.environ.get("BACKFILL_SECONDS", "480"))
+CALIBRATION_FILE = DATA_DIR / "calibration.json"
 HISTORY_DAYS = int(os.environ.get("HISTORY_DAYS", "1100"))   # 持仓历史留 3 年
 WATCH_FILE = ROOT / "scraper" / "watchlist.json"
 
@@ -1036,6 +1040,8 @@ def update_history(history: dict, entries: dict, holders: list[Holder], today: d
         same = lambda r: (r.get("type"), r.get("cd"), r.get("vp")) == (rec["type"], rec["cd"], rec["vp"]) and rec["cd"] and rec["vp"]
         idx = next((i for i, r in enumerate(rows) if r.get("id") == rec["id"]), None)
         if idx is not None:
+            if rows[idx].get("fwd") and not rec.get("fwd"):
+                rec["fwd"] = rows[idx]["fwd"]
             rows[idx] = rec
         elif not any(same(r) for r in rows):
             rows.append(rec)
@@ -1109,6 +1115,214 @@ def sequence_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
     return {"same": same, "opp_days": opp_days}
 
 
+def parse_company_rows(html: str) -> list[dict] | None:
+    """某公司公告列表页的每一行：{id, date, time, headline, url}。页面认不出返回 None。"""
+    soup = BeautifulSoup(html, "html.parser")
+    out = []
+    for tr in soup.find_all("tr"):
+        tds = tr.find_all("td")
+        a = tr.find("a", href=re.compile(r"idsId", re.I))
+        if len(tds) < 3 or a is None or not a.get("href"):
+            continue
+        text = tds[0].get_text(" ", strip=True)
+        dm, tm = DATE_RE.search(text), TIME_RE.search(text)
+        idm = re.search(r"idsId=(\w+)", a["href"])
+        if not dm or not idm:
+            continue
+        try:
+            d = dt.date(int(dm.group(3)), int(dm.group(2)), int(dm.group(1)))
+        except ValueError:
+            continue
+        href = safe_url(urljoin(BASE, a["href"].strip()))
+        if href:
+            out.append({"id": idm.group(1), "date": d.isoformat(), "time": to_24h(*tm.groups()) if tm else "",
+                        "headline": TAIL_RE.sub("", a.get_text(" ", strip=True)).strip(), "url": href})
+    if not out and not re.search(r"no\s+announcements|Search\s+results", html, re.I):
+        return None
+    return out
+
+
+class Backfill:
+    """回补持仓历史。每个（基金, 股票）从已知最早的一份公告出发，按它写的“上一份公告日期”到公司的全年公告页找上一份，
+    读出来确认是同一家基金就记下，再接着往前，直到 603（新进）、找不到、或超出保留期。有总量和时间上限，没追完的下次接着追。"""
+
+    def __init__(self, history: dict, holders: list[Holder], today: dt.date, budget: int | None = None, seconds: float | None = None):
+        self.h, self.holders, self.today = history, holders, today
+        self.budget = BACKFILL_PDFS if budget is None else budget
+        self.deadline = time.monotonic() + (BACKFILL_SECONDS if seconds is None else seconds)
+        self.lists: dict[tuple, list] = {}
+        self.series: dict[str, list] = {}
+        self.read = self.added = 0
+        self.cutoff = (today - dt.timedelta(days=HISTORY_DAYS)).isoformat()
+
+    def out_of_budget(self) -> bool:
+        return self.read >= self.budget or time.monotonic() > self.deadline
+
+    def year_rows(self, code: str, year: int) -> list[dict]:
+        if (code, year) not in self.lists:
+            rows = parse_company_rows(fetch(COMPANY_YEAR.format(code=code, year=year), timeout=40, tries=2).text)
+            if rows is None:
+                raise FetchError("公司年度公告页认不出来")
+            self.lists[(code, year)] = [r for r in rows if SUBSTANTIAL_RE.search(r["headline"])]
+            time.sleep(PAUSE)
+        return self.lists[(code, year)]
+
+    def prices(self, code: str) -> list:
+        if code not in self.series:
+            try:
+                self.series[code] = price_series(code)
+            except FetchError:
+                self.series[code] = []
+            time.sleep(PAUSE)
+        return self.series[code]
+
+    def read_notice(self, row: dict, code: str) -> dict | None:
+        e = {**row, "code": code, "pages": None, "price_sensitive": False, "type": classify(row["headline"]),
+             "hint": headline_hint(row["headline"]), "company": "", "holder_name": "", "region": "", "change_date": "",
+             "voting_power": [], "pdf_url": "", "status": "new", "attempts": 0}
+        self.read += 1
+        try:
+            process_entry(e, None, lambda _e: True)
+        except Exception as ex:  # noqa: BLE001
+            log(f"  回补读取失败 {code} {row['date']}：{type(ex).__name__}: {ex}")
+            return None
+        finally:
+            time.sleep(PAUSE)
+        return e if e.get("status") == "parsed" else None
+
+    def chase(self, key: str) -> None:
+        holder, code = key.split("|", 1)
+        meta = self.h.setdefault("meta", {}).setdefault(key, {})
+        rows = self.h["pos"][key]
+        while not meta.get("done") and not self.out_of_budget():
+            first = rows[0]
+            target = first.get("prev_notice") or ""
+            if first.get("type") == "becoming" or not target or target < self.cutoff or target >= (first.get("date") or ""):
+                meta["done"] = "start" if first.get("type") == "becoming" else "no_prev" if not target else "old"
+                return
+            t = dt.date.fromisoformat(target)
+            lo, hi = (t - dt.timedelta(days=3)).isoformat(), (t + dt.timedelta(days=6)).isoformat()
+            known = {r.get("id") for r in rows} | set(meta.get("tried", []))
+            years = sorted({t.year, (t + dt.timedelta(days=6)).year})
+            cands = [r for y in years for r in self.year_rows(code, y)
+                     if lo <= r["date"] <= hi and r["id"] not in known and r["date"] < (first.get("date") or "9")]
+            cands = [r for r in cands if not is_noise(headline_hint(r["headline"]), self.holders, [])]
+            cands.sort(key=lambda r: abs((dt.date.fromisoformat(r["date"]) - t).days))
+            hit = None
+            for r in cands[:4]:
+                if self.out_of_budget():
+                    return
+                meta.setdefault("tried", []).append(r["id"])
+                e = self.read_notice(r, code)
+                if not e:
+                    continue
+                who, _ = match_entry(e, self.holders)
+                if who and target_code(e) == code:
+                    series = self.prices(code)
+                    tr = e.get("trades") or {}
+                    if series:
+                        e["px"] = insight.price_context(series, e.get("change_date") or tr.get("last") or e["date"], tr.get("first", ""), tr.get("last", ""))
+                        add_timeline(e, series)
+                    rec = dict(insight.history_record(e), bf=1)
+                    dest = self.h["pos"].setdefault(pos_key(who, code), [])
+                    if not any(x.get("id") == rec["id"] for x in dest):
+                        dest.append(rec)
+                        dest.sort(key=lambda x: (x.get("date") or "", x.get("time") or "", str(x.get("id"))))
+                        self.added += 1
+                    if who == holder:
+                        hit = rec
+                        break
+            if not hit:
+                meta["done"] = "not_found"
+                return
+            meta["tried"] = meta.get("tried", [])[-12:]
+
+    def run(self) -> None:
+        # 先追最近有动作的持仓
+        keys = sorted(self.h.get("pos", {}), key=lambda k: self.h["pos"][k][-1].get("date") or "", reverse=True)
+        for key in keys:
+            if self.out_of_budget():
+                break
+            try:
+                self.chase(key)
+            except FetchError as ex:
+                log(f"  回补 {key} 中断：{ex}")
+                meta = self.h.setdefault("meta", {}).setdefault(key, {})
+                meta["err"] = meta.get("err", 0) + 1
+                if meta["err"] >= 4:                 # 连着几次都取不到这家公司的公告页：不再试
+                    meta["done"] = "error"
+            except Exception as ex:  # noqa: BLE001
+                log(f"  回补 {key} 出错：{type(ex).__name__}: {ex}")
+                self.h.setdefault("meta", {}).setdefault(key, {})["done"] = "error"
+
+    def refresh_forward(self, max_codes: int = 40) -> None:
+        """旧记录的“公告后 1/3/6 个月涨跌”到期了就补上。"""
+        need: dict[str, list] = {}
+        for key, rows in self.h.get("pos", {}).items():
+            code = key.split("|", 1)[1]
+            for r in rows:
+                due = [k for k, n in (("1m", 30), ("3m", 91), ("6m", 182))
+                       if k not in (r.get("fwd") or {}) and insight._shift(r.get("date") or "", n + 3) <= self.today.isoformat()]
+                if due and r.get("fwd_tries", 0) < 3:
+                    need.setdefault(code, []).append(r)
+        for code in sorted(need, key=lambda c: c not in self.series)[:max_codes]:
+            series = self.prices(code)
+            for r in need[code]:
+                fwd = insight.forward_returns(series, r.get("date") or "") if series else {}
+                if len(fwd) > len(r.get("fwd") or {}):
+                    r["fwd"] = fwd
+                else:
+                    r["fwd_tries"] = r.get("fwd_tries", 0) + 1
+
+
+def calibrate(history: dict, holders: list[Holder]) -> dict:
+    """回头看：把持仓历史里每份公告按现在的公式重新判断一遍（只用单只股票的证据），再对照之后发生的事——
+    公告后 3 个月股价涨跌、它自己下一份公告是同向还是反向。按“方向:目的”汇总。只是统计，不会自动改权重。"""
+    style_of = {h.name: h.style for h in holders}
+    agg: dict[str, dict] = {}
+    for key, rows in (history.get("pos") or {}).items():
+        holder = key.split("|", 1)[0]
+        for i, r in enumerate(rows):
+            if not r.get("px") and not r.get("tr"):
+                continue
+            e = {"id": r.get("id"), "date": r.get("date"), "time": r.get("time"), "type": r.get("type"), "votes": r.get("votes"),
+                 "voting_power": r.get("vp")}
+            before = rows[:i]
+            prev = before[-1] if before else None
+            holding = (r["votes"][0] if r.get("type") == "change" and len(r.get("votes") or []) == 2
+                       else next((x["votes"][-1] for x in reversed(before) if x.get("votes")), None))
+            try:
+                ins = insight.judge({
+                    "type": r.get("type"), "voting_power": r.get("vp") or [], "votes": r.get("votes") or [], "trades": r.get("tr") or {},
+                    "px": r.get("px") or {}, "ocr": r.get("ocr"), "style": style_of.get(holder, "active"), "date": r.get("date"),
+                    "change_date": r.get("cd"), "tl": r.get("tl") or {}, "cost": insight.cost_basis(before, holding) if before else {},
+                    "seq": sequence_for(history, holder, key.split("|", 1)[1], e),
+                    "prev": {"vp": (prev.get("vp") or [None])[-1], "votes": (prev.get("votes") or [None])[-1], "type": prev.get("type"),
+                             "date": prev.get("date")} if prev else None})
+            except Exception:  # noqa: BLE001
+                continue
+            if not ins or not ins.get("_f"):
+                continue
+            side, top = ins["_f"]["side"], ins["purposes"][0]["k"]
+            a = agg.setdefault(f"{side}:{top}", {"n": 0, "n3": 0, "sum3": 0.0, "up3": 0, "n_next": 0, "same_next": 0})
+            a["n"] += 1
+            f3 = (r.get("fwd") or {}).get("3m")
+            if f3 is not None:
+                a["n3"] += 1
+                a["sum3"] += f3
+                a["up3"] += f3 > 0
+            nxt = next((_rec_dir(x) for x in rows[i + 1:] if _rec_dir(x)), "")
+            if nxt:
+                a["n_next"] += 1
+                a["same_next"] += nxt == side
+    out = {}
+    for k, a in sorted(agg.items()):
+        out[k] = {"n": a["n"], "n3": a["n3"], "avg3": round(a["sum3"] / a["n3"], 3) if a["n3"] else None,
+                  "up3": round(a["up3"] / a["n3"], 3) if a["n3"] else None, "n_next": a["n_next"],
+                  "same_next": round(a["same_next"] / a["n_next"], 3) if a["n_next"] else None}
+    return out
+
+
 def build_notices(entries: dict, holders: list[Holder], history: dict | None = None) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
@@ -1133,6 +1347,7 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
                     "style": style_of.get(holder, "active"), "prev": last_seen.get(key), "date": e.get("date"),
                     "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
                     "change_date": e.get("change_date"), "seq": sequence_for(history, holder, item["code"], e),
+                    "tl": e.get("tl") or {},
                 })
             except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
                 log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")
@@ -1158,7 +1373,9 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
         log(f"  横向比较出错：{type(ex).__name__}: {ex}")
     for n in final:
         if n.get("insight"):
-            n["insight"].pop("_f", None)          # 打分用的中间数据不输出
+            f = n["insight"].pop("_f", None)      # 打分用的中间数据不输出
+            if f:
+                n["insight"]["side"] = f["side"]
     return final
 
 
@@ -1331,7 +1548,21 @@ def add_detail(e: dict, data: bytes, texts: list[str] | None = None) -> None:
     e["votes"] = votes
     # 扫描件的逐笔数字靠 OCR 认，错一位就差很远，不读明细
     e["trades"] = {} if e.get("ocr") else insight.parse_trades(trade_pages(data), e.get("date", ""), ntype)["summary"]
+    e["prev_notice"] = next((d for d in (parse_prev_notice(t) for t in (texts if texts is not None else pdf_texts(data))) if d), "")
     e["detail_v"] = INSIGHT_VERSION
+
+
+PREV_NOTICE_RE = re.compile(r"previous\s+notice\s+was\s+(given\s+to\s+the\s+company\s+on|dated)\s*:?\s*([^\n]{4,40})", re.I)
+
+
+def parse_prev_notice(text: str) -> str:
+    """604/605 开头写的“上一份公告是哪天交给公司的”（没有就用“上一份公告的日期”）。回补持仓历史时顺着它往前找。"""
+    found = {}
+    for m in PREV_NOTICE_RE.finditer(text or ""):
+        d = parse_date(m.group(2))
+        if d:
+            found.setdefault("given" if m.group(1).lower().startswith("given") else "dated", d)
+    return found.get("given") or found.get("dated") or ""
 
 
 def enrich_entry(e: dict) -> None:
@@ -1447,6 +1678,18 @@ def events_near(evs: list[dict], e: dict) -> list[dict]:
     return [x for x in evs if lo <= x["d"] <= hi][-20:]
 
 
+def entry_side(e: dict) -> str:
+    return _rec_dir({"type": e.get("type"), "votes": e.get("votes"), "vp": e.get("voting_power")})
+
+
+def add_timeline(e: dict, series: list) -> None:
+    """逐笔时间线和公告后的涨跌（都要用日线）。"""
+    tr = e.get("trades") or {}
+    side = entry_side(e)
+    e["tl"] = insight.timeline(series, tr.get("daily") or [], side) if side else {}
+    e["fwd"] = insight.forward_returns(series, e.get("date") or "")
+
+
 def add_prices(entries: list[dict]) -> tuple[int, int]:
     """给这些公告补上变动时的股价背景、公司同期的大事（融资/业绩/收购/回购）和所属行业（每只股票只取一次）。
     返回 (取到的股票数, 失败的股票数)。大事和行业取不到不算失败，只是解读里少一条依据。"""
@@ -1468,6 +1711,7 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
             ref = e.get("change_date") or tr.get("last") or e.get("date", "")
             e["px"] = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
             e["px_v"] = INSIGHT_VERSION
+            add_timeline(e, series)
         time.sleep(PAUSE)
         try:
             evs = company_events(code)
@@ -1730,6 +1974,21 @@ def main() -> int:
     if not isinstance(history, dict) or not isinstance(history.get("pos"), dict):
         history = {"pos": {}}
     hist_added = update_history(history, entries, holders, today)
+    bf = Backfill(history, holders, today)
+    t_bf = time.monotonic()
+    try:
+        bf.run()
+        bf.refresh_forward()
+    except Exception as ex:  # noqa: BLE001  回补出错不能影响当天的抓取
+        log(f"回补持仓历史出错：{type(ex).__name__}: {ex}")
+    pending = sum(1 for k in history["pos"] if not (history.get("meta", {}).get(k) or {}).get("done"))
+    if bf.read:
+        log(f"回补持仓历史：读了 {bf.read} 份旧公告，补进 {bf.added} 条，还有 {pending} 个持仓没追完，用时 {time.monotonic() - t_bf:.0f} 秒")
+    try:
+        calibration = calibrate(history, holders)
+    except Exception as ex:  # noqa: BLE001
+        log(f"回测统计出错：{type(ex).__name__}: {ex}")
+        calibration = {}
 
     cutoff = (today - dt.timedelta(days=KEEP_DAYS)).isoformat()
     entries = {k: v for k, v in entries.items() if (v.get("date") or "") >= cutoff}
@@ -1759,16 +2018,19 @@ def main() -> int:
             "backfill": backfill,
             "insight": {"detail_added": enriched + sum(1 for e in work if e.get("detail_v") == INSIGHT_VERSION),
                         "prices_ok": px_ok, "prices_failed": px_failed,
-                        "history_added": hist_added, "positions": len(history["pos"])},
+                        "history_added": hist_added, "positions": len(history["pos"]),
+                        "backfill_read": bf.read, "backfill_added": bf.added, "backfill_pending": pending},
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],
         "styles": {h.name: insight.STYLES[h.style][0] for h in holders},
         "groups": {h.name: h.group for h in holders},
+        "calibration": calibration,
         "notices": notices,
     }
     write_json(STORE_FILE, store)
     write_json(HISTORY_FILE, history)
+    write_json(CALIBRATION_FILE, calibration, pretty=True)
     write_json(NOTICES_FILE, out, pretty=True)
     if LEGACY_SEEN_FILE.exists():
         LEGACY_SEEN_FILE.unlink()

@@ -181,7 +181,7 @@ PDFS = {
 
 class FakeASX:
     def __init__(self, listing=LISTING, fail_ids=(), lists_down=False, prev_listing=None, broken_ids=(),
-                 api_items=(), api_down=False, api_pdfs=None, prices=None, events=None, sectors=None):
+                 api_items=(), api_down=False, api_pdfs=None, prices=None, events=None, sectors=None, years=None):
         self.listing, self.fail_ids, self.lists_down = listing, set(fail_ids), lists_down
         self.prev_listing, self.broken_ids = prev_listing, set(broken_ids)
         self.api_items, self.api_down, self.api_pdfs = list(api_items), api_down, api_pdfs or {}
@@ -190,6 +190,7 @@ class FakeASX:
         self.prices = prices or {}          # 股票代码 → 日线 [[毫秒, 收盘, 成交量], ...]；没有的代码返回 404
         self.price_calls = []
         self.events, self.sectors, self.event_calls = events or {}, sectors or {}, []
+        self.years, self.year_calls = years or {}, []
 
     def __call__(self, url, *, max_bytes=None, tries=3, timeout=60):
         if "/chart/highcharts" in url:
@@ -198,6 +199,12 @@ class FakeASX:
             if code not in self.prices:
                 raise scrape.FetchError("HTTP 404")
             return scrape.Fetched(url, json.dumps(self.prices[code]).encode(), "application/json")
+        if "announcements.do?by=asxCode" in url and "timeframe=Y" in url:
+            key = (url.split("asxCode=")[1].split("&")[0], int(url.split("year=")[1].split("&")[0]))
+            self.year_calls.append(key)
+            if key not in self.years:
+                return scrape.Fetched(url, b"<html><h2>Search results</h2>No announcements</html>", "text/html")
+            return scrape.Fetched(url, self.years[key].encode(), "text/html; charset=utf-8")
         if "announcements.do?by=asxCode" in url:
             code = url.split("asxCode=")[1].split("&")[0]
             self.event_calls.append(code)
@@ -251,6 +258,7 @@ def sandbox(tmp_path, monkeypatch):
     monkeypatch.setattr(scrape, "NOTICES_FILE", tmp_path / "data" / "notices.json")
     monkeypatch.setattr(scrape, "STORE_FILE", tmp_path / "data" / "all_notices.json")
     monkeypatch.setattr(scrape, "HISTORY_FILE", tmp_path / "data" / "history.json")
+    monkeypatch.setattr(scrape, "CALIBRATION_FILE", tmp_path / "data" / "calibration.json")
     monkeypatch.setattr(scrape, "LEGACY_SEEN_FILE", tmp_path / "data" / "seen.json")
     monkeypatch.setattr(scrape, "WATCH_FILE", tmp_path / "scraper" / "watchlist.json")
     monkeypatch.setattr(scrape, "PAUSE", 0)
@@ -1974,3 +1982,114 @@ def test_close_call_keeps_generic_label():
     assert ins["action"] == "add" and "分不出主次" in ins["reasons"][0] and ins["purposes"][0]["k"] in ("flow", "dip")
     insight.finalize(ins, {"nb": 0, "ns": 0})     # 没有横向证据时，逢低是唯一高过基准线的
     assert ins["action"] == "add_dip" and "最像「逢低买入」" in ins["reasons"][0] and len(ins["reasons"]) == 2
+
+
+# ---------------------------------------------------------------- 第十轮：回补历史、逐笔时间线、回测
+
+def year_page(rows):
+    trs = "".join(f'<tr><td>{d}<br/><span class="dates-time">{t}</span></td><td class="pricesens"></td>'
+                  f'<td><a href="/asx/v2/statistics/displayAnnouncement.do?display=pdf&amp;idsId={i}">{h}<br/>3 pages 200KB</a></td></tr>'
+                  for d, t, h, i in rows)
+    return f"<html><h2>Search results</h2><table><tr><th>Date</th></tr>{trs}</table></html>"
+
+
+OLD_604 = ["Form 604", "To Company Name/Scheme Superloop Limited", "1. Details of substantial holder (1)",
+           "Name Paradice Investment Management Pty Ltd", "There was a change in the interests of the",
+           "substantial holder on 31/08/2026", "The previous notice was given to the company on 02/06/2026",
+           "2. Previous and present voting power", "Ordinary 8,500,000 5.20% 10,000,000 6.10%",
+           "3. Changes in relevant interests",
+           "24/08/2026 Paradice On market purchase $1,500,000.00 500,000 500,000",
+           "25/08/2026 Paradice On market purchase $1,450,000.00 500,000 500,000",
+           "26/08/2026 Paradice On market purchase $1,400,000.00 250,000 250,000",
+           "27/08/2026 Paradice On market purchase $700,000.00 250,000 250,000",
+           "4. Present relevant interests"]
+OLD_603 = ["Form 603", "To Company Name/Scheme Superloop Limited", "1. Details of substantial holder (1)",
+           "Name Paradice Investment Management Pty Ltd", "The holder became a substantial holder on 01/06/2026",
+           "2. Details of voting power", "Fully paid ordinary shares 8,500,000 8,500,000 5.20%"]
+OTHER_604 = ["Form 604", "To Company Name/Scheme Superloop Limited", "1. Details of substantial holder (1)",
+             "Name Some Random Fund Pty Ltd", "There was a change in the interests of the substantial holder on 31/08/2026",
+             "2. Previous and present voting power", "Ordinary 1 6.01% 2 7.05%"]
+
+
+def test_parse_prev_notice():
+    assert scrape.parse_prev_notice("The previous notice was given to the company on 21/10/2026\nThe previous notice was dated 20/10/2026") == "2026-10-21"
+    assert scrape.parse_prev_notice("The previous notice was dated 29 October 2026") == "2026-10-29"
+    assert scrape.parse_prev_notice("The previous notice was given to the company on: 09/11/2026") == "2026-11-09"
+    assert scrape.parse_prev_notice("The previous notice was given to the company on 31 / 08 / 2026") == "2026-08-31"
+    assert scrape.parse_prev_notice("The previous notice was given to the company on\n") == "" and scrape.parse_prev_notice("") == ""
+
+
+def test_backfill_chases_previous_notices(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)                       # 上一份公告：01/09/2026
+    monkeypatch.setitem(PDFS, "2001", OLD_604)
+    monkeypatch.setitem(PDFS, "2002", OTHER_604)
+    monkeypatch.setitem(PDFS, "2003", OLD_603)
+    years = {("SLC", 2026): year_page([
+        ("28/10/2026", "5:00 pm", "Change in substantial holding", "1001"),
+        ("01/09/2026", "9:00 am", "Change in substantial holding", "2002"),     # 别人的，同一天
+        ("01/09/2026", "4:00 pm", "Change in substantial holding", "2001"),
+        ("15/07/2026", "4:00 pm", "Annual Report", "2999"),
+        ("02/06/2026", "4:00 pm", "Becoming a substantial holder", "2003")])}
+    fake = FakeASX(prices={"SLC": falling_prices()}, years=years)
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    hist = read(sandbox / "data" / "history.json")
+    key = next(k for k in hist["pos"] if k.endswith("|SLC"))
+    rows = hist["pos"][key]
+    assert [r["id"] for r in rows] == ["2003", "2001", "1001"] and rows[0]["type"] == "becoming" and rows[1]["bf"] == 1
+    assert rows[1]["buy_qty"] == 1_500_000 and rows[1]["prev_notice"] == "2026-06-02" and rows[1]["px"]["p"] > 0
+    assert rows[1]["tl"]["n"] == 4 and rows[1]["fwd"]["1m"] < 0 and "3m" not in rows[1]["fwd"]      # 3 个月还没到
+    assert hist["meta"][key]["done"] == "start"
+    run = read(sandbox / "data" / "notices.json")["last_run"]["insight"]
+    assert run["backfill_read"] == 3 and run["backfill_added"] == 2
+    # 这次的公告现在有成本价，也知道是连续加仓
+    n = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] == "SLC")
+    assert "连续加仓" in n["insight"]["tags"] and any("连续第 2 次加仓" in r for r in n["insight"]["reasons"])
+    c = scrape.cost_for(hist, key.split("|")[0], "SLC", {"id": "1001", "date": "2026-10-30", "time": "17:00", "type": "change", "votes": [10_000_000, 12_000_000]})
+    assert c["n"] == 1 and 3.3 < c["avg"] < 3.4 and c["cov"] == 0.15           # 只知道 150 万股的成本，不到四成，所以解读里不拿它下结论
+    # 追完了：再跑不再读旧公告
+    fake.pdf_downloads.clear()
+    scrape.main()
+    assert fake.pdf_downloads == []
+    cal = read(sandbox / "data" / "calibration.json")
+    assert sum(v["n"] for v in cal.values()) >= 2 and all(":" in k for k in cal)
+
+
+def test_backfill_budget_and_missing_pages(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    monkeypatch.setattr(scrape, "BACKFILL_PDFS", 0)
+    fake = FakeASX(prices={"SLC": falling_prices()})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    assert scrape.main() == 0
+    hist = read(sandbox / "data" / "history.json")
+    key = next(k for k in hist["pos"] if k.endswith("|SLC"))
+    assert not (hist.get("meta", {}).get(key) or {}).get("done") and fake.year_calls == []        # 没名额：留到下次
+    monkeypatch.setattr(scrape, "BACKFILL_PDFS", 50)
+    assert scrape.main() == 0                                                                      # 公司那年没有对得上的公告
+    hist = read(sandbox / "data" / "history.json")
+    assert hist["meta"][key]["done"] == "not_found" and read(sandbox / "data" / "notices.json")["last_run"]["errors"] == []
+
+
+def test_timeline_and_forward_returns():
+    day = lambda i: int(dt.datetime(2026, 9, 1, tzinfo=dt.timezone.utc).timestamp() * 1000) + i * 86400000
+    closes = [1.00, 0.95, 0.97, 0.90, 0.92, 0.85, 0.86, 0.80, 0.82, 0.78]
+    series = [[day(i), p, 1000] for i, p in enumerate(closes)]
+    iso = lambda i: (dt.date(2026, 9, 1) + dt.timedelta(days=i)).isoformat()
+    daily = [[iso(1), 400], [iso(3), 300], [iso(4), 50], [iso(5), 200], [iso(7), 300], [iso(8), -100]]
+    tl = insight.timeline(series, daily, "buy")
+    assert tl["n"] == 5 and tl["down_share"] == 0.96 and tl["r_win"] == -0.2 and tl["base_down"] == round(4 / 7, 3)
+    assert insight.timeline(series, daily, "sell") == {} and insight.timeline([], daily, "buy") == {}
+    assert insight.timeline(series, [["x"], None, [iso(1), "a"]], "buy") == {}
+    f = _f("buy", tl=tl)
+    assert top(f) == "dip" and any("集中在股价下跌的日子" in w for w in insight.score_purposes(f)[0]["why"])
+    assert insight.forward_returns(series, iso(0)) == {} and insight.forward_returns(series, "2030-01-01") == {}
+    long = [[day(i), 1.0 + i * 0.01, 1] for i in range(200)]
+    fw = insight.forward_returns(long, iso(0))
+    assert fw["1m"] == 0.3 and fw["3m"] == 0.91 and fw["6m"] == 1.82
+
+
+def test_parse_company_rows():
+    rows = scrape.parse_company_rows((FIXTURES / "company_anns_ppe.html").read_text(encoding="utf-8"))
+    r = next(x for x in rows if x["id"] == "03161285")
+    assert r["date"] == "2026-11-02" and r["time"] == "18:31" and r["headline"] == "Change in substantial holding"
+    assert scrape.parse_company_rows("<html>blocked</html>") is None

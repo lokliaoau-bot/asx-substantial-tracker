@@ -61,6 +61,7 @@ KIND_RES = (            # 顺序有意义：先认特殊性质，再认普通场
 MONEY_RE = re.compile(r"(?:AUD|A\$|US\$|\$)\s*\(?-?\s*(\d{1,3}(?:,\s?\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)\)?", re.I)
 NUM_RE = re.compile(r"(?<![\w.,/])(\(?-?\s?)(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)(\)?-?)(?![\w/]|[.,]\d)")   # 负数：-12,000 / (12,000) / 12,000-
 MAX_TRADE_ROWS = 2000
+MAX_DAILY = 150
 
 
 def _year(y: int) -> int:
@@ -260,6 +261,13 @@ def summarise(rows: list[dict], ntype: str = "") -> dict:
         "kinds": {k: int(v) for k, v in sorted(kinds.items(), key=lambda kv: -kv[1])},
     }
     out["net_qty"] = out["buy_qty"] - out["sell_qty"]
+    # 每天的净买卖量（买为正、卖为负），给“逐笔时间线”用；只留最近 MAX_DAILY 天
+    daily: dict[str, int] = {}
+    for r in buys:
+        daily[r["date"]] = daily.get(r["date"], 0) + int(r["qty"])
+    for r in sells:
+        daily[r["date"]] = daily.get(r["date"], 0) - int(r["qty"])
+    out["daily"] = [[d, q] for d, q in sorted(daily.items()) if q][-MAX_DAILY:]
     return out
 
 
@@ -358,6 +366,68 @@ def price_context(series: list, ref: str, first: str = "", last: str = "") -> di
             out["t_vol"] = int(sum(vol))          # 交易明细那段时间全市场的成交量（股）
     except (TypeError, ValueError):
         pass
+    return out
+
+
+def _points(series: list) -> list[tuple[str, float]]:
+    pts = []
+    for row in series or []:
+        try:
+            d = dt.datetime.fromtimestamp(row[0] / 1000, dt.timezone.utc).date().isoformat()
+            p = float(row[1])
+        except (TypeError, ValueError, IndexError, OverflowError, OSError):
+            continue
+        if p > 0:
+            pts.append((d, p))
+    pts.sort()
+    return pts
+
+
+def timeline(series: list, daily: list, side: str) -> dict:
+    """逐笔时间线：把每天的净买卖量和当天的股价涨跌对起来看。side = buy/sell，只看这个方向的交易日。
+    返回 {n: 用上的交易日数, down_share: 这个方向的量有多少发生在股价下跌的日子, base_down: 同期下跌日占比（对照），
+           r_win: 从第一笔到最后一笔股价的涨跌, accel: 后一半的量 ÷ 前一半的量}；不到 4 个交易日返回 {}。"""
+    pts = _points(series)
+    if len(pts) < 3:
+        return {}
+    idx = {d: i for i, (d, _) in enumerate(pts)}
+    sign = 1 if side == "buy" else -1
+    rows = []
+    for item in daily or []:
+        try:
+            d, q = item[0], float(item[1]) * sign
+        except (TypeError, ValueError, IndexError):
+            continue
+        i = idx.get(d)
+        if q > 0 and i:                       # i == 0（没有前一天）也不用
+            rows.append((d, q, pts[i][1] / pts[i - 1][1] - 1))
+    if len(rows) < 4:
+        return {}
+    tot = sum(q for _, q, _ in rows)
+    i0, i1 = idx[rows[0][0]], idx[rows[-1][0]]
+    moves = [pts[i][1] / pts[i - 1][1] - 1 for i in range(max(i0, 1), i1 + 1)]
+    half = len(rows) // 2
+    first, second = sum(q for _, q, _ in rows[:half]), sum(q for _, q, _ in rows[half:])
+    return {"n": len(rows), "down_share": round(sum(q for _, q, m in rows if m < 0) / tot, 3),
+            "base_down": round(sum(1 for m in moves if m < 0) / len(moves), 3) if moves else None,
+            "r_win": round(pts[i1][1] / pts[max(i0 - 1, 0)][1] - 1, 3),
+            "accel": round(_clip(second / first, 0, 9.99), 2) if first > 0 else None}
+
+
+def forward_returns(series: list, ref: str) -> dict:
+    """ref 之后 1/3/6 个月股价涨跌（还没到的不给）。"""
+    pts = _points(series)
+    days = [d for d, _ in pts]
+    i = bisect.bisect_right(days, ref or "") - 1
+    if i < 0 or _days_between(days[i], ref) > 10:
+        return {}
+    out = {}
+    for k, n in (("1m", 30), ("3m", 91), ("6m", 182)):
+        target = _shift(ref, n)
+        if days[-1] < target:
+            continue
+        j = bisect.bisect_right(days, target) - 1
+        out[k] = round(pts[j][1] / pts[i][1] - 1, 3)
     return out
 
 
@@ -504,10 +574,22 @@ def history_record(e: dict) -> dict:
     if px.get("t_lo") and px.get("t_hi"):
         ok = lambda v: v is not None and px["t_lo"] * 0.6 <= v <= px["t_hi"] * 1.6
         bp, sp = (bp if ok(bp) else None), (sp if ok(sp) else None)
-    return {"id": e.get("id"), "date": e.get("date") or "", "time": e.get("time") or "", "type": e.get("type"),
-            "cd": e.get("change_date") or "", "vp": list(e.get("voting_power") or []), "votes": list(votes),
-            "buy_qty": int(buy), "sell_qty": int(sell), "buy_price": bp, "sell_price": sp, "p": px.get("p"),
-            "first": tr.get("first") or ""}
+    rec = {"id": e.get("id"), "date": e.get("date") or "", "time": e.get("time") or "", "type": e.get("type"),
+           "cd": e.get("change_date") or "", "vp": list(e.get("voting_power") or []), "votes": list(votes),
+           "buy_qty": int(buy), "sell_qty": int(sell), "buy_price": bp, "sell_price": sp, "p": px.get("p"),
+           "first": tr.get("first") or ""}
+    # 下面这些是为了以后能对旧公告重新打分、做回测
+    tr.pop("daily", None)
+    if tr:
+        rec["tr"] = tr
+    if px:
+        rec["px"] = px
+    for k in ("tl", "fwd", "prev_notice"):
+        if e.get(k):
+            rec[k] = e[k]
+    if e.get("ocr"):
+        rec["ocr"] = True
+    return rec
 
 
 BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement"}
@@ -881,6 +963,17 @@ def judge(n: dict) -> dict | None:
          "plc": 0.0, "raise": bool(raise_ev), "so_up": bool(so_chg is not None and so_chg >= 0.03), "plc_inferred": placement_said,
          "target": bool(tk_ev and churn < 0.6), "res_j": res_j, "cost_d": None, "gain": None, "own_gain": None,
          "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
+    tl = n.get("tl") or {}
+    if tl.get("n") and tl.get("down_share") is not None:
+        f["tl"] = tl
+        act = "买入" if direction == "buy" else "卖出"
+        line = f"逐笔看（{tl['n']} 个交易日）：{act}的量有 {tl['down_share'] * 100:.0f}% 发生在股价下跌的日子"
+        if tl.get("base_down") is not None:
+            line += f"（同期下跌的日子占 {tl['base_down'] * 100:.0f}%）"
+        line += f"，这段时间股价 {fr(tl['r_win'])}"
+        if tl.get("accel") is not None and tl["n"] >= 6 and (tl["accel"] >= 1.8 or tl["accel"] <= 0.55):
+            line += f"；后半段的量是前半段的 {tl['accel']:.1f} 倍，" + ("越做越多" if tl["accel"] >= 1.8 else "越做越少")
+        reasons.append(line + "。")
     if rows_ok and buy and gross:
         f["plc"] = _clip(share("placement") * gross / buy, 0, 1)
     if chg_frac is not None and t == "change":
@@ -995,6 +1088,7 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             why.setdefault(k, []).append((pts, text))
 
     size, part = f.get("size"), f.get("part")
+    tl = f.get("tl") or {}
     nb, ns = ctx.get("nb", 0), ctx.get("ns", 0)
     opp = f.get("opp_days")
     S["base"] = BASELINE
@@ -1025,6 +1119,12 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("plc", 0.5, "买入量超过同期场内成交量")
         if f.get("target"):
             add("arb", 3.2 if style == "hedge" else 1.6, "买入发生在公司被收购的消息之后")
+        if tl.get("n"):
+            edge = tl["down_share"] - (tl.get("base_down") if tl.get("base_down") is not None else 0.5)
+            add("dip", 0.7 if edge >= 0.15 else 0, "买入的量集中在股价下跌的日子")
+            add("mom", 0.7 if edge <= -0.15 else 0, "买入的量集中在股价上涨的日子")
+            add("dip", 0.4 if tl["r_win"] <= -0.10 else 0, "买的过程中股价一直在跌，它没有停")
+            add("mom", 0.4 if tl["r_win"] >= 0.10 else 0, "买的过程中股价一直在涨，它还在追")
         if nb >= 2 and ns == 0:
             add("flow", 1.0 + 0.3 * (min(nb, 5) - 2), f"同期在另外 {nb} 只股票上也只买不卖")
             add("flow", {"super": 0.3, "platform": 0.5}.get(style, 0.0))
@@ -1060,6 +1160,10 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("stop", 0.6, "业绩后股价大跌时卖出")
         if size is not None and size >= 0.4:
             add("stop", 0.3 if f["f_down"] > 0 else 0, "一次减掉四成以上")
+        if tl.get("n"):
+            edge = tl["down_share"] - (tl.get("base_down") if tl.get("base_down") is not None else 0.5)
+            add("profit", 0.5 if edge <= -0.15 else 0, "卖出的量集中在股价上涨的日子（逢高卖）")
+            add("stop", 0.5 if edge >= 0.15 and tl["r_win"] <= -0.05 else 0, "股价越跌它卖得越多")
         if ns >= 2 and nb == 0:
             add("flow", 1.2 + 0.3 * (min(ns, 5) - 2), f"同期在另外 {ns} 只股票上也只卖不买")
             add("flow", {"super": 0.3, "platform": 0.5}.get(style, 0.0))

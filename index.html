@@ -588,6 +588,13 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
         row.append(el("span", "pname", String(x.name || "")), bar, el("span", "ppct", pct + "%"));
         box.append(row);
       });
+      const cal = state.data && state.data.calibration && i.side && state.data.calibration[`${i.side}:${ps[0].k}`];
+      if (cal && cal.n3 >= 8 && typeof cal.avg3 === "number") {
+        const avg = Math.round(cal.avg3 * 100), up = Math.round((cal.up3 || 0) * 100);
+        let t = `回头看：过去 ${cal.n3} 次被判为“${ps[0].name}”的，公告后 3 个月股价平均 ${avg >= 0 ? "+" : ""}${avg}%，${up}% 的次数上涨`;
+        if (cal.n_next >= 8 && typeof cal.same_next === "number") t += `；它自己下一步继续同方向的占 ${Math.round(cal.same_next * 100)}%`;
+        box.append(el("div", "pstrength", t + "。"));
+      }
       if (typeof i.strength === "number") {
         const s = Math.round(i.strength);
         box.append(el("div", "pstrength", `这次动作的力度：${s >= 60 ? "强" : s >= 30 ? "中" : "弱"}（${s}/100）`));

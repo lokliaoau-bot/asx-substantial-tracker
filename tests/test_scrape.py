@@ -2424,7 +2424,7 @@ def test_add_market_only_fetches_when_needed(sandbox, monkeypatch):
 
 REPORT_TEXT = ["Investment Update October 2026 ASX: WAM",
                "The WAM Capital investment portfolio decreased in October. Diversified investor WAM Research (ASX: WAX) was a contributor",
-               "to the investment portfolio performance while Maas Group Holdings (ASX: MGH) was a detractor. WAM Research's share price",
+               "to the investment portfolio performance while Maas Group Holdings (ASX: MGH) was a detractor. The WAX share price",
                "increased after the company upgraded its earnings expectations. We remain confident in the medium-term outlook.",
                "Dividends since inception are shown below."]
 
@@ -2443,6 +2443,7 @@ def test_fund_report_quotes_end_to_end(sandbox, monkeypatch):
     n = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] == "WAX")
     q = n["insight"]["quotes"][0]
     assert q["fund"] == "WAM" and "was a contributor" in q["text"] and "Dividends since inception" not in q["text"]
+    assert "The WAX share price increased" in q["text"]                 # 后面用简称接着讲的那句也带上
     assert "有基金原话" in n["insight"]["tags"] and any(r.startswith("基金自己的说法（WAM《October 2026 Investment Update》") for r in n["insight"]["reasons"])
     assert n["insight"]["reasons"][-1].startswith(n["insight"]["style"] + "：") or n["ocr"]
     other = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] != "WAX")
@@ -2465,3 +2466,11 @@ def test_fund_quotes_matching():
     assert scrape.fund_quotes({}, "L1 Capital", "MIN", "Mineral Resources Limited", "2026-11-05") == []
     assert scrape.fund_quotes({"reports": ["x", {"holder": "L1 Capital"}]}, "L1 Capital", "MIN", "Mineral Resources", "2026-11-05") == []
     assert scrape.name_key("The Lottery Corporation Limited") == "Lottery" and scrape.name_key("Data#3 Limited") == "" and scrape.name_key("Maas Group Holdings") == ""
+
+
+def test_fund_quotes_skip_table_junk():
+    junk = "Cents per share 16.0 14.0 12.0 10.0 8.0 6.0 4.0 2.0 1999/00 2001/02 2003/04 2005/06 Energy One 2.1% Maas 1.9% 2007/08 2009/10 2011/12."
+    store = {"reports": [{"id": "1", "holder": "Wilson Asset Management", "fund": "WAM", "date": "2026-11-11", "title": "October 2026 Investment Update",
+                          "url": "", "text": "The portfolio decreased in October. " + junk}]}
+    q = scrape.fund_quotes(store, "Wilson Asset Management", "EOL", "Energy One Limited", "2026-11-05")
+    assert q == [{"fund": "WAM", "title": "October 2026 Investment Update", "date": "2026-11-11", "url": "", "text": ""}]   # 只在表格里出现：不摘句，只说在持仓表里

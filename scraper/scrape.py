@@ -1525,19 +1525,28 @@ def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: 
     tick = re.compile(rf"\(\s*ASX\s*:\s*{re.escape(code)}\s*\)", re.I)
     key = name_key(company)
     name = re.compile(rf"(?<![A-Za-z]){re.escape(key)}(?![a-z])", re.I) if key else None
+    fw = next((w for w in re.sub(r"[^A-Za-z0-9#& ]", " ", NAME_DROP_RE.sub(" ", company or "")).split() if len(w) >= 3), "")
+    alts = "|".join(re.escape(w) for w in dict.fromkeys([fw, code]) if w)
+    first_word = re.compile(rf"(?<![A-Za-z0-9])(?:{alts})(?![A-Za-z0-9])") if alts else None
     for r in sorted((r for r in store.get("reports") or [] if isinstance(r, dict)), key=lambda r: r.get("date") or "", reverse=True):
         if r.get("holder") != holder or not (lo <= (r.get("date") or "") <= hi) or not r.get("text"):
             continue
         sents = re.split(r"(?<=[.!?])\s+(?=[A-Z])", r["text"])
-        hits = [i for i, s in enumerate(sents) if tick.search(s) or (name and name.search(s))]
+
+        def prose(x: str) -> bool:            # 表格、图表坐标轴被读成的“句子”不要
+            return 25 <= len(x) <= 600 and sum(c.isdigit() for c in x) <= 0.12 * len(x)
+
+        ticked = [i for i, x in enumerate(sents) if tick.search(x) and prose(x)]
+        named = [i for i, x in enumerate(sents) if name and name.search(x) and prose(x)]
+        hits = sorted(set(ticked) | set(named))
+        if ticked and first_word:             # 带代码的那句之后，接着用简称讲这只股票的句子也带上
+            start = ticked[0]
+            hits = sorted(set(hits) | {i for i in range(start + 1, min(start + 6, len(sents))) if first_word.search(sents[i]) and prose(sents[i])})
         if not hits:
+            if tick.search(r["text"]) or (name and name.search(r["text"])):
+                out.append({"fund": r.get("fund"), "title": r.get("title"), "date": r.get("date"), "url": safe_url(r.get("url") or ""), "text": ""})
             continue
-        picked, used = [], set()
-        for i in hits[:3]:
-            if i not in used:
-                used.add(i)
-                picked.append(sents[i].strip())
-        text = " ".join(picked)
+        text = " ".join(sents[i].strip() for i in hits[:3])
         if len(text) > 520:
             text = text[:517].rsplit(" ", 1)[0] + "…"
         out.append({"fund": r.get("fund"), "title": r.get("title"), "date": r.get("date"), "url": safe_url(r.get("url") or ""), "text": text})
@@ -1670,9 +1679,13 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
             if quotes:
                 ins = n["insight"]
                 ins["quotes"] = quotes
-                ins.setdefault("tags", []).append("有基金原话")
+                if any(q["text"] for q in quotes):
+                    ins.setdefault("tags", []).append("有基金原话")
                 for q in quotes:
-                    insight._add_reason(ins, f"基金自己的说法（{q['fund']}《{q['title']}》，{q['date']}，英文原文）：“{q['text']}”")
+                    if q["text"]:
+                        insight._add_reason(ins, f"基金自己的说法（{q['fund']}《{q['title']}》，{q['date']}，英文原文）：“{q['text']}”")
+                    else:
+                        insight._add_reason(ins, f"这只股票出现在它的月报（{q['fund']}《{q['title']}》，{q['date']}）的持仓表里，但没有文字说明。")
     for n in final:
         if n.get("insight"):
             f = n["insight"].pop("_f", None)      # 打分用的中间数据不输出

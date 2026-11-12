@@ -1,0 +1,31 @@
+name: debug-r10   # 临时诊断用，只在 debug-r10 分支上运行。不会合并到 main。
+
+on:
+  push:
+    branches: [debug-r10]
+
+permissions:
+  contents: write
+
+jobs:
+  dump:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+      - run: mkdir -p out && python tools/probe.py
+      - name: Push output
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan debug-r10-out
+          git rm -rq --cached .
+          git add -f out
+          git commit -qm "debug: corpus"
+          git push -f origin debug-r10-out

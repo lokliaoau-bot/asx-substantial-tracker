@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-12T12:10:59+11:00",
- "last_success_at": "2026-11-12T12:10:48+11:00",
+ "updated_at": "2026-11-12T12:12:50+11:00",
+ "last_success_at": "2026-11-12T12:12:46+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -25,7 +25,7 @@
   "2026-11-12"
  ],
  "partial_days": {
-  "2026-11-12": "12:10"
+  "2026-11-12": "12:12"
  },
  "last_run": {
   "ok": true,
@@ -46,8 +46,8 @@
    "prices_failed": 0,
    "history_added": 0,
    "positions": 68,
-   "backfill_read": 3,
-   "backfill_added": 3,
+   "backfill_read": 0,
+   "backfill_added": 0,
    "backfill_pending": 0
   },
   "errors": []
@@ -665,7 +665,7 @@
    "sector": "Industrials",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "高",
     "reasons": [
@@ -1362,7 +1362,7 @@
    "sector": "Information Technology",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -1598,7 +1598,7 @@
    "sector": "Consumer Staples",
    "insight": {
     "action": "trim_loss",
-    "label": "低位减仓，像止损",
+    "label": "减仓，像止损",
     "tone": "bear",
     "confidence": "高",
     "reasons": [
@@ -1663,7 +1663,7 @@
    "sector": "Consumer Discretionary",
    "insight": {
     "action": "trim_loss",
-    "label": "低位减仓，像止损",
+    "label": "减仓，像止损",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -2617,7 +2617,7 @@
    "sector": "Consumer Discretionary",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -2679,7 +2679,7 @@
    "sector": "Consumer Discretionary",
    "insight": {
     "action": "trim_loss",
-    "label": "低位减仓，像止损",
+    "label": "减仓，像止损",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -2863,7 +2863,7 @@
    "sector": "",
    "insight": {
     "action": "trim_loss",
-    "label": "低位减仓，像止损",
+    "label": "减仓，像止损",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -3177,7 +3177,7 @@
    "sector": "Health Care",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -3415,7 +3415,7 @@
    "sector": "Information Technology",
    "insight": {
     "action": "trim_loss",
-    "label": "低位减仓，像止损",
+    "label": "减仓，像止损",
     "tone": "bear",
     "confidence": "高",
     "reasons": [
@@ -3480,7 +3480,7 @@
    "sector": "Industrials",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -3923,7 +3923,7 @@
    "sector": "Health Care",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "中",
     "reasons": [
@@ -3981,7 +3981,7 @@
    "sector": "Financials",
    "insight": {
     "action": "trim_profit",
-    "label": "高位减仓，像获利了结",
+    "label": "减仓，像获利了结",
     "tone": "bear",
     "confidence": "高",
     "reasons": [
@@ -4428,7 +4428,7 @@
    "sector": "Materials",
    "insight": {
     "action": "trim_loss",
-    "label": "低位减仓，像止损",
+    "label": "减仓，像止损",
     "tone": "bear",
     "confidence": "高",
     "reasons": [

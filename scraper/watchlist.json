@@ -38,6 +38,17 @@
         "WMI",
         "WLE",
         "WAA"
+      ],
+      "own_codes": [
+        "WAM",
+        "WAX",
+        "WMI",
+        "WLE",
+        "WAA",
+        "WGB",
+        "WAR",
+        "WMA",
+        "WQG"
       ]
     },
     {
@@ -56,6 +67,13 @@
       "style": "hedge",
       "report_codes": [
         "RF1"
+      ],
+      "own_codes": [
+        "RG1",
+        "RG8",
+        "RPL",
+        "RF1",
+        "VG1"
       ]
     },
     {
@@ -73,6 +91,10 @@
       "style": "hedge",
       "report_codes": [
         "LSF"
+      ],
+      "own_codes": [
+        "LSF",
+        "GLS"
       ]
     },
     {

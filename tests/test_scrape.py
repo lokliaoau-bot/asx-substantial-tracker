@@ -1735,7 +1735,7 @@ def test_judge_takeover_and_results_events():
     r = insight.judge(_buy(ev=tk, style="active"))
     assert r["action"] == "add" and any("赌收购成功" in x for x in r["reasons"])
     r = insight.judge(_sell(ev=tk))
-    assert r["action"] == "trim_profit" and any("借收购带来的涨价退出" in x and "+31%" in x for x in r["reasons"])
+    assert r["action"] == "trim_deal" and r["tone"] == "neutral" and any("借收购带来的涨价退出" in x and "+31%" in x for x in r["reasons"])
     # 并购公告后股价没涨：公司多半是出手收购的一方（或还没定），不能说是套利
     quiet = [{"d": "2026-10-15", "k": "takeover", "h": "BET: BetMakers enters Scheme Implementation Deed with TAH", "s": True, "j": 0.01}]
     r = insight.judge(_buy(ev=quiet, style="hedge"))
@@ -2581,3 +2581,69 @@ def test_detail_retry_counter_resets_on_new_reader_version(sandbox, monkeypatch)
     scrape.main()
     e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
     assert e["detail_v"] == scrape.INSIGHT_VERSION and e["detail_try_v"] == scrape.INSIGHT_VERSION
+
+
+# ---------------------------------------------------------------- 第十四轮：逐条审查后修的判断
+
+@pytest.mark.parametrize("headline,code,want", [
+    ("RWC signs Scheme Implementation Deed with Brookfield", "RWC", True),
+    ("Dispatch of Scheme Booklet", "TTT", True),
+    ("Perpetual rejects non-binding indicative proposal", "PPT", True),
+    ("Takeover proposal from TPG Global", "EQT", True),
+    ("ENERGY ONE RESPONSE TO NON-BINDING PROPOSAL", "EOL", True),
+    ("BET: BetMakers enters Scheme Implementation Deed with TAH", "TAH", False),
+    ("Proposed acquisition of XYZ Limited", "ABC", False),
+    ("Merger update", "ABC", None),
+])
+def test_target_by_headline(headline, code, want):
+    assert insight.target_by_headline(headline, code) is want
+
+
+def test_takeover_target_by_headline_without_price_jump():
+    sid = [{"d": "2026-09-16", "k": "takeover", "h": "XYZ signs Scheme Implementation Deed with Brookfield", "s": True, "j": 0.01}]
+    r = insight.judge(dict(_buy(ev=sid, style="hedge"), code="XYZ"))
+    assert r["action"] == "arb" and any("从标题看这家公司是被收购的一方" in x for x in r["reasons"])
+    bidder = [{"d": "2026-09-16", "k": "takeover", "h": "BET: BetMakers enters Scheme Implementation Deed with XYZ", "s": True, "j": 0.01}]
+    r = insight.judge(dict(_buy(ev=bidder, style="hedge"), code="XYZ"))
+    assert r["action"] == "add" and any("出手收购的一方" in x for x in r["reasons"])
+
+
+def test_deal_exit_when_selling_at_a_loss_after_takeover():
+    tk = [{"d": "2026-10-19", "k": "takeover", "h": "XYZ enters binding Scheme Implementation Deed", "s": True, "j": 0.85}]
+    n = _sell(ev=tk, code="XYZ", cost={"avg": 2.4, "cov": 1.0, "since": "2024-04-10", "n": 3})
+    n["px"].update(r1m=0.86, r3m=0.49, r6m=0.66, r12m=-0.16, pos=0.7)
+    r = insight.judge(n)
+    assert r["action"] == "trim_deal" and r["purposes"][0]["k"] == "deal" and "分不出主次" not in " ".join(r["reasons"])
+    assert any("亏钱卖" in x for x in r["reasons"])
+
+
+def test_own_product_is_not_a_stock_pick():
+    assert scrape.is_own_product("Regal Funds Management", "RG8", "Regal Asian Investments Limited", "hedge")
+    assert scrape.is_own_product("L1 Capital", "GLS", "L1 Global Long Short Fund Limited", "hedge")
+    assert scrape.is_own_product("L1 Capital", "ZZZ", "L1 Long Short Fund", "hedge")                     # 按名字也认得出
+    assert not scrape.is_own_product("Australian Retirement Trust", "ACL", "Australian Clinical Labs", "super")
+    assert not scrape.is_own_product("Perennial", "PPT", "Perpetual Limited", "active")
+    r = insight.judge(dict(_sell(), own=True))
+    assert r["action"] == "own_product" and r["tone"] == "neutral" and not r.get("purposes")
+    assert any("自己旗下" in x for x in r["reasons"]) and r["reasons"][0].startswith("持股比例")
+
+
+def test_long_603_window_wording_and_recent_share():
+    n = {"type": "becoming", "voting_power": [6.46], "votes": [17_630_000], "style": "active", "date": "2026-11-10",
+         "change_date": "2026-11-07",
+         "trades": {"n": 109, "n_buy": 100, "n_sell": 9, "buy_qty": 18_870_000, "sell_qty": 1_240_000, "net_qty": 17_630_000,
+                    "first": "2024-11-07", "last": "2026-11-07", "days": 78, "buy_price": 0.54, "sell_price": 0.31, "kinds": {"other": 20_110_000},
+                    "daily": [["2025-03-01", 9_000_000], ["2026-01-05", 4_000_000], ["2026-08-01", 3_000_000], ["2026-10-20", 1_630_000]]},
+         "px": {"p": 0.29, "r1m": -0.09, "r3m": -0.08, "r6m": 0.16, "r12m": -0.54, "pos": 0.19, "hi": 0.64, "lo": 0.21, "t_lo": 0.2, "t_hi": 0.7}}
+    r = insight.judge(n)
+    text = " ".join(r["reasons"])
+    assert "这份 603 列出的明细（比规定的 4 个月更长）" in text and "成为大股东前 4 个月" not in text
+    assert "从零建起来的" in text and "属于快速建仓" not in text and "早就有底仓" in text      # 最近 4 个月只买了 463 万股（26%）
+
+
+def test_previous_notice_falls_back_to_history():
+    hist = {"pos": {"A|EOS": [{"id": "1", "date": "2026-10-16", "time": "16:00", "type": "becoming", "vp": [5.047], "votes": [11_189_140]}]}}
+    e = {"id": "2", "date": "2026-11-06", "time": "17:00", "type": "ceasing"}
+    assert scrape.prev_from_history(hist, "A", "EOS", e) == {"vp": 5.047, "votes": 11_189_140, "type": "becoming", "date": "2026-10-16"}
+    assert scrape.prev_from_history(hist, "A", "EOS", {"id": "1", "date": "2026-10-16", "time": "16:00"}) is None
+    assert scrape.prev_from_history({"pos": {"A|EOS": ["bad"]}}, "A", "EOS", e) is None and scrape.prev_from_history(None, "A", "EOS", e) is None

@@ -509,12 +509,15 @@ LABELS = {
     "trim_flow": "减仓（多只股票一起减，像应付赎回）", "exit_flow": "减到 5% 以下（多只一起减，像应付赎回）",
     "swap_out": "换股调出（卖这只、买别的）", "trim_rebal": "涨多了减一点，像仓位管理", "short_out": "买入不久就卖出，像短线交易",
     "add_pull": "回调时加仓（长期在涨）", "add_prog": "持续加仓，像按计划建仓", "trim_bounce": "趁反弹减仓", "exit_bounce": "趁反弹减到 5% 以下",
-    "trim_wind": "分批减仓，已减掉三成以上", "exit_wind": "分几次减到 5% 以下", "restructure": "股份合并/拆分", "unknown": "看不出来",
+    "trim_wind": "分批减仓，已减掉三成以上", "exit_wind": "分几次减到 5% 以下",
+    "trim_deal": "收购消息后减仓，借机退出", "exit_deal": "收购消息后减到 5% 以下，借机退出",
+    "own_product": "自家旗下产品的持股变化（不是选股）", "restructure": "股份合并/拆分", "unknown": "看不出来",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
         "exit_loss": "bear", "exit": "bear", "add_flow": "bull", "swap_in": "bull", "swap_out": "bear",
-        "add_pull": "bull", "add_prog": "bull", "trim_bounce": "bear", "exit_bounce": "bear", "trim_wind": "bear", "exit_wind": "bear"}
+        "add_pull": "bull", "add_prog": "bull", "trim_bounce": "bear", "exit_bounce": "bear", "trim_wind": "bear", "exit_wind": "bear",
+        "trim_deal": "neutral", "exit_deal": "neutral", "own_product": "neutral"}
 
 
 def fq(n: float) -> str:
@@ -570,8 +573,26 @@ def _days_between(a: str | None, b: str | None) -> int:
         return 10 ** 6
 
 
-TARGET_JUMP = 0.08        # 并购消息后两天内股价涨 8% 以上，才认为公司是被收购的一方
-COST_MIN_COVER = 0.4      # 已知成本的股数至少占持仓的四成，才拿来判断赚还是亏
+TARGET_JUMP = 0.08
+# 并购公告的标题怎么写，能看出这家公司是“被收购的一方”还是“出手收购的一方”
+TARGET_WORDS = re.compile(r"proposal\s+from|proposals?\s+received|receipt\s+of|receives?\b.*\b(?:proposal|offer|approach)|rejects?\b"
+                          r"|response\s+to\b.*\b(?:proposal|offer)|scheme\s+booklet|scheme\s+meeting|implementation\s+deed|\bSID\b"
+                          r"|target'?s?\s+statement|bidder'?s?\s+statement|unsolicited|takeover\s+(?:offer|proposal)|scheme\s+(?:becomes|is)\s+effective"
+                          r"|(?:first|second)\s+court|compulsory\s+acquisition|indicative\s+(?:offer|proposal)|non[- ]binding", re.I)
+BIDDER_WORDS = re.compile(r"\bto\s+acquire\b|\bacquisition\s+of\b|\bacquires?\b|\bacquiring\b|\bbid\s+for\b|\boffer\s+for\b|\bmerger\s+with\b", re.I)
+
+
+def target_by_headline(headline: str, code: str = "") -> bool | None:
+    """从并购公告的标题看这家公司是不是被收购的一方：True 是、False 不是（出手收购，或者公告是别家发的）、None 看不出。"""
+    h = headline or ""
+    m = re.match(r"\s*([A-Z0-9]{3,4})\s*:", h)
+    if m and m.group(1) != code.upper():
+        return False if code else None          # “BET: BetMakers enters SID with TAH” 挂在 TAH 下面：别家（被收购方）发的
+    if BIDDER_WORDS.search(h):
+        return False
+    return True if TARGET_WORDS.search(h) else None        # 并购消息后两天内股价涨 8% 以上，才认为公司是被收购的一方
+COST_MIN_COVER = 0.4
+LONG_603 = 135            # 603 的明细从变动日往前超过这么多天，说明列的不只是规定的 4 个月      # 已知成本的股数至少占持仓的四成，才拿来判断赚还是亏
 
 
 def cost_basis(records: list[dict], holding: int | None = None) -> dict:
@@ -661,7 +682,7 @@ def history_record(e: dict) -> dict:
 
 
 BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog"}
-SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind"}
+SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind", "trim_deal", "exit_deal"}
 CTX_DAYS = 21             # “同期”：前后三周
 PEER_DAYS = 30
 
@@ -858,6 +879,11 @@ def judge(n: dict) -> dict | None:
         return {"action": action, "label": LABELS[action], "tone": TONE.get(action, "neutral"), "confidence": c,
                 "reasons": rs, "style": name, "tags": tags}
 
+    if n.get("own") is True:
+        reasons.append("这是这家基金公司自己旗下（或关联）的上市产品。基金公司持有自家产品，持股变化多半来自种子资金进出、产品回购或分红再投资、"
+                       "产品合并重组，不是在判断这只股票好不好，这里不做买卖目的的推断。")
+        return done("own_product", "中")
+
     # ---- 1. 不是真买卖的情况
     if so_chg is not None and (so_chg > 2 or so_chg < -0.66):
         reasons.append("倒推出来的公司总股本前后差了几倍，应该是股份合并或拆分，前后的股数不能直接比。")
@@ -909,7 +935,8 @@ def judge(n: dict) -> dict | None:
         if sell:
             parts.append(f"卖出 {fq(sell)}" + (f"（均价约 {fp(sp)}）" if sp else ""))
         if parts:
-            what = "成为大股东前 4 个月" if t == "becoming" else "这次披露的明细里"
+            long603 = t == "becoming" and bool(tr.get("first")) and _days_between(tr.get("first"), n.get("change_date") or n.get("date") or "") > LONG_603
+            what = ("这份 603 列出的明细（比规定的 4 个月更长）" if long603 else "成为大股东前 4 个月") if t == "becoming" else "这次披露的明细里"
             line = f"{what}（{span}，{tr['n']} 笔）：" + "，".join(parts) + "。"
             if t == "change" and not reconciled:
                 line += "明细加总和持股数的变化对不上（可能没读全），方向和幅度以持股数为准。"
@@ -982,22 +1009,33 @@ def judge(n: dict) -> dict | None:
             reasons.append(f"期间公司公告过融资（{ev_txt(x)}），一部分买入可能来自认购新股。")
     tk_all = evs("takeover", 60, 0)
     # 消息一出股价跳涨：公司是被收购的一方。近期只有走流程的公告（寄出方案手册之类）时，往前找当初那条让股价跳涨的消息
-    tk_ev = [x for x in ev if x["k"] == "takeover" and x["d"] <= (w1 or "9") and (x.get("j") or 0) >= TARGET_JUMP] if tk_all else []
+    code = str(n.get("code") or "")
+    tk_ev = [x for x in ev if x["k"] == "takeover" and x["d"] <= (w1 or "9")
+             and ((x.get("j") or 0) >= TARGET_JUMP and target_by_headline(x.get("h", ""), code) is not False
+                  or target_by_headline(x.get("h", ""), code) is True)] if tk_all else []
     if tk_ev and churn < 0.6:
-        x = tk_ev[-1]
-        what = f"{ev_txt(x)}，消息出来后股价 {fr(x['j'])}"
+        jumped = [y for y in tk_ev if (y.get("j") or 0) >= TARGET_JUMP]
+        x = (jumped or tk_ev)[-1]               # 优先说当初让股价跳涨的那条消息
+        what = (f"{ev_txt(x)}，消息出来后股价 {fr(x['j'])}" if (x.get("j") or 0) >= TARGET_JUMP
+                else f"{ev_txt(x)}，从标题看这家公司是被收购的一方")
         tags.append("收购相关")
         if direction == "buy":
             if style == "hedge":
-                reasons.append(f"买入发生在收购消息（{what}）之后：对冲基金这时候买，多半是做并购套利"
+                reasons.append(f"买入发生在收购消息（{what}）之后：对冲基金这时候买，常见的是做并购套利"
                                "（赚收购价和市价之间的差价），不代表看好公司本身。")
             else:
                 reasons.append(f"买入发生在收购消息（{what}）之后：可能在赌收购成功，或者赌有人出更高的价。")
         else:
             tk_sell = True
             reasons.append(f"卖出发生在收购消息（{what}）之后：像是借收购带来的涨价退出，不等最终结果。")
+    elif tk_ev:
+        reasons.append(f"期间公司是被收购的一方（{ev_txt(tk_ev[-1])}），但它买卖两边都有，这里不据此判断它是在套利还是借机退出。")
     elif tk_all:
-        reasons.append(f"期间公司有并购相关的公告（{ev_txt(tk_all[-1])}），但股价当时没有大涨，看不出它是被收购的一方，这里不据此下结论。")
+        x = tk_all[-1]
+        if target_by_headline(x.get("h", ""), code) is False:
+            reasons.append(f"期间公司有并购相关的公告（{ev_txt(x)}），从标题看这家公司是出手收购的一方（或者只是对方的公告），这里不据此下结论。")
+        else:
+            reasons.append(f"期间公司有并购相关的公告（{ev_txt(x)}），但股价当时没有大涨，看不出它是被收购的一方，这里不据此下结论。")
     if w0 and w1 and _days_between(w0, w1) <= 30:
         res_ev = [x for x in ev if x.get("k") == "results" and _shift(w0, -6) <= x.get("d", "") <= _shift(w0, 2)]
         if res_ev:
@@ -1064,6 +1102,15 @@ def judge(n: dict) -> dict | None:
         f["base"] = "build" if t == "becoming" else "add"
         if t == "becoming" and rows_ok and votes and buy:
             built = max(buy - sell, 0) / votes[0]
+            ref = n.get("change_date") or n.get("date") or ""
+            if tr.get("first") and _days_between(tr["first"], ref) > LONG_603:
+                # 明细从 4 个月以前就开始：“最近 4 个月净买入”只算最近 4 个月那部分
+                cut = _shift(ref, -123)
+                recent = sum(int(q) for d, q in (x for x in tr.get("daily") or [] if isinstance(x, (list, tuple)) and len(x) == 2)
+                             if isinstance(d, str) and d >= cut and isinstance(q, (int, float)))
+                if 0.95 <= built <= 1.05:
+                    reasons.append(f"明细从 {md(tr['first'], True)} 开始，净买入正好等于现有持仓：这个仓位是那时候从零建起来的。")
+                built = max(recent, 0) / votes[0]
             f["size"] = min(built, 1.0)
             if built >= 0.6:
                 reasons.append(f"现有持仓的 {min(built, 1) * 100:.0f}% 是最近 4 个月净买入的，属于快速建仓。")
@@ -1187,7 +1234,7 @@ PURPOSE_NAMES = {
             "pull": "回调买入（长期在涨）", "prog": "按计划持续建仓"},
     "sell": {"base": "普通减仓", "profit": "获利了结", "stop": "止损或看法变差", "flow": "整体减仓（应付赎回）",
              "swap": "换股调出", "rebal": "仓位管理（涨多了减一点）", "short": "短线交易",
-             "bounce": "趁反弹减仓", "wind": "分批减仓（一路在减）"},
+             "bounce": "趁反弹减仓", "wind": "分批减仓（一路在减）", "deal": "借收购消息退出"},
 }
 PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用基础标签（新进建仓 / 加仓越过 5% 线 / 加仓 / 减仓 / 减到 5% 以下）
     ("buy", "dip"): {"add": "add_dip"}, ("buy", "mom"): {"add": "add_chase"},
@@ -1200,12 +1247,14 @@ PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用�
     ("sell", "rebal"): {"trim": "trim_rebal"}, ("sell", "short"): {"trim": "short_out", "exit": "short_out"},
     ("buy", "pull"): {"add": "add_pull"}, ("buy", "prog"): {"add": "add_prog"},
     ("sell", "bounce"): {"trim": "trim_bounce", "exit": "exit_bounce"}, ("sell", "wind"): {"trim": "trim_wind", "exit": "exit_wind"},
+    ("sell", "deal"): {"trim": "trim_deal", "exit": "exit_deal"},
 }
 
 
 # 这些成对的目的说的是两件不冲突的事（一个讲“怎么做”，一个讲“为什么”），可以同时成立：几乎同分时不算“分不出主次”，标分数高的那个
 COMPATIBLE = {frozenset(x) for x in (("prog", "dip"), ("prog", "mom"), ("prog", "pull"), ("wind", "profit"), ("wind", "stop"),
-                                     ("wind", "bounce"), ("bounce", "profit"), ("bounce", "stop"))}
+                                     ("wind", "bounce"), ("bounce", "profit"), ("bounce", "stop"),
+                                     ("deal", "profit"), ("deal", "stop"), ("deal", "wind"))}
 
 
 def _clip(x: float, lo: float, hi: float) -> float:
@@ -1339,7 +1388,7 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
                 add(k, -0.5)
             add("prog", -0.8)
     else:
-        for k, prior in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2)):
+        for k, prior in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2), ("deal", -1.5)):
             S[k] = prior
         add("profit", 1.0 * f["f_up"], "卖之前股价涨了一大段")
         add("profit", 1.0 * f["highpos"] if f["f_up"] > 0 else 0, "股价在一年区间的高位")
@@ -1359,7 +1408,11 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
         if (f.get("own_gain") or 0) >= 0.15:
             add("profit", 1.5, "同一份明细里卖出均价比买入均价高")
         if f.get("tk_sell"):
-            add("profit", 1.5, "借收购消息带来的涨价卖出")
+            add("deal", 2.6, "卖出发生在公司被收购的消息之后")
+            add("stop", -1.0)                  # 有人出价时卖，主要是借机退出，不是“看法变差”
+            add("profit", 0.5, "借收购消息带来的涨价卖出")
+            add("rebal", -1.0)
+            add("flow", -0.5)
         if f.get("res_j") is not None and f["res_j"] <= -0.08:
             add("stop", 0.6, "业绩后股价大跌时卖出")
         if size is not None and size >= 0.4:

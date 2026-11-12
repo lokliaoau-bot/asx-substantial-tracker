@@ -1691,6 +1691,42 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
     return out
 
 
+GENERIC_BRAND = {"australian", "australia", "colonial", "the", "first", "national", "united"}
+
+
+def own_codes() -> dict[str, set[str]]:
+    """watchlist.json 里每家基金自己旗下（或关联）的上市代码：report_codes + own_codes。"""
+    try:
+        raw = json.loads(WATCH_FILE.read_text(encoding="utf-8"))
+        return {h["name"]: {str(c).upper() for c in (h.get("report_codes") or []) + (h.get("own_codes") or [])}
+                for h in raw.get("holders", []) if h.get("report_codes") or h.get("own_codes")}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return {}
+
+
+def is_own_product(holder: str, code: str, company: str, style: str = "active") -> bool:
+    """这只“股票”是不是这家基金公司自己旗下的产品（例如 Regal 持有 RG1、L1 持有 GLS）。"""
+    if code.upper() in own_codes().get(holder, set()):
+        return True
+    brand = (holder.split() or [""])[0]
+    if style not in ("active", "hedge") or len(brand) < 2 or brand.lower() in GENERIC_BRAND:
+        return False
+    return bool(re.match(rf"\s*{re.escape(brand)}(?![A-Za-z0-9])", company or "", re.I))
+
+
+def prev_from_history(history: dict | None, holder: str, code: str, e: dict) -> dict | None:
+    """近期公告里找不到同一家在同一只股票上的上一份时，从持仓历史里找（比如 603 已经超过近期公告的保留期）。"""
+    rows = ((history or {}).get("pos") or {}).get(pos_key(holder, code)) or []
+    me = (e.get("date") or "", e.get("time") or "", str(e.get("id")))
+    before = [r for r in rows if isinstance(r, dict) and r.get("id") != e.get("id")
+              and (r.get("date") or "", r.get("time") or "", str(r.get("id"))) < me]
+    if not before:
+        return None
+    r = before[-1]
+    vp, votes = r.get("vp") or [], r.get("votes") or []
+    return {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None, "type": r.get("type"), "date": r.get("date")}
+
+
 def build_notices(entries: dict, holders: list[Holder], history: dict | None = None, reports: dict | None = None) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
@@ -1717,11 +1753,13 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
                 item["insight"] = insight.judge({
                     "type": e.get("type"), "voting_power": e.get("voting_power") or [], "votes": e.get("votes") or [],
                     "trades": e.get("trades") or {}, "px": e.get("px") or {}, "ocr": e.get("ocr"),
-                    "style": style_of.get(holder, "active"), "prev": last_seen.get(key), "date": e.get("date"),
+                    "style": style_of.get(holder, "active"), "prev": last_seen.get(key) or prev_from_history(history, holder, item["code"], e),
+                    "date": e.get("date"),
                     "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
                     "change_date": e.get("change_date"), "seq": sequence_for(history, holder, item["code"], e),
                     "tl": e.get("tl") or {}, "stage": stage_for(history, holder, item["code"], e),
-                    "habit": habit_of.get(holder) or {},
+                    "habit": habit_of.get(holder) or {}, "code": item["code"],
+                    "own": is_own_product(holder, item["code"], e.get("company") or "", style_of.get(holder, "active")),
                 })
             except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
                 log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")

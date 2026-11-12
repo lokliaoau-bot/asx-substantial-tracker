@@ -27,7 +27,7 @@
 | 文件 | 内容 |
 | --- | --- |
 | `scraper/scrape.py`（约 1700 行） | 抓取主程序，见下 |
-| `scraper/insight.py`（约 850 行） | 操作解读：`parse_trades`（逐笔明细）、`parse_votes`（第二节持股数）、`price_context`（股价背景）、`event_moves`、`cost_basis`、`judge`（判断规则，纯函数）、`add_context`（横向比较） |
+| `scraper/insight.py`（约 850 行） | 操作解读：`parse_trades`（逐笔明细）、`parse_votes`（第二节持股数）、`price_context`（股价背景）、`event_moves`、`cost_basis`、`judge`（收集证据）、`score_purposes` / `finalize`（目的打分）、`add_context`（横向比较后重新打分） |
 | `scraper/watchlist.json` | 关注名单：`name / group（主动基金·养老金）/ style（active·hedge·strategic·super·platform）/ aliases / hints`，以及 `noise_hints` |
 | `index.html` | 单文件网页（无构建）。读 `data/notices.json`，按钮调 GitHub API 触发抓取并轮询 |
 | `data/all_notices.json` | 内部存储：所有大股东公告的解析结果（35 天） |
@@ -62,25 +62,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第九轮（2026-11-12 开始）：目的打分公式 —— 分支 `dev-r9`，进行中
+### 第九轮（2026-11-12，已完成并合并到 `main`）：目的打分公式
 
-用户要求：自己写一套公式、联合其他动作，更准确地推断基金动作背后的目的。做法：
+- `insight.score_purposes`（先验 + 证据加减分 → softmax 概率）、`finalize`（标签/把握/概率/力度；`judge` 调一次，`add_context` 带横向证据再调一次）、`strength_of`
+- `scrape.sequence_for`：连续同向次数、距上次反向天数（来自 history.json）
+- 输出 `insight.purposes`、`insight.strength`；网页显示概率条和力度
+- 公式和权重表在 `HANDOVER.md` 第 5 节。权重是手调的，**还没回测**——这是下一步最值得做的事
+- 168 个测试、38 项网页检查；`dev-r9` 真实运行通过
 
-- `judge()` 里“不是真买卖 / 5% 线附近 / 边买边卖”这些确定性的判断保留；买和卖的结论改成**打分**：
-  每个候选目的一个分数 = 先验（按基金类型）+ Σ 证据加减分，`softmax` 成概率，最高的当标签，接近基准线时退回“普通加仓/减仓”。
-  买：普通加仓(基准) / 逢低 / 顺势 / 参与融资 / 并购套利 / 整体加仓(资金流入) / 换股调入 / 短线来回
-  卖：普通减仓(基准) / 获利了结 / 止损 / 整体减仓(应付赎回) / 换股调出 / 仓位管理(涨多了减一点) / 短线来回
-- 两步走：`judge` 先算单只股票的证据并把特征存在 `ins["_f"]`；`add_context` 算出横向证据后调 `rescore` 重新打分，最后去掉 `_f`。
-- 新证据“连续动作”：`scrape.sequence_for`（来自 history.json）：连续第几次同向、距离上次反向多少天。
-- 新输出：`insight.purposes`（前三个目的和概率）、`insight.strength`（力度 0–100：幅度、占成交量、连续性、多家同向）。网页显示。
-
-| 步骤 | 状态 |
-| --- | --- |
-| 1 打分函数 `insight.score_purposes` + judge 改造 | 进行中 |
-| 2 `sequence_for` + add_context 里 rescore | 未开始 |
-| 3 网页显示概率和力度 | 未开始 |
-| 4 改测试 + 新测试；三轮审查；dev-r9 真实运行；和正式版逐条对比 | 未开始 |
-| 5 文档（HANDOVER 第 5 节写公式和权重表）+ 合并 main | 未开始 |
+目前没有进行到一半的工作。
 
 ### 第八轮（2026-11-12，已完成并合并到 `main`）：让“操作解读”更能说清目的
 

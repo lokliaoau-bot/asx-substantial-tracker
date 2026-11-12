@@ -972,7 +972,8 @@ def judge(n: dict) -> dict | None:
             line += f"（同期下跌的日子占 {tl['base_down'] * 100:.0f}%）"
         line += f"，这段时间股价 {fr(tl['r_win'])}"
         if tl.get("accel") is not None and tl["n"] >= 6 and (tl["accel"] >= 1.8 or tl["accel"] <= 0.55):
-            line += f"；后半段的量是前半段的 {tl['accel']:.1f} 倍，" + ("越做越多" if tl["accel"] >= 1.8 else "越做越少")
+            times = "10 倍以上" if tl["accel"] >= 9.9 else f"{tl['accel']:.1f} 倍"
+            line += f"；后半段的量是前半段的 {times}，" + ("越做越多" if tl["accel"] >= 1.8 else "越做越少")
         reasons.append(line + "。")
     if rows_ok and buy and gross:
         f["plc"] = _clip(share("placement") * gross / buy, 0, 1)
@@ -1111,10 +1112,10 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("mom", -1.0)
         if f.get("raise"):
             strong = f.get("offmkt") or f.get("so_up")
-            add("plc", 3.0 if strong else 0.6, "公司同期公告了融资" + ("，而且买入量超过场内成交量或总股本明显增加" if strong else ""))
+            add("plc", 3.4 if strong else 0.6, "公司同期公告了融资" + ("，而且买入量超过场内成交量或总股本明显增加" if strong else ""))
             if strong:                       # 认购新股的价格是公司定的，谈不上“逢低”或“追涨”
-                add("dip", -1.0)
-                add("mom", -1.0)
+                add("dip", -1.5)
+                add("mom", -1.5)
         elif f.get("offmkt"):
             add("plc", 0.5, "买入量超过同期场内成交量")
         if f.get("target"):

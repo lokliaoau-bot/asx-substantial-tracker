@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-12T16:20:24+11:00",
- "last_success_at": "2026-11-12T16:19:33+11:00",
+ "updated_at": "2026-11-12T16:28:20+11:00",
+ "last_success_at": "2026-11-12T16:27:47+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -25,7 +25,7 @@
   "2026-11-12"
  ],
  "partial_days": {
-  "2026-11-12": "16:19"
+  "2026-11-12": "16:27"
  },
  "last_run": {
   "ok": true,
@@ -2074,8 +2074,8 @@
      "这家基金的习惯（按它过去 11 次有后续的动作统计）：约 66% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——样本还少，仅供参考。",
      "综合打分：最像「止损或看法变差」（77%），依据：卖出价低于自己的买入成本；股价在一年区间的低位；卖之前股价跌了不少。其次是「短线交易」10%。",
      "同一只股票上，名单里的 Ellerston Capital 最近一个月却在加仓：机构之间看法不一。",
-     "基金自己的说法（WAA《September 2026 Investment Update》，2026-10-14，英文原文）：“During the month, modular data centre manufacturer and operator DXN (ASX: DXN) and Network-as-a-Service provider Megaport (ASX: MP1) were both contributors to the investment portfolio performance.”",
-     "基金自己的说法（WMI《August 2026 Investment Update》，2026-09-14，英文原文）：“During the month, DXN (ASX: DXN) and Beacon Lighting Group (ASX: BLX) were contributors to the investment portfolio performance.”",
+     "基金自己的说法（WAA《September 2026 Investment Update》，2026-10-14，英文原文）：“During the month, modular data centre manufacturer and operator DXN (ASX: DXN) and Network-as-a-Service provider Megaport (ASX: MP1) were both contributors to the investment portfolio performance. DXN is a modular data centre manufacturer and operator, scaled across the Asia -Pacific region. We remain positive on DXN's outlook given its growing exposure to the rapidly expanding AI data centre sector, supported by strong contract momentum and pipeline opportunities across Australia and the Asia-Pacific region,…”",
+     "基金自己的说法（WMI《August 2026 Investment Update》，2026-09-14，英文原文）：“During the month, DXN (ASX: DXN) and Beacon Lighting Group (ASX: BLX) were contributors to the investment portfolio performance. DXN is a prefabricated data centre manufacturer and operator, scaled across the Asia- Pacific region. DXN’s FY2026 results also highlighted a record order backlog of $40.9 million and growing demand for its artificial intelligence (AI)-ready modular data centre solutions.”",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
@@ -2107,14 +2107,14 @@
       "title": "September 2026 Investment Update",
       "date": "2026-10-14",
       "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03152122",
-      "text": "During the month, modular data centre manufacturer and operator DXN (ASX: DXN) and Network-as-a-Service provider Megaport (ASX: MP1) were both contributors to the investment portfolio performance."
+      "text": "During the month, modular data centre manufacturer and operator DXN (ASX: DXN) and Network-as-a-Service provider Megaport (ASX: MP1) were both contributors to the investment portfolio performance. DXN is a modular data centre manufacturer and operator, scaled across the Asia -Pacific region. We remain positive on DXN's outlook given its growing exposure to the rapidly expanding AI data centre sector, supported by strong contract momentum and pipeline opportunities across Australia and the Asia-Pacific region,…"
      },
      {
       "fund": "WMI",
       "title": "August 2026 Investment Update",
       "date": "2026-09-14",
       "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03139124",
-      "text": "During the month, DXN (ASX: DXN) and Beacon Lighting Group (ASX: BLX) were contributors to the investment portfolio performance."
+      "text": "During the month, DXN (ASX: DXN) and Beacon Lighting Group (ASX: BLX) were contributors to the investment portfolio performance. DXN is a prefabricated data centre manufacturer and operator, scaled across the Asia- Pacific region. DXN’s FY2026 results also highlighted a record order backlog of $40.9 million and growing demand for its artificial intelligence (AI)-ready modular data centre solutions."
      }
     ],
     "side": "sell"
@@ -2363,12 +2363,14 @@
      "这家基金的习惯（按它过去 23 次有后续的动作统计）：约 79% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「顺势追加」（27%），依据：近 3 个月股价在涨；已经赚钱了还在加。其次是「按计划持续建仓」23%、「整体加仓（资金流入）」17%。",
      "前后三周它在 BM1、BMC、EMR、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "基金自己的说法（LSF《Monthly Report - August 2026》，2026-09-08，英文原文）：“Gold equities, including Eldorado Gold and Westgold Resources, materially outperformed the index, with producers across the sector benefiting from operating leverage and record cash flow, which supported dividends substantially above market expectations.”",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
     "tags": [
      "连续加仓",
-     "整体加仓"
+     "整体加仓",
+     "有基金原话"
     ],
     "purposes": [
      {
@@ -2388,6 +2390,15 @@
      }
     ],
     "strength": 42,
+    "quotes": [
+     {
+      "fund": "LSF",
+      "title": "Monthly Report - August 2026",
+      "date": "2026-09-08",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03136966",
+      "text": "Gold equities, including Eldorado Gold and Westgold Resources, materially outperformed the index, with producers across the sector benefiting from operating leverage and record cash flow, which supported dividends substantially above market expectations."
+     }
+    ],
     "side": "buy"
    }
   },
@@ -2488,28 +2499,98 @@
      "持股比例 9.76% → 7.68%，持股数减少 9.1 万股（相当于原持仓的 3%）。",
      "持股数几乎没动，比例却掉了 2.08 个百分点：公司总股本变大了约 23%（增发、配售或期权行权），它没有跟着买，所以被摊薄。",
      "对得上：公司在 8/19「Proposed issue of securities - EOL」公告了融资。",
-     "基金自己的说法（WAM《October 2026 Investment Update》，2026-11-11，英文原文）：“Cents per share 16.0 14.0 12.0 10.0 8.0 6.0 4.0 2.0 - 1999/00 2001/02 2003/04 2005/06 2007/08 2009/10 2011/12 2013/14 2015/16 2017/18 2019/20 2021/22 2023/24 2025/262026/27 Ordinary fully franked dividend Special fully franked dividend Equal access share buy-back Ordinary partially franked dividend FY2027 dividend target WAM Capital Limited (ASX: WAM) Level 26, Governor Phillip Tower, 1 Farrer Place, Sydney NSW 2000 ABN: 34 086 587 395 Full Year Results Annual Report Top 20 holdings (in alphabetical order) Code…”",
-     "基金自己的说法（WAX《October 2026 Investment Update》，2026-11-09，英文原文）：“Cents per share 10.0 FY2026: 10.0cps franked at 55% in total 9.0 Interim 5.0cps franked at 60% 8.0 Final 5.0cps franked at 50% 7.0 6.0 5.0 4.0 3.0 2.0 1.0 - 2004/05 2007/08 2010/11 2013/14 2016/17 2019/20 2022/23 2025/26 Ordinary fully franked dividend Special fully franked dividend Ordinary partially franked dividend @ 60% Ordinary partially franked dividend @ 50% WAM Research Limited (ASX: WAX) Level 26, Governor Phillip Tower, 1 Farrer Place, Sydney NSW 2000 ABN: 15 100 504 541 Full Year Results Annual…”",
+     "这只股票出现在它的月报（WAM《October 2026 Investment Update》，2026-11-11）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAX《October 2026 Investment Update》，2026-11-09）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WMI《September 2026 Investment Update》，2026-10-14）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAM《September 2026 Investment Update》，2026-10-12）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAX《September 2026 Investment Update》，2026-10-12）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WMI《August 2026 Investment Update》，2026-09-14）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAM《August 2026 Investment Update》，2026-09-07）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAX《August 2026 Investment Update》，2026-09-07）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAX《July 2026 Investment Update》，2026-08-13）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WMI《July 2026 Investment Update》，2026-08-12）的持仓表里，但没有文字说明。",
+     "这只股票出现在它的月报（WAM《July 2026 Investment Update》，2026-08-12）的持仓表里，但没有文字说明。",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
-    "tags": [
-     "有基金原话"
-    ],
+    "tags": [],
     "quotes": [
      {
       "fund": "WAM",
       "title": "October 2026 Investment Update",
       "date": "2026-11-11",
       "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03164489",
-      "text": "Cents per share 16.0 14.0 12.0 10.0 8.0 6.0 4.0 2.0 - 1999/00 2001/02 2003/04 2005/06 2007/08 2009/10 2011/12 2013/14 2015/16 2017/18 2019/20 2021/22 2023/24 2025/262026/27 Ordinary fully franked dividend Special fully franked dividend Equal access share buy-back Ordinary partially franked dividend FY2027 dividend target WAM Capital Limited (ASX: WAM) Level 26, Governor Phillip Tower, 1 Farrer Place, Sydney NSW 2000 ABN: 34 086 587 395 Full Year Results Annual Report Top 20 holdings (in alphabetical order) Code…"
+      "text": ""
      },
      {
       "fund": "WAX",
       "title": "October 2026 Investment Update",
       "date": "2026-11-09",
       "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03163573",
-      "text": "Cents per share 10.0 FY2026: 10.0cps franked at 55% in total 9.0 Interim 5.0cps franked at 60% 8.0 Final 5.0cps franked at 50% 7.0 6.0 5.0 4.0 3.0 2.0 1.0 - 2004/05 2007/08 2010/11 2013/14 2016/17 2019/20 2022/23 2025/26 Ordinary fully franked dividend Special fully franked dividend Ordinary partially franked dividend @ 60% Ordinary partially franked dividend @ 50% WAM Research Limited (ASX: WAX) Level 26, Governor Phillip Tower, 1 Farrer Place, Sydney NSW 2000 ABN: 15 100 504 541 Full Year Results Annual…"
+      "text": ""
+     },
+     {
+      "fund": "WMI",
+      "title": "September 2026 Investment Update",
+      "date": "2026-10-14",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03152058",
+      "text": ""
+     },
+     {
+      "fund": "WAM",
+      "title": "September 2026 Investment Update",
+      "date": "2026-10-12",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151094",
+      "text": ""
+     },
+     {
+      "fund": "WAX",
+      "title": "September 2026 Investment Update",
+      "date": "2026-10-12",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151098",
+      "text": ""
+     },
+     {
+      "fund": "WMI",
+      "title": "August 2026 Investment Update",
+      "date": "2026-09-14",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03139124",
+      "text": ""
+     },
+     {
+      "fund": "WAM",
+      "title": "August 2026 Investment Update",
+      "date": "2026-09-07",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03136417",
+      "text": ""
+     },
+     {
+      "fund": "WAX",
+      "title": "August 2026 Investment Update",
+      "date": "2026-09-07",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03136479",
+      "text": ""
+     },
+     {
+      "fund": "WAX",
+      "title": "July 2026 Investment Update",
+      "date": "2026-08-13",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03124832",
+      "text": ""
+     },
+     {
+      "fund": "WMI",
+      "title": "July 2026 Investment Update",
+      "date": "2026-08-12",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03124336",
+      "text": ""
+     },
+     {
+      "fund": "WAM",
+      "title": "July 2026 Investment Update",
+      "date": "2026-08-12",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03124352",
+      "text": ""
      }
     ]
    }
@@ -3032,11 +3113,14 @@
      "这家基金的习惯（按它过去 60 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「换股调出」（28%），依据：同期在另外 3 只股票上加仓。其次是「普通减仓」25%、「获利了结」21%。",
      "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "基金自己的说法（RF1《Unitholder Monthly Report for September 2026》，2026-10-13，英文原文）：“FUND INFORMATION Name Regal Investment Fund ASX Code RF1 ASX Closing Price $3.40 Monthly NAV $3.53 Premium/(Discount) -3.64% Structure Listed Investment Trust Listing Date 17 June 2019 Management Fee 1.5% (plus GST) Performance Fee 20% (plus GST) above RBA Cash Rate High Water Mark Yes Fund Size A$737m Units on Issue 208,864,082 units Distribution Frequency Semi-annual Responsible Entity Equity Trustees Limited Investment Manager Regal Partners Funds Management Pty Limited Fund Administrator APEX Group Data as…”",
+     "基金自己的说法（RF1《Unitholder Monthly Report for August 2026》，2026-09-14，英文原文）：“The RF1 portfolio will be constructed using multiple Regal Partners Investment Strategies and these strategies are not necessarily limited to the current Investment Strategies. The Investment Manager forms part of Regal Funds Management, a business of ASX-listed Regal Partners Limited (ASX:RPL) (\"Re gal Partners\"). RF1's portfolio is constructed by the Investment Manager using multiple investment strategies managed by Regal Partners bus inesses.”",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
     "tags": [
-     "换股"
+     "换股",
+     "有基金原话"
     ],
     "purposes": [
      {
@@ -3056,6 +3140,22 @@
      }
     ],
     "strength": 50,
+    "quotes": [
+     {
+      "fund": "RF1",
+      "title": "Unitholder Monthly Report for September 2026",
+      "date": "2026-10-13",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151752",
+      "text": "FUND INFORMATION Name Regal Investment Fund ASX Code RF1 ASX Closing Price $3.40 Monthly NAV $3.53 Premium/(Discount) -3.64% Structure Listed Investment Trust Listing Date 17 June 2019 Management Fee 1.5% (plus GST) Performance Fee 20% (plus GST) above RBA Cash Rate High Water Mark Yes Fund Size A$737m Units on Issue 208,864,082 units Distribution Frequency Semi-annual Responsible Entity Equity Trustees Limited Investment Manager Regal Partners Funds Management Pty Limited Fund Administrator APEX Group Data as…"
+     },
+     {
+      "fund": "RF1",
+      "title": "Unitholder Monthly Report for August 2026",
+      "date": "2026-09-14",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03139255",
+      "text": "The RF1 portfolio will be constructed using multiple Regal Partners Investment Strategies and these strategies are not necessarily limited to the current Investment Strategies. The Investment Manager forms part of Regal Funds Management, a business of ASX-listed Regal Partners Limited (ASX:RPL) (\"Re gal Partners\"). RF1's portfolio is constructed by the Investment Manager using multiple investment strategies managed by Regal Partners bus inesses."
+     }
+    ],
     "side": "sell"
    }
   },
@@ -3958,11 +4058,13 @@
      "这家基金的习惯（按它过去 23 次有后续的动作统计）：约 79% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「逢低买入」（62%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「整体加仓（资金流入）」17%、「普通加仓」10%。",
      "前后三周它在 BM1、BMC、EMR、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "基金自己的说法（LSF《Monthly Report - October 2026》，2026-11-09，英文原文）：“Key detractors included Mineral Resources and Lloyds, while The Lottery Corporation contributed positively. Mineral Resources fell 15.7% over the month as prices weakened for iron ore (-2%) and lithium (-30%).”",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
     "tags": [
-     "整体加仓"
+     "整体加仓",
+     "有基金原话"
     ],
     "purposes": [
      {
@@ -3982,6 +4084,15 @@
      }
     ],
     "strength": 13,
+    "quotes": [
+     {
+      "fund": "LSF",
+      "title": "Monthly Report - October 2026",
+      "date": "2026-11-09",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03163668",
+      "text": "Key detractors included Mineral Resources and Lloyds, while The Lottery Corporation contributed positively. Mineral Resources fell 15.7% over the month as prices weakened for iron ore (-2%) and lithium (-30%)."
+     }
+    ],
     "side": "buy"
    }
   },
@@ -4997,6 +5108,8 @@
      "交易形状：这次卖的量有 100% 集中在 10/15 一天，是平时日成交量的 24 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
      "综合打分：最像「获利了结」（67%），依据：借收购消息带来的涨价卖出；卖之前股价涨了一大段；股价在一年区间的高位。其次是「换股调出」10%、「普通减仓」9%。",
      "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "基金自己的说法（RF1《Unitholder Monthly Report for September 2026》，2026-10-13，英文原文）：“Equity Trustees is a subsidiary of E QT Holdings Limited (ABN 22 607 797 615), a publicly listed company on the Australian Securities Exchange (ASX: EQT).”",
+     "基金自己的说法（RF1《Unitholder Monthly Report for August 2026》，2026-09-14，英文原文）：“Equity Trustee s is a subsidiary of E QT Holdings Limited (ABN 22 607 797 615), a publicl y listed company on the Australian Securities Excha nge (ASX: EQT).”",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -5005,7 +5118,8 @@
      "连续减仓",
      "已减三成",
      "大宗",
-     "换股"
+     "换股",
+     "有基金原话"
     ],
     "purposes": [
      {
@@ -5025,6 +5139,22 @@
      }
     ],
     "strength": null,
+    "quotes": [
+     {
+      "fund": "RF1",
+      "title": "Unitholder Monthly Report for September 2026",
+      "date": "2026-10-13",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151752",
+      "text": "Equity Trustees is a subsidiary of E QT Holdings Limited (ABN 22 607 797 615), a publicly listed company on the Australian Securities Exchange (ASX: EQT)."
+     },
+     {
+      "fund": "RF1",
+      "title": "Unitholder Monthly Report for August 2026",
+      "date": "2026-09-14",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03139255",
+      "text": "Equity Trustee s is a subsidiary of E QT Holdings Limited (ABN 22 607 797 615), a publicl y listed company on the Australian Securities Excha nge (ASX: EQT)."
+     }
+    ],
     "side": "sell"
    }
   }

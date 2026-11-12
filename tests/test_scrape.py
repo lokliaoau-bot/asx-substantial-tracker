@@ -2566,3 +2566,18 @@ def test_history_records_reread_with_new_reader(sandbox, monkeypatch):
     before = len(fake.pdf_downloads)
     scrape.main()
     assert len(fake.pdf_downloads) == before                                   # 都是新读法了：不再重读
+
+
+def test_detail_retry_counter_resets_on_new_reader_version(sandbox, monkeypatch):
+    monkeypatch.setitem(PDFS, "1001", TRADE_604)
+    fake = FakeASX(prices={"SLC": falling_prices()})
+    monkeypatch.setattr(scrape, "fetch", fake)
+    scrape.main()
+    store = read(sandbox / "data" / "all_notices.json")
+    e = store["entries"]["1001"]
+    e["detail_v"], e["detail_tries"] = scrape.INSIGHT_VERSION - 1, 3           # 旧版读法下已经试满了
+    e.pop("detail_try_v", None)
+    (sandbox / "data" / "all_notices.json").write_text(json.dumps(store), encoding="utf-8")
+    scrape.main()
+    e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
+    assert e["detail_v"] == scrape.INSIGHT_VERSION and e["detail_try_v"] == scrape.INSIGHT_VERSION

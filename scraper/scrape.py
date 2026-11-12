@@ -1956,6 +1956,11 @@ def parse_prev_notice(text: str) -> str:
     return found.get("given") or found.get("dated") or ""
 
 
+def detail_tries(e: dict) -> int:
+    """这一版读法下补读过几次。读法升级后从 0 重新数（以前不清零，升级几次后就再也不重读了）。"""
+    return e.get("detail_tries", 0) if e.get("detail_try_v") == INSIGHT_VERSION else 0
+
+
 def enrich_entry(e: dict) -> None:
     """给已经解析过的公告补读明细（新加进关注名单、或明细读法升级时）。"""
     data, _ = download_pdf(e["url"])
@@ -2293,14 +2298,15 @@ def main() -> int:
     in_work = {id(e) for e in work}
     enrich = [e for e in entries.values()
               if e.get("status") == "parsed" and id(e) not in in_work and e.get("detail_v") != INSIGHT_VERSION
-              and e.get("detail_tries", 0) < DETAIL_TRIES and is_matched(e)]
+              and detail_tries(e) < DETAIL_TRIES and is_matched(e)]
     enrich.sort(key=lambda e: (e.get("date", ""), e.get("time", "")), reverse=True)
     room = max(MAX_PDFS - len(work), 0)
     deferred += max(len(enrich) - room, 0)
     enrich = enrich[:room]
 
     def handle_enrich(e: dict) -> bool:
-        e["detail_tries"] = e.get("detail_tries", 0) + 1
+        e["detail_tries"] = detail_tries(e) + 1
+        e["detail_try_v"] = INSIGHT_VERSION
         try:
             enrich_entry(e)
             return True

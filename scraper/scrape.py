@@ -1469,6 +1469,39 @@ def report_codes() -> dict[str, list[str]]:
         return {}
 
 
+REPORT_CHILD = """
+import io, sys
+from pypdf import PdfReader
+r = PdfReader(io.BytesIO(sys.stdin.buffer.read()))
+if r.is_encrypted:
+    r.decrypt("")
+out = []
+for page in r.pages[:6]:
+    try:
+        out.append(page.extract_text() or "")
+    except Exception:
+        pass
+sys.stdout.buffer.write("\\n".join(out).encode("utf-8", "replace"))
+"""
+
+
+def report_text(data: bytes) -> str:
+    """读月报前 6 页的文字。放在单独的进程里读，限内存、限时间：月报里图表多，个别文件会把内存吃光
+    （第十二轮真实运行时整个任务因此被系统杀掉过），读不出就返回空。"""
+    def limit():
+        try:
+            import resource
+            resource.setrlimit(resource.RLIMIT_AS, (1_500_000_000, 1_500_000_000))
+        except Exception:  # noqa: BLE001
+            pass
+    try:
+        p = subprocess.run([sys.executable, "-c", REPORT_CHILD], input=data, capture_output=True, timeout=45,
+                           preexec_fn=limit if os.name == "posix" else None)
+    except (subprocess.TimeoutExpired, OSError):
+        return ""
+    return p.stdout.decode("utf-8", "replace") if p.returncode == 0 else ""
+
+
 def update_fund_reports(store: dict, today: dt.date) -> int:
     """把名单基金最近几个月的月报正文存下来（每份只下载一次）。返回新读了几份。"""
     reports = [r for r in store.get("reports") or [] if isinstance(r, dict) and r.get("id")]
@@ -1495,8 +1528,7 @@ def update_fund_reports(store: dict, today: dt.date) -> int:
                 rec = {"id": row["id"], "holder": holder, "fund": code, "date": row["date"], "title": row["headline"][:80], "url": row["url"], "text": ""}
                 try:
                     data, _ = download_pdf(row["url"])
-                    text = re.sub(r"[ \t]+", " ", "\n".join(trade_pages(data, 6)))
-                    rec["text"] = re.sub(r"\s*\n\s*", " ", text)[:REPORT_CHARS]
+                    rec["text"] = " ".join(report_text(data).split())[:REPORT_CHARS]
                 except Exception as ex:  # noqa: BLE001
                     log(f"  月报没读出 {code} {row['date']}：{type(ex).__name__}: {ex}")
                 reports.append(rec)          # 读不出的也记下（text 为空），免得每次都重试

@@ -1438,8 +1438,10 @@ def test_real_sell_into_weakness_hostplus_bap():
     assert mid["votes"] == [76406237, 64019970]
     assert (tr["n"], tr["buy_qty"], tr["sell_qty"], tr["first"], tr["last"]) == (8, 0, 12386267, "2026-09-17", "2026-10-26")
     assert tr["sell_price"] == pytest.approx(0.821, abs=0.001)          # 对价带负号：-$9,397.80 / -12,000
-    assert j["action"] == "trim_loss" and j["tone"] == "bear" and j["style"] == "养老金"
-    assert any("1,239 万股" in r for r in j["reasons"])
+    # 第十一轮：这只股票 12 个月跌了 57%，但最近 3 个月翻了一倍——以前标“像止损”，现在标“趁反弹减仓”
+    assert j["action"] == "trim_bounce" and j["tone"] == "bear" and j["style"] == "养老金"
+    assert j["purposes"][0]["k"] == "bounce" and j["purposes"][1]["k"] == "stop"
+    assert any("1,239 万股" in r for r in j["reasons"]) and any("趁反弹卖" in r for r in j["reasons"])
 
 
 def test_real_profit_taking_perennial_amx():
@@ -2093,3 +2095,285 @@ def test_parse_company_rows():
     r = next(x for x in rows if x["id"] == "03161285")
     assert r["date"] == "2026-11-02" and r["time"] == "18:31" and r["headline"] == "Change in substantial holding"
     assert scrape.parse_company_rows("<html>blocked</html>") is None
+
+
+# ---------------------------------------------------------------- 第十一轮：趋势结构、持仓阶段、基金习惯、交易形状
+
+def _px(**kw):
+    px = {"p": 2.0, "r1m": 0.0, "r3m": 0.02, "r6m": 0.05, "r12m": 0.05, "pos": 0.5, "hi": 2.5, "lo": 1.5, "t_lo": 1.9, "t_hi": 2.1}
+    px.update(kw)
+    return px
+
+
+def test_pullback_buy_is_not_dip_or_chase():
+    # 一年涨了 80%，最近 3 个月回落 20%，股价在区间中部：回调买入
+    r = insight.judge(_buy(px=_px(r12m=0.8, r6m=0.1, r3m=-0.2, r1m=-0.1, pos=0.55)))
+    assert r["action"] == "add_pull" and r["tone"] == "bull" and r["purposes"][0]["k"] == "pull"
+    assert any("上涨途中的回调" in x for x in r["reasons"])
+    # 同样的回落，但已经跌到一年的最低位：那是逢低，不是回调
+    r = insight.judge(_buy(px=_px(r12m=0.8, r6m=-0.3, r3m=-0.4, r1m=-0.2, pos=0.1)))
+    assert r["action"] == "add_dip" and all(p["k"] != "pull" for p in r["purposes"])
+    # 回落太小（1 个月 -8%）不算
+    r = insight.judge(_buy(px=_px(r12m=0.8, r6m=0.3, r3m=0.05, r1m=-0.08, pos=0.7)))
+    assert r["action"] != "add_pull" and not any("上涨途中的回调" in x for x in r["reasons"])
+    # 长期没涨：不算
+    assert insight.judge(_buy(px=_px(r12m=0.1, r3m=-0.2, pos=0.5)))["action"] != "add_pull"
+    # 603 的基础标签不变（和逢低/顺势一样，只进理由和概率）
+    r = insight.judge(_buy(type="becoming", voting_power=[5.5], votes=[8_000_000], px=_px(r12m=0.8, r3m=-0.2, pos=0.55)))
+    assert r["action"] in ("build", "cross_up") and r["purposes"][0]["k"] == "pull"
+
+
+def test_bounce_sell_depends_on_cost():
+    px = _px(r12m=-0.55, r6m=0.3, r3m=0.9, r1m=0.1, pos=0.3)
+    r = insight.judge(_sell(px=px))
+    assert r["action"] == "trim_bounce" and r["tone"] == "bear" and any("趁反弹卖" in x for x in r["reasons"])
+    # 知道成本而且是赚钱卖的：就是获利了结
+    r = insight.judge(_sell(px=px, cost={"avg": 1.0, "cov": 0.9, "since": "2026-01-10", "n": 3}))
+    assert r["action"] == "trim_profit"
+    # 知道成本而且亏着：反弹减亏和止损不冲突，不算“分不出主次”
+    r = insight.judge(_sell(px=px, cost={"avg": 4.0, "cov": 0.9, "since": "2025-01-10", "n": 3}))
+    assert r["action"] in ("trim_bounce", "trim_loss") and {p["k"] for p in r["purposes"][:2]} == {"bounce", "stop"}
+    assert not any("分不出主次" in x for x in r["reasons"])
+    # 退出类
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], px=px, prev={"vp": 7.0, "votes": 7_000_000, "type": "change", "date": "2026-08-01"}))
+    assert r["action"] == "exit_bounce"
+    # 长期没怎么跌：不算
+    assert insight.judge(_sell(px=_px(r12m=-0.1, r3m=0.3)))["action"] != "trim_bounce"
+
+
+HIST11 = {"pos": {"A|XYZ": [
+    {"id": "1", "date": "2025-03-10", "time": "", "type": "becoming", "cd": "2025-03-06", "first": "2024-12-01", "vp": [5.2], "votes": [5_200_000],
+     "buy_qty": 4_000_000, "sell_qty": 0},
+    {"id": "2", "date": "2025-08-01", "time": "", "type": "change", "cd": "2025-07-30", "vp": [5.2, 10.0], "votes": [5_200_000, 10_000_000],
+     "buy_qty": 4_800_000, "sell_qty": 0},
+    {"id": "3", "date": "2026-06-01", "time": "", "type": "change", "cd": "2026-05-28", "vp": [10.0, 8.0], "votes": [10_000_000, 8_000_000],
+     "buy_qty": 0, "sell_qty": 2_000_000},
+]}}
+
+
+def test_stage_for():
+    e = {"id": "4", "date": "2026-11-05", "time": "10:00", "type": "change", "voting_power": [8.0, 6.0], "votes": [8_000_000, 6_000_000]}
+    st = scrape.stage_for(HIST11, "A", "XYZ", e)
+    assert st["peak"] == 10.0 and st["off"] == 0.4 and st["off_before"] == 0.2 and st["by"] == "股数"
+    assert (st["n_buy"], st["n_sell"], st["known_start"], st["fresh"]) == (2, 1, True, True)
+    assert st["age"] == (dt.date(2026, 11, 5) - dt.date(2024, 12, 1)).days      # 知道建仓时间：从第一笔买入算
+    # 退出类：只知道在 5% 以下，按“至少”算，用比例
+    st = scrape.stage_for(HIST11, "A", "XYZ", {"id": "5", "date": "2026-11-05", "time": "", "type": "ceasing"})
+    assert st["off"] == 0.5 and st["by"] == "比例"
+    # 没有更早的记录、日期坏了、没有历史：空
+    assert scrape.stage_for(HIST11, "A", "NOPE", e) == {}
+    assert scrape.stage_for(None, "A", "XYZ", e) == {}
+    assert scrape.stage_for(HIST11, "A", "XYZ", dict(e, date="bad")) == {}
+    # 自己这份不算“之前”；比第一份还早的也没有“之前”
+    assert scrape.stage_for(HIST11, "A", "XYZ", {"id": "1", "date": "2025-03-10", "time": "", "type": "becoming", "voting_power": [5.2]}) == {}
+
+
+def test_stage_handles_share_consolidation_dilution_and_reentry():
+    # 10 合 1：合并之前的股数不能拿来比，从合并之后重新算
+    hist = {"pos": {"A|XYZ": [
+        {"id": "1", "date": "2025-03-10", "time": "", "type": "becoming", "vp": [8.0], "votes": [80_000_000]},
+        {"id": "2", "date": "2025-09-10", "time": "", "type": "change", "vp": [8.0, 9.0], "votes": [8_000_000, 9_000_000]}]}}
+    e = {"id": "3", "date": "2026-02-01", "time": "", "type": "change", "voting_power": [9.0, 8.5], "votes": [9_000_000, 8_500_000]}
+    st = scrape.stage_for(hist, "A", "XYZ", e)
+    assert st["off"] == round(1 - 8.5 / 9, 3) and st["by"] == "股数" and st["peak"] == 9.0
+    # 这份公告自己前后就差了几倍（合并发生在这一份里）：不给
+    assert scrape.stage_for(hist, "A", "XYZ", dict(e, voting_power=[9.0, 9.0], votes=[9_000_000, 900_000])) == {}
+    # 有一份没读到股数：退回用比例
+    hist2 = {"pos": {"A|XYZ": [{"id": "1", "date": "2025-03-10", "time": "", "type": "becoming", "vp": [10.0], "votes": []}]}}
+    st = scrape.stage_for(hist2, "A", "XYZ", e)
+    assert st["by"] == "比例" and st["off"] == 0.15 and st["fresh"] is False
+    # 退出过又回来：只看回来之后这一段
+    hist3 = {"pos": {"A|XYZ": HIST11["pos"]["A|XYZ"] + [
+        {"id": "9", "date": "2026-07-01", "time": "", "type": "ceasing", "vp": [], "votes": []},
+        {"id": "10", "date": "2026-09-01", "time": "", "type": "becoming", "cd": "2026-08-28", "vp": [5.5], "votes": [5_500_000], "buy_qty": 0}]}}
+    st = scrape.stage_for(hist3, "A", "XYZ", {"id": "11", "date": "2026-11-05", "time": "", "type": "change", "voting_power": [5.5, 6.5],
+                                                "votes": [5_500_000, 6_500_000]})
+    assert st["peak"] == 5.5 and st["off"] == 0 and (st["n_buy"], st["n_sell"]) == (1, 0) and st["fresh"] is False
+    assert st["age"] == (dt.date(2026, 11, 5) - dt.date(2026, 8, 28)).days     # 不知道建仓时间：从越过 5% 那天算
+    assert scrape.stage_for(hist3, "A", "XYZ", {"id": "10", "date": "2026-09-01", "time": "", "type": "becoming", "voting_power": [5.5]}) == {}
+
+
+def _stage(**kw):
+    st = {"age": 600, "known_start": True, "fresh": True, "peak": 10.0, "off": 0.4, "off_before": 0.2, "by": "股数", "n_buy": 2, "n_sell": 1, "hist": 5}
+    st.update(kw)
+    return st
+
+
+def test_stage_drives_wind_rebal_and_short():
+    # 已经比最高点少了四成、连续第 3 次减：分批减仓
+    r = insight.judge(_sell(stage=_stage(), seq={"same": 2, "opp_days": None}))
+    assert r["action"] == "trim_wind" and "已减三成" in r["tags"] and any(x.startswith("持仓阶段：从建仓算起约 20 个月") for x in r["reasons"])
+    assert any("比最高点少了 40%（按股数算）" in x for x in r["reasons"])
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], stage=_stage(off=0.5, by="比例"), seq={"same": 1, "opp_days": None},
+                            prev={"vp": 7.0, "votes": 7_000_000, "type": "change", "date": "2026-08-01"}))
+    assert r["action"] == "exit_wind" and any("至少少了 50%（按持股比例算" in x for x in r["reasons"])
+    # 之前没减过：一次卖出不叫“分批”
+    r = insight.judge(_sell(stage=_stage(n_sell=0)))
+    assert r["action"] != "trim_wind" and "已减三成" not in r["tags"] and any("建仓以来第一次减仓" in x for x in r["reasons"])
+    # 涨了之后小幅减：以前是“仓位管理”；但已经减掉三成以上的就不是“减一点”了
+    small = dict(voting_power=[8.0, 7.2], votes=[8_000_000, 7_200_000], style="super", px=_px(r6m=0.15, pos=0.5, t_vol=50_000_000))
+    tr = dict(_sell()["trades"], sell_qty=800_000, net_qty=-800_000)
+    assert insight.judge(_sell(trades=tr, **small))["action"] == "trim_rebal"
+    assert insight.judge(_sell(trades=tr, stage=_stage(off=0.05, n_sell=0, age=400), **small))["action"] == "trim_rebal"   # 成为大股东一年多第一次小减
+    assert insight.judge(_sell(trades=tr, stage=_stage(off=0.35), **small))["action"] != "trim_rebal"
+    # 刚建仓 3 个月就卖：短线
+    quick = _stage(age=90, off=0.25, n_buy=1, n_sell=0)
+    sc = lambda **kw: {p["k"]: p["s"] for p in insight.score_purposes(insight.judge(_sell(**kw))["_f"])}
+    assert sc(stage=quick)["short"] == pytest.approx(sc()["short"] + 1.6)
+    assert insight.judge(_sell(stage=quick))["action"] == "trim"                       # 单凭这一条不够，还是普通减仓
+    r = insight.judge(_sell(stage=quick, habit={"n": 30, "follow": 0.5, "rev": 0.3, "n_buy": 30, "contr": 0.5}))
+    assert r["purposes"][0]["k"] == "short" and r["action"] == "short_out" and any("建仓才 3 个月就开始卖" in x for x in r["reasons"])
+    # 上一份反向公告就在 60 天内的，已经按“刚加仓就掉头”加过分，不重复加
+    assert sc(stage=quick, seq={"same": 0, "opp_days": 20})["short"] == pytest.approx(sc(seq={"same": 0, "opp_days": 20})["short"])
+    # 603 只是“越过 5%”、不知道什么时候建的仓：不能说刚买就卖
+    r = insight.judge(_sell(stage=_stage(age=90, off=0.25, n_buy=1, n_sell=0, fresh=False)))
+    assert r["action"] == "trim" and any("成为大股东以来第一次减仓" in x for x in r["reasons"])
+    # 坏的输入不出错
+    for bad in ({"age": None}, {"age": 10}, {"age": "x", "peak": 5}, {"age": 10, "peak": 0}, "oops" and {}):
+        assert insight.judge(_sell(stage=bad))["action"] == "trim"
+
+
+def test_reentry_wording_needs_a_real_sale():
+    r = insight.judge(_buy(stage=_stage(off=0.1, off_before=0.3, n_sell=2)))
+    assert any("之前已经从最高点减掉过 30%，这次是往回买" in x for x in r["reasons"])
+    r = insight.judge(_buy(stage=_stage(off=0.1, off_before=0.3, n_sell=0, by="比例")))      # 比例掉了但没卖过：是被摊薄，不说“减掉过”
+    assert not any("往回买" in x for x in r["reasons"])
+    r = insight.judge(_buy(stage=_stage(off=0.0, off_before=0.0, n_sell=0)))
+    assert any("持仓的新高" in x for x in r["reasons"])
+
+
+def test_habits_counts_shrinks_and_respects_as_of():
+    def rows(dirs, start="2025-01-01", step=40, px=None):
+        out, d, v = [], dt.date.fromisoformat(start), 100
+        for i, s in enumerate(dirs):
+            nv = v + 10 if s == "b" else v - 10
+            out.append({"id": f"{start}-{i}", "date": (d + dt.timedelta(days=step * i)).isoformat(), "time": "", "type": "change",
+                        "votes": [v, nv], "px": px or {}})
+            v = nv
+        return out
+    hist = {"pos": {"Steady|AAA": rows("bbbbbbbbbbbbb", px={"pos": 0.2, "r3m": -0.2}),            # 12 次有后续，全部同方向；都在弱的时候买
+                    "Flippy|BBB": rows("bsbsbsbsbsbsb", px={"pos": 0.9, "r3m": 0.3})}}            # 12 次有后续，全部 40 天内掉头
+    h = scrape.habits(hist)
+    assert h["Steady"]["n"] == 12 and h["Flippy"]["n"] == 12
+    assert h["Steady"]["follow"] == round((12 + 8 * 0.5) / 20, 3) and h["Flippy"]["follow"] == round((0 + 8 * 0.5) / 20, 3)   # 向全体平均（0.5）收缩
+    assert h["Steady"]["rev"] == round((0 + 8 * 0.5) / 20, 3) and h["Flippy"]["rev"] == round((12 + 8 * 0.5) / 20, 3)
+    assert h["Steady"]["contr"] > 0.8 > 0.5 > h["Flippy"]["contr"] and h["Steady"]["n_buy"] == 13 and h["Flippy"]["n_buy"] == 7
+    # as_of：只数那一天之前的（回头看时不偷看之后的事）
+    early = scrape.habits(hist, as_of="2025-03-01")
+    assert early["Steady"]["n"] == 1 and early["Flippy"]["n"] == 1
+    assert scrape.habits(hist, as_of="2024-01-01") == {} and scrape.habits(None) == {} and scrape.habits({"pos": {}}) == {}
+    # 掉头但隔了很久：不算“3 个月内掉头”
+    slow = scrape.habits({"pos": {"Slow|CCC": rows("bsbsbsb", step=200)}})
+    assert slow["Slow"]["rev"] == 0 and slow["Slow"]["follow"] == 0
+
+
+def test_habit_feeds_scoring_and_reason():
+    steady = {"n": 30, "follow": 0.9, "rev": 0.03, "n_buy": 30, "contr": 0.7}
+    flippy = {"n": 30, "follow": 0.5, "rev": 0.3, "n_buy": 30, "contr": 0.4}
+    a = insight.judge(_buy(habit=steady, seq={"same": 1, "opp_days": None}))
+    b = insight.judge(_buy(habit=flippy, seq={"same": 1, "opp_days": None}))
+    assert any("这家基金的习惯（按它过去 30 次" in x and "一旦开始就倾向一路做下去" in x for x in a["reasons"])
+    assert any("经常做一段就反过来" in x for x in b["reasons"])
+    pa = {p["k"]: p["s"] for p in insight.score_purposes(a["_f"])}
+    pb = {p["k"]: p["s"] for p in insight.score_purposes(b["_f"])}
+    assert pa["prog"] > pb["prog"] and pa["short"] < pb["short"] and pa["dip"] > pb["dip"] and pa["mom"] < pb["mom"]
+    # 连续第 3 次加仓 + 习惯一路加：按计划建仓
+    r = insight.judge(_buy(habit=steady, seq={"same": 2, "opp_days": None}))
+    assert r["action"] == "add_prog" and r["tone"] == "bull"
+    # 样本太少不用，也不提；缺字段的不用
+    r = insight.judge(_buy(habit={"n": 3, "follow": 1.0, "rev": 0.0, "n_buy": 3, "contr": 1.0}))
+    assert not any("习惯" in x for x in r["reasons"]) and "habit" not in r["_f"]
+    assert "habit" not in insight.judge(_buy(habit={"n": 30}))["_f"]
+    r = insight.judge(_buy(habit={"n": 8, "follow": 0.9, "rev": 0.0, "n_buy": 8, "contr": 0.6}))
+    assert any("样本还少，仅供参考" in x for x in r["reasons"])
+
+
+def test_prog_and_price_purposes_are_compatible_not_a_tie():
+    # “按计划建仓”和“逢低买入”几乎同分：两件事不冲突，不能退回“普通加仓”
+    f = _f(side="buy", base="add", f_down=0.8, lowpos=0.3, seq_same=2, habit={"n": 30, "follow": 0.85, "rev": 0.05, "n_buy": 0, "contr": 0.6})
+    ranked = {p["k"]: p["s"] for p in insight.score_purposes(f)}
+    assert abs(ranked["prog"] - ranked["dip"]) <= insight.TIE
+    ins = {"reasons": [], "style": "养老金", "_f": f}
+    insight.finalize(ins)
+    assert ins["action"] in ("add_dip", "add_prog") and not any("分不出主次" in x for x in ins["reasons"])
+    # 真正互斥的（逢低 vs 顺势）几乎同分时，照旧不硬贴标签
+    f2 = _f(side="buy", base="add", f_down=1.0, u3=1.2)
+    ins2 = {"reasons": [], "style": "养老金", "_f": f2}
+    insight.finalize(ins2)
+    assert ins2["action"] == "add" and any("分不出主次" in x for x in ins2["reasons"])
+
+
+def test_block_of_and_block_evidence():
+    daily = [["2026-10-20", 100_000], ["2026-10-21", 3_000_000], ["2026-10-22", -50_000], ["bad"], ["2026-10-23", "x"]]
+    assert insight.block_of(daily, 200_000, "buy") == {"d": "2026-10-21", "top": round(3_000_000 / 3_100_000, 3), "x": 15.0}
+    assert insight.block_of(daily, 200_000, "sell") == {}                      # 卖的那天只有 5 万股
+    assert insight.block_of(daily, 1_000_000, "buy") == {}                     # 只有日均量的 3 倍
+    assert insight.block_of([["2026-10-20", 1_000_000], ["2026-10-21", 1_100_000], ["2026-10-22", 1_200_000]], 100_000, "buy") == {}   # 很大但分散
+    assert insight.block_of(daily, None, "buy") == {} and insight.block_of(None, 100, "buy") == {} and insight.block_of([], 100, "sell") == {}
+    tr = dict(_sell()["trades"], daily=[["2026-10-20", -100_000], ["2026-11-03", -1_900_000]])
+    r = insight.judge(_sell(trades=tr, px=_px(adv=100_000)))
+    assert "大宗" in r["tags"] and any(x.startswith("交易形状：这次卖的量有 95% 集中在 11/3 一天，是平时日成交量的 19 倍") for x in r["reasons"])
+    assert "大宗" not in insight.judge(_sell(trades=tr, px=_px(adv=1_000_000)))["tags"]
+    # 一次性大宗卖出不是“涨多了减一点”
+    small = dict(voting_power=[8.0, 7.2], votes=[8_000_000, 7_200_000], style="super")
+    tr2 = dict(_sell()["trades"], sell_qty=800_000, net_qty=-800_000)
+    assert insight.judge(_sell(trades=tr2, px=_px(r6m=0.15, pos=0.5, t_vol=50_000_000, adv=50_000), **small))["action"] == "trim_rebal"
+    tr2["daily"] = [["2026-11-03", -800_000]]
+    r = insight.judge(_sell(trades=tr2, px=_px(r6m=0.15, pos=0.5, t_vol=50_000_000, adv=50_000), **small))
+    assert r["action"] != "trim_rebal" and "大宗" in r["tags"]
+    # 买入：一天拿下一大笔，更像接大宗或认购新股
+    trb = dict(_buy()["trades"], daily=[["2026-11-03", 2_000_000]])
+    a = {p["k"]: p["s"] for p in insight.score_purposes(insight.judge(_buy(trades=trb, px=_px(adv=100_000)))["_f"])}
+    b = {p["k"]: p["s"] for p in insight.score_purposes(insight.judge(_buy(trades=trb, px=_px(adv=10_000_000)))["_f"])}
+    assert a["plc"] > b["plc"] and a["dip"] < b["dip"]
+    # 持仓历史里会记下来（旧记录没有逐日明细，回头看时靠这个）
+    e = {"id": "1", "date": "2026-11-05", "type": "change", "change_date": "2026-11-03", "voting_power": [8.0, 6.0], "votes": [8_000_000, 6_000_000],
+         "trades": dict(tr), "px": _px(adv=100_000)}
+    rec = insight.history_record(e)
+    assert rec["blk"]["d"] == "2026-11-03" and "daily" not in rec["tr"] and "daily" in e["trades"]
+    assert insight.judge(_sell(blk=rec["blk"]))["tags"] == ["大宗"]
+    assert "blk" not in insight.history_record(dict(e, px=_px()))
+
+
+def test_round11_fields_do_not_leak_and_old_inputs_still_work():
+    # 不给新字段时，和以前一样（旧数据、读不到历史时不出错）
+    plain = insight.judge(_sell())
+    assert plain["action"] == "trim" and not any(x.startswith(("持仓阶段", "这家基金的习惯", "交易形状", "长短期")) for x in plain["reasons"])
+    ks = {p["k"] for p in insight.score_purposes(plain["_f"])}
+    assert {"wind", "bounce"} <= ks and {"pull", "prog"} <= {p["k"] for p in insight.score_purposes(insight.judge(_buy())["_f"])}
+    for a in ("add_pull", "add_prog", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind"):
+        assert a in insight.LABELS and a in insight.TONE and (a in insight.BUY_ACTIONS or a in insight.SELL_ACTIONS)
+    for side, names in insight.PURPOSE_NAMES.items():
+        for k in names:
+            for base, action in insight.PURPOSE_ACTION.get((side, k), {}).items():
+                assert action in insight.LABELS, (side, k, base)
+
+
+def test_build_notices_passes_stage_and_habit(sandbox):
+    holders, _ = scrape.load_watchlist()
+    name = alias = "Paradice Investment Management"
+    assert any(h.name == name for h in holders)
+    hist = {"pos": {scrape.pos_key(name, "XYZ"): [dict(r) for r in HIST11["pos"]["A|XYZ"]]}}
+    e = {"id": "77", "code": "XYZ", "date": "2026-11-05", "time": "10:00", "headline": "Change in substantial holding", "status": "parsed",
+         "type": "change", "holder_name": alias, "voting_power": [8.0, 6.0], "votes": [8_000_000, 6_000_000], "change_date": "2026-11-03",
+         "trades": _sell()["trades"], "px": _px()}
+    out = scrape.build_notices({"77": e}, holders, hist)
+    assert len(out) == 1 and out[0]["holder"] == name
+    ins = out[0]["insight"]
+    assert any(x.startswith("持仓阶段：") and "比最高点少了 40%" in x for x in ins["reasons"]) and "_f" not in ins and ins["side"] == "sell"
+    # 没有历史也照常
+    assert scrape.build_notices({"77": e}, holders, None)[0]["insight"]["action"]
+
+
+def test_calibrate_reports_quick_reversals():
+    holders, _ = scrape.load_watchlist()
+    name = holders[0].name
+    px = _px()
+    rows = [{"id": "1", "date": "2026-01-10", "time": "", "type": "change", "cd": "2026-01-08", "vp": [6.0, 7.0], "votes": [6_000_000, 7_000_000], "px": px},
+            {"id": "2", "date": "2026-02-10", "time": "", "type": "change", "cd": "2026-02-08", "vp": [7.0, 6.0], "votes": [7_000_000, 6_000_000], "px": px},
+            {"id": "3", "date": "2026-09-10", "time": "", "type": "change", "cd": "2026-09-08", "vp": [6.0, 7.0], "votes": [6_000_000, 7_000_000], "px": px}]
+    cal = scrape.calibrate({"pos": {scrape.pos_key(name, "XYZ"): rows}}, holders)
+    buy = next(v for k, v in cal.items() if k.startswith("buy:"))
+    sell = next(v for k, v in cal.items() if k.startswith("sell:"))
+    assert buy["n"] == 2 and buy["n_next"] == 1 and buy["same_next"] == 0 and buy["rev_next"] == 1.0       # 31 天后就反向
+    assert sell["n_next"] == 1 and sell["rev_next"] == 0.0                                                  # 反向了，但隔了 7 个月

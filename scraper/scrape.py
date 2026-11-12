@@ -1115,6 +1115,148 @@ def sequence_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
     return {"same": same, "opp_days": opp_days}
 
 
+def _row_key(r: dict) -> tuple:
+    return (r.get("date") or "", r.get("time") or "", str(r.get("id")))
+
+
+def _rows_before(history: dict | None, holder: str, code: str, e: dict) -> list[dict]:
+    rows = ((history or {}).get("pos") or {}).get(pos_key(holder, code)) or []
+    me = _row_key(e)
+    return sorted((r for r in rows if r.get("id") != e.get("id") and _row_key(r) < me), key=_row_key)
+
+
+BAD_DATA = (TypeError, ValueError, AttributeError, KeyError, IndexError, ZeroDivisionError, OverflowError)
+
+
+def stage_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
+    """见 _stage_for。持仓历史文件里有坏数据时返回 {}（宁可不用这条证据，也不能让解读出错）。"""
+    try:
+        return _stage_for(history, holder, code, e)
+    except BAD_DATA:
+        return {}
+
+
+def habits(history: dict | None, as_of: str = "") -> dict:
+    """见 _habits。持仓历史文件里有坏数据时返回 {}。"""
+    try:
+        return _habits(history, as_of)
+    except BAD_DATA:
+        return {}
+
+
+def _stage_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
+    """持仓阶段（第十一轮）：这家基金在这只股票上走到哪一步了。只用这份公告之前的记录。
+    返回 {age: 从起点到现在的天数（起点：知道建仓时间就用第一笔买入，否则用最早一份公告的变动日）, known_start: 最早一份是不是 603, fresh: 那份 603 是不是“近 4 个月买出来的”（知道建仓时间）,
+           peak: 到过的最高持股比例, off: 这次之后比最高点少了多少（0–1）, off_before: 这次之前比最高点少了多少,
+           by: 用什么量的（"股数" 或 "比例"）, n_buy / n_sell: 之前公告过几次加仓、减仓}；没有更早的记录返回 {}。
+    最高点优先用持股数量（不受增发摊薄影响）；中间遇到股份合并/拆分（倒推总股本差一倍以上）就从那之后重新算。"""
+    before = _rows_before(history, holder, code, e)
+    last_exit = max((i for i, r in enumerate(before) if r.get("type") == "ceasing"), default=-1)
+    before = before[last_exit + 1:]              # 中途退出过（605）又回来的，只看回来之后这一段
+    if not before:
+        return {}
+    first = before[0]
+    fv = first.get("votes") or []
+    # 603 只说明“哪天越过 5%”，不等于“哪天开始买”。只有最早那份 603 里近 4 个月净买入占了当时持仓一半以上，才算知道它是什么时候建的仓
+    fresh = bool(first.get("type") == "becoming" and fv and fv[0] > 0
+                 and ((first.get("buy_qty") or 0) - (first.get("sell_qty") or 0)) >= 0.5 * fv[0])
+    try:
+        today = dt.date.fromisoformat(e.get("date") or "")
+        start = dt.date.fromisoformat((first.get("first") if fresh else "") or first.get("cd") or first.get("date") or "")
+    except ValueError:
+        return {}
+    cur_vp = [float(x) for x in (e.get("voting_power") or [])]
+    cur_votes = [int(x) for x in (e.get("votes") or [])]
+    typ = e.get("type")
+    points: list[tuple[float | None, int | None]] = []          # (比例, 股数)，按时间顺序；每份公告最多两个点（之前、之后）
+    for r in before:
+        vp, votes = r.get("vp") or [], r.get("votes") or []
+        for i in range(len(vp)):
+            points.append((vp[i], votes[i] if len(votes) == len(vp) else None))
+    n_hist = len(points)
+    if typ == "change" and len(cur_vp) == 2:
+        points.append((cur_vp[0], cur_votes[0] if len(cur_votes) == 2 else None))
+        points.append((cur_vp[1], cur_votes[1] if len(cur_votes) == 2 else None))
+    elif typ == "becoming" and cur_vp:
+        points.append((cur_vp[0], cur_votes[0] if cur_votes else None))
+    elif typ == "ceasing":
+        points.append((None, None))
+    else:
+        return {}
+    # 股份合并/拆分：相邻两个点倒推出来的总股本差一倍以上，之前的股数就不能比了
+    cut, last_so = 0, None
+    for i, (vp, votes) in enumerate(points):
+        if vp and votes:
+            so = votes / vp
+            if last_so and not 0.5 <= so / last_so <= 2:
+                cut = i
+            last_so = so
+    usable = points[cut:]
+    vps = [vp for vp, _ in usable[:-1] if vp]
+    shs = [sh for _, sh in usable[:-1] if sh]
+    after_vp, after_sh = points[-1]
+    if typ == "ceasing":
+        after_vp = 5.0                                           # 只知道在 5% 以下：按“至少减了这么多”算
+    prev_vp, prev_sh = next(((vp, sh) for vp, sh in reversed(usable[:-1]) if vp), (None, None))
+    if not vps or not after_vp:
+        return {}
+    by_shares = bool(typ != "ceasing" and after_sh and shs and prev_sh and len(shs) == len(vps))
+    if by_shares:
+        peak, after, prev = max(shs), after_sh, prev_sh
+    else:
+        peak, after, prev = max(vps), after_vp, prev_vp
+    dirs = [_rec_dir(r) for r in before]
+    return {"age": (today - start).days, "known_start": first.get("type") == "becoming", "fresh": fresh, "peak": round(max(vps), 2),
+            "off": round(max(1 - after / peak, 0.0), 3), "off_before": round(max(1 - prev / peak, 0.0), 3),
+            "by": "股数" if by_shares else "比例", "n_buy": dirs.count("buy"), "n_sell": dirs.count("sell"),
+            "hist": n_hist}
+
+
+HABIT_K = 8               # 往“所有基金的平均水平”收缩用的假想样本数：样本少的基金主要看平均，样本多的看它自己
+HABIT_REV_DAYS = 90
+
+
+def _habits(history: dict | None, as_of: str = "") -> dict:
+    """基金习惯（第十一轮）：从持仓历史里数每家基金过去的做法。as_of：只用这一天之前已经发生的事（回头看时防止偷看答案）。
+    返回 {基金: {n: 有后续的动作数, follow: 下一份公告还是同方向的比例, rev: 90 天内反向的比例,
+                  n_buy: 能看出股价强弱的买入次数, contr: 其中在股价弱的时候买的比例}}，比例都已向全体平均收缩。"""
+    raw: dict[str, dict] = {}
+    for key, rows in ((history or {}).get("pos") or {}).items():
+        holder = key.split("|", 1)[0]
+        a = raw.setdefault(holder, {"n": 0, "same": 0, "rev": 0, "n_buy": 0, "weak": 0})
+        seq = [(r, _rec_dir(r)) for r in sorted(rows, key=_row_key)]
+        seq = [(r, d) for r, d in seq if d and (not as_of or (r.get("date") or "") < as_of)]
+        for (r, d), (nr, nd) in zip(seq, seq[1:]):
+            a["n"] += 1
+            a["same"] += nd == d
+            gap = insight._days_between(r.get("date"), nr.get("date"))
+            a["rev"] += nd != d and gap <= HABIT_REV_DAYS
+        for r, d in seq:
+            px = r.get("px") or {}
+            pos, r3 = px.get("pos"), px.get("r3m")
+            if d != "buy" or (pos is None and r3 is None):
+                continue
+            weak = (pos is not None and pos <= 0.4) or (r3 is not None and r3 <= -0.10)
+            strong = (pos is not None and pos >= 0.6) or (r3 is not None and r3 >= 0.10)
+            if weak != strong:
+                a["n_buy"] += 1
+                a["weak"] += weak
+    tot = {k: sum(a[k] for a in raw.values()) for k in ("n", "same", "rev", "n_buy", "weak")}
+    if not tot["n"]:
+        return {}
+    g_follow, g_rev = tot["same"] / tot["n"], tot["rev"] / tot["n"]
+    g_contr = tot["weak"] / tot["n_buy"] if tot["n_buy"] else 0.5
+    out = {}
+    for holder, a in raw.items():
+        if not a["n"] and not a["n_buy"]:
+            continue
+        out[holder] = {"n": a["n"], "follow": round((a["same"] + HABIT_K * g_follow) / (a["n"] + HABIT_K), 3),
+                       "rev": round((a["rev"] + HABIT_K * g_rev) / (a["n"] + HABIT_K), 3),
+                       "n_buy": a["n_buy"], "contr": round((a["weak"] + HABIT_K * g_contr) / (a["n_buy"] + HABIT_K), 3)}
+    return out
+
+
+
 def parse_company_rows(html: str) -> list[dict] | None:
     """某公司公告列表页的每一行：{id, date, time, headline, url}。页面认不出返回 None。"""
     soup = BeautifulSoup(html, "html.parser")
@@ -1280,6 +1422,13 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
     公告后 3 个月股价涨跌、它自己下一份公告是同向还是反向。按“方向:目的”汇总。只是统计，不会自动改权重。"""
     style_of = {h.name: h.style for h in holders}
     agg: dict[str, dict] = {}
+    habit_cache: dict[str, dict] = {}
+
+    def habit_at(day: str) -> dict:           # 只用那一天之前的记录算习惯，不偷看之后的事
+        if day not in habit_cache:
+            habit_cache[day] = habits(history, as_of=day)
+        return habit_cache[day]
+
     for key, rows in (history.get("pos") or {}).items():
         holder = key.split("|", 1)[0]
         for i, r in enumerate(rows):
@@ -1297,6 +1446,8 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
                     "px": r.get("px") or {}, "ocr": r.get("ocr"), "style": style_of.get(holder, "active"), "date": r.get("date"),
                     "change_date": r.get("cd"), "tl": r.get("tl") or {}, "cost": insight.cost_basis(before, holding) if before else {},
                     "seq": sequence_for(history, holder, key.split("|", 1)[1], e),
+                    "stage": stage_for(history, holder, key.split("|", 1)[1], e), "blk": r.get("blk") or {},
+                    "habit": habit_at(r.get("date") or "").get(holder) or {},
                     "prev": {"vp": (prev.get("vp") or [None])[-1], "votes": (prev.get("votes") or [None])[-1], "type": prev.get("type"),
                              "date": prev.get("date")} if prev else None})
             except Exception:  # noqa: BLE001
@@ -1304,22 +1455,25 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
             if not ins or not ins.get("_f"):
                 continue
             side, top = ins["_f"]["side"], ins["purposes"][0]["k"]
-            a = agg.setdefault(f"{side}:{top}", {"n": 0, "n3": 0, "sum3": 0.0, "up3": 0, "n_next": 0, "same_next": 0})
+            a = agg.setdefault(f"{side}:{top}", {"n": 0, "n3": 0, "sum3": 0.0, "up3": 0, "n_next": 0, "same_next": 0, "rev": 0})
             a["n"] += 1
             f3 = (r.get("fwd") or {}).get("3m")
             if f3 is not None:
                 a["n3"] += 1
                 a["sum3"] += f3
                 a["up3"] += f3 > 0
-            nxt = next((_rec_dir(x) for x in rows[i + 1:] if _rec_dir(x)), "")
-            if nxt:
+            nxt_row = next((x for x in rows[i + 1:] if _rec_dir(x)), None)
+            if nxt_row:
+                nxt = _rec_dir(nxt_row)
                 a["n_next"] += 1
                 a["same_next"] += nxt == side
+                a["rev"] += nxt != side and insight._days_between(r.get("date"), nxt_row.get("date")) <= HABIT_REV_DAYS
     out = {}
     for k, a in sorted(agg.items()):
         out[k] = {"n": a["n"], "n3": a["n3"], "avg3": round(a["sum3"] / a["n3"], 3) if a["n3"] else None,
                   "up3": round(a["up3"] / a["n3"], 3) if a["n3"] else None, "n_next": a["n_next"],
-                  "same_next": round(a["same_next"] / a["n_next"], 3) if a["n_next"] else None}
+                  "same_next": round(a["same_next"] / a["n_next"], 3) if a["n_next"] else None,
+                  "rev_next": round(a["rev"] / a["n_next"], 3) if a["n_next"] else None}
     return out
 
 
@@ -1328,6 +1482,11 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
     group_of = {h.name: h.group for h in holders}
     style_of = {h.name: h.style for h in holders}
     last_seen: dict[tuple, dict] = {}        # (申报方, 股票) → 上一份公告的要点，给“操作解读”做参照
+    try:
+        habit_of = habits(history)
+    except Exception as ex:  # noqa: BLE001  习惯统计出错不能影响公告本身
+        log(f"  基金习惯统计出错：{type(ex).__name__}: {ex}")
+        habit_of = {}
     for e in sorted(entries.values(), key=lambda e: (e.get("date") or "", e.get("time") or "", str(e.get("id")))):
         holder, conf = match_entry(e, holders)
         if holder:
@@ -1347,7 +1506,8 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
                     "style": style_of.get(holder, "active"), "prev": last_seen.get(key), "date": e.get("date"),
                     "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
                     "change_date": e.get("change_date"), "seq": sequence_for(history, holder, item["code"], e),
-                    "tl": e.get("tl") or {},
+                    "tl": e.get("tl") or {}, "stage": stage_for(history, holder, item["code"], e),
+                    "habit": habit_of.get(holder) or {},
                 })
             except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
                 log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")

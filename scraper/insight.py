@@ -6,6 +6,9 @@
 2. （可选）股价背景：由 scrape.py 传入，见 price_context()。
 3. judge()：一组写死的规则，输出 {kind, label, tone, confidence, reasons}。
 
+第十一轮加了四类证据（都在 judge 末尾的 6b 节）：趋势结构（长期和短期方向相反）、持仓阶段（stage，来自持仓历史）、
+基金习惯（habit，来自持仓历史）、交易形状（block_of，一天之内的大宗）。
+
 这里只做规则判断，不调用任何 AI。规则给的是“最可能的解释”和依据，不是事实——基金为什么买卖，公告里不会写。
 """
 
@@ -472,11 +475,14 @@ LABELS = {
     "transfer": "划转或换管理人", "arb": "收购消息后买入，像并购套利",
     "add_flow": "加仓（多只股票一起加，像有新资金）", "swap_in": "换股调入（卖别的、买这只）", "short_in": "卖出不久又买回，像短线来回",
     "trim_flow": "减仓（多只股票一起减，像应付赎回）", "exit_flow": "减到 5% 以下（多只一起减，像应付赎回）",
-    "swap_out": "换股调出（卖这只、买别的）", "trim_rebal": "涨多了减一点，像仓位管理", "short_out": "买入不久就卖出，像短线交易", "restructure": "股份合并/拆分", "unknown": "看不出来",
+    "swap_out": "换股调出（卖这只、买别的）", "trim_rebal": "涨多了减一点，像仓位管理", "short_out": "买入不久就卖出，像短线交易",
+    "add_pull": "回调时加仓（长期在涨）", "add_prog": "持续加仓，像按计划建仓", "trim_bounce": "趁反弹减仓", "exit_bounce": "趁反弹减到 5% 以下",
+    "trim_wind": "分批减仓，已减掉三成以上", "exit_wind": "分几次减到 5% 以下", "restructure": "股份合并/拆分", "unknown": "看不出来",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
-        "exit_loss": "bear", "exit": "bear", "add_flow": "bull", "swap_in": "bull", "swap_out": "bear"}
+        "exit_loss": "bear", "exit": "bear", "add_flow": "bull", "swap_in": "bull", "swap_out": "bear",
+        "add_pull": "bull", "add_prog": "bull", "trim_bounce": "bear", "exit_bounce": "bear", "trim_wind": "bear", "exit_wind": "bear"}
 
 
 def fq(n: float) -> str:
@@ -564,6 +570,31 @@ def cost_basis(records: list[dict], holding: int | None = None) -> dict:
     return {"avg": round(cost / shares, 4), "cov": round(cov, 3) if cov is not None else None, "since": since, "n": used}
 
 
+BLOCK_SHARE = 0.5         # 一天的量占这个方向总量的一半以上
+BLOCK_ADV = 5.0           # 而且是平时日均成交量的 5 倍以上：算“一次性大宗”
+
+
+def block_of(daily: list, adv, side: str) -> dict:
+    """交易形状（第十一轮）：这个方向的量是不是集中在一天、而且远超平时的日成交量。
+    daily：[[日期, 当天净买卖量], ...]；adv：近 60 个交易日的日均成交量。返回 {d, top: 占比, x: 是日均量的几倍}，不是大宗返回 {}。"""
+    sign = 1 if side == "buy" else -1
+    rows = []
+    for item in daily if isinstance(daily, list) else []:
+        try:
+            q = float(item[1]) * sign
+        except (TypeError, ValueError, IndexError, KeyError):
+            continue
+        if 0 < q < 1e15:
+            rows.append((q, str(item[0])))
+    if not rows or not _is_num(adv) or adv <= 0:
+        return {}
+    tot = sum(q for q, _ in rows)
+    q, d = max(rows)
+    if q / tot >= BLOCK_SHARE and q / adv >= BLOCK_ADV:
+        return {"d": d, "top": round(q / tot, 3), "x": round(min(q / adv, 999.0), 1)}
+    return {}
+
+
 def history_record(e: dict) -> dict:
     """把一条公告压成“持仓历史”里的一行（长期保存，用来累计买入成本）。读得不可靠的买卖数字不记。"""
     tr, px, votes = dict(e.get("trades") or {}), e.get("px") or {}, e.get("votes") or []
@@ -579,6 +610,11 @@ def history_record(e: dict) -> dict:
            "buy_qty": int(buy), "sell_qty": int(sell), "buy_price": bp, "sell_price": sp, "p": px.get("p"),
            "first": tr.get("first") or ""}
     # 下面这些是为了以后能对旧公告重新打分、做回测
+    net = (votes[1] - votes[0]) if e.get("type") == "change" and len(votes) == 2 else buy - sell
+    side = "buy" if e.get("type") == "becoming" else "sell" if e.get("type") == "ceasing" else "buy" if net > 0 else "sell" if net < 0 else ""
+    blk = block_of(tr.get("daily"), px.get("adv"), side) if side and (buy or sell) else {}
+    if blk:
+        rec["blk"] = blk
     tr.pop("daily", None)
     if tr:
         rec["tr"] = tr
@@ -592,8 +628,8 @@ def history_record(e: dict) -> dict:
     return rec
 
 
-BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement"}
-SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit"}
+BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog"}
+SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind"}
 CTX_DAYS = 21             # “同期”：前后三周
 PEER_DAYS = 30
 
@@ -1024,6 +1060,64 @@ def judge(n: dict) -> dict | None:
                                        f"低了 {abs(gain) * 100:.0f}%：是亏钱卖的。" if gain <= -0.10 else
                                        "和成本差不多：不像获利了结，也谈不上止损。"))
         f["tk_sell"] = tk_sell
+    # ---- 6b. 第十一轮的四类新证据：趋势结构、持仓阶段、基金习惯、交易形状
+    r1 = px.get("r1m")
+    lt_up = _ratio_max(((r12, 0.40), (r6, 0.25)))
+    lt_dn = _ratio_max(((r12, -0.30), (r6, -0.25)))
+    st_dn = _ratio_max(((r3, -0.15), (r1, -0.15)))
+    st_up = _ratio_max(((r3, 0.15), (r1, 0.15)))
+    f["pull"] = round(min(lt_up, st_dn), 2) if direction == "buy" and lt_up >= 1 and st_dn >= 0.8 and pos is not None and pos >= 0.35 else 0.0
+    f["bounce"] = round(min(lt_dn, st_up), 2) if direction == "sell" and lt_dn >= 1 and st_up >= 0.8 else 0.0
+    long_txt = f"近 12 个月 {fr(r12)}" if r12 is not None and abs(r12) >= abs(r6 or 0) else f"近 6 个月 {fr(r6)}" if r6 is not None else ""
+    short_txt = (f"近 3 个月 {fr(r3)}" if r3 is not None and abs(r3) >= abs(r1 or 0) else f"近 1 个月 {fr(r1)}" if r1 is not None else "")
+    if f["pull"]:
+        reasons.append(f"长短期方向不一样：长期是涨的（{long_txt}），最近才回落（{short_txt}），股价也不在一年的低位——是在上涨途中的回调里买，和“跌了很久去抄底”不是一回事。")
+    if f["bounce"]:
+        reasons.append(f"长短期方向不一样：长期跌了很多（{long_txt}），最近在反弹（{short_txt}）——是趁反弹卖。"
+                       "不知道它的成本时，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。")
+
+    stage = _checked(n.get("stage"), ("off", "off_before", "n_buy", "n_sell", "hist"), ("age", "peak"))
+    if stage and stage["peak"] > 0 and stage["age"] >= 0:
+        stage["off"], stage["off_before"] = _clip(stage["off"], 0, 1), _clip(stage["off_before"], 0, 1)
+        stage["known_start"], stage["fresh"] = stage.get("known_start") is True, stage.get("fresh") is True
+        stage["by"] = "股数" if stage.get("by") == "股数" else "比例"
+        f["stage"] = stage
+        months = max(round(stage["age"] / 30.4), 1)
+        head = "从建仓算起" if stage.get("fresh") else "从首次越过 5% 披露线算起" if stage.get("known_start") else "从能查到的最早一份公告算起"
+        line = f"持仓阶段：{head}约 {months} 个月，持股比例最高到过 {stage['peak']:g}%"
+        off, off0 = stage.get("off") or 0.0, stage.get("off_before") or 0.0
+        if direction == "sell" and off >= 0.10:
+            line += (f"；这次之后比最高点{'至少' if t == 'ceasing' else ''}少了 {off * 100:.0f}%"
+                     + ("（按股数算）" if stage.get("by") == "股数" else "（按持股比例算，被增发摊薄的部分也算在里面）"))
+        elif direction == "buy" and off0 >= 0.15 and (stage.get("n_sell") or 0) >= 1:
+            line += f"；之前已经从最高点减掉过 {off0 * 100:.0f}%，这次是往回买"
+        elif direction == "buy" and off < 0.02 and t == "change":
+            line += "；这次之后是它在这只股票上持仓的新高"
+        nb0, ns0 = stage.get("n_buy") or 0, stage.get("n_sell") or 0
+        line += f"。之前公告过 {nb0} 次买入、{ns0} 次减仓。"
+        if direction == "sell" and ns0 == 0 and nb0 >= 1:
+            line += "这是它" + ("建仓以来" if stage.get("fresh") else "成为大股东以来" if stage.get("known_start") else "有记录以来") + "第一次减仓。"
+        reasons.append(line)
+        if direction == "sell" and off >= 0.30 and (ns0 >= 1 or f["seq_same"] >= 1):
+            tags.append("已减三成")
+    habit = _checked(n.get("habit"), ("n_buy",), ("n", "follow", "rev", "contr"))
+    if habit and habit["n"] >= HABIT_MIN and all(0 <= habit[k] <= 1 for k in ("follow", "rev", "contr")):
+        habit = {k: habit[k] for k in ("n", "follow", "rev", "n_buy", "contr")}
+        f["habit"] = habit
+        line = (f"这家基金的习惯（按它过去 {habit['n']} 次有后续的动作统计）：约 {habit['follow'] * 100:.0f}% 的情况下一份公告还是同方向，"
+                f"约 {habit['rev'] * 100:.0f}% 会在 3 个月内掉头")
+        line += "——" + ("样本还少，仅供参考。" if habit["n"] < 12 else "一旦开始就倾向一路做下去。" if habit["follow"] >= 0.8
+                       else "经常做一段就反过来，单独一份公告的分量要打折。" if habit["rev"] >= 0.2 or habit["follow"] <= 0.6 else "属于一般水平。")
+        reasons.append(line)
+    blk = _checked(n.get("blk"), (), ("top", "x")) or (block_of(tr.get("daily"), px.get("adv"), direction) if rows_ok else {})
+    if blk and not offmkt:
+        blk = {"d": str(blk.get("d") or ""), "top": blk["top"], "x": blk["x"]}
+        f["blk"] = blk
+        verb = "买" if direction == "buy" else "卖"
+        reasons.append(f"交易形状：这次{verb}的量有 {blk['top'] * 100:.0f}% 集中在 {md(str(blk.get('d') or ''))} 一天，是平时日成交量的 {blk['x']:.0f} 倍——"
+                       + ("是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。" if direction == "buy"
+                          else "是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。"))
+        tags.append("大宗")
     # 数据质量分（和目的无关）：明细对得上、基金类型、扫描件
     q = score + (1 if style in ("active", "strategic") else 0) - (1 if style == "platform" or ocr else 0) - (2 if not vp and not rows_ok else 0)
     f["q"] = q
@@ -1045,9 +1139,11 @@ TIE = 0.15
 SHORT_DAYS = 60
 PURPOSE_NAMES = {
     "buy": {"base": "普通加仓", "dip": "逢低买入", "mom": "顺势追加", "plc": "参与融资", "arb": "并购套利",
-            "flow": "整体加仓（资金流入）", "swap": "换股调入", "short": "短线来回"},
+            "flow": "整体加仓（资金流入）", "swap": "换股调入", "short": "短线来回",
+            "pull": "回调买入（长期在涨）", "prog": "按计划持续建仓"},
     "sell": {"base": "普通减仓", "profit": "获利了结", "stop": "止损或看法变差", "flow": "整体减仓（应付赎回）",
-             "swap": "换股调出", "rebal": "仓位管理（涨多了减一点）", "short": "短线交易"},
+             "swap": "换股调出", "rebal": "仓位管理（涨多了减一点）", "short": "短线交易",
+             "bounce": "趁反弹减仓", "wind": "分批减仓（一路在减）"},
 }
 PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用基础标签（新进建仓 / 加仓越过 5% 线 / 加仓 / 减仓 / 减到 5% 以下）
     ("buy", "dip"): {"add": "add_dip"}, ("buy", "mom"): {"add": "add_chase"},
@@ -1058,11 +1154,43 @@ PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用�
     ("sell", "profit"): {"trim": "trim_profit", "exit": "exit_profit"}, ("sell", "stop"): {"trim": "trim_loss", "exit": "exit_loss"},
     ("sell", "flow"): {"trim": "trim_flow", "exit": "exit_flow"}, ("sell", "swap"): {"trim": "swap_out", "exit": "swap_out"},
     ("sell", "rebal"): {"trim": "trim_rebal"}, ("sell", "short"): {"trim": "short_out", "exit": "short_out"},
+    ("buy", "pull"): {"add": "add_pull"}, ("buy", "prog"): {"add": "add_prog"},
+    ("sell", "bounce"): {"trim": "trim_bounce", "exit": "exit_bounce"}, ("sell", "wind"): {"trim": "trim_wind", "exit": "exit_wind"},
 }
+
+
+# 这些成对的目的说的是两件不冲突的事（一个讲“怎么做”，一个讲“为什么”），可以同时成立：几乎同分时不算“分不出主次”，标分数高的那个
+COMPATIBLE = {frozenset(x) for x in (("prog", "dip"), ("prog", "mom"), ("prog", "pull"), ("wind", "profit"), ("wind", "stop"),
+                                     ("wind", "bounce"), ("bounce", "profit"), ("bounce", "stop"))}
 
 
 def _clip(x: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, x))
+
+
+def _ratio_max(pairs) -> float:
+    """[(涨跌幅, 门槛), ...] 里“涨跌幅 ÷ 门槛”最大的一个，截到 0–1.3；门槛为负表示看跌幅。都没有数据时是 0。"""
+    vals = [r / c for r, c in pairs if r is not None]
+    return _clip(max(vals), 0.0, 1.3) if vals else 0.0
+
+
+HABIT_MIN = 6             # 一家基金至少有这么多次“有后续的动作”，才谈得上习惯
+
+
+def _is_num(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and x == x and abs(x) < 1e12
+
+
+def _checked(d, nums: tuple, required: tuple) -> dict:
+    """持仓历史文件万一坏了，新证据宁可不用，也不能让整条解读出错：不是字典、必需的数字缺了或不是数字，就当没有。
+    其余数字字段不是数字的按 0 算。"""
+    if not isinstance(d, dict) or not all(_is_num(d.get(k)) for k in required):
+        return {}
+    out = dict(d)
+    for k in nums:
+        if not _is_num(out.get(k)):
+            out[k] = 0
+    return out
 
 
 def _trend(r3, r6, r12, sign: int) -> float:
@@ -1092,6 +1220,10 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
     tl = f.get("tl") or {}
     nb, ns = ctx.get("nb", 0), ctx.get("ns", 0)
     opp = f.get("opp_days")
+    stage, habit, blk = f.get("stage") or {}, f.get("habit") or {}, f.get("blk") or {}
+    follow_adj = _clip((habit["follow"] - 0.72) * 4, -0.5, 0.6) if habit else 0.0     # 0.72 ≈ 全体基金“下一次同方向”的平均比例
+    rev_adj = _clip((habit["rev"] - 0.10) * 4, -0.4, 0.5) if habit else 0.0           # 0.10 ≈ 全体“3 个月内掉头”的平均比例
+    edge = (tl["down_share"] - (tl.get("base_down") if tl.get("base_down") is not None else 0.5)) if tl.get("n") else None
     S["base"] = BASELINE
     if side == "buy":
         for k, prior in (("dip", -0.3), ("mom", -0.3), ("plc", -1.5), ("arb", -2.0), ("flow", -1.0), ("swap", -1.0), ("short", -1.2)):
@@ -1135,6 +1267,33 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("swap", 0.3 if ctx.get("rot") else 0, "卖的和买的不在一个行业")
         if opp is not None and opp <= SHORT_DAYS:
             add("short", 2.0 + (0.4 if style == "hedge" else 0), f"{opp} 天前还在减仓")
+        # -- 第十一轮
+        S["pull"], S["prog"] = -0.6, -1.0
+        if f.get("pull"):
+            add("pull", 1.5 * f["pull"], "长期在涨、最近回落，股价不在低位")
+            add("pull", 0.2 if f["highpos"] > 0 else 0)
+            add("dip", -0.8)
+            add("mom", -0.5)
+        else:
+            S["pull"] = -3.0
+        add("prog", 0.7 * min(f.get("seq_same", 0), 2), f"近 4 个月连续第 {f.get('seq_same', 0) + 1} 次加仓")
+        add("prog", follow_adj, "这家基金一旦开始加仓，通常会一路加下去")
+        if tl.get("n", 0) >= 8:
+            add("prog", 0.3 if part is not None and part <= 0.10 else 0, "分很多天慢慢买")
+            add("prog", 0.3 if edge is not None and abs(edge) < 0.10 else 0, "涨的日子跌的日子都在买，不挑价格")
+        add("prog", 0.2 if stage.get("hist", 0) >= 2 and (stage.get("off") or 0) < 0.02 else 0, "持仓创了新高")
+        if f.get("plc", 0.0) >= 0.5 or f.get("t") == "becoming":
+            add("prog", -1.0)
+        if habit and (habit.get("n_buy") or 0) >= 8:
+            tilt = _clip((habit["contr"] - 0.6) * 1.5, -0.3, 0.3)
+            add("dip", tilt, "这家基金习惯在股价弱的时候买")
+            add("mom", -tilt, "这家基金习惯在股价强的时候买")
+        add("short", rev_adj, "这家基金经常买了不久就反手")
+        if blk:
+            add("plc", 1.2 if f.get("raise") else 0.8, "大部分是一天之内一次性拿下的")
+            for k in ("dip", "mom"):
+                add(k, -0.5)
+            add("prog", -0.8)
     else:
         for k, prior in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2)):
             S[k] = prior
@@ -1179,6 +1338,43 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("rebal", 0.3 if part is not None and part <= 0.05 else 0, "卖得很慢")
         if opp is not None and opp <= SHORT_DAYS:
             add("short", 2.0 + (0.4 if style == "hedge" else 0), f"{opp} 天前还在加仓")
+        # -- 第十一轮
+        S["bounce"], S["wind"] = -0.6, -1.2
+        if f.get("bounce"):
+            add("bounce", 1.5 * f["bounce"], "长期跌了很多、最近反弹时卖")
+            if g is None:                      # 不知道成本：单看最近的反弹，既不能算“获利”，也不能算“越跌越卖”
+                add("profit", -0.8)
+                add("stop", -0.8)
+            elif g >= 0.10:
+                add("bounce", -1.5)
+            elif g <= -0.10:
+                add("bounce", 0.3, "按它的成本算还是亏的")
+        else:
+            S["bounce"] = -3.0
+        off, sold_before = stage.get("off") or 0.0, (stage.get("n_sell") or 0) >= 1 or f.get("seq_same", 0) >= 1
+        if off >= 0.30:
+            add("wind", 1.0 + 0.8 * _clip((off - 0.30) / 0.30, 0, 1), f"已经比最高点少了 {off * 100:.0f}%")
+            add("rebal", -1.5)                 # 都减掉三成以上了，谈不上“涨多了减一点”
+        add("wind", 0.5 * min(f.get("seq_same", 0), 2), f"近 4 个月连续第 {f.get('seq_same', 0) + 1} 次减仓")
+        add("wind", 0.5 if f.get("t") == "ceasing" and (stage.get("n_sell") or 0) >= 1 else 0, "之前已经减过，这次减到了 5% 以下")
+        add("wind", follow_adj if sold_before else 0, "这家基金一旦开始减仓，通常会一路减下去")
+        if not sold_before:
+            add("wind", -1.0)                  # 之前没减过：一次卖出谈不上“分批”
+        first_sell = bool(stage) and (stage.get("n_sell") or 0) == 0 and (stage.get("n_buy") or 0) >= 1
+        age = stage.get("age")
+        if first_sell and age is not None and stage.get("known_start"):
+            if age <= 150 and stage.get("fresh"):                 # 只有确实是近几个月才建的仓，才谈得上“刚买就卖”
+                if not (opp is not None and opp <= SHORT_DAYS):   # 上面已经按“刚加仓就掉头”加过分的，不重复加
+                    add("short", 1.6, f"建仓才 {max(round(age / 30.4), 1)} 个月就开始卖")
+                add("stop", 0.7 if f["f_down"] > 0 or (g is not None and g <= -0.10) else 0, "建仓没多久、股价不如意就卖，像认错")
+            elif age >= 270 and size is not None and size <= 0.15:
+                add("rebal", 0.4, "成为大股东以来第一次减，而且只减了一点")
+        if age is not None and age >= 540 and f["f_up"] > 0 and (g is None or g >= 0.10):
+            add("profit", 0.3, "已经拿了一年半以上")
+        add("short", rev_adj, "这家基金经常卖了不久就反手")
+        if blk:
+            add("rebal", -1.5)                 # 一次性大宗卖出不是“慢慢减一点”
+            add("flow", -0.5)
     z = sum(math.exp(v) for v in S.values())
     out = [{"k": k, "name": PURPOSE_NAMES[side][k], "s": round(v, 2), "p": round(math.exp(v) / z, 3),
             "why": [t for _, t in sorted(why.get(k, []), reverse=True)]} for k, v in S.items()]
@@ -1216,7 +1412,8 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
     close = False
     if top["k"] != "base" and top["s"] < base["s"] + MARGIN:
         top = base
-    elif top["k"] != "base" and any(x["k"] not in ("base", top["k"]) and x["s"] >= top["s"] - TIE for x in ranked):
+    elif top["k"] != "base" and any(x["k"] not in ("base", top["k"]) and x["s"] >= top["s"] - TIE
+                                    and frozenset((x["k"], top["k"])) not in COMPATIBLE for x in ranked):
         close = True                                       # 有另一种目的和它几乎同分：分不出主次，不硬贴标签
     action = f["base"] if close else PURPOSE_ACTION.get((f["side"], top["k"]), {}).get(f["base"], f["base"])
     pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= 0.45 else 0) + (1 if top["k"] != "base" and top["p"] >= 0.7 else 0)

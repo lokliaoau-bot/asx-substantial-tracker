@@ -35,6 +35,7 @@
 | `data/notices.json` | 网页用：只含命中名单的公告 + `insight` |
 | `tests/test_scrape.py` | 离线测试（假 ASX：`FakeASX`；真实样本在 `tests/fixtures/`） |
 | `tests/frontend_check.py` | Playwright 网页检查（用 `/usr/local/bin/python3` 跑） |
+| `tools/replay.py` | 离线回放：改了判断规则后，用仓库里的真实数据和旧代码逐条对比 |
 
 `scrape.py` 的流程（`main()`）：
 1. 读两个列表页（当天、上一交易日）`parse_listing` + 全市场接口 `market_rows`（增量，`api_since`）→ 去重 `dedupe_keys`
@@ -61,6 +62,22 @@ python -m pytest -q -p no:warnings                      # 全部离线
 ## 当前进度（每次更新这里）
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
+
+### 第十一轮（2026-11-12，**代码完成，还没在 GitHub 上真跑、还没合并**）：趋势结构 + 持仓阶段 + 基金习惯 + 交易形状
+
+**进行中（接手后从这里开始）**：
+1. 把这份代码推到 `dev-r11`（这一轮是在连不上 GitHub 的聊天环境里做的，用户手里是一个 zip）
+2. 对 `dev-r11` 触发 `scrape.yml`，确认跑通；看 `data/notices.json` 里有没有“持仓阶段：”“这家基金的习惯”“交易形状：”这些理由，`calibration.json` 有没有 `rev_next`
+3. `python tools/replay.py` 和 main 逐条对比（预期：近期公告约 5 条标签变化，见 `HANDOVER.md`）
+4. 没问题再 fast-forward 合并到 `main`
+
+做了什么（细节和权重在 `HANDOVER.md` 第 5 节“第十一轮”）：
+- `insight.py`：`judge` 末尾“6b”节收集四类新证据；新目的 `pull`（回调买入）、`prog`（按计划持续建仓）、`bounce`（趁反弹减仓）、`wind`（分批减仓）；
+  `COMPATIBLE`（不冲突的目的同分时不算“分不出主次”）；`block_of`；`_checked`（坏数据保护）
+- `scrape.py`：`stage_for`（持仓阶段）、`habits`（基金习惯，`as_of` 防偷看）、`calibrate` 多了 `rev_next`；`build_notices` 把 `stage` / `habit` 传给 `judge`
+- `index.html`：“回头看”多一句“3 个月内就掉头的占 x%”，别的没动（新标签、新小标签网页自动显示）
+- `tools/replay.py`：离线回放对比工具
+- 只改判断规则，版本号没动；186 个测试、39 项网页检查通过
 
 ### 第十轮（2026-11-12，已完成并合并到 `main`）：回补历史 + 逐笔时间线 + 回头看
 

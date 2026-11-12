@@ -26,8 +26,8 @@
 
 | 文件 | 内容 |
 | --- | --- |
-| `scraper/scrape.py`（约 1500 行） | 抓取主程序，见下 |
-| `scraper/insight.py`（约 600 行） | 操作解读：`parse_trades`（逐笔明细）、`parse_votes`（第二节持股数）、`price_context`（股价背景）、`judge`（判断规则，纯函数） |
+| `scraper/scrape.py`（约 1700 行） | 抓取主程序，见下 |
+| `scraper/insight.py`（约 850 行） | 操作解读：`parse_trades`（逐笔明细）、`parse_votes`（第二节持股数）、`price_context`（股价背景）、`event_moves`、`cost_basis`、`judge`（判断规则，纯函数）、`add_context`（横向比较） |
 | `scraper/watchlist.json` | 关注名单：`name / group（主动基金·养老金）/ style（active·hedge·strategic·super·platform）/ aliases / hints`，以及 `noise_hints` |
 | `index.html` | 单文件网页（无构建）。读 `data/notices.json`，按钮调 GitHub API 触发抓取并轮询 |
 | `data/all_notices.json` | 内部存储：所有大股东公告的解析结果（35 天） |
@@ -62,17 +62,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第八轮（2026-11-11 开始）：让“操作解读”更能说清目的 —— 分支 `dev-r8`，进行中
+### 第八轮（2026-11-12，已完成并合并到 `main`）：让“操作解读”更能说清目的
 
-用户同意的范围（都不加新的付费数据源，不明显拖慢抓取）：
+- 公司同期大事 `ev`（融资/业绩/收购/回购，`company_events` + `insight.event_moves`）、行业 `sector`、交易期间成交量 `px.t_vol`
+- 成本价：`data/history.json`（`update_history` / `cost_for` / `insight.cost_basis`）
+- 横向比较 `insight.add_context` + 网页小标签 `insight.tags`
+- `INSIGHT_VERSION = 3`；157 个测试、37 项网页检查；`dev-r8` 真实运行三次，和正式版逐条对比 79 条里只有 3 条标签变化（都合理）
+- 判断规则的细节在 `HANDOVER.md` 第 5 节“第八轮加的判据”
 
-| # | 内容 | 状态 |
-| --- | --- | --- |
-| 1 | 公司同期事件（融资/业绩/收购/回购）：`company_events` 读该公司近 6 个月公告页 → `classify_event` → entry 的 `ev`（含消息后股价变动 `j`，`insight.event_moves`）→ judge 第 4b 节 | 代码 + 测试完成 |
-| 2 | 成本价：`data/history.json`（`update_history` / `cost_for` / `insight.cost_basis`，留 3 年）→ 卖出时判断赚还是亏，买入时说摊低成本/加码 | 代码 + 测试完成 |
-| 3 | 横向比较 `insight.add_context`：同一基金前后三周在别的股票（整体减仓/整体加仓/换股，行业来自 `company_sector`）+ 同一股票多家同向/反向；`insight.tags` 在网页显示成小标签 | 代码 + 测试完成 |
-| 4 | 买卖量占同期全市场成交量（`px.t_vol`）：超过 1 倍 = 不是场内成交；“SecuritiesBuy” 粘连修复。（查过：明细里的 “other” 行其实都是没写性质的普通现金买卖，不用另外处理） | 代码 + 测试完成 |
-| 5 | 三轮审查 + `dev-r8` 真实运行 + 合并 main + 更新 HANDOVER/README/DEPLOY | **进行中**：第一次真实运行（11/11）发现并修了：并购公告分不清谁收购谁（改用“消息后股价涨 8% 以上才算被收购方”）、行业轮动说得太满、措辞。`INSIGHT_VERSION = 3`。下一步：再跑一次 dev-r8 → 看结果 → 写文档 → 合并 |
+目前没有进行到一半的工作。下一步候选（`HANDOVER.md` 第 9 节）：用全年公告页回补持仓历史、ASIC 做空数据、董事买卖、回测。
 
 已验证可用的接口（探路结果在 `debug-r8-out`）：
 - 公司近 6 个月公告：`/asx/v2/statistics/announcements.do?by=asxCode&asxCode=XXX&timeframe=D&period=M6`（HTML；`timeframe=Y&year=2026` 是全年，里面也有更早的大股东公告，以后可用来回补持仓历史）

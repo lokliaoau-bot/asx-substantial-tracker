@@ -1,6 +1,6 @@
 # 大股东公告雷达 — 交接文件（给接手的 AI）
 
-> 版本：2026-11-12（第十二轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
+> 版本：2026-11-12（第十三轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
 > 用户 Lok 是会计师，不写代码，用中文沟通，喜欢大白话和例子。所有对用户的说明都要用中文、少术语。
 
 ## 1. 一句话说明
@@ -37,7 +37,7 @@
 | `data/calibration.json` | 回头看的统计（第十轮），每次运行重算 |
 | `data/fund_reports.json` | 名单基金上市产品的月报正文（第十二轮），找“基金自己怎么说” |
 | `data/notices.json` | 网页用的结果：只含命中名单的 |
-| `tests/test_scrape.py` | 192 个离线测试 |
+| `tests/test_scrape.py` | 196 个离线测试 |
 | `tools/replay.py` | 离线回放：按当前规则重判 history 和近期公告，和旧代码逐条对比（第十一轮） |
 | `tests/fixtures/` | 真实公告样本（PDF 只留前几页；`insight_samples.json` 是 10 份真实公告的文字 + 对应股价） |
 | `tests/frontend_check.py` | Playwright 网页检查（39 项），含 GitHub API 的模拟 |
@@ -70,7 +70,7 @@
 
 版本号（升级后旧数据自动重读）：
 - `PARSER_VERSION`（现在 8）：解析规则变了就加 1，全部公告重读一遍（约 700 份，单次运行上限 300 份，要跑两三次——**先在测试分支跑完再合并**）
-- `INSIGHT_VERSION`（现在 4）：只改逐笔明细的读法时加 1，只重读命中名单的公告
+- `INSIGHT_VERSION`（现在 5）：只改逐笔明细的读法时加 1，只重读命中名单的公告
 - 只改 `judge()` 的判断规则：不用加版本，每次运行都重新算
 
 ## 5. 操作解读是怎么判断的（`insight.py`）
@@ -250,6 +250,23 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 **不参与打分**（程序读不懂英文句子的意思）。2026-11 实测命中 4 条：Wilson 的 DXN（两份月报都说是 contributor）、L1 的 WGX 和 MIN。
 局限：月报每月只点评两三只股票，命中率低；L1、Regal 的月报不带代码，只能靠公司名；Perennial、Paradice、Celeste、Ellerston 没有上市产品，没有月报可读。
 
+### 第十三轮：逐笔明细读准
+
+**说明写在日期行上面的表格**。有的公告（Hostplus、AustralianSuper）表格里的单元格是顶端对齐、日期在底部：
+“Purchase of / Sale of / Acquisition of shares pursuant of the Capital” 写在日期那行的**上面**。以前只往下找说明，Hostplus 的 167 笔买入全部没认出方向。
+现在 `parse_trades` 每行同时收集上面（`pre`，最多 5 行，到上一笔交易为止）和下面（`cont`）的文字，**整份公告选一边**：
+看“自己这行没写买卖”的那些行，哪一边能给更多行找到方向就用哪一边（不能逐行选，否则会把上一笔或下一笔的说明借过来）。
+另外：只有日期的单独一行（折行说明里的“29 Jan 2026”）不算交易；被金额和股数隔开的“Capital … raising”去掉数字后拼起来再认性质。
+81 份真实样本里只有两份读数变了，都变对：明细和持股数对得上的从 37 份变成 39 份，Hostplus 2025-09 那份从“净卖出 286 万股”纠正成“净买入 145 万股”（和持股数一股不差）。
+
+**修了一个老 bug**：`detail_tries`（补读明细失败次数）以前从不清零，读法升级几次后大部分公告攒满了上限，新读法再也不会重读它们（第十三轮第一次真实运行 82 条只重读了 3 条）。
+现在只数当前读法版本下的次数（`detail_tries()` + `detail_try_v`）。
+
+**历史记录也会按新读法重读**：history 记录多了 `dv`（用哪一版读法读的）。`Backfill.refresh_old` 把 `dv` 不是当前版本的记录，按编号里的 8 位 idsId
+（`mk-2924-03159057-…` 中间那段）拼出下载地址重新读，确认还是同一家基金、同一只股票后替换；和回补共用每次 150 份的名额。251 条两次运行读完。
+
+**还对不上的 4 份**：Regal 的 TTT、RIV 是 PDF 自己没列全（逐笔加起来和持股变化差一截）；L1 的 GLS、Regal 的 RG1/RG8 明细在别的地方或字间带空格。605 没有持股数是格式本来如此。
+
 （旧）把握（高/中/低）是打分：明细和持股数对得上 +1，股价证据明确 +1，主动/战略型基金 +1，平台型或扫描件 −1。≥3 高，≤0 低。
 
 保护措施：
@@ -297,7 +314,7 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 192 passed，全部离线
+python -m pytest -q                             # 196 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
 ```

@@ -64,14 +64,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第十三轮（2026-11-12 开始）：逐笔明细读准 —— 分支 `dev-r13`，进行中
+### 第十三轮（2026-11-12，已完成并合并到 `main`）：逐笔明细读准
 
-- `insight.parse_trades`：有的表格把“Purchase of / Sale of / Acquisition of shares”写在日期行**上面**（Hostplus、AustralianSuper）。
-  每行同时收集上面的 `pre` 和下面的 `cont`，整份公告按“哪边能给更多没写方向的行找到方向”选一边；只有日期的单独一行不算交易；
-  被金额隔开的“Capital … raising”去掉数字后拼起来认性质。81 份真实样本里只有 A4N、ANN 两份读数变了（都变对：对得上的 37 → 39 份）
-- `INSIGHT_VERSION = 5`；history 记录多了 `dv`（用哪一版读法读的）；`Backfill.refresh_old` 按 idsId（`mk-` 编号中间那 8 位）重新下载，把旧读法的记录重读（共用每次 150 份的名额）
-- 194 个测试 + 39 项网页检查通过。**下一步：`dev-r13` 真实运行（大约要两三次才能把 251 条历史重读完）→ 和 main 对比 → 文档 → 合并**
-- 不用修的：Regal TTT/RIV 对不上是 PDF 自己没列全；605 没有持股数是格式本来如此
+- `insight.parse_trades`：说明写在日期行上面的表格（`pre` / `cont` 整份选一边）、只有日期的行不算、被数字隔开的短语拼起来认性质
+- 修 bug：`detail_tries` 按读法版本分开数（`detail_tries()` / `detail_try_v`）
+- history 记录带 `dv`；`Backfill.refresh_old` 按 idsId 重读旧读法的记录
+- `INSIGHT_VERSION = 5`；196 个测试、39 项网页检查；`dev-r13` 真实运行两次，82 条公告 + 251 条历史全部重读；对得上 36 → 38（近期）
+- 细节在 `HANDOVER.md` 第 5 节“第十三轮”
+
+目前没有进行到一半的工作。下一步候选见 `HANDOVER.md` 第 9 节。
 
 ### 第十二轮（2026-11-12，已完成并合并到 `main`）：相对大盘 + 基金月报原话
 

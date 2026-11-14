@@ -1986,7 +1986,7 @@ def test_close_call_keeps_generic_label():
     assert ins["action"] == "add" and "分不出主次" in ins["reasons"][0] and ins["purposes"][0]["k"] in ("flow", "dip")
     insight.finalize(ins, {"nb": 0, "ns": 0})     # 没有横向证据时，逢低是唯一高过基准线的
     assert ins["action"] == "add_dip" and "最像「逢低买入」" in ins["reasons"][0]
-    assert len([r for r in ins["reasons"] if not r.startswith(insight.EDGE_HEAD)]) == 2          # 再打一次分不会多出一句
+    assert len([r for r in ins["reasons"] if not r.startswith(insight.EDGE_HEAD)]) == 3          # 再打一次分不会多出一句（综合打分、怎么做的、基金类型）
     assert sum(r.startswith(insight.EDGE_HEAD) for r in ins["reasons"]) <= 1
 
 
@@ -2052,7 +2052,9 @@ def test_backfill_chases_previous_notices(sandbox, monkeypatch):
     n = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] == "SLC")
     assert "连续加仓" in n["insight"]["tags"] and any("连续第 2 次加仓" in r for r in n["insight"]["reasons"])
     c = scrape.cost_for(hist, key.split("|")[0], "SLC", {"id": "1001", "date": "2026-10-30", "time": "17:00", "type": "change", "votes": [10_000_000, 12_000_000]})
-    assert c["n"] == 1 and 3.3 < c["avg"] < 3.4 and c["cov"] == 0.15           # 只知道 150 万股的成本，不到四成，所以解读里不拿它下结论
+    # 第二十一轮：这份假公告的买入均价（约 $3.3）比假日线同期的股价（约 $2.2）高五成、分 4 天买的——均价存疑，成本改用当时的收盘价
+    assert c["n"] == 1 and 2.1 < c["avg"] < 2.2 and c["cov"] == 0.15           # 只知道 150 万股的成本，不到四成，所以解读里不拿它下结论
+    assert rows[1].get("buy_price") is None
     # 追完了：再跑不再读旧公告
     fake.pdf_downloads.clear()
     scrape.main()
@@ -3297,3 +3299,250 @@ def test_edge_line_names_the_evidence_and_the_alternative():
         pytest.skip("这个样本不贴边")
     line = next(x for x in r["reasons"] if x.startswith(insight.EDGE_HEAD))
     assert "结论就会变成「" in line and r["confidence"] != "高"
+
+
+# ---------------------------------------------------------------- 第二十一轮：基金经理视角（跟投比例、20% 收购线、流动性、怎么做的 / 为什么）
+
+def test_follow_ratio_and_days_to_trade():
+    fr_ = insight.follow_ratio
+    assert fr_(0.53, 0.28) == 1.89 and fr_(0.07, 0.24) == 0.29 and fr_(0.25, 0.25) == 1.0
+    assert fr_(0.5, 0.03) is None            # 总股本只多了 3%：四舍五入的差异，不谈跟投
+    assert fr_(0.5, 1.6) is None             # 总股本翻了一倍半以上：合并/换股，不谈
+    assert fr_(-0.1, 0.3) is None and fr_(0, 0.3) is None and fr_(None, 0.3) is None and fr_(0.3, "x") is None
+    d = insight.days_to_trade
+    assert d(1_000_000, 10_000) == 100 and d(10**9, 1) == 9999
+    assert d(0, 10) is None and d(10, 0) is None and d(None, 5) is None and d(5, float("nan")) is None
+
+
+def test_under_follow_is_not_an_add():
+    # 公司总股本多了 28%，它的股数只多了 7%：份额从 9.4% 降到 8.15%（Regal EOL 的真实数字）
+    n = _buy(voting_power=[9.4, 8.15], votes=[3_000_000, 3_210_000], trades=dict(_buy()["trades"], buy_qty=210_000, net_qty=210_000, sell_qty=0))
+    r = insight.judge(n)
+    assert r["action"] == "add_under" and r["tone"] == "neutral" and "没跟足" in r["tags"]
+    assert any(x.startswith("跟投比例：") and "没跟上" in x and "9.4% 降到 8.15%" in x for x in r["reasons"])
+    # 股数多了 53%、总股本多了 28%：超比例（AustralianSuper A4N）
+    r = insight.judge(_buy(voting_power=[5.0, 6.0], votes=[10_000_000, 15_300_000],
+                           trades=dict(_buy()["trades"], buy_qty=5_300_000, net_qty=5_300_000, sell_qty=0)))
+    assert "超比例" in r["tags"] and r["action"] != "add_under" and any("主动提高了自己的份额" in x for x in r["reasons"])
+    # 总股本没变：不提跟投
+    r = insight.judge(_buy())
+    assert not any(x.startswith("跟投比例") for x in r["reasons"]) and "fol" not in r["_f"]
+    assert "add_under" in insight.LABELS and "add_under" in insight.BUY_ACTIONS and insight.TONE["add_under"] == "neutral"
+
+
+def test_takeover_line_and_liquidity_notes():
+    # 买到 19.4%：顶到线
+    r = insight.judge(_buy(voting_power=[17.3, 19.4], votes=[17_300_000, 19_400_000],
+                           trades=dict(_buy()["trades"], buy_qty=2_100_000, net_qty=2_100_000, sell_qty=0)))
+    assert "顶到20%线" in r["tags"] and r["_f"]["cap"] == "at" and any(x.startswith("收购线：买完之后持股 19.4%") for x in r["reasons"])
+    # 从 19.3% 小幅减到 18.2%：贴着线；仓位相当于 100 多天的成交量：难卖
+    tr = dict(_sell()["trades"], sell_qty=1_100_000, net_qty=-1_100_000, buy_qty=0)
+    r = insight.judge(_sell(voting_power=[19.3, 18.2], votes=[19_300_000, 18_200_000], trades=tr, px=_px(adv=150_000)))
+    assert {"贴着20%线", "仓位难卖"} <= set(r["tags"]) and r["_f"]["cap"] == "off" and r["_f"]["dtl"] == 129
+    assert any(x.startswith("流动性：卖之前的持仓相当于这只股票约 129 个交易日") for x in r["reasons"])
+    # 从 19.3% 一口气减到 10%：不是“留出余地”
+    r = insight.judge(_sell(voting_power=[19.3, 10.0], votes=[19_300_000, 10_000_000]))
+    assert "贴着20%线" not in r["tags"]
+    # 普通情况什么都不加；没有日均成交量时不谈流动性
+    r = insight.judge(_sell())
+    assert not ({"贴着20%线", "仓位难卖", "顶到20%线"} & set(r["tags"])) and "dtl" not in r["_f"]
+    assert "仓位难卖" not in insight.judge(_sell(px=_px(adv=5_000_000)))["tags"]
+
+
+def test_small_trim_called_stop_is_capped():
+    # 股价大跌、只减了 5%、仓位难卖：标签还是“像止损”，但把握最多“中”，并说明“止损”说重了
+    px = _px(r3m=-0.35, r6m=-0.45, r12m=-0.6, pos=0.05, adv=50_000)
+    tr = dict(_sell()["trades"], sell_qty=400_000, net_qty=-400_000, buy_qty=0)
+    r = insight.judge(_sell(voting_power=[8.0, 7.6], votes=[8_000_000, 7_600_000], trades=tr, px=px, style="active"))
+    assert r["purposes"][0]["k"] == "stop" and r["confidence"] != "高"
+    assert any(x.startswith("注意：这次只减了持仓的 5%") and "重了" in x for x in r["reasons"])
+    insight.finalize(r)                                           # 再打一次分不会多出一句
+    assert sum(x.startswith("注意：这次只减了") for x in r["reasons"]) == 1 and sum(x.startswith("怎么做的：") for x in r["reasons"]) == 1
+    # 同样的股价，一次减掉四成：不加这句
+    r = insight.judge(_sell(voting_power=[8.0, 4.9], votes=[8_000_000, 4_900_000], px=px, style="active"))
+    assert not any(x.startswith("注意：这次只减了") for x in r["reasons"])
+
+
+def test_how_and_why_are_reported_separately():
+    r = insight.judge(_sell())
+    assert r["how"] == "在市场上卖" and "why" not in r and any(x == "怎么做的：在市场上卖。" for x in r["reasons"])
+    # 第一名是“怎么做的”（倒手）时，另外说明动机；动机的概率是在动机里重新算的，不被“倒手”分走
+    s, b = _cp_entries()
+    cp = _find(s, [b])
+    tr = dict(_sell()["trades"], sell_qty=9_499_064, net_qty=-9_493_955, buy_qty=5109)
+    ins = insight.judge(_sell(voting_power=[18.58, 8.58], votes=[17_644_814, 8_150_859], trades=tr,
+                              px={"p": 0.37, "r1m": 0.12, "r3m": 0.25, "r6m": 0.37, "r12m": 0.32, "pos": 0.95, "hi": 0.37, "lo": 0.2, "t_lo": 0.29, "t_hi": 0.37}))
+    insight.add_counterparty(ins, cp, "Perennial")
+    assert ins["how"].startswith("整块转给了一个特定的接盘方") and ins["why"]["k"] == "profit"
+    p_all = next(p["p"] for p in ins["purposes"] if p["k"] == "profit")
+    assert ins["why"]["p"] > p_all                                # 拿掉“倒手”以后，获利了结的占比更高
+    assert any(x.startswith("怎么做的：整块转给了一个特定的接盘方（倒手）。至于为什么：撇开成交方式不看，动机上最像「获利了结」") for x in ins["reasons"])
+    # how_of 的几种情况
+    h = insight.how_of
+    assert h({"side": "buy", "plc_form": True}) == "认购公司发的新股（公司的发行文件对得上）"
+    assert h({"side": "buy", "fixed": True}).startswith("按事先约定的价格")
+    assert h({"side": "buy", "blk": {"d": "x"}}, "plc") == "多半是认购新股（配售）" and h({"side": "buy", "blk": {"d": "x"}}).startswith("一次性的大宗")
+    assert h({"side": "sell", "tl": {"n": 12}, "part": 0.04}) == "在市场上分 12 个交易日慢慢卖，不显眼"
+    assert h({"side": "buy", "part": 0.4}) == "在市场上买，是同期最主要的买家之一"
+    assert h({"side": "sell", "tl": "bad", "part": "x"}) == "在市场上卖" and h({}) == "在市场上卖"
+    assert insight.why_of([{"k": "hand", "s": 3.0, "name": "a"}]) is None
+
+
+def test_thin_603_caps_confidence():
+    # 603 里近 4 个月买的只占持仓 51%：标签可以说“逢低建仓”，但把握最多“中”，并说明另一半看不到
+    n = _buy(type="becoming", voting_power=[5.5], votes=[8_000_000], style="active",
+             trades=dict(_buy()["trades"], buy_qty=4_100_000, net_qty=4_100_000, sell_qty=0),
+             px=_px(r3m=-0.3, r6m=-0.4, r12m=-0.5, pos=0.05))
+    r = insight.judge(n)
+    assert r["action"] == "build_dip" and r["confidence"] == "中"
+    assert any(x.startswith("注意：这份 603 里近 4 个月买的只占现有持仓的 51%") for x in r["reasons"])
+    n["trades"] = dict(n["trades"], buy_qty=7_000_000, net_qty=7_000_000)
+    r2 = insight.judge(n)
+    assert r2["action"] == "build_dip" and not any(x.startswith("注意：这份 603") for x in r2["reasons"])
+
+
+# ---------------------------------------------------------------- 第二十一轮（续）：成交的时候股价在哪——不是公告那天在哪
+
+def test_buy_location():
+    loc = insight.buy_location
+    px = {"t_lo": 1.0, "t_hi": 2.0, "p": 1.8}
+    assert loc(1.1, px) == (0.1, round(1.8 / 1.1 - 1, 3)) and loc(1.9, dict(px, p=1.5)) == (0.9, round(1.5 / 1.9 - 1, 3))
+    assert loc(2.15, px) == (1.0, round(1.8 / 2.15 - 1, 3))            # 略高于区间：按区间顶算
+    assert loc(2.3, px) is None and loc(0.85, px) is None               # 明显在区间之外：成交价和日线对不上，不用
+    assert loc(1.1, {"t_lo": 1.0, "t_hi": 1.2, "p": 1.1}) is None       # 区间太窄，没有高低之分
+    for bad in ({}, {"t_lo": 0, "t_hi": 2, "p": 1}, {"t_lo": 1, "t_hi": 2}, {"t_lo": "x", "t_hi": 2, "p": 1}):
+        assert loc(1.5, bad) is None
+    assert loc(None, px) is None and loc(float("nan"), px) is None
+
+
+def _win_buy(bp, p, days=4, first="2026-10-20", last="2026-10-30", **px_over):
+    tr = dict(_buy()["trades"], buy_price=bp, sell_qty=0, first=first, last=last, days=days)
+    return _buy(trades=tr, px=_px(p=p, t_lo=1.0, t_hi=2.0, lo=0.8, hi=2.2, **px_over))
+
+
+def test_bought_low_then_it_rose_is_not_chasing():
+    # 两周内买在 $1.05，之后涨到 $1.90；公告那天看“3 个月 +80%、在高位”，以前会判“顺势（追涨）”
+    n = _win_buy(1.05, 1.9, r1m=0.7, r3m=0.8, r6m=0.8, r12m=0.8, pos=0.8)
+    r = insight.judge(n)
+    assert r["action"] != "add_chase" and "买在低处" in r["tags"] and r["_f"]["early"] and r["_f"]["loc"] == 0.05
+    assert any(x.startswith("成交价位：它这批买的均价约 $1.05") and "高了 81%" in x for x in r["reasons"])
+    assert any(x.startswith("买入位置：") and "不是看到涨了才去追" in x for x in r["reasons"])
+    # 同样的股价，但买在 $1.85（真的是涨起来以后买的）：还是顺势
+    r = insight.judge(_win_buy(1.85, 1.9, r1m=0.7, r3m=0.8, r6m=0.8, r12m=0.8, pos=0.8))
+    assert r["action"] == "add_chase" and "买在低处" not in r["tags"] and not any(x.startswith("成交价位") for x in r["reasons"])
+
+
+def test_bought_high_then_it_fell_is_not_dip():
+    # 两周内买在 $1.90，之后跌到 $1.20；公告那天看“3 个月 −35%、在低位”，以前会判“逢低”
+    n = _win_buy(1.9, 1.2, r1m=-0.35, r3m=-0.35, r6m=-0.3, r12m=-0.3, pos=0.25)
+    r = insight.judge(n)
+    assert r["action"] != "add_dip" and "买在高处" in r["tags"] and r["_f"]["late"]
+    assert any("先买、之后才跌的，不是等跌下来才买" in x for x in r["reasons"])
+    # 买在 $1.15（跌下来以后买的）：逢低
+    assert insight.judge(_win_buy(1.15, 1.2, r1m=-0.35, r3m=-0.35, r6m=-0.3, r12m=-0.3, pos=0.25))["action"] == "add_dip"
+    # 买了七个月（一路跌一路买）：均价是一路上的平均，不换算，照旧算逢低
+    r = insight.judge(_win_buy(1.9, 1.2, first="2026-03-01", last="2026-10-30", days=80, r1m=-0.1, r3m=-0.35, r6m=-0.3, r12m=-0.3, pos=0.25))
+    assert r["action"] == "add_dip" and not any(x.startswith("成交价位") for x in r["reasons"])
+
+
+def test_sold_before_the_fall_is_not_stop_loss():
+    tr = dict(_sell()["trades"], sell_price=1.9, buy_qty=0, first="2026-10-20", last="2026-10-30", days=4)
+    px = _px(p=1.2, t_lo=1.0, t_hi=2.0, lo=0.8, hi=2.2, r1m=-0.35, r3m=-0.35, r6m=-0.3, r12m=-0.3, pos=0.25)
+    r = insight.judge(_sell(trades=tr, px=px))
+    assert r["action"] != "trim_loss" and any(x.startswith("成交价位：它这批卖的均价约 $1.90") for x in r["reasons"])
+    tr2 = dict(tr, sell_price=1.22)
+    assert insight.judge(_sell(trades=tr2, px=px))["action"] == "trim_loss"      # 跌下来以后才卖的：止损
+
+
+def test_bought_below_the_market_low_is_off_market():
+    # 两天内买的均价比同期最低收盘价低 20%：市场上买不到，是场外折价拿的；不叫逢低
+    tr = dict(_buy()["trades"], buy_price=0.8, sell_qty=0, first="2026-10-29", last="2026-10-30", days=2)
+    px = _px(p=1.05, t_lo=1.0, t_hi=1.1, r3m=-0.3, r6m=-0.35, r12m=-0.4, pos=0.1)
+    r = insight.judge(_buy(trades=tr, px=px))
+    assert r["_f"]["disc"] == 0.2 and "折价拿货" in r["tags"] and r["action"] != "add_dip"
+    assert r["how"].startswith("按低于市场的折扣价在场外拿的") and any(x.startswith("折价：这批买入的均价约 $0.800") for x in r["reasons"])
+    # 只低 5%（盘中低点可能比收盘低）不算；连着 13 天都低于最低收盘价（多半是复权价对不上）也不算
+    assert "disc" not in insight.judge(_buy(trades=dict(tr, buy_price=0.95), px=px))["_f"]
+    assert "disc" not in insight.judge(_buy(trades=dict(tr, days=13), px=px))["_f"]
+    assert insight.judge(_buy(trades=dict(tr, buy_price=0.95), px=px))["action"] == "add_dip"
+
+
+# ---------------------------------------------------------------- 第二十一轮（续二）：明细里的成交均价可信吗
+
+def test_implied_vwap():
+    D = dt.date
+    pts = [(D(2026, 10, 19), 1.0, 100.0), (D(2026, 10, 20), 2.0, 100.0), (D(2026, 10, 22), 4.0, 100.0)]
+    v = insight.implied_vwap(pts, [["2026-10-19", 100], ["2026-10-20", 300], ["2026-10-22", -50]])
+    assert v == {"b": 1.75, "nb": 2, "s": 4.0, "ns": 1}
+    # 10/21 没有日线：用之前最近的收盘价（10/20 的 2.0）
+    assert insight.implied_vwap(pts, [["2026-10-21", 10]]) == {"b": 2.0, "nb": 1}
+    # 离得太远、坏数据：不算
+    assert insight.implied_vwap(pts, [["2026-11-30", 10]]) == {}
+    assert insight.implied_vwap(pts, [["bad", 10], ["2026-10-19", "x"], None]) == {}
+    assert insight.implied_vwap(pts, None) == {} and insight.implied_vwap([], [["2026-10-19", 5]]) == {}
+    # price_context 带上逐日明细时多一个 vw
+    ms = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
+    series = [[ms(d), p, vol] for d, p, vol in pts]
+    px = insight.price_context(series, "2026-10-22", "2026-10-19", "2026-10-22", [["2026-10-19", 100], ["2026-10-20", 300]])
+    assert px["vw"] == {"b": 1.75, "nb": 2}
+    assert "vw" not in insight.price_context(series, "2026-10-22", "2026-10-19", "2026-10-22")
+
+
+def test_price_doubt():
+    pd_ = insight.price_doubt
+    tr = {"days": 8, "n_buy": 8, "n_sell": 0}
+    px = {"t_lo": 0.375, "t_hi": 0.43}
+    assert "同期股价一直在 $0.375–$0.430 之间" in pd_(0.6058, "b", tr, px)        # L1 LIN 的真实数字
+    assert pd_(0.41, "b", tr, px) == "" and pd_(0.46, "b", tr, px) == ""            # 在区间里、或只略高一点
+    assert pd_(0.30, "b", tr, px) != ""
+    assert pd_(0.6058, "b", {"days": 2, "n_buy": 2}, px) == ""                      # 一两天的成交不查（可能是场外）
+    assert pd_(0.6058, "s", tr, px) == ""                                           # 卖出那边没几笔
+    assert pd_(None, "b", tr, px) == "" and pd_(0.6, "b", tr, {}) == "" and pd_(0.6, "b", tr, {"t_lo": 0, "t_hi": 1}) == ""
+    # 量集中在一天：放宽到 20%
+    one = dict(tr, daily=[["2026-10-20", 10], ["2026-10-21", 10], ["2026-10-22", 10], ["2026-10-23", 900]])
+    assert pd_(0.33, "b", one, px) == "" and pd_(0.28, "b", one, px) != ""
+    # 有“按每天收盘价推出来的均价”时用它
+    pxv = {"t_lo": 1.0, "t_hi": 3.0, "vw": {"b": 2.0, "nb": 6}}
+    assert "应该在 $2.00 左右（差 25%）" in pd_(2.5, "b", tr, pxv) and pd_(2.1, "b", tr, pxv) == ""
+    assert pd_(2.5, "b", tr, {"t_lo": 1.0, "t_hi": 3.0, "vw": {"b": 2.0, "nb": 2}}) == ""   # 只有两天：退回区间检查，在区间里
+
+
+def test_doubtful_average_price_is_not_used():
+    # 买入均价 $1.47，同期股价 $0.90–$1.05，8 个交易日 8 笔：均价不用——不拿它说“比成本高、在加码”，也不拿它判断逢低
+    tr = dict(_buy()["trades"], buy_price=1.47, sell_qty=0, n_buy=8, n_sell=0, days=8, first="2026-10-20", last="2026-10-30")
+    px = _px(p=1.0, t_lo=0.9, t_hi=1.05)
+    cost = {"avg": 1.2, "cov": 0.9, "since": "2026-01-10", "n": 3}
+    r = insight.judge(_buy(trades=tr, px=px, cost=cost))
+    assert "均价存疑" in r["tags"] and r["_f"]["px_doubt"]
+    assert any(x.startswith("明细里的买入均价约 $1.47，而同期股价一直在 $0.900–$1.05 之间") for x in r["reasons"])
+    assert not any("$1.47" in x and "成本" in x for x in r["reasons"])
+    # 同样的数字但均价在区间里：不标
+    ok = insight.judge(_buy(trades=dict(tr, buy_price=1.0), px=px, cost=cost))
+    assert "均价存疑" not in ok["tags"] and "px_doubt" not in ok["_f"]
+
+
+def test_doubtful_price_does_not_become_cost():
+    # 上一份公告的买入均价 $0.84，可当时股价只有 $0.38–0.47（L1 LIN 的真实数字）：算成本时不用它，用当时的收盘价
+    rec = {"date": "2026-10-20", "buy_qty": 1_000_000, "sell_qty": 0, "buy_price": 0.84, "p": 0.41, "votes": [5_000_000, 6_000_000],
+           "tr": {"days": 11, "n_buy": 11, "n_sell": 0}, "px": {"t_lo": 0.375, "t_hi": 0.465, "p": 0.41}}
+    assert insight.cost_basis([rec])["avg"] == 0.41
+    ok = dict(rec, buy_price=0.42)
+    assert insight.cost_basis([ok])["avg"] == 0.42
+    # 没有 tr / px 的老记录照旧用均价；坏数据不出错
+    assert insight.cost_basis([{"date": "2026-10-20", "buy_qty": 10, "buy_price": 0.84, "p": 0.41}])["avg"] == 0.84
+    assert insight.cost_basis([dict(rec, tr="x", px=None)])["avg"] == 0.84
+    # 进历史之前也过一遍
+    e = {"id": "1", "date": "2026-10-20", "type": "change", "voting_power": [5.0, 6.0], "votes": [5_000_000, 6_000_000],
+         "trades": {"buy_qty": 1_000_000, "sell_qty": 0, "buy_price": 0.84, "sell_price": None, "days": 11, "n_buy": 11, "n_sell": 0},
+         "px": {"t_lo": 0.375, "t_hi": 0.465, "p": 0.41}}
+    assert insight.history_record(e)["buy_price"] is None
+    e["trades"]["buy_price"] = 0.42
+    assert insight.history_record(e)["buy_price"] == 0.42
+
+
+def test_order_tags():
+    o = insight.order_tags
+    assert o(["连续减仓", "换股", "已减三成", "多家同向", "仓位难卖", "贴着20%线", "均价存疑"]) == \
+        ["均价存疑", "贴着20%线", "仓位难卖", "连续减仓", "换股", "已减三成", "多家同向"]
+    assert o(["整体加仓", "倒手", "整体加仓", "大宗"]) == ["倒手", "大宗", "整体加仓"]          # 去重，其余保持原顺序
+    assert o(["a", "b"]) == ["a", "b"] and o([]) == [] and o(None) == [] and o(["x", 3, None]) == ["x"]

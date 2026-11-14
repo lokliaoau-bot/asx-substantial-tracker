@@ -82,7 +82,7 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
-PX_VERSION = 7                                            # 股价背景的算法改了就加 1（第十七轮：加了自身波动 vol、小盘股对照小盘指数），近期和历史记录都会重算
+PX_VERSION = 8                                            # 股价背景的算法改了就加 1（第十七轮：加了自身波动 vol、小盘股对照小盘指数），近期和历史记录都会重算
 INSIGHT_VERSION = 5                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
@@ -1375,7 +1375,7 @@ class Backfill:
                     series = self.prices(code)
                     tr = e.get("trades") or {}
                     if series:
-                        e["px"] = insight.price_context(series, price_ref(e.get("change_date"), tr, e["date"]), tr.get("first", ""), tr.get("last", ""))
+                        e["px"] = insight.price_context(series, price_ref(e.get("change_date"), tr, e["date"]), tr.get("first", ""), tr.get("last", ""), tr.get("daily"))
                         add_timeline(e, series)
                     rec = dict(insight.history_record(e), bf=1, dv=INSIGHT_VERSION, px_v=PX_VERSION)
                     dest = self.h["pos"].setdefault(pos_key(who, code), [])
@@ -1418,7 +1418,7 @@ class Backfill:
                 series = self.prices(code)
                 tr = e.get("trades") or {}
                 if series:
-                    e["px"] = insight.price_context(series, price_ref(e.get("change_date"), tr, e["date"]), tr.get("first", ""), tr.get("last", ""))
+                    e["px"] = insight.price_context(series, price_ref(e.get("change_date"), tr, e["date"]), tr.get("first", ""), tr.get("last", ""), tr.get("daily"))
                     add_timeline(e, series)
                 new = dict(insight.history_record(e), dv=INSIGHT_VERSION, px_v=PX_VERSION)
                 for k in ("bf", "fwd", "fwd_x", "bm"):
@@ -1461,8 +1461,10 @@ class Backfill:
             series = self.prices(code)
             for r in need[code]:
                 tr = r.get("tr") if isinstance(r.get("tr"), dict) else {}
-                px = insight.price_context(series, price_ref(r.get("cd"), tr, r.get("date") or ""), tr.get("first", ""), tr.get("last", "")) if series else {}
+                px = insight.price_context(series, price_ref(r.get("cd"), tr, r.get("date") or ""), tr.get("first", ""), tr.get("last", ""), tr.get("daily")) if series else {}
                 if px:
+                    if "vw" not in px and isinstance((r.get("px") or {}).get("vw"), dict):
+                        px["vw"] = r["px"]["vw"]         # 历史记录不存逐日明细，重算不出来：保留读 PDF 那次算好的
                     r["px"], r["px_v"] = px, PX_VERSION
                     done += 1
                 else:
@@ -2197,6 +2199,8 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
             f = n["insight"].pop("_f", None)      # 打分用的中间数据不输出
             if f:
                 n["insight"]["side"] = f["side"]
+            if "tags" in n["insight"]:
+                n["insight"]["tags"] = insight.order_tags(n["insight"]["tags"])
     return final
 
 
@@ -2587,7 +2591,7 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
             e.pop("iss_ok", None)
             tr = e.get("trades") or {}
             ref = price_ref(e.get("change_date"), tr, e.get("date", ""))
-            px = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
+            px = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""), tr.get("daily"))
             if not px and e.get("px"):         # 这次取到的日线不够用：保留上次的，下次再试（第十七轮：ACL 被清空过）
                 e["px_tries"] = e.get("px_tries", 0) + 1
                 continue

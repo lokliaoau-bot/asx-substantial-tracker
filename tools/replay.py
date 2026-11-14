@@ -125,7 +125,7 @@ def claimed(v: dict, action_key: dict) -> tuple[str, list[str], float | None]:
     return top, [top] + rest[:1], prob
 
 
-def gold_score(res: dict, path: Path, root: Path) -> dict:
+def gold_score(res: dict, path: Path, root: Path, min_sure: int = 2) -> dict:
     """和人工标准答案对比。只算 sure ≥ 2 的条目；同一份公告在 history 和 live 里各有一条时只算 live 那条。"""
     sys.path.insert(0, str(root / "scraper"))
     import insight
@@ -134,7 +134,7 @@ def gold_score(res: dict, path: Path, root: Path) -> dict:
     live_ids = {g["id"] for g in items if g["src"] == "live"}
     rows = []
     for g in items:
-        if g["sure"] < 2 or (g["src"] == "history" and g["id"].rsplit("|", 1)[-1] in live_ids):
+        if g["sure"] < min_sure or (g["src"] == "history" and g["id"].rsplit("|", 1)[-1] in live_ids):
             continue
         v = res.get(g["src"], {}).get(g["id"])
         if not v:
@@ -153,8 +153,24 @@ def gold_score(res: dict, path: Path, root: Path) -> dict:
     return out
 
 
-def print_gold(sc: dict) -> None:
+def wilson(pct_: float | None, n: int) -> str:
+    """命中率的 95% 区间（Wilson）：样本少的时候，一个百分比其实是一个范围。"""
+    if pct_ is None or not n:
+        return ""
+    p, z = pct_ / 100, 1.96
+    mid = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / (1 + z * z / n)
+    return f"（95% 区间 {100 * max(mid - half, 0):.0f}–{100 * min(mid + half, 1):.0f}%）"
+
+
+def print_gold(sc: dict, sc_all: dict | None = None) -> None:
+    print("== 注意：这份答案是熟悉规则的 AI 标的，规则、温度、把握门槛也是对着它调的——下面是“开发集分数”，不是准确率。")
+    print("   要当准确率用，得有一份没看过规则和程序输出的人盲标的答案（第二十一轮审稿意见第 1 条）。")
     print(f"== 标准答案对比（sure ≥ 2，共 {sc['n']} 条）")
+    print(f"  严格命中的范围：{sc['strict']}% {wilson(sc['strict'], sc['n'])}")
+    if sc_all:
+        print(f"  连把握低的也算上（sure ≥ 1，共 {sc_all['n']} 条）：严格 {sc_all['strict']}% {wilson(sc_all['strict'], sc_all['n'])}，"
+              f"宽松 {sc_all['loose']}%，前两名 {sc_all['top2']}%")
     print(f"  第一名命中：严格 {sc['strict']}%（和标准答案的第一名一样），宽松 {sc['loose']}%（在标准答案的两个可接受目的里）")
     print(f"  前两名命中：{sc['top2']}%；给出明确目的（不是“普通加仓/减仓”）的比例：{sc['definite']}%")
     print("  按把握分：" + "，".join(f"{c} {n} 条 → {p}%" for c, (n, p) in sc["by_conf"].items()))
@@ -198,7 +214,8 @@ def main() -> int:
         fragile_report(json.loads(Path(args.fragile).read_text("utf-8")), Path(args.root).resolve())
         return 0
     if args.gold:
-        print_gold(gold_score(json.loads(Path(args.gold).read_text("utf-8")), Path(args.gold_file), Path(args.root).resolve()))
+        res_, gf, root_ = json.loads(Path(args.gold).read_text("utf-8")), Path(args.gold_file), Path(args.root).resolve()
+        print_gold(gold_score(res_, gf, root_), gold_score(res_, gf, root_, min_sure=1))
         return 0
     if args.diff:
         diff(*(json.loads(Path(p).read_text("utf-8")) for p in args.diff))

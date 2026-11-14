@@ -342,7 +342,36 @@ def shares_outstanding(votes: int | None, pct: float | None) -> float | None:
 
 # ---------------------------------------------------------------- 股价背景
 
-def price_context(series: list, ref: str, first: str = "", last: str = "") -> dict:
+def implied_vwap(pts: list, daily: list) -> dict:
+    """“如果这些量都按当天收盘价成交，均价应该是多少”。pts：[(日期, 收盘价, 成交量)]（升序）；daily：[[日期, 当天净买卖量], ...]。
+    返回 {"b": 买入那些天的量加权收盘价, "nb": 天数, "s": 卖出的, "ns": 天数}（没有的一边不给）。
+    用来核对明细里读出来的成交均价：在市场上分好几天成交的，均价不可能离这个数太远。"""
+    close = {d: p for d, p, _ in pts}
+    days = sorted(close)
+    out = {}
+    for key, sign in (("b", 1), ("s", -1)):
+        tot_q = tot_v = 0.0
+        n = 0
+        for item in daily if isinstance(daily, list) else []:
+            try:
+                d, q = dt.date.fromisoformat(str(item[0])), float(item[1]) * sign
+            except (TypeError, ValueError, IndexError, KeyError):
+                continue
+            if not 0 < q < 1e15:
+                continue
+            px = close.get(d)
+            if px is None:                       # 当天没有日线（停牌、数据缺）：用之前 5 天内最近的一个收盘价
+                prior = [x for x in days if d - dt.timedelta(days=5) <= x < d]
+                px = close[prior[-1]] if prior else None
+            if px is None:
+                return {}                        # 有一天对不上日线：整份不算（宁缺毋错）
+            tot_q, tot_v, n = tot_q + q, tot_v + q * px, n + 1
+        if tot_q:
+            out[key], out["n" + key] = round(tot_v / tot_q, 4), n
+    return out
+
+
+def price_context(series: list, ref: str, first: str = "", last: str = "", daily: list | None = None) -> dict:
     """series：[[毫秒时间戳, 收盘价, 成交量], ...]（ASX 日线，按时间升序）。
     ref：参考日（变动日）。返回参考日的收盘价、之前 1/3/6/12 个月涨跌幅、在一年高低区间里的位置（0=最低，1=最高），
     以及交易明细那段时间（first–last）的最低/最高收盘价和日均成交量。数据不够时相应字段为 None。"""
@@ -393,6 +422,9 @@ def price_context(series: list, ref: str, first: str = "", last: str = "") -> di
             out["t_vol"] = int(sum(vol))          # 交易明细那段时间全市场的成交量（股）
     except (TypeError, ValueError):
         pass
+    vw = implied_vwap(pts, daily) if daily else {}
+    if vw:
+        out["vw"] = vw                           # 第二十一轮：按当天收盘价推出来的均价，核对明细用
     return out
 
 
@@ -807,7 +839,11 @@ def cost_basis(records: list[dict], holding: int | None = None) -> dict:
     since, used = "", 0
     for r in records:
         bq, sq = r.get("buy_qty") or 0, r.get("sell_qty") or 0
-        price = r.get("buy_price") or r.get("p")
+        price = r.get("buy_price")
+        # 第二十一轮：那份公告的买入均价和当时的股价对不上的（金额读错、日线复权），不拿它当成本，改用当时的收盘价
+        if price and price_doubt(price, "b", r.get("tr") if isinstance(r.get("tr"), dict) else {}, r.get("px") if isinstance(r.get("px"), dict) else {}):
+            price = None
+        price = price or r.get("p")
         if bq > 0 and price and price > 0:
             cost += bq * price
             shares += bq
@@ -861,6 +897,10 @@ def history_record(e: dict) -> dict:
     if px.get("t_lo") and px.get("t_hi"):
         ok = lambda v: v is not None and px["t_lo"] * 0.6 <= v <= px["t_hi"] * 1.6
         bp, sp = (bp if ok(bp) else None), (sp if ok(sp) else None)
+    if bp and price_doubt(bp, "b", tr, px):        # 第二十一轮：和同期股价对不上的均价不进历史（以后算成本会用到）
+        bp = None
+    if sp and price_doubt(sp, "s", tr, px):
+        sp = None
     rec = {"id": e.get("id"), "date": e.get("date") or "", "time": e.get("time") or "", "type": e.get("type"),
            "cd": e.get("change_date") or "", "vp": list(e.get("voting_power") or []), "votes": list(votes),
            "buy_qty": int(buy), "sell_qty": int(sell), "buy_price": bp, "sell_price": sp, "p": px.get("p"),
@@ -886,7 +926,9 @@ def history_record(e: dict) -> dict:
     return rec
 
 
-BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog",
+LABELS.update({"add_under": "多拿了股票，但没跟上公司增发，份额反而下降"})
+TONE.update({"add_under": "neutral"})
+BUY_ACTIONS = {"add_under", "build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog",
                "add_take", "build_take", "build_dip", "build_chase", "build_pull", "build_flow", "add_flow", "add_fixed", "build_fixed"}
 SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind", "trim_deal", "exit_deal",
                 "trim_hand", "exit_hand"}
@@ -1054,6 +1096,99 @@ def add_context(notices: list[dict]) -> None:
         finalize(ins, ctx)
 
 
+# ---------------------------------------------------------------- 第二十一轮：基金经理会先问的四个问题
+#
+# 1. 公司同期发了多少新股？它跟了多少？（跟投比例：买了但比例反而下降 ≠ 加仓）
+# 2. 离 20% 收购线多远？（顶到线就不能再买，贴着线小幅减不一定是看法变了）
+# 3. 这个仓位要多少天才卖得完？（卖不动的仓位只能慢慢减或找人接，“卖得慢”不代表不坚决）
+# 4. 是怎么做的、为什么做，是两个问题（finalize 里分开说：how / why）
+TAKEOVER_LINE = 20.0      # 公司法第 606 条：持股超过 20% 一般要发起收购要约或经股东批准（另有每 6 个月最多多买 3% 的例外）
+NEAR_LINE = 19.0          # 到了这里就算“顶到线”
+SO_UP_MIN = 0.05          # 公司总股本至少增加这么多，才谈“跟投比例”（太小的差异是四舍五入）
+SO_UP_MAX = 1.5           # 再大多半是合并、换股这类重组，跟投比例说明不了什么
+OVER_FOLLOW = 1.5         # 自己持股数的增幅 ÷ 总股本增幅 ≥ 这个数：比按比例跟投多得多
+ILLIQUID_DAYS = 40        # 卖之前的持仓 ≥ 这么多个交易日的全市场成交量：在市场上卖不动
+HOW_KEYS = {"plc", "take", "hand"}      # 这几个“目的”其实说的是“怎么做的”（认购新股、整块接过来、整块转出去），不是“为什么”
+SMALL_TRIM = 0.15         # 一次减掉的不到持仓的这么多：算“只减了一小部分”
+FRESH_EDGE = 0.6          # 603 里近 4 个月买的不到持仓的六成：标签里的目的把握最多“中”
+
+
+def follow_ratio(chg_frac, so_chg) -> float | None:
+    """跟投比例：自己持股数的增幅 ÷ 公司总股本的增幅。1 = 正好按比例跟投（持股比例不变），< 1 = 没跟足（比例下降），> 1 = 多拿了。
+    只在公司总股本明显增加（SO_UP_MIN–SO_UP_MAX）、自己也确实多了股数时算；否则 None。"""
+    if not (_is_num(chg_frac) and _is_num(so_chg)) or chg_frac <= 0 or not SO_UP_MIN <= so_chg <= SO_UP_MAX:
+        return None
+    return round(chg_frac / so_chg, 2)
+
+
+LOC_RANGE = 1.25          # 买入期间股价的最高 ÷ 最低至少这么大，才谈“买在区间的哪里”（区间太窄时没有高低之分）
+LOC_LOW, LOC_HIGH = 0.25, 0.65
+EARLY_GAIN = 0.20         # 买在低处、现在比均价高出这么多：是涨起来之前买的，不是追涨
+LATE_LOSS = -0.05         # 买在高处、现在比均价还低：是先买后跌，不是逢低
+DISC_PEN = 2.5            # 折价拿的：给“逢低/顺势/回调/套利”减的分（这是事实，不是推断，所以比整块交易的 1.0 重）
+BELOW_DAYS = 3            # 只认一两天内的买入：连着很多天都低于最低收盘价，多半是复权价或日期对不上，不是折价
+BELOW_LOW = 0.08          # 买入均价比同期最低收盘价还低这么多：市场上买不到这个价，是场外按折价拿的
+ASOF_SPAN = 45            # 交易从头到尾不超过这么多天，才做这个换算
+ASOF_MIN = 0.10           # 成交均价和变动时的股价差到这么多，才把“之前涨跌”换算到成交的价位上
+
+
+def buy_location(bp, px: dict) -> tuple[float, float] | None:
+    """这批买入（或卖出）的均价落在“交易期间股价区间”的哪里（0 = 最低，1 = 最高），以及现在比均价高/低多少。
+    “逢低”“追涨”“止损”说的是成交的时候股价在哪，不是公告那天股价在哪——买完之后才跌的不叫逢低，买完之后才涨的不叫追涨，
+    卖完之后才跌的不叫止损。
+    区间太窄、或均价明显落在区间之外（复权价和成交价对不上、明细读错）时返回 None。"""
+    lo, hi, p = px.get("t_lo"), px.get("t_hi"), px.get("p")
+    if not all(_is_num(x) and x > 0 for x in (bp, lo, hi, p)) or hi / lo < LOC_RANGE or not lo * 0.9 <= bp <= hi * 1.1:
+        return None
+    return round(_clip((bp - lo) / (hi - lo), 0, 1), 2), round(p / bp - 1, 3)
+
+
+PX_TOL = 0.08             # 分好几天在市场上成交的均价，和同期股价最多差这么多（盘中高低点会比收盘价再偏一点）
+PX_TOL_ONE_DAY = 0.20
+PX_MIN_DAYS = 4           # 至少这么多个交易日才用这条检查：一两天的成交可能就是场外的整块或配售，那是另一回事
+
+
+def price_doubt(avg, side: str, tr: dict, px: dict) -> str:
+    """明细里的成交均价可信吗？可疑时返回一句原因（给人看的），没问题或没法判断返回空串。side："b" 买 / "s" 卖。
+    有 px["vw"]（按每天收盘价推出来的均价）时用它核对，没有就用交易期间的最低/最高收盘价。"""
+    if not _is_num(avg) or avg <= 0 or not isinstance(tr, dict) or not isinstance(px, dict):
+        return ""
+    cnt = lambda v: v if _is_num(v) else 0         # 历史文件里的坏数据（不是数字）按 0 算，不能让解读出错
+    # 量集中在一天的（一天占六成以上）：那天盘中可能大起大落，均价离收盘价远一点也正常，放宽到 20%
+    sign = 1 if side == "b" else -1
+    qs = []
+    for item in tr.get("daily") if isinstance(tr.get("daily"), list) else []:
+        try:
+            q = float(item[1]) * sign
+        except (TypeError, ValueError, IndexError, KeyError):
+            continue
+        if 0 < q < 1e15:
+            qs.append(q)
+    tol = PX_TOL_ONE_DAY if qs and max(qs) >= 0.6 * sum(qs) else PX_TOL
+    vw = px.get("vw") if isinstance(px.get("vw"), dict) else {}
+    if _is_num(vw.get(side)) and vw[side] > 0 and cnt(vw.get("n" + side)) >= PX_MIN_DAYS:
+        r = avg / vw[side]
+        if abs(r - 1) > tol:
+            return f"而按这 {vw['n' + side]} 天每天的收盘价算应该在 {fp(vw[side])} 左右（差 {abs(r - 1) * 100:.0f}%）"
+        return ""
+    lo, hi = px.get("t_lo"), px.get("t_hi")
+    if not (_is_num(lo) and _is_num(hi) and lo > 0) or cnt(tr.get("days")) < PX_MIN_DAYS:
+        return ""
+    n_side = cnt(tr.get("n_buy" if side == "b" else "n_sell"))
+    if n_side < PX_MIN_DAYS:                      # 这一边只有两三笔：可能就是一两天的事，不查
+        return ""
+    if avg < lo * (1 - tol) or avg > hi * (1 + tol):
+        return f"而同期股价一直在 {fp(lo)}–{fp(hi)} 之间"
+    return ""
+
+
+def days_to_trade(shares, adv) -> int | None:
+    """这么多股相当于这只股票多少个交易日的全部成交量（adv：近 60 个交易日的日均成交量）。算不出返回 None。"""
+    if not (_is_num(shares) and _is_num(adv)) or shares <= 0 or adv <= 0:
+        return None
+    return min(int(round(shares / adv)), 9999)
+
+
 def judge(n: dict) -> dict | None:
     """n：一条公告的字段——type, voting_power, votes, trades(summary), px, ocr, style, prev（上一份公告的 [比例, 持股数]，
     只有退出类用得上）。返回 {"action","label","tone","confidence","reasons":[...],"style":...}；信息太少时返回 None。
@@ -1111,6 +1246,24 @@ def judge(n: dict) -> dict | None:
         pass                                       # 没有市场价可比，照用，但不拿来下“获利/止损”的结论
     if mismatch:
         bp = sp = None
+    # 第二十一轮：在市场上分好几天成交的，均价不可能落在同期股价之外。落在外面的（L1 的 LIN 均价 $0.84、同期股价 $0.38–0.47）
+    # 要么是明细里的金额读错了，要么是日线做过复权（BAP、PNR、GTI 的旧记录），要么掺了场外折价的成交——哪一种都不能再拿这个均价和市价、成本比。
+    px_note = []
+    if not fixed:                                  # 已经认出“按约定价格拿新股”的（BMC $1.00），均价本来就不在市价上，不算可疑
+        for side_, word in (("b", "买入"), ("s", "卖出")):
+            avg = bp if side_ == "b" else sp
+            why = price_doubt(avg, side_, tr, px)
+            if why:
+                px_note.append(f"{word}均价约 {fp(avg)}，{why}")
+                if side_ == "b":
+                    bp = None
+                else:
+                    sp = None
+    if px_note:
+        f_px_doubt = "明细里的" + "；".join(px_note) + "——在市场上分好几天成交的，均价不可能离同期股价这么远。可能是明细里的金额读错了、" \
+                     "日线做过复权，或者其中掺了场外成交。这个均价下面不用（不拿它算盈亏，也不拿它判断逢低还是追涨）。"
+    else:
+        f_px_doubt = ""
 
     if t == "change" and dvp is not None:
         line = f"持股比例 {vp[0]:g}% → {vp[1]:g}%"
@@ -1259,10 +1412,35 @@ def judge(n: dict) -> dict | None:
         if pos is not None:
             line += f"，处在一年区间（{fp(px['lo'])}–{fp(px['hi'])}）的{pos_word(pos)}"
         reasons.append(line + "。")
+    if f_px_doubt:
+        reasons.append(f_px_doubt)
+        tags.insert(0, "均价存疑")               # 放最前面（网页只显示前几个小标签）：这条关系到下面的话能信多少
     # 第十二轮：判断“涨了/跌了”时扣掉大盘同期的涨跌——大盘一起跌 20% 时买，不算这只股票的“逢低”
     mk = px.get("m") if isinstance(px.get("m"), dict) else {}
     mk = {k: v for k, v in mk.items() if isinstance(v, (int, float)) and not isinstance(v, bool) and -0.9 < v < 5}
     r1x = px.get("r1m")
+    # 第二十一轮：“逢低/追涨/止损”看的是成交时股价在哪。成交均价和变动那天的股价差得多时（买完才跌、买完才涨、卖完才跌……），
+    # 把“之前涨跌”和“一年区间里的位置”换算到成交均价上再打分；写给人看的那句“变动时股价”不变。
+    main_px = bp if direction == "buy" and buy and sell < 0.5 * buy else sp if direction == "sell" and sell and buy < 0.5 * sell else None
+    where = buy_location(main_px, px) if rows_ok and main_px else None
+    span = _days_between(tr.get("first"), tr.get("last")) if tr.get("first") and tr.get("last") else None
+    # 只在交易集中在一个半月以内时换算：这时“均价和变动日股价的差”就是成交之后才发生的涨跌。
+    # 拖了好几个月的买卖，均价是一路上的平均，和“3 个月前”比没有意义（AustralianSuper 买 A4N 七个月一路跌一路买，那就是逢低）
+    asof = bool(where and abs(where[1]) >= ASOF_MIN and span is not None and 0 <= span <= ASOF_SPAN
+                and px["t_lo"] <= main_px <= px["t_hi"])        # 均价落在同期市价之外的（折价配售等）不换算
+    if asof:
+        k = 1 + where[1]
+        adj = lambda r: (1 + r) / k - 1 if r is not None else None
+        r3a, r6a, r12a = adj(r3), adj(r6), adj(r12)
+        r1x = adj(r1x)
+        if _is_num(px.get("lo")) and _is_num(px.get("hi")) and px["hi"] > px["lo"]:
+            pos = round(_clip((main_px - px["lo"]) / (px["hi"] - px["lo"]), 0, 1), 3)
+        verb = "买" if direction == "buy" else "卖"
+        bits = [f"{lab} {fr(v)}" for lab, v in (("3 个月", r3a), ("6 个月", r6a), ("12 个月", r12a)) if v is not None]
+        reasons.append(f"成交价位：它这批{verb}的均价约 {fp(main_px)}，变动那天股价已经是 {fp(px['p'])}（{'高' if where[1] > 0 else '低'}了 {abs(where[1]) * 100:.0f}%）。"
+                       f"判断它是不是逢低、追涨、止损，要看它{verb}的时候股价在哪：按成交均价算，之前" + "、".join(bits)
+                       + (f"，处在一年区间的{pos_word(pos)}" if pos is not None else "") + "。下面按这组数字判断。")
+        r3, r6, r12 = r3a, r6a, r12a
     if mk:
         r3 = r3 - mk["m3"] if r3 is not None and "m3" in mk else r3
         r6 = r6 - mk["m6"] if r6 is not None and "m6" in mk else r6
@@ -1275,8 +1453,6 @@ def judge(n: dict) -> dict | None:
     for sign, word in ((-1, "跌"), (1, "涨")):        # 第十七轮：波动大的股票，看着大的涨跌其实是平常的起伏
         if _trend(r3, r6, r12, sign) >= 1 > _trend(r3, r6, r12, sign, vol):
             reasons.append(f"这只股票平时波动就大（一天约 ±{vol * 100:.1f}%），上面这种幅度的{word}在它身上算正常起伏，不当作“{word}了一大段”。")
-    high = pos is not None and pos >= 0.65
-    low = pos is not None and pos <= 0.3
 
     # ---- 4b. 公司同期的大事（来自这家公司的公告标题）
     tk_sell = False
@@ -1542,6 +1718,64 @@ def judge(n: dict) -> dict | None:
                        + ("是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。" if direction == "buy"
                           else "是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。"))
         tags.append("大宗")
+    if f_px_doubt:
+        f["px_doubt"] = True
+    # ---- 6c. 第二十一轮：基金经理视角（跟投比例、20% 收购线、流动性）。都是事实，写进理由和小标签；只有“没跟足”会改标签
+    fol = follow_ratio(chg_frac, so_chg) if direction == "buy" and t == "change" else None
+    if fol is not None:
+        f["fol"] = fol
+        so_txt = f"这段时间公司的总股本增加了约 {so_chg * 100:.0f}%（发了新股），它的持股数增加了 {chg_frac * 100:.0f}%"
+        if dvp is not None and dvp <= -0.05:
+            f["under"] = True
+            reasons.append(f"跟投比例：{so_txt}——没跟上，持股比例反而从 {vp[0]:g}% 降到 {vp[1]:g}%。"
+                           "它是多拿了一些股票，但在这家公司里的份额变小了：算不上加码，更像是“跟了一部分，没跟足”。")
+            tags.append("没跟足")
+        elif fol >= OVER_FOLLOW and dvp is not None and dvp >= 0.5:
+            reasons.append(f"跟投比例：{so_txt}——比按比例跟投多得多（约 {fol:.1f} 倍），是借这次发新股主动提高了自己的份额。")
+            tags.append("超比例")
+        elif 0.8 <= fol <= 1.25:
+            reasons.append(f"跟投比例：{so_txt}——差不多是按比例跟投，保住原来的份额。")
+    disc = None
+    if (direction == "buy" and rows_ok and bp and buy and sell < 0.5 * buy and not f.get("fixed") and _is_num(px.get("t_lo")) and px["t_lo"] > 0
+            and bp < px["t_lo"] * (1 - BELOW_LOW) and _is_num(tr.get("days")) and 0 < tr["days"] <= BELOW_DAYS):
+        disc = round(1 - bp / px["t_lo"], 3)
+        f["disc"] = disc
+        reasons.append(f"折价：这批买入的均价约 {fp(bp)}，比同期股价的最低收盘价（{fp(px['t_lo'])}）还低 {disc * 100:.0f}%——"
+                       "在市场上买不到这个价，是场外按折扣价拿的（配售、折价大宗或行权）。价格不是它在市场上挑的，谈不上“逢低”或“追涨”。")
+        tags.append("折价拿货")
+    if where and direction == "buy" and disc is None:
+        loc, mtm = where
+        f["loc"], f["mtm"] = loc, mtm
+        rng = f"这批买入的均价约 {fp(bp)}，买入期间股价在 {fp(px['t_lo'])}–{fp(px['t_hi'])} 之间"
+        if loc <= LOC_LOW and mtm >= EARLY_GAIN:
+            f["early"] = True
+            reasons.append(f"买入位置：{rng}——买在了这段时间的最低处附近，现在 {fp(px['p'])}，已经高出 {mtm * 100:.0f}%。"
+                           "它是在涨起来之前买的（或者是按折扣价拿的新股），不是看到涨了才去追。")
+            tags.append("买在低处")
+        elif loc >= LOC_HIGH and mtm <= LATE_LOSS:
+            f["late"] = True
+            reasons.append(f"买入位置：{rng}——买在了这段时间的高处，现在 {fp(px['p'])}，比均价低 {-mtm * 100:.0f}%。"
+                           "它是先买、之后才跌的，不是等跌下来才买。")
+            tags.append("买在高处")
+    after_vp = vp[-1] if vp and t in ("change", "becoming") else None
+    if after_vp is not None and NEAR_LINE <= after_vp < TAKEOVER_LINE + 0.01 and direction == "buy":
+        f["cap"] = "at"
+        reasons.append(f"收购线：买完之后持股 {after_vp:g}%，已经顶到 20% 的收购线（超过 20% 一般要向所有股东发收购要约或经股东批准，"
+                       "另外只允许每 6 个月多买 3%）。它在这只股票上基本没有再买的空间了：之后不再加仓不代表看法变了。")
+        tags.append("顶到20%线")
+    elif (t == "change" and len(vp) == 2 and direction == "sell" and NEAR_LINE <= vp[0] < TAKEOVER_LINE + 0.01
+          and vp[1] >= NEAR_LINE - 2.5):
+        f["cap"] = "off"
+        reasons.append(f"收购线：卖之前持股 {vp[0]:g}%，贴着 20% 的收购线；这次只减到 {vp[1]:g}%。"
+                       "贴着线的大股东小幅减持，常常只是给自己留出余地（比如准备参与下一次融资），不一定是看法变差。")
+        tags.append("贴着20%线")
+    hold0 = votes[0] if t == "change" and len(votes) == 2 else prev.get("votes") if t == "ceasing" else None
+    dtl = days_to_trade(hold0, px.get("adv")) if direction == "sell" else None
+    if dtl is not None and dtl >= ILLIQUID_DAYS:
+        f["dtl"] = dtl
+        reasons.append(f"流动性：卖之前的持仓相当于这只股票约 {dtl} 个交易日的全部成交量。这么大的仓位在市场上卖不动，"
+                       "只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。")
+        tags.append("仓位难卖")
     # 数据质量分（和目的无关）：明细对得上、基金类型、扫描件
     q = score + (1 if style in ("active", "strategic") else 0) - (1 if style == "platform" or ocr else 0) - (2 if not vp and not rows_ok else 0)
     f["q"] = q
@@ -1764,6 +1998,9 @@ def score_purposes(f: dict, ctx: dict | None = None, trace: list | None = None) 
             add("dip", tilt, "这家基金习惯在股价弱的时候买")
             add("mom", -tilt, "这家基金习惯在股价强的时候买")
         add("short", rev_adj, "这家基金经常买了不久就反手")
+        if f.get("disc") and not f.get("mega"):        # 第二十一轮：均价低于同期最低收盘价——场外折价拿的，和整块交易同样处理
+            for k in ("dip", "mom", "pull", "arb"):    # 并购套利是在市场上贴着报价买，也不会是大幅折价
+                add(k, -DISC_PEN)
         if f.get("mega"):                              # 第二十轮：一两笔就是全市场成交量的 10 倍以上、占公司 2% 以上——一整块谈好的交易，
             add("dip", -MEGA_PEN)                      # 价格不是在市场上挑的。可能是配售，也可能是从别的股东手里接（Regal 和别家机构对倒 NOL），
             add("mom", -MEGA_PEN)                      # 所以只压“逢低/顺势”，不替它说是哪一种
@@ -1926,9 +2163,64 @@ def choose(ranked: list[dict], f: dict) -> tuple[dict, bool, str]:
         action = "build"       # 4 个月里只买了持仓的一半不到：说不清它为什么拿着这只股票，标签只说“新进建仓”
     if f.get("fixed") and action in ("add_placement", "build_placement"):     # 价格全是约定价：不一定是配售，也可能是行权、转股
         action = "add_fixed" if action == "add_placement" else "build_fixed"
+    if f.get("under") and f["side"] == "buy" and f["base"] == "add":
+        action = "add_under"   # 第二十一轮：股数多了、份额却降了——不管是逢低还是认购，都不能叫“加仓”
     if f.get("form") in LABELS:          # 形式已经确定的（刚好跌破 5% 线）：标签说形式，目的放在概率和理由里
         action = f["form"]
     return top, close, action
+
+
+# 网页只显示前 4 个小标签。说“这笔交易是什么性质、下面的话能信多少”的排在前面，说背景的（连续加仓、整体加仓……）排后面
+TAG_FIRST = ("倒手", "均价存疑", "折价拿货", "定价认购", "没跟足", "超比例", "顶到20%线", "贴着20%线", "清仓", "大宗", "仓位难卖")
+
+
+def order_tags(tags) -> list:
+    """把重要的小标签挪到前面，其余保持原来的先后；去掉重复的。不是列表时返回空列表。"""
+    if not isinstance(tags, list):
+        return []
+    seen, out = set(), []
+    for t in tags:
+        if isinstance(t, str) and t not in seen:
+            seen.add(t)
+            out.append(t)
+    rank = {t: i for i, t in enumerate(TAG_FIRST)}
+    return sorted(out, key=lambda t: rank.get(t, len(TAG_FIRST)))      # sorted 是稳定排序：同一档的保持原顺序
+
+
+def how_of(f: dict, top: str = "") -> str:
+    """怎么做的（事实，不是猜的）：按证据的硬度从高到低取第一条。top：打分的第一名（是“参与融资”时，大宗也按认购新股说）。"""
+    buy = f.get("side") == "buy"
+    if isinstance(f.get("cp"), dict):
+        return "整块从另一个大股东手里接过来（倒手）" if buy else "整块转给了一个特定的接盘方（倒手）"
+    if buy and f.get("plc_form"):
+        return "认购公司发的新股（公司的发行文件对得上）"
+    if buy and f.get("fixed"):
+        return "按事先约定的价格从公司拿新股（行权、转股或配售）"
+    if buy and ((f.get("plc") or 0) >= 0.5 or f.get("rblk") or top == "plc"):
+        return "多半是认购新股（配售）"
+    if buy and f.get("disc"):
+        return "按低于市场的折扣价在场外拿的（配售、折价大宗或行权）"
+    if f.get("mega") or f.get("blk") or f.get("offmkt"):
+        return "一次性的大宗交易，不是在市场上零散成交"
+    tl = f.get("tl") if isinstance(f.get("tl"), dict) else {}
+    part = f.get("part")
+    if (tl.get("n") or 0) >= 8 and _is_num(part) and part <= 0.10:
+        return f"在市场上分 {tl['n']} 个交易日慢慢{'买' if buy else '卖'}，不显眼"
+    if _is_num(part) and part >= 0.25:
+        return f"在市场上{'买' if buy else '卖'}，是同期最主要的{'买家' if buy else '卖家'}之一"
+    return f"在市场上{'买' if buy else '卖'}"
+
+
+def why_of(ranked: list[dict]) -> dict | None:
+    """为什么做：把“怎么做的”那几项（HOW_KEYS）拿掉以后，在剩下的动机里重新算概率，取第一名。
+    只在第一名本来是“怎么做的”时才有意义（比如“倒手 46%、获利了结 26%”：两件事并不冲突）。"""
+    S = {x["k"]: x["s"] for x in ranked if x["k"] not in HOW_KEYS}
+    if not S:
+        return None
+    P = softmax(S)
+    k = max(S, key=lambda x: S[x])
+    name = next(x["name"] for x in ranked if x["k"] == k)
+    return {"k": k, "name": name, "p": round(P[k], 3)}
 
 
 FRESH_603 = 0.5        # 第二十轮：603 的现有持仓至少一半是最近 4 个月买的，标签才说目的（和持仓阶段里的“fresh”同一个标准）
@@ -1980,6 +2272,15 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
     conf = "高" if pts >= 3 else "低" if pts <= 0 else "中"
     if flips and conf == "高":          # 第二十轮：某一笔证据的分量稍微变一点结论就会变——最多算“中”
         conf = "中"
+    # 第二十一轮：603 标签里的目的只看得到近 4 个月的买入；这部分不到持仓六成时，另外那部分为什么买的看不出来
+    thin = bool(f.get("base") == "build" and action != "build" and top["k"] in WHY_603 and (f.get("size") or 0) < FRESH_EDGE)
+    if thin and conf == "高":
+        conf = "中"
+    # “止损”的意思是认错离场。只减了一小部分、大头还在，而且仓位本来就难卖或贴着 20% 线：说止损重了，把握最多“中”
+    soft = bool(f["side"] == "sell" and top["k"] == "stop" and f.get("t") == "change" and _is_num(f.get("size")) and f["size"] < SMALL_TRIM
+                and (f.get("dtl") or f.get("cap") == "off"))
+    if soft and conf == "高":
+        conf = "中"
     edge = ""
     if flips:
         alt = collections.Counter(a for _, _, a, _ in flips).most_common(1)[0][0]
@@ -2009,5 +2310,26 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
         rs.insert(idx, line)
     if edge:
         rs.insert(idx + 1, edge)
+    rs[:] = [r for r in rs if not r.startswith(("怎么做的：", "注意：这份 603", "注意：这次只减了"))]
+    how, why = how_of(f, top["k"]), (why_of(ranked) if top["k"] in HOW_KEYS else None)
+    line2 = f"怎么做的：{how}。"
+    if why and why["k"] != "base":
+        line2 += f"至于为什么：撇开成交方式不看，动机上最像「{why['name']}」（在各种动机里占 {why['p'] * 100:.0f}%）。"
+    elif why:
+        line2 += "至于为什么：从股价和成本上看不出特别的动机。"
+    idx = next((i for i, r in enumerate(rs) if r.startswith("综合打分：") or r.startswith("形式上只是刚好跌破 5% 线；综合打分：")), len(rs) - 1)
+    rs.insert(idx + 1, line2)
+    if thin:
+        rs.insert(idx + 2, f"注意：这份 603 里近 4 个月买的只占现有持仓的 {(f.get('size') or 0) * 100:.0f}% 左右，其余是更早买的（603 不要求列出），"
+                           "那部分是什么价位、为什么买的看不出来；而且 603 只要求列买入，这期间有没有卖过也不一定看得到。所以把握最多算“中”。")
+    if soft:
+        rs.insert(idx + 2, f"注意：这次只减了持仓的 {f['size'] * 100:.0f}%，大头还留着"
+                           + ("，而且这个仓位在市场上本来就卖不动" if f.get("dtl") else "") + ("，卖之前又贴着 20% 收购线" if f.get("cap") == "off" else "")
+                           + "。“止损”是认错离场的意思，用在这里重了：更像是在股价不好的时候先降一点风险。所以把握最多算“中”。")
+    ins["how"] = how
+    if why:
+        ins["why"] = why
+    else:
+        ins.pop("why", None)
     ins.update(action=action, label=LABELS[action], tone=TONE.get(action, "neutral"), confidence=conf,
                purposes=[{"k": x["k"], "name": x["name"], "p": x["p"]} for x in shown], strength=strength_of(f, ctx))

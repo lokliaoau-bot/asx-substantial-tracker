@@ -596,11 +596,18 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
         box.append(row);
       });
       const cal = state.data && state.data.calibration && i.side && state.data.calibration[`${i.side}:${ps[0].k}`];
-      if (cal && cal.n3 >= 8 && typeof cal.avg3 === "number") {
-        const avg = Math.round(cal.avg3 * 100), up = Math.round((cal.up3 || 0) * 100);
-        let t = `回头看：过去 ${cal.n3} 次被判为“${ps[0].name}”的，公告后 3 个月股价平均 ${avg >= 0 ? "+" : ""}${avg}%，${up}% 的次数上涨`;
+      if (cal && ((cal.n3x >= 8 && typeof cal.avg3x === "number") || (cal.n3 >= 8 && typeof cal.avg3 === "number"))) {
+        const ex = cal.n3x >= 8 && typeof cal.avg3x === "number";
+        const avg = Math.round((ex ? cal.avg3x : cal.avg3) * 100), up = Math.round(((ex ? cal.up3x : cal.up3) || 0) * 100);
+        let t = ex
+          ? `回头看：过去 ${cal.n3x} 次被判为“${ps[0].name}”的，公告后 3 个月比同期指数平均${avg >= 0 ? "多涨" : "少涨"} ${Math.abs(avg)}%，${up}% 的次数跑赢指数`
+          : `回头看：过去 ${cal.n3} 次被判为“${ps[0].name}”的，公告后 3 个月股价平均 ${avg >= 0 ? "+" : ""}${avg}%，${up}% 的次数上涨`;
         if (cal.n_next >= 8 && typeof cal.same_next === "number") t += `；它自己下一步继续同方向的占 ${Math.round(cal.same_next * 100)}%`;
         if (cal.n_next >= 8 && typeof cal.rev_next === "number") t += `，3 个月内就掉头的占 ${Math.round(cal.rev_next * 100)}%`;
+        if (cal.check_n >= 5 && typeof cal.check === "number" && cal.check_name) {
+          t += `；按这个判断，之后应该“${cal.check_name}”，实际做到的占 ${Math.round(cal.check * 100)}%`;
+          if (typeof cal.check_base === "number") t += `（同方向的全部公告平均 ${Math.round(cal.check_base * 100)}%）`;
+        }
         box.append(el("div", "pstrength", t + "。"));
       }
       if (typeof i.strength === "number") {

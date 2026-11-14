@@ -1464,6 +1464,56 @@ class Backfill:
                     r["fwd_tries"] = r.get("fwd_tries", 0) + 1
 
 
+SMALL_INDEX = "XSO"                 # 小盘股对照 S&P/ASX Small Ordinaries
+SMALL_VALUE = 2_000_000             # 每天成交额（日均成交量 × 股价）低于这个数（澳元）算小盘股
+_INDEX: dict[str, list] = {}        # 本次运行里取过的指数日线
+
+
+def benchmark_of(px: dict) -> str:
+    """这只股票该和哪个指数比：小盘股（日均成交额 < SMALL_VALUE）用小盘指数，其余用 ASX 200；不知道成交额时用 ASX 200。"""
+    try:
+        value = float(px.get("adv")) * float(px.get("p"))
+    except (TypeError, ValueError, AttributeError):
+        return INDEX_CODE
+    return SMALL_INDEX if 0 < value < SMALL_VALUE else INDEX_CODE
+
+
+def index_series(code: str = INDEX_CODE) -> list:
+    """指数日线，整理成和股票一样的 [[毫秒, 收盘], ...]（指数的行是 [时间, 开, 高, 低, 收, 量]）。每次运行每个指数只取一次。"""
+    if code not in _INDEX:
+        rows = []
+        for row in price_series(code):
+            try:
+                rows.append([row[0], float(row[4] if len(row) >= 5 else row[1])])
+            except (TypeError, ValueError, IndexError):
+                continue
+        _INDEX[code] = rows
+    return _INDEX[code]
+
+
+def add_forward_excess(history: dict) -> int:
+    """给持仓历史里的“公告后 1/3/6 个月涨跌”（fwd）配上“比同期指数多涨多少”（fwd_x），以及用的是哪个指数（bm）。返回补了几条。"""
+    todo = []
+    for rows in (history.get("pos") or {}).values():
+        for r in rows:
+            fwd = r.get("fwd") if isinstance(r.get("fwd"), dict) else {}
+            if fwd and set(fwd) - set(r["fwd_x"] if isinstance(r.get("fwd_x"), dict) else {}):
+                todo.append(r)
+    done = 0
+    for r in todo:
+        code = benchmark_of(r.get("px") or {})
+        try:
+            ser = index_series(code)
+        except FetchError:
+            continue
+        ifwd = insight.forward_returns(ser, r.get("date") or "")
+        fx = {k: round(v - ifwd[k], 3) for k, v in r["fwd"].items() if k in ifwd and isinstance(v, (int, float))}
+        if fx:
+            r["fwd_x"], r["bm"] = fx, code
+            done += 1
+    return done
+
+
 def index_points() -> list[tuple[str, float]]:
     pts = []
     for row in price_series(INDEX_CODE):
@@ -1632,11 +1682,55 @@ def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: 
     return out or table_only          # 只在持仓表里出现过：只提最新的一份
 
 
-def calibrate(history: dict, holders: list[Holder]) -> dict:
+# 每个目的判对了的话，之后应该发生什么（第十六轮“可检验的预言”）。只用之后的记录检验，判断时不用（as_of）。
+CHECK_OF = {"prog": "next_same", "wind": "next_same", "short": "rev90", "stop": "nobuy180", "rebal": "no_big_cut",
+            "dip": "beat3", "pull": "beat3", "mom": "beat3", "base": "beat3"}
+CHECK_NAMES = {"next_same": "下一份公告还是同方向", "rev90": "90 天内反向", "nobuy180": "半年内没有买回",
+               "no_big_cut": "下一份不是大幅减仓（< 20%）", "beat3": "之后 3 个月跑赢指数"}
+
+
+def outcome_checks(r: dict, side: str, later: list[dict], today: dt.date) -> dict:
+    """一条记录之后发生了什么：{检验名: True/False}；还看不出来的不放。later：同一持仓之后的记录（按时间）。"""
+    out = {}
+    try:
+        d0 = dt.date.fromisoformat(r.get("date") or "")
+    except ValueError:
+        return out
+    moves = [(x, _rec_dir(x)) for x in later if _rec_dir(x)]
+    if moves:
+        out["next_same"] = moves[0][1] == side
+        nx = moves[0][0]
+        if side == "sell":
+            v = nx.get("votes") or []
+            if nx.get("type") == "ceasing":
+                out["no_big_cut"] = False
+            elif len(v) == 2 and v[0] > 0:
+                out["no_big_cut"] = not (v[1] < v[0] * 0.8)
+    age = lambda x: (dt.date.fromisoformat(x.get("date") or "9999-01-01") - d0).days if re.fullmatch(r"\d{4}-\d{2}-\d{2}", x.get("date") or "") else 99999
+    opp = [x for x, dirn in moves if dirn != side]
+    if opp and age(opp[0]) <= 90:
+        out["rev90"] = True
+    elif (today - d0).days >= 90 or any(age(x) > 90 for x in later):
+        out["rev90"] = False
+    if side == "sell":
+        buys = [x for x, dirn in moves if dirn == "buy"]
+        if buys and age(buys[0]) <= 180:
+            out["nobuy180"] = False
+        elif (today - d0).days >= 180 or any(age(x) > 180 for x in later):
+            out["nobuy180"] = True
+    f3 = r["fwd_x"].get("3m") if isinstance(r.get("fwd_x"), dict) else None
+    if isinstance(f3, (int, float)):
+        out["beat3"] = f3 > 0
+    return out
+
+
+def calibrate(history: dict, holders: list[Holder], today: dt.date | None = None) -> dict:
     """回头看：把持仓历史里每份公告按现在的公式重新判断一遍（只用单只股票的证据），再对照之后发生的事——
     公告后 3 个月股价涨跌、它自己下一份公告是同向还是反向。按“方向:目的”汇总。只是统计，不会自动改权重。"""
     style_of = {h.name: h.style for h in holders}
     agg: dict[str, dict] = {}
+    base_ck: dict[str, list] = {}
+    today = today or dt.date.today()
     habit_cache: dict[str, dict] = {}
 
     def habit_at(day: str) -> dict:           # 只用那一天之前的记录算习惯，不偷看之后的事
@@ -1670,13 +1764,28 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
             if not ins or not ins.get("_f"):
                 continue
             side, top = ins["_f"]["side"], ins["purposes"][0]["k"]
-            a = agg.setdefault(f"{side}:{top}", {"n": 0, "n3": 0, "sum3": 0.0, "up3": 0, "n_next": 0, "same_next": 0, "rev": 0})
+            a = agg.setdefault(f"{side}:{top}", {"n": 0, "n3": 0, "sum3": 0.0, "up3": 0, "n_next": 0, "same_next": 0, "rev": 0,
+                                                 "n3x": 0, "sum3x": 0.0, "up3x": 0, "ck": 0, "ck_ok": 0})
             a["n"] += 1
             f3 = (r.get("fwd") or {}).get("3m")
             if f3 is not None:
                 a["n3"] += 1
                 a["sum3"] += f3
                 a["up3"] += f3 > 0
+            f3x = r["fwd_x"].get("3m") if isinstance(r.get("fwd_x"), dict) else None
+            if isinstance(f3x, (int, float)):
+                a["n3x"] += 1
+                a["sum3x"] += f3x
+                a["up3x"] += f3x > 0
+            checks = outcome_checks(r, side, rows[i + 1:], today)
+            for name, ok in checks.items():          # 不分目的的全体平均，做对照
+                b = base_ck.setdefault(f"{side}:{name}", [0, 0])
+                b[0] += 1
+                b[1] += ok
+            name = CHECK_OF.get(top)
+            if name and name in checks:
+                a["ck"] += 1
+                a["ck_ok"] += checks[name]
             nxt_row = next((x for x in rows[i + 1:] if _rec_dir(x)), None)
             if nxt_row:
                 nxt = _rec_dir(nxt_row)
@@ -1688,7 +1797,14 @@ def calibrate(history: dict, holders: list[Holder]) -> dict:
         out[k] = {"n": a["n"], "n3": a["n3"], "avg3": round(a["sum3"] / a["n3"], 3) if a["n3"] else None,
                   "up3": round(a["up3"] / a["n3"], 3) if a["n3"] else None, "n_next": a["n_next"],
                   "same_next": round(a["same_next"] / a["n_next"], 3) if a["n_next"] else None,
-                  "rev_next": round(a["rev"] / a["n_next"], 3) if a["n_next"] else None}
+                  "rev_next": round(a["rev"] / a["n_next"], 3) if a["n_next"] else None,
+                  "n3x": a["n3x"], "avg3x": round(a["sum3x"] / a["n3x"], 3) if a["n3x"] else None,
+                  "up3x": round(a["up3x"] / a["n3x"], 3) if a["n3x"] else None}
+        name = CHECK_OF.get(k.split(":", 1)[1])
+        if name and a["ck"]:
+            b = base_ck.get(f"{k.split(':', 1)[0]}:{name}") or [0, 0]
+            out[k].update(check=round(a["ck_ok"] / a["ck"], 3), check_n=a["ck"], check_name=CHECK_NAMES[name],
+                          check_base=round(b[1] / b[0], 3) if b[0] else None)
     return out
 
 
@@ -2607,7 +2723,13 @@ def main() -> int:
     except Exception as ex:  # noqa: BLE001
         log(f"基金月报出错：{type(ex).__name__}: {ex}")
     try:
-        calibration = calibrate(history, holders)
+        n_x = add_forward_excess(history)
+        if n_x:
+            log(f"超额涨跌：补了 {n_x} 条")
+    except Exception as ex:  # noqa: BLE001
+        log(f"超额涨跌出错：{type(ex).__name__}: {ex}")
+    try:
+        calibration = calibrate(history, holders, today)
     except Exception as ex:  # noqa: BLE001
         log(f"回测统计出错：{type(ex).__name__}: {ex}")
         calibration = {}

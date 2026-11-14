@@ -1,0 +1,1924 @@
+{
+ "_note": "操作解读的人工标准答案（第十六轮，2026-11-14）。标注时只看证据（持股变化、逐笔明细、股价、成本、公司公告、对手方、月报原话），不看程序给的标签。why 用 insight.PURPOSE_NAMES 的键，另有确定性的键：passive（被动稀释/上升）、lending、transfer、own（自家产品）、restructure（股份合并）、line（在 5% 线附近来回）、rotate（来回交易，没有方向）。sure：1 = 猜的（不计入命中率），2 = 有旁证，3 = 有直接证据。标注者是 AI，需要用户抽查。src=history 的条目 id 是 history.json 里的“基金|代码|编号”。",
+ "items": [
+  {
+   "id": "03160080",
+   "src": "live",
+   "holder": "Hostplus",
+   "code": "BAP",
+   "date": "2026-10-30",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "bounce",
+    "profit"
+   ],
+   "sure": 2,
+   "evidence": "12 个月 -57% 后 3 个月 +105%，卖在上涨日（下跌日只占 3%），趁反弹卖"
+  },
+  {
+   "id": "03160460",
+   "src": "live",
+   "holder": "UniSuper",
+   "code": "TLC",
+   "date": "2026-10-30",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "一个多月里第三份买入公告，18 天分批买，多买在下跌日"
+  },
+  {
+   "id": "03160606",
+   "src": "live",
+   "holder": "L1 Capital",
+   "code": "LIN",
+   "date": "2026-10-30",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "dip",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "两个月第四次加仓，股价 3 个月 -41%、在低位，买价低于自己成本 0.75"
+  },
+  {
+   "id": "03161248",
+   "src": "live",
+   "holder": "L1 Capital",
+   "code": "GLS",
+   "date": "2026-11-02",
+   "type": "change",
+   "how": "none",
+   "why": [
+    "passive",
+    "own"
+   ],
+   "sure": 3,
+   "evidence": "持股数不变，比例因 5.65 亿配股下降；也是 L1 自家产品"
+  },
+  {
+   "id": "03161266",
+   "src": "live",
+   "holder": "Wilson Asset Management",
+   "code": "EOL",
+   "date": "2026-11-02",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "passive",
+    "deal"
+   ],
+   "sure": 2,
+   "evidence": "持股数只少 3%，比例降 2 个点主要是增发摊薄；收购提议后高价卖了一些"
+  },
+  {
+   "id": "03161285",
+   "src": "live",
+   "holder": "Mercer",
+   "code": "PPE",
+   "date": "2026-11-02",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "dip",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "平台型，股价在一年低位，明细读不出"
+  },
+  {
+   "id": "03161619",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "RIV",
+   "date": "2026-11-03",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "九个月里买卖都有、价格几乎一样，净卖出不多"
+  },
+  {
+   "id": "03161621",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "EOL",
+   "date": "2026-11-03",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "arb"
+   ],
+   "sure": 1,
+   "evidence": "一年里来回买卖、持股数小增，比例被增发摊薄；公司是收购提议对象"
+  },
+  {
+   "id": "03161641",
+   "src": "live",
+   "holder": "Colonial First State (CFS)",
+   "code": "KAR",
+   "date": "2026-11-03",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "line",
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "平台型持股刚好 5.00%，之后几天在 5% 线上下来回"
+  },
+  {
+   "id": "03162074",
+   "src": "live",
+   "holder": "Hostplus",
+   "code": "BAP",
+   "date": "2026-11-04",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "bounce",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "一周内第二次减，从高点已减三成，股价刚反弹 90%"
+  },
+  {
+   "id": "03162078",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "SPG",
+   "date": "2026-11-04",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "stop",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "卖价 0.066 远低于成本 0.10，股价半年 -78%"
+  },
+  {
+   "id": "03163615",
+   "src": "live",
+   "holder": "Colonial First State (CFS)",
+   "code": "KAR",
+   "date": "2026-11-09",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "line"
+   ],
+   "sure": 3,
+   "evidence": "5.00% → 跌破 → 又回到 5.00%，在线附近来回"
+  },
+  {
+   "id": "03164122",
+   "src": "live",
+   "holder": "Colonial First State (CFS)",
+   "code": "KAR",
+   "date": "2026-11-10",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line"
+   ],
+   "sure": 3,
+   "evidence": "再次跌破 5%，只卖了 6.3 万股"
+  },
+  {
+   "id": "03164152",
+   "src": "live",
+   "holder": "Perennial",
+   "code": "AMX",
+   "date": "2026-11-10",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "hand",
+    "profit"
+   ],
+   "sure": 3,
+   "evidence": "同日 Landchecker 一方成为大股东，持股等于 Perennial 卖前全部持股"
+  },
+  {
+   "id": "03164259",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "RTH",
+   "date": "2026-11-10",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "deal",
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "收购协议公布后股价 +85% 时卖光，卖价仍低于成本 1.19"
+  },
+  {
+   "id": "03164658",
+   "src": "live",
+   "holder": "Australian Retirement Trust",
+   "code": "AZJ",
+   "date": "2026-11-11",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base",
+    "line"
+   ],
+   "sure": 1,
+   "evidence": "养老金持股 5.014% 刚过线，四个月买入只占持仓 18%，公司同时在回购"
+  },
+  {
+   "id": "03164686",
+   "src": "live",
+   "holder": "AustralianSuper",
+   "code": "A4N",
+   "date": "2026-11-11",
+   "type": "change",
+   "how": "placement",
+   "why": [
+    "plc",
+    "dip"
+   ],
+   "sure": 3,
+   "evidence": "明细里 1708 万股是认购配售；股价一年 -49%"
+  },
+  {
+   "id": "03164706",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "TTT",
+   "date": "2026-11-11",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "plc",
+    "short"
+   ],
+   "sure": 2,
+   "evidence": "以 0.13 整价买入 3462 万股（配售价），随后在市场上卖出更多"
+  },
+  {
+   "id": "03164758",
+   "src": "live",
+   "holder": "Mercer",
+   "code": "AHE",
+   "date": "2026-11-11",
+   "type": "ceasing",
+   "how": "unknown",
+   "why": [
+    "stop",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "平台型退出，股价一年 -52% 在最低点，无明细"
+  },
+  {
+   "id": "03165059",
+   "src": "live",
+   "holder": "Perennial",
+   "code": "PC2",
+   "date": "2026-11-12",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line"
+   ],
+   "sure": 3,
+   "evidence": "10 天前刚越过 5.06%，只卖 65 万股就跌破"
+  },
+  {
+   "id": "Australian Retirement Trust|ANN|03050482",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "ANN",
+   "date": "2026-01-16",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "越过 5% 时近四个月买入只占持仓一成，股价横盘"
+  },
+  {
+   "id": "Australian Retirement Trust|BAP|03077831",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "BAP",
+   "date": "2026-03-31",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "stop"
+   ],
+   "sure": 1,
+   "evidence": "股价三个月 -58% 时买卖都做，净卖出很少"
+  },
+  {
+   "id": "Australian Retirement Trust|BAP|03142218",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "BAP",
+   "date": "2026-09-22",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "bounce",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "一个月反弹 77% 后一天卖 883 万股，连续第二次减"
+  },
+  {
+   "id": "Australian Retirement Trust|BAP|mk-2924-03154537-3A705220",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "BAP",
+   "date": "2026-10-28",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "wind",
+    "bounce"
+   ],
+   "sure": 2,
+   "evidence": "连续第三次减，退出时已比高点少一半以上，股价刚反弹一倍"
+  },
+  {
+   "id": "Australian Retirement Trust|EOS|03153442",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "EOS",
+   "date": "2026-10-16",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "越过 5% 时近四个月买入占持仓 37%，股价横盘"
+  },
+  {
+   "id": "Australian Retirement Trust|EOS|mk-2924-03159056-2A1709174",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "EOS",
+   "date": "2026-11-06",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line",
+    "stop"
+   ],
+   "sure": 3,
+   "evidence": "三周前刚到 5.047%，只卖 30 万股就跌破"
+  },
+  {
+   "id": "Australian Retirement Trust|FPR|02922333",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "FPR",
+   "date": "2025-03-04",
+   "type": "change",
+   "how": "none",
+   "why": [
+    "passive"
+   ],
+   "sure": 2,
+   "evidence": "持股数减少但比例上升：公司回购或股本缩减"
+  },
+  {
+   "id": "Australian Retirement Trust|NWH|mk-2924-03159048-6A1353962",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "NWH",
+   "date": "2026-11-06",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "越过 5% 时近四个月只买了持仓的 3%"
+  },
+  {
+   "id": "Australian Retirement Trust|ZIP|03153440",
+   "src": "history",
+   "holder": "Australian Retirement Trust",
+   "code": "ZIP",
+   "date": "2026-10-16",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "越过 5% 时近四个月买入占持仓 18%"
+  },
+  {
+   "id": "AustralianSuper|CAR|03102786",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "CAR",
+   "date": "2026-06-10",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "两个月内第四次加仓，股价半年 -19%"
+  },
+  {
+   "id": "AustralianSuper|CPU|02803894",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "CPU",
+   "date": "2024-05-03",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "base",
+    "mom"
+   ],
+   "sure": 1,
+   "evidence": "两年里买卖都很多，净买入；股价一年 +21%"
+  },
+  {
+   "id": "AustralianSuper|PLS|02782970",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PLS",
+   "date": "2024-03-07",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "mom"
+   ],
+   "sure": 2,
+   "evidence": "四个月内第三次加仓，股价一个月 +23%"
+  },
+  {
+   "id": "AustralianSuper|PLS|02821152",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PLS",
+   "date": "2024-06-24",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "连续加仓，这次股价一个月 -20%、在低位"
+  },
+  {
+   "id": "AustralianSuper|PLS|02863993",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PLS",
+   "date": "2024-10-04",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "连续第五次加仓，股价横盘"
+  },
+  {
+   "id": "AustralianSuper|PLS|02990151",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PLS",
+   "date": "2025-09-02",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "mom"
+   ],
+   "sure": 2,
+   "evidence": "四天买 3939 万股，股价三个月 +98%，连续加仓"
+  },
+  {
+   "id": "AustralianSuper|PLS|03089529",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PLS",
+   "date": "2026-05-01",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "profit",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "股价一年 +288% 在高位，卖价 5.53 是成本 2.58 的两倍多，连续减"
+  },
+  {
+   "id": "AustralianSuper|PLS|03105974",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PLS",
+   "date": "2026-06-19",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "profit",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "同上，继续高位减，卖在上涨日"
+  },
+  {
+   "id": "AustralianSuper|PWH|02936298",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "PWH",
+   "date": "2025-04-09",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "股价一年 -40% 在最低位，多买在下跌日，买价远低于成本 9.93"
+  },
+  {
+   "id": "AustralianSuper|QAN|03083424",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "QAN",
+   "date": "2026-04-16",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "dip",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "四个月从零建仓，八成买在下跌日，股价三个月 -12%"
+  },
+  {
+   "id": "AustralianSuper|QAN|03124969",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "QAN",
+   "date": "2026-08-13",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "建仓后第三次加仓，近九成买在下跌日"
+  },
+  {
+   "id": "AustralianSuper|RWC|03128377",
+   "src": "history",
+   "holder": "AustralianSuper",
+   "code": "RWC",
+   "date": "2026-08-21",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "base",
+    "mom"
+   ],
+   "sure": 1,
+   "evidence": "两年窗口买卖都有，净买；股价在一年高位"
+  },
+  {
+   "id": "Aware Super|BAP|03013085",
+   "src": "history",
+   "holder": "Aware Super",
+   "code": "BAP",
+   "date": "2025-10-21",
+   "type": "becoming",
+   "how": "unknown",
+   "why": [
+    "dip",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "刚越过 5%，股价三个月 -38% 在低位，无明细"
+  },
+  {
+   "id": "Aware Super|BAP|03015807",
+   "src": "history",
+   "holder": "Aware Super",
+   "code": "BAP",
+   "date": "2025-10-27",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "股价三个月 -50% 后两天买 395 万股"
+  },
+  {
+   "id": "Aware Super|BAP|03142943",
+   "src": "history",
+   "holder": "Aware Super",
+   "code": "BAP",
+   "date": "2026-09-23",
+   "type": "ceasing",
+   "how": "block",
+   "why": [
+    "stop",
+    "bounce"
+   ],
+   "sure": 2,
+   "evidence": "卖价 0.74 远低于成本 2.64，反弹后一次性卖出退出"
+  },
+  {
+   "id": "Cbus|ACL|mk-2924-03150592-3A704512",
+   "src": "history",
+   "holder": "Cbus",
+   "code": "ACL",
+   "date": "2026-10-20",
+   "type": "becoming",
+   "how": "lending",
+   "why": [
+    "lending"
+   ],
+   "sure": 3,
+   "evidence": "明细主要是证券借贷 65 万股"
+  },
+  {
+   "id": "Cbus|ACL|mk-2924-03151182-3A704616",
+   "src": "history",
+   "holder": "Cbus",
+   "code": "ACL",
+   "date": "2026-10-21",
+   "type": "ceasing",
+   "how": "lending",
+   "why": [
+    "lending"
+   ],
+   "sure": 3,
+   "evidence": "退回借出的 65 万股"
+  },
+  {
+   "id": "Colonial First State (CFS)|ACL|02938040",
+   "src": "history",
+   "holder": "Colonial First State (CFS)",
+   "code": "ACL",
+   "date": "2025-04-14",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "平台型加了 1 个点，无明细，股价跟大盘差不多"
+  },
+  {
+   "id": "Colonial First State (CFS)|ACL|mk-2924-03154404-3A705195",
+   "src": "history",
+   "holder": "Colonial First State (CFS)",
+   "code": "ACL",
+   "date": "2026-10-28",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rebal",
+    "profit"
+   ],
+   "sure": 1,
+   "evidence": "平台型，股价半年 +53% 在高位，买卖都做，净减了一成多"
+  },
+  {
+   "id": "Colonial First State (CFS)|CAR|03149777",
+   "src": "history",
+   "holder": "Colonial First State (CFS)",
+   "code": "CAR",
+   "date": "2026-10-07",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "越过 5% 时近四个月只买了持仓的 4%"
+  },
+  {
+   "id": "Colonial First State (CFS)|KAR|03163615",
+   "src": "history",
+   "holder": "Colonial First State (CFS)",
+   "code": "KAR",
+   "date": "2026-11-09",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "line"
+   ],
+   "sure": 3,
+   "evidence": "5.00% → 跌破 → 又回到 5.00%"
+  },
+  {
+   "id": "Ellerston Capital|DXN|mk-2924-03158629-3A705909",
+   "src": "history",
+   "holder": "Ellerston Capital",
+   "code": "DXN",
+   "date": "2026-11-05",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "一个月暴跌 75% 后一天买 400 万股，买价远低于成本 0.27"
+  },
+  {
+   "id": "Ellerston Capital|MYG|mk-2924-03153866-2A1706442",
+   "src": "history",
+   "holder": "Ellerston Capital",
+   "code": "MYG",
+   "date": "2026-10-27",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "base",
+    "mom"
+   ],
+   "sure": 1,
+   "evidence": "半年里先买后卖，净买入；股价一年 +299%"
+  },
+  {
+   "id": "Hostplus|ANN|mk-2924-03151616-3A704679",
+   "src": "history",
+   "holder": "Hostplus",
+   "code": "ANN",
+   "date": "2026-10-22",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line",
+    "profit"
+   ],
+   "sure": 3,
+   "evidence": "前一天刚减到 5.01%，再卖 5 万股就跌破；股价在一年高位、远高于成本"
+  },
+  {
+   "id": "Hostplus|BAP|03160080",
+   "src": "history",
+   "holder": "Hostplus",
+   "code": "BAP",
+   "date": "2026-10-30",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "bounce",
+    "profit"
+   ],
+   "sure": 2,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "Hostplus|BAP|03162074",
+   "src": "history",
+   "holder": "Hostplus",
+   "code": "BAP",
+   "date": "2026-11-04",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "bounce",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "L1 Capital|BM1|mk-2924-03150693-6A1350227",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "BM1",
+   "date": "2026-10-20",
+   "type": "becoming",
+   "how": "placement",
+   "why": [
+    "plc"
+   ],
+   "sure": 3,
+   "evidence": "1212 万股是配售"
+  },
+  {
+   "id": "L1 Capital|BMC|03111062",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "BMC",
+   "date": "2026-07-02",
+   "type": "becoming",
+   "how": "block",
+   "why": [
+    "plc",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "上市不到一年，六笔大额买入，可能是上市认购"
+  },
+  {
+   "id": "L1 Capital|BMC|03129165",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "BMC",
+   "date": "2026-08-24",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "plc"
+   ],
+   "sure": 2,
+   "evidence": "以 1.00 元买入，市价 2.63：是按发行/行权价拿的新股"
+  },
+  {
+   "id": "L1 Capital|BMC|03144198",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "BMC",
+   "date": "2026-09-25",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "plc"
+   ],
+   "sure": 2,
+   "evidence": "同上，又以 1.00 元拿了 275 万股"
+  },
+  {
+   "id": "L1 Capital|GLS|03153537",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "GLS",
+   "date": "2026-10-16",
+   "type": "change",
+   "how": "placement",
+   "why": [
+    "own",
+    "plc"
+   ],
+   "sure": 3,
+   "evidence": "自家产品，认购配股 4294 万股"
+  },
+  {
+   "id": "L1 Capital|GLS|03161248",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "GLS",
+   "date": "2026-11-02",
+   "type": "change",
+   "how": "none",
+   "why": [
+    "passive",
+    "own"
+   ],
+   "sure": 3,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "L1 Capital|LIN|03136728",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "LIN",
+   "date": "2026-09-07",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "一年 +165% 后三个月回落 23% 时加仓"
+  },
+  {
+   "id": "L1 Capital|LIN|03160606",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "LIN",
+   "date": "2026-10-30",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "dip",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "L1 Capital|PPC|02918082",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "PPC",
+   "date": "2025-02-24",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "transfer",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "一天以 1.00 元卖 654 万股，市价 1.50：不像市场成交"
+  },
+  {
+   "id": "L1 Capital|WGX|02798077",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "WGX",
+   "date": "2024-04-19",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "mom"
+   ],
+   "sure": 2,
+   "evidence": "一周内第二次加仓，股价一年 +48%"
+  },
+  {
+   "id": "L1 Capital|WGX|02983587",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "WGX",
+   "date": "2025-08-21",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "base",
+    "mom"
+   ],
+   "sure": 1,
+   "evidence": "半年里买卖都很多，净买入，股价在高位"
+  },
+  {
+   "id": "L1 Capital|WGX|03099811",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "WGX",
+   "date": "2026-06-01",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "一年 +62% 后三个月回落 36% 时重新加仓"
+  },
+  {
+   "id": "L1 Capital|WGX|03114474",
+   "src": "history",
+   "holder": "L1 Capital",
+   "code": "WGX",
+   "date": "2026-07-13",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "连续第二次回调加仓，多买在下跌日"
+  },
+  {
+   "id": "Mercer|PPE|03121923",
+   "src": "history",
+   "holder": "Mercer",
+   "code": "PPE",
+   "date": "2026-08-04",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "越过 5% 时近四个月买入占持仓两成"
+  },
+  {
+   "id": "Mercer|PPE|03145385",
+   "src": "history",
+   "holder": "Mercer",
+   "code": "PPE",
+   "date": "2026-09-29",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "base",
+    "dip"
+   ],
+   "sure": 1,
+   "evidence": "平台型加仓，明细读不出，股价一个月 -17%"
+  },
+  {
+   "id": "Perennial|FLX|mk-2924-03151062-2A1705294",
+   "src": "history",
+   "holder": "Perennial",
+   "code": "FLX",
+   "date": "2026-10-21",
+   "type": "becoming",
+   "how": "block",
+   "why": [
+    "dip",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "股价一年 -85% 在最低点时大块买入"
+  },
+  {
+   "id": "Perennial|PC2|03165059",
+   "src": "history",
+   "holder": "Perennial",
+   "code": "PC2",
+   "date": "2026-11-12",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line"
+   ],
+   "sure": 3,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "Regal Funds Management|AI1|03104711",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "AI1",
+   "date": "2026-06-16",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "short"
+   ],
+   "sure": 1,
+   "evidence": "一个月里高买低卖都做，持股数几乎不变"
+  },
+  {
+   "id": "Regal Funds Management|ELS|03019554",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "ELS",
+   "date": "2025-10-31",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull",
+    "short"
+   ],
+   "sure": 2,
+   "evidence": "半年 +221% 后回落 19% 时买回，此前刚减过一大截"
+  },
+  {
+   "id": "Regal Funds Management|EOL|02995946",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "EOL",
+   "date": "2025-09-16",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "mom"
+   ],
+   "sure": 2,
+   "evidence": "股价一年 +230%、在一年最高点时三周内从零建仓"
+  },
+  {
+   "id": "Regal Funds Management|EOL|03000326",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "EOL",
+   "date": "2025-09-25",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "mom",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "建仓后一周继续在高位追加"
+  },
+  {
+   "id": "Regal Funds Management|EQT|02964685",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "EQT",
+   "date": "2025-07-01",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "base",
+    "prog"
+   ],
+   "sure": 1,
+   "evidence": "刚越过 5% 两周后再加一块"
+  },
+  {
+   "id": "Regal Funds Management|EQT|mk-2924-03150085-3A704429",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "EQT",
+   "date": "2026-10-19",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "deal",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "TPG 收购提议后连续减到 5% 以下，卖价和成本差不多"
+  },
+  {
+   "id": "Regal Funds Management|FCL|mk-2924-03158603-2A1708842",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "FCL",
+   "date": "2026-11-05",
+   "type": "ceasing",
+   "how": "mixed",
+   "why": [
+    "line",
+    "rotate"
+   ],
+   "sure": 2,
+   "evidence": "一年里买卖几乎相等，从 5.17% 小幅跌破"
+  },
+  {
+   "id": "Regal Funds Management|GTI|02818230",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "GTI",
+   "date": "2024-06-14",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate"
+   ],
+   "sure": 1,
+   "evidence": "两个月里买卖都做，净卖出一些"
+  },
+  {
+   "id": "Regal Funds Management|GTI|02854656",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "GTI",
+   "date": "2024-09-17",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "plc",
+    "dip"
+   ],
+   "sure": 1,
+   "evidence": "以 0.004 的价格一大块买入 1.6 亿股，持股翻倍：像认购新股"
+  },
+  {
+   "id": "Regal Funds Management|GTI|03117291",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "GTI",
+   "date": "2026-07-22",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "restructure",
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "持股数从 7.8 亿变 1.3 亿而比例上升：股份合并"
+  },
+  {
+   "id": "Regal Funds Management|GTI|mk-2924-03153184-2A1706169",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "GTI",
+   "date": "2026-10-26",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "卖价 0.02 远低于成本 0.064，股价一年 -73%"
+  },
+  {
+   "id": "Regal Funds Management|NOL|02923430",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "NOL",
+   "date": "2025-03-06",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "小幅净买入，价格平稳"
+  },
+  {
+   "id": "Regal Funds Management|NOL|02957840",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "NOL",
+   "date": "2025-06-12",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "profit",
+    "short"
+   ],
+   "sure": 2,
+   "evidence": "卖掉一半，卖价 1.68 高于成本 1.35"
+  },
+  {
+   "id": "Regal Funds Management|NOL|02960164",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "NOL",
+   "date": "2025-06-19",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "short",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "一周前在 1.68 卖掉一半，现在 1.50 一块买回 400 万股"
+  },
+  {
+   "id": "Regal Funds Management|NOL|02972887",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "NOL",
+   "date": "2025-07-25",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "short"
+   ],
+   "sure": 2,
+   "evidence": "继续以 1.40 买回，回到卖出前的水平"
+  },
+  {
+   "id": "Regal Funds Management|NOL|03009028",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "NOL",
+   "date": "2025-10-13",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "profit",
+    "short"
+   ],
+   "sure": 1,
+   "evidence": "又在 1.55 卖出 200 万股，高于成本"
+  },
+  {
+   "id": "Regal Funds Management|PNR|02824499",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "PNR",
+   "date": "2024-07-02",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "mom"
+   ],
+   "sure": 1,
+   "evidence": "股价三个月 +52% 在一年最高点时大量买入（价格单位疑似未复权）"
+  },
+  {
+   "id": "Regal Funds Management|PNR|02883196",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "PNR",
+   "date": "2024-11-18",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull"
+   ],
+   "sure": 1,
+   "evidence": "一年 +111% 后一个月回落 24% 时加仓"
+  },
+  {
+   "id": "Regal Funds Management|PNR|02935840",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "PNR",
+   "date": "2025-04-08",
+   "type": "change",
+   "how": "none",
+   "why": [
+    "restructure"
+   ],
+   "sure": 3,
+   "evidence": "持股数从 8.6 亿变 5600 万而比例上升：股份合并"
+  },
+  {
+   "id": "Regal Funds Management|RG1|mk-2924-03155412-2A1707076",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "RG1",
+   "date": "2026-10-29",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "own"
+   ],
+   "sure": 3,
+   "evidence": "Regal 自家上市产品"
+  },
+  {
+   "id": "Regal Funds Management|RIV|03012517",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "RIV",
+   "date": "2025-10-20",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "半年里买卖都做，净卖出 215 万股"
+  },
+  {
+   "id": "Regal Funds Management|RIV|03161619",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "RIV",
+   "date": "2026-11-03",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "Regal Funds Management|RTH|02795622",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "RTH",
+   "date": "2024-04-12",
+   "type": "becoming",
+   "how": "block",
+   "why": [
+    "take",
+    "plc"
+   ],
+   "sure": 1,
+   "evidence": "一天一笔买入全部 289 万股（6.35%），像从别人手里整块接或配售"
+  },
+  {
+   "id": "Regal Funds Management|RTH|03164259",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "RTH",
+   "date": "2026-11-10",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "deal",
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "Regal Funds Management|SPG|03103739",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "SPG",
+   "date": "2026-06-12",
+   "type": "becoming",
+   "how": "block",
+   "why": [
+    "plc",
+    "take"
+   ],
+   "sure": 2,
+   "evidence": "股价一个月 -67% 后，以 0.10 整价一笔拿下全部 14.35%：像认购重组配售"
+  },
+  {
+   "id": "Regal Funds Management|SPG|03129138",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "SPG",
+   "date": "2026-08-24",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "卖价 0.083 低于成本 0.10，股价还在跌"
+  },
+  {
+   "id": "Regal Funds Management|SPG|mk-2924-03158606-3A705908",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "SPG",
+   "date": "2026-11-05",
+   "type": "ceasing",
+   "how": "block",
+   "why": [
+    "stop",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "一天卖掉剩下的 1 亿股，卖价 0.066 比成本低三成多"
+  },
+  {
+   "id": "Regal Funds Management|TOR|mk-2924-03150086-6A1349947",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "TOR",
+   "date": "2026-10-19",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "股价半年 -68% 在最低点，85% 买在下跌日"
+  },
+  {
+   "id": "Regal Funds Management|TTT|02976701",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "TTT",
+   "date": "2025-08-04",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate"
+   ],
+   "sure": 2,
+   "evidence": "半年里买 7500 万、卖 7100 万，来回交易"
+  },
+  {
+   "id": "Regal Funds Management|VVA|03165248",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "VVA",
+   "date": "2026-11-12",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "rotate",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "一年里买卖都做，净卖出一些"
+  },
+  {
+   "id": "Regal Funds Management|YRL|02892334",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "YRL",
+   "date": "2024-12-05",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "一年 +167% 后一个月回落 23% 时加仓"
+  },
+  {
+   "id": "Regal Funds Management|YRL|03148514",
+   "src": "history",
+   "holder": "Regal Funds Management",
+   "code": "YRL",
+   "date": "2026-10-05",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "卖价 0.145 低于成本 0.18，股价一年 -65%"
+  },
+  {
+   "id": "UniSuper|TLC|03160460",
+   "src": "history",
+   "holder": "UniSuper",
+   "code": "TLC",
+   "date": "2026-10-30",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "Washington H. Soul Pattinson|EQT|02762393",
+   "src": "history",
+   "holder": "Washington H. Soul Pattinson",
+   "code": "EQT",
+   "date": "2024-01-11",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "战略型股东增持，明细跨度长、和持股数对不上"
+  },
+  {
+   "id": "Washington H. Soul Pattinson|EQT|02840045",
+   "src": "history",
+   "holder": "Washington H. Soul Pattinson",
+   "code": "EQT",
+   "date": "2024-08-15",
+   "type": "change",
+   "how": "block",
+   "why": [
+    "profit",
+    "hand"
+   ],
+   "sure": 2,
+   "evidence": "一天以 34 元卖 204 万股，成本 24 元，股价在高位"
+  },
+  {
+   "id": "Washington H. Soul Pattinson|EQT|02958912",
+   "src": "history",
+   "holder": "Washington H. Soul Pattinson",
+   "code": "EQT",
+   "date": "2025-06-16",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "wind",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "继续减，已比高点少四成，无明细"
+  },
+  {
+   "id": "Wilson Asset Management|DXN|03109084",
+   "src": "history",
+   "holder": "Wilson Asset Management",
+   "code": "DXN",
+   "date": "2026-06-29",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "mom",
+    "plc"
+   ],
+   "sure": 1,
+   "evidence": "股价一个月涨了九倍多时从零建仓"
+  },
+  {
+   "id": "Wilson Asset Management|DXN|03161640",
+   "src": "history",
+   "holder": "Wilson Asset Management",
+   "code": "DXN",
+   "date": "2026-11-03",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "股价一个月 -75% 后卖光，卖价 0.178 低于成本 0.203"
+  },
+  {
+   "id": "Wilson Asset Management|EOL|02979147",
+   "src": "history",
+   "holder": "Wilson Asset Management",
+   "code": "EOL",
+   "date": "2025-08-11",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "pull",
+    "mom"
+   ],
+   "sure": 1,
+   "evidence": "一年 +195% 的强势股，多在下跌日少量加"
+  },
+  {
+   "id": "Wilson Asset Management|EOL|03010497",
+   "src": "history",
+   "holder": "Wilson Asset Management",
+   "code": "EOL",
+   "date": "2025-10-15",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "profit",
+    "rebal"
+   ],
+   "sure": 2,
+   "evidence": "股价在一年最高点，卖价 18.3 远高于成本 11.3，只减了一成"
+  },
+  {
+   "id": "Wilson Asset Management|EOL|03105542",
+   "src": "history",
+   "holder": "Wilson Asset Management",
+   "code": "EOL",
+   "date": "2026-06-18",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "dip"
+   ],
+   "sure": 2,
+   "evidence": "股价半年 -30% 在一年低位时加仓"
+  },
+  {
+   "id": "Wilson Asset Management|EOL|03161266",
+   "src": "history",
+   "holder": "Wilson Asset Management",
+   "code": "EOL",
+   "date": "2026-11-02",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "passive",
+    "deal"
+   ],
+   "sure": 2,
+   "evidence": "同近期那条"
+  },
+  {
+   "id": "mk-2924-03150085-3A704429",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "EQT",
+   "date": "2026-10-19",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "deal",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "TPG、BGH 先后提出收购后减到 5% 以下"
+  },
+  {
+   "id": "mk-2924-03150592-3A704512",
+   "src": "live",
+   "holder": "Cbus",
+   "code": "ACL",
+   "date": "2026-10-20",
+   "type": "becoming",
+   "how": "lending",
+   "why": [
+    "lending"
+   ],
+   "sure": 3,
+   "evidence": "明细主要是证券借贷"
+  },
+  {
+   "id": "mk-2924-03150693-6A1350227",
+   "src": "live",
+   "holder": "L1 Capital",
+   "code": "BM1",
+   "date": "2026-10-20",
+   "type": "becoming",
+   "how": "placement",
+   "why": [
+    "plc"
+   ],
+   "sure": 3,
+   "evidence": "1212 万股是配售，公司同期公告了配售"
+  },
+  {
+   "id": "mk-2924-03151115-3A704604",
+   "src": "live",
+   "holder": "Colonial First State (CFS)",
+   "code": "CAR",
+   "date": "2026-10-21",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line"
+   ],
+   "sure": 3,
+   "evidence": "两周前刚到 5.01%，净卖 4.5 万股就跌破"
+  },
+  {
+   "id": "mk-2924-03151182-3A704616",
+   "src": "live",
+   "holder": "Cbus",
+   "code": "ACL",
+   "date": "2026-10-21",
+   "type": "ceasing",
+   "how": "lending",
+   "why": [
+    "lending"
+   ],
+   "sure": 3,
+   "evidence": "退回借出的股份"
+  },
+  {
+   "id": "mk-2924-03153150-2A1706134",
+   "src": "live",
+   "holder": "UniSuper",
+   "code": "HUB",
+   "date": "2026-10-26",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "dip",
+    "prog"
+   ],
+   "sure": 2,
+   "evidence": "股价一年 -44%、在低位，四个月建起六成持仓，多买在下跌日"
+  },
+  {
+   "id": "mk-2924-03153184-2A1706169",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "GTI",
+   "date": "2026-10-26",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "stop"
+   ],
+   "sure": 2,
+   "evidence": "卖价 0.02 远低于成本 0.064"
+  },
+  {
+   "id": "mk-2924-03153906-2A1706467",
+   "src": "live",
+   "holder": "Ellerston Capital",
+   "code": "MYG",
+   "date": "2026-10-27",
+   "type": "change",
+   "how": "mixed",
+   "why": [
+    "dip",
+    "base"
+   ],
+   "sure": 1,
+   "evidence": "股价三个月 -33% 在最低点，净买入（历史里同一天另一份记录的股价对不上，存疑）"
+  },
+  {
+   "id": "mk-2924-03154537-3A705220",
+   "src": "live",
+   "holder": "Australian Retirement Trust",
+   "code": "BAP",
+   "date": "2026-10-28",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "wind",
+    "bounce"
+   ],
+   "sure": 2,
+   "evidence": "同历史那条"
+  },
+  {
+   "id": "mk-2924-03155391-6A1352448",
+   "src": "live",
+   "holder": "Perennial",
+   "code": "LUX",
+   "date": "2026-10-29",
+   "type": "becoming",
+   "how": "placement",
+   "why": [
+    "plc"
+   ],
+   "sure": 3,
+   "evidence": "招股书发出两天后一笔拿到 714 万股：上市认购"
+  },
+  {
+   "id": "mk-2924-03155404-6A1352453",
+   "src": "live",
+   "holder": "Perennial",
+   "code": "LUX",
+   "date": "2026-10-29",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "上市后接着在市场上加"
+  },
+  {
+   "id": "mk-2924-03155406-6A1352454",
+   "src": "live",
+   "holder": "Perennial",
+   "code": "LUX",
+   "date": "2026-10-29",
+   "type": "change",
+   "how": "gradual",
+   "why": [
+    "prog",
+    "mom"
+   ],
+   "sure": 2,
+   "evidence": "上市后连续第二次加，股价一个月 +17%"
+  },
+  {
+   "id": "mk-2924-03155407-2A1707074",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "RG8",
+   "date": "2026-10-29",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "own"
+   ],
+   "sure": 3,
+   "evidence": "Regal 自家上市产品，公司同时在回购"
+  },
+  {
+   "id": "mk-2924-03155412-2A1707076",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "RG1",
+   "date": "2026-10-29",
+   "type": "change",
+   "how": "unknown",
+   "why": [
+    "own"
+   ],
+   "sure": 3,
+   "evidence": "Regal 自家上市产品"
+  },
+  {
+   "id": "mk-2924-03158606-3A705908",
+   "src": "live",
+   "holder": "Regal Funds Management",
+   "code": "SPG",
+   "date": "2026-11-05",
+   "type": "ceasing",
+   "how": "block",
+   "why": [
+    "stop",
+    "wind"
+   ],
+   "sure": 2,
+   "evidence": "同历史那条"
+  },
+  {
+   "id": "mk-2924-03159048-6A1353962",
+   "src": "live",
+   "holder": "Australian Retirement Trust",
+   "code": "NWH",
+   "date": "2026-11-06",
+   "type": "becoming",
+   "how": "gradual",
+   "why": [
+    "base"
+   ],
+   "sure": 2,
+   "evidence": "同历史那条"
+  },
+  {
+   "id": "mk-2924-03159056-2A1709174",
+   "src": "live",
+   "holder": "Australian Retirement Trust",
+   "code": "EOS",
+   "date": "2026-11-06",
+   "type": "ceasing",
+   "how": "gradual",
+   "why": [
+    "line",
+    "stop"
+   ],
+   "sure": 3,
+   "evidence": "同历史那条"
+  }
+ ]
+}

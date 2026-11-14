@@ -2829,3 +2829,85 @@ def test_weekend_listing_page_is_recognised():
     rows, recognised = scrape.parse_listing(html, dt.date(2026, 11, 14))
     assert rows == [] and recognised                    # 周末没有公告不是“ASX 改版了”
     assert scrape.parse_listing("<html><body>Something else entirely</body></html>", dt.date(2026, 11, 14)) == ([], False)
+
+
+# ---------------------------------------------------------------- 第十六轮：标准答案、可检验的预言、超额收益
+
+def test_benchmark_small_caps_use_small_ords():
+    assert scrape.benchmark_of({"adv": 100_000, "p": 1.5}) == "XSO"          # 每天成交 15 万澳元：小盘
+    assert scrape.benchmark_of({"adv": 3_000_000, "p": 20}) == "XJO"
+    for bad in ({}, {"adv": None, "p": 1}, {"adv": "x", "p": 1}, {"adv": 0, "p": 1}, None, "x"):
+        assert scrape.benchmark_of(bad or {}) == "XJO" if not isinstance(bad, str) else scrape.benchmark_of(bad) == "XJO"
+
+
+def test_forward_excess_against_index(monkeypatch):
+    day = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
+    idx = [[day(dt.date(2025, 1, 1) + dt.timedelta(days=i)), 0, 0, 0, 1000 * (1 + 0.001 * i), 1] for i in range(500)]
+    fetched = []
+
+    def fake_series(code):
+        fetched.append(code)
+        if code == "XSO":
+            raise scrape.FetchError("down")
+        return idx
+    monkeypatch.setattr(scrape, "price_series", fake_series)
+    monkeypatch.setattr(scrape, "_INDEX", {})
+    big = {"id": "1", "date": "2025-03-01", "px": {"adv": 5_000_000, "p": 10}, "fwd": {"1m": 0.10, "3m": 0.20}}
+    small = {"id": "2", "date": "2025-03-01", "px": {"adv": 1000, "p": 1}, "fwd": {"3m": 0.05}}
+    junk = {"id": "3", "date": "", "px": {}, "fwd": {"3m": "x"}}
+    h = {"pos": {"A|XYZ": [big, small, junk]}}
+    assert scrape.add_forward_excess(h) == 1
+    ifwd = insight.forward_returns(scrape.index_series("XJO"), "2025-03-01")
+    assert big["bm"] == "XJO" and big["fwd_x"]["3m"] == round(0.20 - ifwd["3m"], 3) and big["fwd_x"]["3m"] < 0.20
+    assert "fwd_x" not in small and "fwd_x" not in junk                     # 小盘指数取不到：不乱用别的指数
+    assert fetched.count("XJO") == 1                                        # 同一个指数一次运行只取一次
+    assert scrape.add_forward_excess(h) == 0 or "fwd_x" in big               # 已经补过的不重复补
+
+
+def test_outcome_checks_only_look_forward():
+    today = dt.date(2026, 11, 14)
+    r = {"date": "2026-01-10", "fwd_x": {"3m": -0.04}}
+    later = [{"date": "2026-02-20", "type": "change", "vp": [7, 6], "votes": [7_000_000, 6_000_000]}]
+    c = scrape.outcome_checks(r, "buy", later, today)
+    assert c == {"next_same": False, "rev90": True, "beat3": False}
+    c = scrape.outcome_checks(r, "sell", [{"date": "2026-03-01", "type": "change", "vp": [6, 5.5], "votes": [6_000_000, 5_500_000]}], today)
+    assert c["next_same"] and c["no_big_cut"] and c["rev90"] is False and c["nobuy180"] is True
+    c = scrape.outcome_checks(r, "sell", [{"date": "2026-03-01", "type": "ceasing", "vp": [5, 0], "votes": []}], today)
+    assert c["no_big_cut"] is False
+    # 刚发生不久、之后什么都没有：90 天、半年都还看不出来，不下结论
+    assert scrape.outcome_checks({"date": "2026-11-01"}, "sell", [], today) == {}
+    assert scrape.outcome_checks({"date": "bad"}, "buy", later, today) == {}
+
+
+def test_calibrate_reports_excess_and_checks():
+    holders, _ = scrape.load_watchlist()
+    name = holders[0].name
+    px = _px()
+    rows = [{"id": str(i), "date": f"2025-{m:02d}-10", "time": "", "type": "change", "cd": f"2025-{m:02d}-08", "vp": [6.0 + i, 7.0 + i],
+             "votes": [(6 + i) * 1_000_000, (7 + i) * 1_000_000], "px": px, "fwd": {"3m": 0.05}, "fwd_x": {"3m": 0.02 if i % 2 else -0.01}}
+            for i, m in enumerate(range(1, 11))]
+    cal = scrape.calibrate({"pos": {scrape.pos_key(name, "XYZ"): rows}}, holders, dt.date(2026, 11, 14))
+    buys = [v for k, v in cal.items() if k.startswith("buy:")]
+    n = sum(v["n3x"] for v in buys)
+    assert n == 10 and abs(sum(v["avg3x"] * v["n3x"] for v in buys) / n - 0.005) < 0.001
+    assert round(sum(v["up3x"] * v["n3x"] for v in buys)) == 5
+    for k, v in cal.items():
+        if "check" in v:
+            assert scrape.CHECK_OF[k.split(":")[1]] and v["check_n"] >= 1 and 0 <= v["check"] <= 1 and v["check_base"] is not None and v["check_name"]
+    assert any("check" in v for v in buys)
+    # 坏数据不出错
+    rows[0]["fwd_x"] = "x"
+    rows[1]["date"] = None
+    scrape.calibrate({"pos": {scrape.pos_key(name, "XYZ"): rows}}, holders, dt.date(2026, 11, 14))
+
+
+def test_gold_file_is_well_formed():
+    g = json.loads((Path(__file__).parent / "fixtures" / "gold_purposes.json").read_text("utf-8"))
+    keys = set(insight.PURPOSE_NAMES) | {k for _, k in insight.PURPOSE_ACTION} | {"base", "passive", "lending", "transfer", "own", "restructure", "line", "rotate"}
+    ids = set()
+    for it in g["items"]:
+        assert it["src"] in ("history", "live") and 1 <= it["sure"] <= 3 and 1 <= len(it["why"]) <= 2
+        assert set(it["why"]) <= keys, it
+        assert it["id"] not in ids
+        ids.add(it["id"])
+    assert len(g["items"]) >= 100

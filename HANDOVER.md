@@ -319,6 +319,22 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 
 局限：只看得到持股 5% 以上一方的公告；对方公告晚到时，要等下一次抓取才会补上这句；对方名字读不准时显示“另一家机构（名字没读准）”。
 
+### 第十六轮：先有尺子，再改公式（标准答案 + 可检验的预言 + 和指数比）
+
+按 `ACCURACY_PLAN.md` 第 3 节做，**这一轮不改任何标签**（回放：历史 257 条、近期 84 条全部不变）。
+
+1. **标准答案** `tests/fixtures/gold_purposes.json`：131 条（历史 + 近期），每条写“怎么做的（how）”“为什么（why，最多两个可接受的目的）”“有多确定（sure 1–3）”和依据。
+   `python tools/replay.py out.json && python tools/replay.py --gold out.json` 打分，只算 sure ≥ 2 的。
+   **注意：这批答案是 AI 按公告和股价标的，标的人熟悉现在的规则，所以分数可能偏乐观；需要 Lok 抽查约 15 条。**
+   起点（第十五轮代码，78 条）：第一名严格 74.4%、宽松 83.3%、前两名 92.3%、给出明确目的 82.1%；按把握 高 22 条 81.8% / 中 50 条 84.0% / 低 6 条 83.3%（高和中分不开，第十七轮要解决）；Brier 0.249。
+   没命中的 13 条里大多是“普通加仓/减仓”但其实有明确目的：按 $1.00 这种整数价大笔买入（像配售）、603 建仓时股价在低位、连续几次同向。
+2. **可检验的预言**（`scrape.outcome_checks`，`CHECK_OF` / `CHECK_NAMES`）：每个目的判对了的话之后应该发生什么——
+   按计划建仓/分批减仓 → 下一份还是同方向；短线来回 → 90 天内反向；止损 → 半年内没有买回；再平衡 → 下一份不是大幅减仓（< 20%）；逢低/回调/顺势/普通 → 之后 3 个月跑赢指数。
+   `calibrate` 给每组加 `check`（做到的比例）、`check_n`、`check_name` 和 `check_base`（同方向全部公告的平均，用来对照：比平均高才说明判断有信息量）。还看不出来的（刚过去不到 90 天/半年）不算。
+3. **和指数比**（`add_forward_excess`）：历史记录的 `fwd`（公告后 1/3/6 个月涨跌）配上 `fwd_x`（减去同期指数）和 `bm`（用了哪个指数）。
+   小盘股（日均成交额 < 200 万澳元，`benchmark_of`）用小盘指数 XSO，其余用 ASX 200（XJO）；取不到小盘指数时**不补**（不拿别的指数凑）。指数日线每次运行每个指数只取一次（`index_series`）。
+   `calibrate` 多了 `n3x / avg3x / up3x`；网页“回头看”有 8 条以上时改说“比同期指数平均多涨/少涨 x%，y% 的次数跑赢指数”，并加一句预言检验（5 条以上时）。
+
 ## 6. 数据格式
 
 `data/notices.json`：
@@ -354,8 +370,9 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 218 passed，全部离线
+python -m pytest -q                             # 223 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
+python tools/replay.py --gold /tmp/new.json     # 和标准答案对比打分（第十六轮起每轮都要报）
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
 ```
 

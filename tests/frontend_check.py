@@ -38,7 +38,9 @@ SAMPLE = {
                                         "Perennial", "Celeste Funds Management", "Ellerston Capital", "Thorney / Tiga Trading",
                                         "Washington H. Soul Pattinson", "Tattarang (Andrew Forrest)"]},
                "AustralianSuper": "养老金", "UniSuper": "养老金"},
-    "calibration": {"buy:dip": {"n": 20, "n3": 12, "avg3": 0.084, "up3": 0.667, "n_next": 10, "same_next": 0.7}},
+    "calibration": {"buy:dip": {"n": 20, "n3": 12, "avg3": 0.084, "up3": 0.667, "n_next": 10, "same_next": 0.7,
+                                "n3x": 12, "avg3x": -0.031, "up3x": 0.417, "check": 0.583, "check_n": 12,
+                                "check_name": "之后 3 个月跑赢指数<i>", "check_base": 0.5}},
     "notices": [
         {"id": "1", "code": "SLC", "company": "Superloop Limited", "date": day(0), "time": "16:10", "headline": "Becoming a substantial holder",
          "url": "https://www.asx.com.au/a", "pdf_url": "https://www.asx.com.au/a.pdf", "price_sensitive": False, "type": "becoming",
@@ -148,8 +150,10 @@ def main():
         check(pg.locator("#rows details.ins summary .chip").count() == 2 and "多家同向" in pg.inner_text("#rows details.ins summary")
               and pg.locator("#rows details.ins summary b").count() == 0, "解读的小标签显示出来，且不会被当成 HTML")
         pg.click("#rows details.ins summary")
-        check("过去 12 次被判为“逢低买入”的，公告后 3 个月股价平均 +8%，67% 的次数上涨；它自己下一步继续同方向的占 70%" in pg.inner_text("#rows details.ins .purposes"),
-              "有足够样本时显示回头看的统计")
+        pt = pg.inner_text("#rows details.ins .purposes")
+        check("过去 12 次被判为“逢低买入”的，公告后 3 个月比同期指数平均少涨 3%，42% 的次数跑赢指数；它自己下一步继续同方向的占 70%" in pt
+              and "之后应该“之后 3 个月跑赢指数<i>”，实际做到的占 58%（同方向的全部公告平均 50%）" in pt,
+              "有足够样本时显示回头看的统计（和指数比、预言检验）")
         check(pg.locator("#rows details.ins .prow").count() == 2 and "62%" in pg.inner_text("#rows details.ins .purposes")
               and "力度：强（71/100）" in pg.inner_text("#rows details.ins .purposes") and pg.locator("#rows details.ins .purposes i").count() == 0,
               "目的概率条和力度显示出来（低于 5% 的不显示，名字不会被当成 HTML）")

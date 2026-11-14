@@ -1050,7 +1050,7 @@ def update_history(history: dict, entries: dict, holders: list[Holder], today: d
         same = lambda r: (r.get("type"), r.get("cd"), r.get("vp")) == (rec["type"], rec["cd"], rec["vp"]) and rec["cd"] and rec["vp"]
         idx = next((i for i, r in enumerate(rows) if r.get("id") == rec["id"]), None)
         if idx is not None:
-            for k in ("fwd", "fwd_x", "bm"):
+            for k in ("fwd", "fwd_x", "bm", "px", "px_v"):
                 if rows[idx].get(k) and not rec.get(k):
                     rec[k] = rows[idx][k]
             rows[idx] = rec
@@ -1756,6 +1756,22 @@ def outcome_checks(r: dict, side: str, later: list[dict], today: dt.date) -> dic
     if isinstance(f3, (int, float)):
         out["beat3"] = f3 > 0
     return out
+
+
+def reconcile_stats(notices: list[dict], entries: dict) -> dict:
+    """数据质量：604 的逐笔明细加总和持股数变化对得上的有几条（两处独立读出来的数字一致，说明都读对了）。每次运行写进 last_run。"""
+    ok = bad = 0
+    for x in notices:
+        e = entries.get(str(x.get("id"))) or {}
+        v, tr = e.get("votes") or [], e.get("trades") or {}
+        if x.get("type") != "change" or len(v) != 2 or not tr.get("n") or not isinstance(tr.get("net_qty"), (int, float)):
+            continue
+        d = v[1] - v[0]
+        if abs(tr["net_qty"] - d) <= max(abs(d) * 0.05, 10):
+            ok += 1
+        else:
+            bad += 1
+    return {"ok": ok, "bad": bad}
 
 
 def calibrate(history: dict, holders: list[Holder], today: dt.date | None = None) -> dict:
@@ -2464,8 +2480,11 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
             e.pop("ev", None)
             tr = e.get("trades") or {}
             ref = price_ref(e.get("change_date"), tr, e.get("date", ""))
-            e["px"] = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
-            e["px_v"] = PX_VERSION
+            px = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
+            if not px and e.get("px"):         # 这次取到的日线不够用：保留上次的，下次再试（第十七轮：ACL 被清空过）
+                e["px_tries"] = e.get("px_tries", 0) + 1
+                continue
+            e["px"], e["px_v"] = px, PX_VERSION
             add_timeline(e, series)
         time.sleep(PAUSE)
         try:
@@ -2801,7 +2820,8 @@ def main() -> int:
             "insight": {"detail_added": enriched + sum(1 for e in work if e.get("detail_v") == INSIGHT_VERSION),
                         "prices_ok": px_ok, "prices_failed": px_failed,
                         "history_added": hist_added, "positions": len(history["pos"]),
-                        "backfill_read": bf.read, "backfill_added": bf.added, "history_refreshed": bf.refreshed, "backfill_pending": pending},
+                        "backfill_read": bf.read, "backfill_added": bf.added, "history_refreshed": bf.refreshed, "backfill_pending": pending,
+                        "reconcile": reconcile_stats(notices, entries)},
             "errors": errors[:10],
         },
         "watchlist": [h.name for h in holders],

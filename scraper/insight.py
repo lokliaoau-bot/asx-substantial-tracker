@@ -901,6 +901,8 @@ def judge(n: dict) -> dict | None:
         active_pp = dsh / so1 * 100               # 自己买卖带来的百分点变化
         chg_frac = dsh / votes[0]
     reconciled = bool(rows_ok and dsh is not None and abs(tr.get("net_qty", 0) - dsh) <= max(abs(dsh) * 0.05, 10))
+    # 第十七轮：604 的明细加总和持股数变化对不上——明细没读全。方向和幅度按持股数，来自明细的均价、时间线、交易形状都不用
+    mismatch = bool(t == "change" and rows_ok and dsh is not None and not reconciled)
     # 明细里的均价和当时的市场价差太远：多半是把总金额或别的数字当成了价格，不用
     bp, sp = tr.get("buy_price"), tr.get("sell_price")
     if px.get("t_lo") and px.get("t_hi"):
@@ -908,6 +910,8 @@ def judge(n: dict) -> dict | None:
         bp, sp = (bp if ok(bp) else None), (sp if ok(sp) else None)
     elif not px:
         pass                                       # 没有市场价可比，照用，但不拿来下“获利/止损”的结论
+    if mismatch:
+        bp = sp = None
 
     if t == "change" and dvp is not None:
         line = f"持股比例 {vp[0]:g}% → {vp[1]:g}%"
@@ -1010,9 +1014,10 @@ def judge(n: dict) -> dict | None:
             long603 = t == "becoming" and bool(tr.get("first")) and _days_between(tr.get("first"), n.get("change_date") or n.get("date") or "") > LONG_603
             what = ("这份 603 列出的明细（比规定的 4 个月更长）" if long603 else "成为大股东前 4 个月") if t == "becoming" else "这次披露的明细里"
             line = f"{what}（{span}，{tr['n']} 笔）：" + "，".join(parts) + "。"
-            if t == "change" and not reconciled:
-                line += "明细加总和持股数的变化对不上（可能没读全），方向和幅度以持股数为准。"
             reasons.append(line)
+            if mismatch:
+                reasons.insert(0, "注意：这份公告的逐笔明细加总和持股数的变化对不上（明细多半没读全）。下面的方向和幅度按持股数判断，"
+                                  "明细里的均价、买卖时间和交易形状不可信，没有用。")
         if reconciled or (t != "change" and tr["n"] >= 2):
             score += 1
     # 买卖量和同期全市场成交量比：看它急不急、是不是在场内做的
@@ -1057,8 +1062,10 @@ def judge(n: dict) -> dict | None:
         if abs(mk.get("m3", 0)) >= 0.06 or abs(mk.get("m12", 0)) >= 0.12:
             bits = [f"{lab} {fr(mk[k])}" for lab, k in (("3 个月", "m3"), ("12 个月", "m12")) if k in mk]
             reasons.append(("同期小盘股指数（Small Ordinaries）" if px.get("mb") == "XSO" else "同期大盘（ASX 200）") + "、".join(bits) + "：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。")
-    up = (r6 is not None and r6 >= 0.25) or (r12 is not None and r12 >= 0.40) or (r3 is not None and r3 >= 0.20)
-    down = (r6 is not None and r6 <= -0.25) or (r3 is not None and r3 <= -0.20) or (r12 is not None and r12 <= -0.35)
+    vol = px.get("vol")
+    for sign, word in ((-1, "跌"), (1, "涨")):        # 第十七轮：波动大的股票，看着大的涨跌其实是平常的起伏
+        if _trend(r3, r6, r12, sign) >= 1 > _trend(r3, r6, r12, sign, vol):
+            reasons.append(f"这只股票平时波动就大（一天约 ±{vol * 100:.1f}%），上面这种幅度的{word}在它身上算正常起伏，不当作“{word}了一大段”。")
     high = pos is not None and pos >= 0.65
     low = pos is not None and pos <= 0.3
 
@@ -1147,13 +1154,13 @@ def judge(n: dict) -> dict | None:
     if seq.get("opp_days") is not None and seq["opp_days"] <= SHORT_DAYS:
         reasons.append(f"它 {seq['opp_days']} 天前的公告还是{'减仓' if direction == 'buy' else '加仓'}，这么快就掉头。")
     f = {"side": direction, "t": t, "style": style, "size": None, "part": None if offmkt else vol_part, "offmkt": offmkt,
-         "f_up": _trend(r3, r6, r12, 1), "f_down": _trend(r3, r6, r12, -1), "u3": _clip((r3 or 0) / 0.15, 0, 1.3),
+         "f_up": _trend(r3, r6, r12, 1, px.get("vol")), "f_down": _trend(r3, r6, r12, -1, px.get("vol")), "u3": _clip((r3 or 0) / 0.15, 0, 1.3),
          "lowpos": _clip((0.45 - pos) / 0.3, 0, 1) if pos is not None else 0.0,
          "highpos": _clip((pos - 0.5) / 0.3, 0, 1) if pos is not None else 0.0,
          "plc": 0.0, "raise": bool(raise_ev), "so_up": bool(so_chg is not None and so_chg >= 0.03), "plc_inferred": placement_said,
          "target": bool(tk_ev and churn < 0.6), "res_j": res_j, "cost_d": None, "gain": None, "own_gain": None,
          "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
-    tl = n.get("tl") or {}
+    tl = {} if mismatch else (n.get("tl") or {})
     if tl.get("n") and tl.get("down_share") is not None:
         f["tl"] = tl
         act = "买入" if direction == "buy" else "卖出"
@@ -1202,6 +1209,14 @@ def judge(n: dict) -> dict | None:
         f["base"] = "exit" if t == "ceasing" else "trim"
         if t == "ceasing" and rows_ok and prev.get("votes") and sell > buy:
             f["size"] = min((sell - buy) / prev["votes"], 1.0)
+            # 第十七轮：605 不写剩下多少，但“上一份公告的持股 − 这次净卖出”就是估计值
+            left = prev["votes"] - (sell - buy)
+            if left <= 0.02 * prev["votes"]:
+                reasons.append(f"上一份公告时持有 {fq(prev['votes'])}，这次明细里净卖出 {fq(sell - buy)}：基本卖光了，是清仓。")
+                tags.append("清仓")
+            elif prev.get("vp") and prev["vp"] * left / prev["votes"] < 5.2:      # 估出来还在 5% 以上：明细不全或总股本变了，不说
+                reasons.append(f"上一份公告时持有 {fq(prev['votes'])}，这次明细里净卖出 {fq(sell - buy)}：估计还剩约 {fq(left)}"
+                               f"（约 {prev['vp'] * left / prev['votes']:.1f}%，没算总股本的变化）。")
         if chg_frac is not None and t == "change":
             if abs(chg_frac) >= 0.4:
                 reasons.append("一次减掉了四成以上的持仓，幅度很大。")
@@ -1272,7 +1287,7 @@ def judge(n: dict) -> dict | None:
         line += "——" + ("样本还少，仅供参考。" if habit["n"] < 12 else "一旦开始就倾向一路做下去。" if habit["follow"] >= 0.8
                        else "经常做一段就反过来，单独一份公告的分量要打折。" if habit["rev"] >= 0.2 or habit["follow"] <= 0.6 else "属于一般水平。")
         reasons.append(line)
-    blk = _checked(n.get("blk"), (), ("top", "x")) or (block_of(tr.get("daily"), px.get("adv"), direction) if rows_ok else {})
+    blk = {} if mismatch else (_checked(n.get("blk"), (), ("top", "x")) or (block_of(tr.get("daily"), px.get("adv"), direction) if rows_ok else {}))
     if blk and not offmkt:
         blk = {"d": str(blk.get("d") or ""), "top": blk["top"], "x": blk["x"]}
         f["blk"] = blk
@@ -1368,9 +1383,20 @@ def _checked(d, nums: tuple, required: tuple) -> dict:
     return out
 
 
-def _trend(r3, r6, r12, sign: int) -> float:
-    """之前涨（sign=1）或跌（sign=-1）得有多明显：1.0 = 刚好达到“明显”的门槛（3 个月 20% / 6 个月 25% / 12 个月 40%·35%），最多 1.3。"""
+VOL_K = 1.0         # 第十七轮：涨跌要超过“这只股票平时这么长时间的正常波动”的几倍才算明显
+VOL_CAP = 1.5       # 波动门槛最多是固定门槛的几倍
+TRADING_DAYS = (63, 126, 252)
+
+
+def _trend(r3, r6, r12, sign: int, vol=None) -> float:
+    """之前涨（sign=1）或跌（sign=-1）得有多明显：1.0 = 刚好达到“明显”的门槛，最多 1.3。
+    固定门槛：3 个月 20% / 6 个月 25% / 12 个月 40%·35%。知道这只股票自己的日波动 vol 时，门槛至少是 VOL_K 倍的正常波动（vol × √交易日数）。"""
     cuts = (0.20, 0.25, 0.40 if sign > 0 else 0.35)
+    if isinstance(vol, (int, float)) and not isinstance(vol, bool) and 0.002 <= vol <= 0.3:
+        vc = tuple(VOL_K * vol * math.sqrt(n) for n in TRADING_DAYS)
+        # 只对波动大的股票更严（只用波动门槛试过：蓝筹的小涨跌也算数，效果更差）；最多严到固定门槛的 VOL_CAP 倍——
+        # 波动按 √时间放大会高估一年的正常起伏（Hostplus BAP：一天 ±5.5%，12 个月跌 57% 仍然是实打实的下跌）
+        cuts = tuple(max(c, min(v, VOL_CAP * c)) for c, v in zip(cuts, vc))
     vals = [sign * r / c for r, c in zip((r3, r6, r12), cuts) if r is not None]
     return _clip(max(vals), 0.0, 1.3) if vals else 0.0
 

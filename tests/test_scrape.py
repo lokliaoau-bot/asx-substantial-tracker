@@ -1441,7 +1441,7 @@ def test_real_sell_into_weakness_hostplus_bap():
     assert tr["sell_price"] == pytest.approx(0.821, abs=0.001)          # 对价带负号：-$9,397.80 / -12,000
     # 第十一轮：这只股票 12 个月跌了 57%，但最近 3 个月翻了一倍——以前标“像止损”，现在标“趁反弹减仓”
     assert j["action"] == "trim_bounce" and j["tone"] == "bear" and j["style"] == "养老金"
-    assert j["purposes"][0]["k"] == "bounce" and j["purposes"][1]["k"] == "stop"
+    assert j["purposes"][0]["k"] == "bounce" and "stop" in [p["k"] for p in j["purposes"][:3]]   # 第十七轮：波动大，“跌了一大段”打了折
     assert any("1,239 万股" in r for r in j["reasons"]) and any("趁反弹卖" in r for r in j["reasons"])
 
 
@@ -2959,3 +2959,64 @@ def test_small_cap_reason_names_small_ords():
     n = _buy()
     n["px"].update(r3m=-0.22, r6m=-0.22, r12m=-0.22, pos=0.5, m={"m1": -0.05, "m3": -0.20, "m6": -0.20, "m12": -0.20}, mb="XSO")
     assert any("同期小盘股指数（Small Ordinaries）3 个月 -20%" in x for x in insight.judge(n)["reasons"])
+
+
+def test_trend_threshold_scales_with_own_volatility():
+    assert insight._trend(-0.24, None, None, -1) == 1.2                          # 固定门槛：3 个月跌 24% 算明显
+    assert insight._trend(-0.24, None, None, -1, 0.05) < 1                       # 一天波动 5% 的股票：3 个月正常起伏约 40%
+    assert insight._trend(-0.24, None, None, -1, 0.01) == 1.2                    # 蓝筹不会因此更宽松
+    for bad in (None, "x", True, 0, -1, 5, float("nan")):
+        assert insight._trend(-0.24, None, None, -1, bad) == 1.2
+    n = _buy()
+    n["px"].update(r3m=-0.24, r6m=-0.10, r12m=-0.10, pos=0.5, vol=0.05)
+    r = insight.judge(n)
+    assert r["action"] != "add_dip" and any("一天约 ±5.0%" in x and "正常起伏" in x for x in r["reasons"])
+    n["px"]["vol"] = 0.01
+    assert not any("正常起伏" in x for x in insight.judge(n)["reasons"])
+
+
+def test_ceasing_estimates_what_is_left():
+    prev = {"vp": 8.0, "votes": 8_000_000, "type": "change", "date": "2026-08-01"}
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev,
+                            trades={**_sell()["trades"], "sell_qty": 8_000_000, "net_qty": -8_000_000}))
+    assert "清仓" in r["tags"] and any("基本卖光了" in x for x in r["reasons"])
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev,
+                            trades={**_sell()["trades"], "sell_qty": 4_000_000, "net_qty": -4_000_000}))
+    assert "清仓" not in r["tags"] and any("估计还剩约 400 万股（约 4.0%" in x for x in r["reasons"])
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev))              # 估出来 6%：和“降到 5% 以下”矛盾，不说
+    assert not any("估计还剩" in x for x in r["reasons"])
+    assert not any("估计还剩" in x for x in insight.judge(_sell(type="ceasing", voting_power=[], votes=[]))["reasons"])  # 不知道上一份：不估
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev={**prev, "vp": None}))
+    assert not any("估计还剩" in x for x in r["reasons"])
+
+
+def test_mismatched_trades_are_not_used_as_evidence():
+    tl = {"n": 8, "down_share": 0.9, "base_down": 0.5, "r_win": -0.15}
+    good = _buy(tl=tl)
+    bad = _buy(tl=tl, trades={**_buy()["trades"], "buy_qty": 900_000, "net_qty": 900_000})   # 持股数 +200 万，明细只读到 90 万
+    rg, rb = insight.judge(good), insight.judge(bad)
+    assert not any("对不上" in x for x in rg["reasons"]) and any("逐笔看" in x for x in rg["reasons"])
+    assert rb["reasons"][0].startswith("注意：这份公告的逐笔明细加总和持股数的变化对不上")
+    assert not any("逐笔看" in x or "均价约" in x for x in rb["reasons"])
+    assert rb["confidence"] in ("中", "低")
+
+
+def test_reconcile_stats():
+    entries = {"1": {"votes": [100, 200], "trades": {"n": 2, "net_qty": 100}}, "2": {"votes": [100, 200], "trades": {"n": 2, "net_qty": 30}},
+               "3": {"votes": [], "trades": {"n": 2, "net_qty": 30}}, "4": {"votes": [100, 200], "trades": {"n": 1, "net_qty": "x"}}}
+    notices = [{"id": k, "type": "change"} for k in entries] + [{"id": "9", "type": "ceasing"}]
+    assert scrape.reconcile_stats(notices, entries) == {"ok": 1, "bad": 1}
+    assert scrape.reconcile_stats([], {}) == {"ok": 0, "bad": 0}
+
+
+def test_empty_price_series_keeps_previous_context(monkeypatch):
+    monkeypatch.setattr(scrape, "price_series", lambda c: [])
+    monkeypatch.setattr(scrape, "company_events", lambda c: [])
+    monkeypatch.setattr(scrape, "company_sector", lambda c: "")
+    monkeypatch.setattr(scrape, "PAUSE", 0)
+    old = {"p": 2.96, "r3m": 0.23}
+    e = {"id": "1", "code": "ACL", "date": "2026-10-28", "change_date": "2026-10-27", "px": dict(old), "px_v": 5, "trades": {}}
+    fresh = {"id": "2", "code": "ACL", "date": "2026-10-28", "change_date": "2026-10-27", "trades": {}}
+    scrape.add_prices([e, fresh])
+    assert e["px"] == old and e["px_v"] == 5 and e["px_tries"] == 1
+    assert fresh["px"] == {} and fresh["px_v"] == scrape.PX_VERSION

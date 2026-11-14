@@ -3113,3 +3113,86 @@ def test_slip_keeps_label_but_gets_purposes():
     # 来回交易也不会盖过“刚好跌破”
     tr2 = {**tr, "buy_qty": 120_000, "n_buy": 3, "buy_price": 2.0, "net_qty": -30_000, "sell_qty": 150_000}
     assert insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev, trades=tr2))["action"] == "slip"
+
+
+# ---------------------------------------------------------------- 第十九轮：公司的发行文件（Appendix 3B / 2A）
+
+def _form(name):
+    return (FIXTURES / "issue_forms" / f"{name}.txt").read_text(encoding="utf-8")
+
+
+def test_parse_issue_forms_from_real_samples():
+    r = insight.parse_issue_form(_form("TTT_03134624"), "TTT")                    # 配售：股票 + 给券商的期权，只取普通股
+    assert r == {**r, "f": "3B", "kind": "plc", "p": 0.13, "q": 126_923_078, "d": "2026-09-08"} and "Huntsville" in r["why"]
+    assert insight.parse_issue_form(_form("PPC_03132672"), "PPC")["kind"] == "emp"  # 勾的是“placement or other”，用途是员工持股信托
+    assert insight.parse_issue_form(_form("PPC_03135368"), "PPC")["kind"] == "emp"
+    assert insight.parse_issue_form(_form("RIV_03160125"), "RIV") == {**insight.parse_issue_form(_form("RIV_03160125"), "RIV"),
+                                                                      "f": "2A", "kind": "drp", "p": 1.2225, "q": 136_450}
+    r = insight.parse_issue_form(_form("MP1_03100361"), "MP1")                    # 配股：股数在汇总表、价格叫 offer price
+    assert r["kind"] == "pro" and r["p"] == 14.3 and r["q"] == 57_856_541
+    assert insight.parse_issue_form(_form("GTI_03116463"), "GTI")["kind"] == "noncash"   # 收购换股，不是现金
+    assert "p" not in insight.parse_issue_form(_form("DXN_03130711"), "DXN")
+    r = insight.parse_issue_form(_form("TOR_03152935"), "TOR")
+    assert r["f"] == "2A" and r["p"] == 0.19 and r["kind"] in insight.ISSUE_NAMES
+    for bad in ("", None, 5, "Change in substantial holding", "Appendix 3B - Proposed issue of securities\nnothing"):
+        r = insight.parse_issue_form(bad, "X")
+        assert r == {} or "p" not in r
+
+
+def _iss(d, p, q=10_000_000, kind="plc"):
+    return {"d": d, "k": "raise", "h": "Proposed issue of securities", "u": "1", "iss": {"f": "3B", "kind": kind, "p": p, "q": q, "d": d, "disc": -0.08}}
+
+
+def test_issue_check_confirms_and_refutes():
+    tr = {"buy_price": 0.13, "first": "2026-09-01", "last": "2026-09-30", "daily": [["2026-09-07", 3_000_000]]}
+    hit, ref = insight.issue_check([_iss("2026-09-08", 0.13)], tr, True, "2026-10-10")
+    assert hit and not ref
+    assert insight.issue_check([_iss("2026-09-08", 0.20)], tr, True, "2026-10-10") == (None, True)        # 价格对不上：否定
+    assert insight.issue_check([_iss("2026-09-08", 0.13, kind="emp")], tr, True, "2026-10-10") == (None, True)
+    assert insight.issue_check([], tr, False, "2026-10-10") == (None, False)                               # 没读过文件：不否定
+    assert insight.issue_check([], {**tr, "daily": [["2025-01-07", 5]]}, True, "2026-10-10") == (None, False)   # 太早，看不到
+    assert insight.issue_check([], {**tr, "daily": [[f"2026-09-0{i}", 5] for i in range(1, 6)]}, True, "2026-10-10") == (None, False)
+    assert insight.issue_check([{"iss": "x"}, {"iss": {"p": "a"}}], {**tr, "buy_price": None}, True, "x") == (None, False)
+
+
+def test_judge_uses_issue_forms():
+    trades = {**_buy()["trades"], "n_buy": 1, "buy_qty": 2_000_000, "buy_price": 1.25, "daily": [["2026-10-30", 2_000_000]]}
+    n = _buy(trades=trades, ev=[_iss("2026-10-30", 1.25)], iss_ok=True)
+    r = insight.judge(n)
+    assert r["action"] == "add_placement" and r["purposes"][0]["p"] > 0.7
+    assert any(x.startswith("公司的发行文件对得上：10/30 按 $1.25 发行 1,000 万股新股（配售，Appendix 3B），发行价比公告前一天的收盘价低 8%") for x in r["reasons"])
+    # PPC 那种：一笔整数金额，但同期只有员工持股的发行
+    r = insight.judge(_buy(trades=trades, ev=[_iss("2026-08-28", 1.97, kind="emp")], iss_ok=True))
+    assert r["action"] != "add_placement" and "整数金额" not in r["tags"] and any("不是认购配售" in x for x in r["reasons"])
+    # 员工发行的“Proposed issue of securities”不再算融资
+    emp = [_iss("2026-10-31", 1.97, kind="emp")]
+    assert not any("公告过融资" in x or "公告了融资" in x for x in insight.judge(_buy(ev=emp, iss_ok=True))["reasons"])
+
+
+def test_company_events_keep_issue_form_links():
+    html = """<table><tr><td>30/10/2026</td><td></td><td><a href="/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03160125">Application for quotation of securities - RIV</a></td></tr>
+    <tr><td>30/10/2026</td><td></td><td><a href="/x?idsId=03160126">Application for quotation of securities - RIV</a></td></tr>
+    <tr><td>05/10/2026</td><td></td><td><a href="/x?idsId=03148365">Cancel - Proposed issue of securities - YRL</a></td></tr>
+    <tr><td>02/09/2026</td><td></td><td><a href="/x?idsId=03134624">Proposed issue of securities - TTT</a></td></tr></table>"""
+    evs = scrape.parse_company_events(html)
+    assert [(e["k"], e.get("u")) for e in evs] == [("raise", "03134624"), ("quote", "03160125"), ("quote", "03160126")]
+    many = [{"d": f"2026-10-{i:02d}", "k": "quote"} for i in range(1, 25)] + [{"d": f"2026-10-{i:02d}", "k": "results"} for i in range(1, 25)]
+    near = scrape.events_near(many, {"date": "2026-10-30", "change_date": "2026-10-01"})
+    assert sum(x["k"] == "quote" for x in near) == 8 and sum(x["k"] == "results" for x in near) == 20
+
+
+def test_read_issue_forms(monkeypatch):
+    monkeypatch.setattr(scrape, "download_pdf", lambda url: (b"%PDF", url))
+    monkeypatch.setattr(scrape, "pdf_texts", lambda data, pages=8: [_form("TTT_03134624")])
+    monkeypatch.setattr(scrape, "PAUSE", 0)
+    monkeypatch.setattr(scrape, "_ISSUES", {})
+    day = lambda d: int(dt.datetime.fromisoformat(d).replace(tzinfo=dt.timezone.utc).timestamp() * 1000)
+    series = [[day("2026-09-01"), 0.15, 1], [day("2026-09-02"), 0.14, 1]]
+    evs = [{"d": "2026-09-02", "k": "raise", "u": "03134624"}, {"d": "2026-09-03", "k": "results"}]
+    scrape.read_issue_forms("TTT", evs, series)
+    assert evs[0]["iss"]["p"] == 0.13 and evs[0]["iss"]["disc"] == round(0.13 / 0.15 - 1, 3) and "iss" not in evs[1]
+    monkeypatch.setattr(scrape, "download_pdf", lambda url: (_ for _ in ()).throw(scrape.FetchError("x")))
+    monkeypatch.setattr(scrape, "_ISSUES", {})
+    evs = [{"d": "2026-09-02", "k": "raise", "u": "9"}]
+    scrape.read_issue_forms("TTT", evs, series)
+    assert "iss" not in evs[0]

@@ -530,6 +530,106 @@ TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip
         "flip_plc": "neutral", "flip": "neutral", "flip_back": "neutral", "churn": "neutral"}
 
 
+ISSUE_KINDS = (       # 第十九轮：Appendix 3B / 2A 里“这是什么发行”→ 分类。顺序有意义
+    ("drp", re.compile(r"dividend\s+or\s+distribution\s+plan|dividend\s+reinvestment", re.I)),
+    ("exer", re.compile(r"options?\s+being\s+exercised|convertible\s+securities\s+being\s+converted|exercise\s+of\s+(?:options|performance|rights)", re.I)),
+    ("emp", re.compile(r"employee|incentive|performance\s+rights|share\s+trust|remuneration|\bESP\b|\bLTI\b|vesting|director'?s?\s+fees", re.I)),
+    ("spp", re.compile(r"(?:security|share)\s+purchase\s+plan|\bSPP\b", re.I)),
+    ("pro", re.compile(r"pro\s*rata|entitlement|rights\s+issue|accelerated\s+offer|renounceable", re.I)),
+    ("plc", re.compile(r"placement|capital\s+rais|working\s+capital|fund(?:ing)?\s+(?:the|growth|exploration|drilling)|accelerat|proceeds", re.I)),
+)
+ISSUE_RAISE = {"plc", "pro", "spp"}      # 这几类是真的融资（基金可以认购）；员工计划、期权行权、股息再投资不算
+
+
+def _dmy(s: str) -> str:
+    m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", s or "")
+    if not m:
+        return ""
+    try:
+        return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1))).isoformat()
+    except ValueError:
+        return ""
+
+
+def parse_issue_form(text: str, code: str = "") -> dict:
+    """第十九轮：读 Appendix 3B（拟发行）/ 2A（申请挂牌）里普通股那一项：价格 p、股数 q、发行日 d、类型 kind、用途 why。
+    读不出普通股的价格或股数时返回 {}（宁缺毋错）。"""
+    if not isinstance(text, str) or not text:
+        return {}
+    form = "3B" if re.search(r"Appendix\s+3B\s*-\s*Proposed\s+issue", text, re.I) else "2A" if re.search(r"Appendix\s+2A", text, re.I) else ""
+    if not form:
+        return {}
+    lines = [x.strip() for x in text.splitlines()]
+    q = p = None
+    for i, line in enumerate(lines):          # 普通股那一项：“XXX : ORDINARY FULLY PAID”，下面依次是股数和价格
+        if not re.search(r":\s*ORDINARY\s+FULLY\s+PAID", line, re.I) or (code and not line.upper().startswith(code.upper())):
+            continue
+        for j in range(i + 1, min(i + 25, len(lines))):
+            if q is None and re.match(r"Number\s+of\s+\+securities\s+(?:proposed\s+to\s+be\s+issued|to\s+be\s+quoted)", lines[j], re.I):
+                m = re.match(r"^([\d,]+)$", lines[j + 1] if j + 1 < len(lines) else "")
+                q = int(m.group(1).replace(",", "")) if m else None
+            m = re.search(r"\bAUD\s+(\d+\.\d+)\s*$", lines[j])
+            if q is not None and m:
+                p = float(m.group(1))
+                break
+            if re.search(r"ORDINARY\s+FULLY\s+PAID|^Part\s+\d", lines[j], re.I) and j > i + 1:
+                break
+        if q and p:
+            break
+    if not (q and p):                         # 配股（accelerated offer）：股数在开头的汇总表，价格叫 offer price
+        m = re.search(rf"^{re.escape(code.upper()) if code else '[A-Z0-9]{{3,6}}'}\s+ORDINARY\s+FULLY\s+PAID\s+([\d,]+)\s*$", text, re.M)
+        q = q or (int(m.group(1).replace(",", "")) if m else None)
+        m = re.search(r"(?:offer|issue)\s+price\s+per\s+\+security[^\n]*\n(?:[^\n]*\n){0,2}?[^\n]*\bAUD\s+(\d+\.\d+)\s*$", text, re.I | re.M)
+        p = p or (float(m.group(1)) if m else None)
+    cash = bool(q and p and 0 < p < 100_000)
+    m = re.search(r"Proposed\s+\+issue\s+date\s*\n\s*(\d{1,2}/\d{1,2}/\d{4})", text) or re.search(r"\nIssue\s+date\s*\n\s*(\d{1,2}/\d{1,2}/\d{4})", text)
+    d = _dmy(m.group(1)) if m else ""
+    m = re.search(r"The\s+Proposed\s+issue\s+is:\s*\n([^\n]+)", text, re.I) or re.search(r"2\.1\s+The\s+\+securities\s+to\s+be\s+quoted\s+are:\s*\n([^\n]+(?:\n[^\n]+)?)", text, re.I)
+    what = m.group(1) if m else ""
+    m = re.search(r"purpose\(s\)\s+for\s+which\s+the\s+entity\s+is\s+issuing\s+the\s+securities\s*\n(?:Other\s*\n)?(?:Please\s+provide\s+additional\s+details\s*\n)?([^\n]+(?:\n(?!7F\.1|Appendix|Part\s)[^\n]+)?)", text, re.I)
+    why = re.sub(r"\s+", " ", m.group(1)).strip()[:160] if m else ""
+    m = re.search(r"2\.3d[^\n]*\n(?:[^\n]*\n){0,2}?((?:[^\n]+\n){1,3})", text) if form == "2A" else None
+    extra = m.group(1) if m else ""
+    # 先看“这是什么发行”里写明的股息再投资/期权行权，再看用途里是不是员工计划（员工发行也会勾“placement or other type of issue”），最后才是发行方式
+    by = lambda txt, ks: next((k for k, rx in ISSUE_KINDS if k in ks and rx.search(txt)), "")
+    kind = (by(what, ("drp", "exer", "emp")) or by(why + " " + extra, ("emp", "drp", "exer")) or by(what, ("spp", "pro", "plc"))
+            or by(why + " " + extra, ("spp", "pro", "plc")))
+    if not kind and re.search(r"placement", what, re.I):
+        kind = "plc"
+    if re.search(r"previously\s+announced[^\n]*Appendix\s+3B|transaction[s]?\s+previously\s+announced", what + " " + text[:4000], re.I) and form == "2A" and not kind:
+        kind = "follow"                       # 2A 跟着之前的 3B：类型看那份 3B
+    if not cash:                              # 认出是发行文件，但普通股不是按现金价格发的（期权行权、收购换股……）：只记类型
+        return {"f": form, "kind": kind if kind in ("drp", "exer", "emp") else "noncash", "d": d, "why": why}
+    return {"f": form, "kind": kind or "other", "p": round(p, 6), "q": q, "d": d, "why": why}
+
+
+ISSUE_NAMES = {"plc": "配售", "pro": "配股", "spp": "股东认购计划（SPP）", "follow": "新股发行", "other": "新股发行"}
+
+
+def issue_check(ev: list[dict], tr: dict, iss_ok: bool, ref_date: str) -> tuple[dict | None, bool]:
+    """第十九轮：拿公司的发行文件（Appendix 3B / 2A）对基金的买入。返回 (对上的那份文件, 是否否定“像配售”)。
+    对上 = 文件是真的融资（不是员工计划/期权行权/股息再投资/换股），价格和基金的买入均价差 2% 以内，发行日在交易期间前后 7 天内。
+    否定 = 买入只发生在一两天、在我们看得到的近 6 个月里，而那几天前后 10 天没有这个价格的融资文件。"""
+    bp = tr.get("buy_price")
+    if not (isinstance(bp, (int, float)) and not isinstance(bp, bool) and bp > 0):
+        return None, False
+    raising = [x for x in ev if isinstance(x.get("iss"), dict) and isinstance(x["iss"].get("p"), (int, float)) and x["iss"]["p"] > 0
+               and x["iss"].get("kind") in ISSUE_NAMES]
+    lo, hi = _shift(tr.get("first") or "", -7), _shift(tr.get("last") or "", 7)
+    when = lambda x: x["iss"].get("d") or x.get("d") or ""
+    hit = next((x for x in sorted(raising, key=lambda x: abs(x["iss"]["p"] / bp - 1))
+                if abs(x["iss"]["p"] / bp - 1) <= 0.02 and lo and hi and lo <= when(x) <= hi), None)
+    if hit or not iss_ok:
+        return hit, False
+    days = [str(r[0]) for r in (tr.get("daily") or []) if isinstance(r, (list, tuple)) and len(r) == 2
+            and isinstance(r[1], (int, float)) and r[1] > 0]
+    if not days or len(days) > 2 or min(days) < _shift(ref_date, -175):   # 公司公告页只看得到近 6 个月：更早的买入没法否定
+        return None, False
+    near = [x for x in raising if abs(x["iss"]["p"] / bp - 1) <= 0.02 and any(_days_between(when(x), d) <= 10 for d in days)]
+    return None, not near
+
+
+PLC_FORM = 4.5          # 发行文件对得上：给“参与融资”加的分
 RBLK_PLC = 3.5          # 一笔整数金额的买入、公司同期公告了融资：给“参与融资”加的分
 RBLK_PLC_NORAISE = 1.0  # 没看到融资公告时（也可能是谈好价格的大宗交易）
 
@@ -1084,6 +1184,11 @@ def judge(n: dict) -> dict | None:
             reasons.append(f"分 {days} 天慢慢{verb}，只占同期成交量的 {max(part * 100, 0.1):.1g}% 左右，不着急。")
     churn = min(buy, sell) / max(buy, sell) if rows_ok and max(buy, sell) else 0.0
     round_blk = bool(rows_ok and buy and round_block(tr))
+    form_hit, form_refute = (issue_check(ev, tr, bool(n.get("iss_ok")), n.get("date") or "") if rows_ok and buy and not mismatch else (None, False))
+    if round_blk and form_refute:
+        round_blk = False
+        reasons.append(f"明细里有一笔整数金额的买入（{fq(buy)} × {fp(tr['buy_price'])}），但公司那段时间的发行文件里没有这个价格的新股："
+                       "不是认购配售（可能是场外协议、互换，或者价格栏填的不是成交价），不当作参与融资。")
     placement = rows_ok and buy and share("placement") * gross >= 0.5 * buy
 
     # ---- 4. 股价位置
@@ -1119,8 +1224,20 @@ def judge(n: dict) -> dict | None:
     # ---- 4b. 公司同期的大事（来自这家公司的公告标题）
     tk_sell = False
     res_j = None
-    raise_ev = evs("raise", 10, 5)
-    if direction == "buy" and raise_ev:
+    # 第十九轮：标题是“Proposed issue of securities”、读过正文发现是员工计划/期权行权/股息再投资/收购换股的，不算融资
+    raise_ev = [x for x in evs("raise", 10, 5) if not (isinstance(x.get("iss"), dict) and x["iss"].get("kind") not in ISSUE_NAMES)]
+    if direction == "buy" and form_hit:
+        iss = form_hit["iss"]
+        disc = iss.get("disc")
+        reasons.append(f"公司的发行文件对得上：{md(iss.get('d') or form_hit['d'])} 按 {fp(iss['p'])} 发行 {fq(iss['q'])}新股"
+                       f"（{ISSUE_NAMES[iss['kind']]}，Appendix {iss['f']}）"
+                       + (f"，发行价比公告前一天的收盘价{'低' if disc < 0 else '高'} {abs(disc) * 100:.0f}%"
+                          if isinstance(disc, (int, float)) and not isinstance(disc, bool) and -0.9 < disc < 1 else "")
+                       + f"；它的买入均价约 {fp(tr['buy_price'])}，就是在认购这次发行。")
+        if "参与融资" not in tags:
+            tags.append("参与融资")
+        placement = True
+    if direction == "buy" and raise_ev and not form_hit:
         x = raise_ev[-1]
         if placement:
             reasons.append(f"对得上：公司在 {ev_txt(x)}公告了融资。")
@@ -1228,7 +1345,8 @@ def judge(n: dict) -> dict | None:
          "highpos": _clip((pos - 0.5) / 0.3, 0, 1) if pos is not None else 0.0,
          "plc": 0.0, "raise": bool(raise_ev), "so_up": bool(so_chg is not None and so_chg >= 0.03), "plc_inferred": placement_said,
          "target": bool(tk_ev and churn < 0.6), "res_j": res_j, "cost_d": None, "gain": None, "own_gain": None,
-         "rblk": bool(direction == "buy" and round_blk and sell < 0.5 * buy), "form": form, "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
+         "rblk": bool(direction == "buy" and round_blk and sell < 0.5 * buy), "form": form,
+         "plc_form": bool(direction == "buy" and form_hit), "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
     tl = {} if mismatch else (n.get("tl") or {})
     if tl.get("n") and tl.get("down_share") is not None:
         f["tl"] = tl
@@ -1522,7 +1640,12 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
                 add("mom", -1.5)
         elif f.get("offmkt"):
             add("plc", 0.5, "买入量超过同期场内成交量")
-        if f.get("rblk") and f.get("plc", 0.0) < 0.5:     # 第十八轮：一笔整数金额的买入；没有融资公告时也可能是谈好的大宗交易
+        if f.get("plc_form"):                          # 第十九轮：公司发行文件的价格、日期都对得上
+            add("plc", PLC_FORM, "公司的发行文件（Appendix 3B/2A）价格、日期都对得上")
+            for k in ("dip", "mom"):
+                add(k, -1.5)
+            add("prog", -1.0)
+        if f.get("rblk") and f.get("plc", 0.0) < 0.5 and not f.get("plc_form"):     # 第十八轮：一笔整数金额的买入；没有融资公告时也可能是谈好的大宗交易
             add("plc", RBLK_PLC if f.get("raise") else RBLK_PLC_NORAISE, "只有一笔、金额正好是整数的买入，像认购配售")
             add("dip", -1.0)
             add("mom", -1.0)

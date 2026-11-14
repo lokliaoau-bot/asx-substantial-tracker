@@ -14,6 +14,7 @@ ASX 公开的全市场列表只提供当天和上一交易日，所以“近两�
 
 from __future__ import annotations
 
+import bisect
 import datetime as dt
 import io
 import json
@@ -81,7 +82,7 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
-PX_VERSION = 6                                            # 股价背景的算法改了就加 1（第十七轮：加了自身波动 vol、小盘股对照小盘指数），近期和历史记录都会重算
+PX_VERSION = 7                                            # 股价背景的算法改了就加 1（第十七轮：加了自身波动 vol、小盘股对照小盘指数），近期和历史记录都会重算
 INSIGHT_VERSION = 5                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
@@ -2135,7 +2136,7 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
                     "trades": e.get("trades") or {}, "px": e.get("px") or {}, "ocr": e.get("ocr"),
                     "style": style_of.get(holder, "active"), "prev": prev,
                     "date": e.get("date"),
-                    "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
+                    "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [], "iss_ok": bool(e.get("iss_ok")),
                     "change_date": e.get("change_date"), "seq": sequence_for(history, holder, item["code"], e),
                     "tl": e.get("tl") or {}, "stage": stage_for(history, holder, item["code"], e),
                     "habit": habit_of.get(holder) or {}, "code": item["code"],
@@ -2426,14 +2427,19 @@ EVENT_KINDS = (     # 顺序有意义：先认更具体的
                            r"|appendix\s+4C\b|appendix\s+5B\b|trading\s+update|guidance|profit\s+(?:update|downgrade|upgrade|warning)"
                            r"|earnings\s+(?:update|guidance)|business\s+update|results?\s+announcement", re.I)),
 )
+ISSUE_HEAD_RE = re.compile(r"proposed\s+issue\s+of\s+securities|application\s+for\s+quotation\s+of\s+securities", re.I)   # 第十九轮：Appendix 3B / 2A
+CANCEL_RE = re.compile(r"^\s*cancel\b", re.I)
+ISSUE_FORMS = 10              # 每只股票每次最多读几份发行文件
 EVENT_SKIP_RE = re.compile(r"results?\s+of\s+(?:annual\s+general\s+)?meeting|results?\s+briefing|results?\s+(?:call|webcast|date)|date\s+of|notice\s+of"
                            r"|presentation\s+date|investor\s+call\s+details|\badvisory\b|\bto\s+be\s+released", re.I)
 MAX_EVENTS = 60
 
 
 def classify_event(headline: str) -> str:
-    if EVENT_SKIP_RE.search(headline) or SUBSTANTIAL_RE.search(headline):
+    if EVENT_SKIP_RE.search(headline) or SUBSTANTIAL_RE.search(headline) or CANCEL_RE.search(headline):
         return ""
+    if re.search(r"application\s+for\s+quotation\s+of\s+securities", headline, re.I):
+        return "quote"                               # Appendix 2A：只用来读发行价，不当作融资消息
     return next((k for k, rx in EVENT_KINDS if rx.search(headline)), "")
 
 
@@ -2457,15 +2463,20 @@ def parse_company_events(html: str) -> list[dict] | None:
         headline = TAIL_RE.sub("", a.get_text(" ", strip=True)).strip()
         k = classify_event(headline)
         if k:
-            out.append({"d": d.isoformat(), "k": k, "h": headline[:90], "s": is_price_sensitive(tr, tds)})
+            ev = {"d": d.isoformat(), "k": k, "h": headline[:90], "s": is_price_sensitive(tr, tds)}
+            m = re.search(r"idsId=(\d+)", a.get("href") or "")
+            if m and ISSUE_HEAD_RE.search(headline):
+                ev["u"] = m.group(1)
+            out.append(ev)
     if not rows and not re.search(r"no\s+announcements|Search\s+results", html, re.I):
         return None
     # 回购期间每天一份“Update - Notification of buy-back”：同一类同一天只留一条，回购只留头尾
     seen, uniq = set(), []
     for ev in sorted(out, key=lambda x: (x["d"], not x["s"])):
-        if (ev["d"], ev["k"]) in seen:
+        key = (ev["d"], ev["k"], ev.get("u") if ev["k"] == "quote" else "")
+        if key in seen:
             continue
-        seen.add((ev["d"], ev["k"]))
+        seen.add(key)
         uniq.append(ev)
     bb = [e for e in uniq if e["k"] == "buyback"]
     if len(bb) > 2:
@@ -2481,6 +2492,43 @@ def company_events(code: str) -> list[dict]:
     if evs is None:
         raise FetchError("公司公告页面认不出来")
     return evs
+
+
+_ISSUES: dict[str, dict] = {}     # 本次运行读过的发行文件（idsId → 解析结果）
+
+
+def read_issue_forms(code: str, evs: list[dict], series: list) -> None:
+    """第十九轮：读这只股票近期的 Appendix 3B / 2A（标题对得上、有 idsId 的），把发行价、股数、类型等存进事件的 iss；
+    再用日线算发行价比公告前一天收盘价的折扣（disc）。读不出的那份不放 iss。"""
+    pts = insight._points(series)
+    days = [d for d, _ in pts]
+    for ev in [x for x in evs if x.get("u")][-ISSUE_FORMS:]:
+        u = ev["u"]
+        if u not in _ISSUES:
+            try:
+                data, _ = download_pdf(BASE + "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=" + u)
+                texts = pdf_texts(data, pages=8) if len(data) <= 3_000_000 else []
+                res = next((r for r in (insight.parse_issue_form(t, code) for t in texts) if r), {})
+            except Exception as ex:  # noqa: BLE001  一份读不出不影响别的
+                log(f"  发行文件没读出 {code} {u}：{type(ex).__name__}: {ex}")
+                res = {}
+            _ISSUES[u] = res
+            time.sleep(PAUSE)
+        res = dict(_ISSUES[u])
+        if not res:
+            continue
+        if res.get("p") and days:
+            i = bisect.bisect_left(days, ev["d"]) - 1            # 公告前一个交易日
+            if i >= 0 and _days_between(days[i], ev["d"]) <= 10:
+                res["disc"] = round(res["p"] / pts[i][1] - 1, 3)
+        ev["iss"] = res
+
+
+def _days_between(a: str, b: str) -> int:
+    try:
+        return abs((dt.date.fromisoformat(b) - dt.date.fromisoformat(a)).days)
+    except (TypeError, ValueError):
+        return 10 ** 6
 
 
 def company_sector(code: str) -> str:
@@ -2500,7 +2548,9 @@ def events_near(evs: list[dict], e: dict) -> list[dict]:
     except ValueError:
         return []
     lo, hi = (start - dt.timedelta(days=45)).isoformat(), end.isoformat()
-    return [x for x in evs if lo <= x["d"] <= hi][-20:]
+    near = [x for x in evs if lo <= x["d"] <= hi]
+    keep = {id(x) for x in [x for x in near if x["k"] != "quote"][-20:] + [x for x in near if x["k"] == "quote"][-8:]}
+    return [x for x in near if id(x) in keep]
 
 
 def entry_side(e: dict) -> str:
@@ -2532,6 +2582,7 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
             return False
         for e in by_code[code]:
             e.pop("ev", None)
+            e.pop("iss_ok", None)
             tr = e.get("trades") or {}
             ref = price_ref(e.get("change_date"), tr, e.get("date", ""))
             px = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
@@ -2544,8 +2595,15 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
         try:
             evs = company_events(code)
             insight.event_moves(series, evs)
+            try:
+                read_issue_forms(code, evs, series)
+                iss_ok = True
+            except Exception as ex:  # noqa: BLE001
+                log(f"  发行文件出错 {code}：{type(ex).__name__}: {ex}")
+                iss_ok = False
             for e in by_code[code]:
                 e["ev"] = events_near(evs, e)
+                e["iss_ok"] = iss_ok
         except Exception as ex:  # noqa: BLE001
             log(f"  公司公告没取到 {code}：{type(ex).__name__}: {ex}")
         time.sleep(PAUSE)
@@ -2605,6 +2663,7 @@ def mark_days(days: set, today: dt.date, hhmm: str, scanned: set, partial: dict)
 
 def main() -> int:
     _INDEX.clear()
+    _ISSUES.clear()
     now = now_syd()
     today = now.date()
     holders, noise = load_watchlist()

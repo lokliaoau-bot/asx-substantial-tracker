@@ -1211,6 +1211,7 @@ def judge(n: dict) -> dict | None:
             f["size"] = min((sell - buy) / prev["votes"], 1.0)
             # 第十七轮：605 不写剩下多少，但“上一份公告的持股 − 这次净卖出”就是估计值
             left = prev["votes"] - (sell - buy)
+            reasons[:] = [x.replace("之后的买卖不用再公告，是否清仓看不出来。", "之后的买卖不用再公告。") for x in reasons]
             if left <= 0.02 * prev["votes"]:
                 reasons.append(f"上一份公告时持有 {fq(prev['votes'])}，这次明细里净卖出 {fq(sell - buy)}：基本卖光了，是清仓。")
                 tags.append("清仓")

@@ -2980,6 +2980,7 @@ def test_ceasing_estimates_what_is_left():
     r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev,
                             trades={**_sell()["trades"], "sell_qty": 8_000_000, "net_qty": -8_000_000}))
     assert "清仓" in r["tags"] and any("基本卖光了" in x for x in r["reasons"])
+    assert not any("是否清仓看不出来" in x for x in r["reasons"])
     r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev,
                             trades={**_sell()["trades"], "sell_qty": 4_000_000, "net_qty": -4_000_000}))
     assert "清仓" not in r["tags"] and any("估计还剩约 400 万股（约 4.0%" in x for x in r["reasons"])

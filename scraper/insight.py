@@ -617,12 +617,21 @@ def issue_check(ev: list[dict], tr: dict, iss_ok: bool, ref_date: str) -> tuple[
                and x["iss"].get("kind") in ISSUE_NAMES]
     lo, hi = _shift(tr.get("first") or "", -7), _shift(tr.get("last") or "", 7)
     when = lambda x: x["iss"].get("d") or x.get("d") or ""
+    buys = [(str(r[0]), float(r[1])) for r in (tr.get("daily") or []) if isinstance(r, (list, tuple)) and len(r) == 2
+            and isinstance(r[1], (int, float)) and not isinstance(r[1], bool) and r[1] > 0]
+    total = sum(q for _, q in buys)
+
+    def concentrated(x: dict) -> bool:        # 便宜的小盘股，市场价本来就贴着发行价：还要求买入的量有四成以上在发行前后 5 天
+        if not total:
+            return tr.get("n_buy") in (1, 2)
+        near = sum(q for d, q in buys if min(_days_between(d, when(x)), _days_between(d, x.get("d") or "")) <= 5)
+        return near >= 0.4 * total
+
     hit = next((x for x in sorted(raising, key=lambda x: abs(x["iss"]["p"] / bp - 1))
-                if abs(x["iss"]["p"] / bp - 1) <= 0.02 and lo and hi and lo <= when(x) <= hi), None)
+                if abs(x["iss"]["p"] / bp - 1) <= 0.02 and lo and hi and lo <= when(x) <= hi and concentrated(x)), None)
     if hit or not iss_ok:
         return hit, False
-    days = [str(r[0]) for r in (tr.get("daily") or []) if isinstance(r, (list, tuple)) and len(r) == 2
-            and isinstance(r[1], (int, float)) and r[1] > 0]
+    days = [d for d, _ in buys]
     if not days or len(days) > 2 or min(days) < _shift(ref_date, -175):   # 公司公告页只看得到近 6 个月：更早的买入没法否定
         return None, False
     near = [x for x in raising if abs(x["iss"]["p"] / bp - 1) <= 0.02 and any(_days_between(when(x), d) <= 10 for d in days)]

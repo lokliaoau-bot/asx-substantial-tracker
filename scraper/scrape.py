@@ -2473,7 +2473,7 @@ def parse_company_events(html: str) -> list[dict] | None:
     # 回购期间每天一份“Update - Notification of buy-back”：同一类同一天只留一条，回购只留头尾
     seen, uniq = set(), []
     for ev in sorted(out, key=lambda x: (x["d"], not x["s"])):
-        key = (ev["d"], ev["k"], ev.get("u") if ev["k"] == "quote" else "")
+        key = (ev["d"], ev["k"], ev.get("u") or "")          # 同一天的配售新闻稿和 3B 都要留（3B 有发行价）
         if key in seen:
             continue
         seen.add(key)
@@ -2502,7 +2502,9 @@ def read_issue_forms(code: str, evs: list[dict], series: list) -> None:
     再用日线算发行价比公告前一天收盘价的折扣（disc）。读不出的那份不放 iss。"""
     pts = insight._points(series)
     days = [d for d, _ in pts]
-    for ev in [x for x in evs if x.get("u")][-ISSUE_FORMS:]:
+    raises = [x for x in evs if x.get("u") and x["k"] == "raise"][-6:]          # 3B 优先：期权行权的 2A 很多，会把它挤掉
+    quotes = [x for x in evs if x.get("u") and x["k"] == "quote"][-(ISSUE_FORMS - len(raises)):]
+    for ev in raises + quotes:
         u = ev["u"]
         if u not in _ISSUES:
             try:

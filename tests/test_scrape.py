@@ -3148,6 +3148,9 @@ def test_issue_check_confirms_and_refutes():
     hit, ref = insight.issue_check([_iss("2026-09-08", 0.13)], tr, True, "2026-10-10")
     assert hit and not ref
     assert insight.issue_check([_iss("2026-09-08", 0.20)], tr, True, "2026-10-10") == (None, True)        # 价格对不上：否定
+    spread = {**tr, "daily": [[f"2026-09-{d:02d}", 1_000_000] for d in (1, 15, 20, 25, 28, 30)]}               # 量没集中在发行前后：不算
+    assert insight.issue_check([_iss("2026-09-08", 0.13)], spread, False, "2026-10-10") == (None, False)
+    assert insight.issue_check([_iss("2026-09-08", 0.13)], {**tr, "daily": None, "n_buy": 1}, False, "2026-10-10")[0]
     assert insight.issue_check([_iss("2026-09-08", 0.13, kind="emp")], tr, True, "2026-10-10") == (None, True)
     assert insight.issue_check([], tr, False, "2026-10-10") == (None, False)                               # 没读过文件：不否定
     assert insight.issue_check([], {**tr, "daily": [["2025-01-07", 5]]}, True, "2026-10-10") == (None, False)   # 太早，看不到

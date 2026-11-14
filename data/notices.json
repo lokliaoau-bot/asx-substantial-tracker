@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-14T14:57:14+11:00",
- "last_success_at": "2026-11-14T14:57:05+11:00",
+ "updated_at": "2026-11-14T14:59:31+11:00",
+ "last_success_at": "2026-11-14T14:59:22+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -27,11 +27,11 @@
   "2026-11-14"
  ],
  "partial_days": {
-  "2026-11-14": "14:57"
+  "2026-11-14": "14:59"
  },
  "last_run": {
   "ok": true,
-  "list_pages_ok": 1,
+  "list_pages_ok": 2,
   "substantial_found": 74,
   "pdf_checked": 0,
   "skipped_noise": 0,
@@ -53,9 +53,7 @@
    "history_refreshed": 0,
    "backfill_pending": 0
   },
-  "errors": [
-   "todayAnns.do 的页面结构认不出来，ASX 可能改版了，需要调整 parse_listing()"
-  ]
+  "errors": []
  },
  "watchlist": [
   "Paradice Investment Management",

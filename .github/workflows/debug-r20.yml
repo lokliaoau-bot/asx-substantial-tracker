@@ -10,7 +10,7 @@ permissions:
 jobs:
   dump:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12"
 
       - run: pip install -r requirements.txt
-      - run: mkdir -p out && python tools/probe_r20.py
+      - run: mkdir -p out && python tools/probe_r20b.py
       - name: Push output
         if: ${{ !cancelled() }}
         run: |

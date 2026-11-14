@@ -1,60 +1,60 @@
 {
  "buy:base": {
-  "n": 27,
+  "n": 28,
   "n3": 18,
-  "avg3": -0.023,
-  "up3": 0.444,
-  "n_next": 22,
-  "same_next": 0.636,
-  "rev_next": 0.136,
+  "avg3": -0.016,
+  "up3": 0.5,
+  "n_next": 24,
+  "same_next": 0.667,
+  "rev_next": 0.125,
   "n3x": 18,
-  "avg3x": -0.06,
-  "up3x": 0.389,
-  "check": 0.389,
+  "avg3x": -0.046,
+  "up3x": 0.444,
+  "check": 0.444,
   "check_n": 18,
   "check_name": "之后 3 个月跑赢指数",
-  "check_base": 0.505
+  "check_base": 0.517
  },
  "buy:dip": {
-  "n": 66,
-  "n3": 35,
-  "avg3": 0.171,
-  "up3": 0.629,
-  "n_next": 47,
-  "same_next": 0.723,
-  "rev_next": 0.085,
-  "n3x": 35,
-  "avg3x": 0.152,
-  "up3x": 0.571,
-  "check": 0.571,
-  "check_n": 35,
+  "n": 67,
+  "n3": 34,
+  "avg3": 0.174,
+  "up3": 0.618,
+  "n_next": 46,
+  "same_next": 0.717,
+  "rev_next": 0.087,
+  "n3x": 34,
+  "avg3x": 0.154,
+  "up3x": 0.559,
+  "check": 0.559,
+  "check_n": 34,
   "check_name": "之后 3 个月跑赢指数",
-  "check_base": 0.505
+  "check_base": 0.517
  },
  "buy:mom": {
-  "n": 37,
-  "n3": 24,
-  "avg3": 0.14,
-  "up3": 0.542,
-  "n_next": 32,
-  "same_next": 0.781,
-  "rev_next": 0.125,
-  "n3x": 24,
-  "avg3x": 0.143,
-  "up3x": 0.5,
-  "check": 0.5,
-  "check_n": 24,
+  "n": 36,
+  "n3": 23,
+  "avg3": 0.151,
+  "up3": 0.565,
+  "n_next": 31,
+  "same_next": 0.774,
+  "rev_next": 0.129,
+  "n3x": 23,
+  "avg3x": 0.152,
+  "up3x": 0.522,
+  "check": 0.522,
+  "check_n": 23,
   "check_name": "之后 3 个月跑赢指数",
-  "check_base": 0.505
+  "check_base": 0.517
  },
  "buy:plc": {
-  "n": 6,
+  "n": 3,
   "n3": 1,
   "avg3": 0.167,
   "up3": 1.0,
-  "n_next": 3,
-  "same_next": 0.667,
-  "rev_next": 0.333,
+  "n_next": 1,
+  "same_next": 0.0,
+  "rev_next": 1.0,
   "n3x": 1,
   "avg3x": 0.194,
   "up3x": 1.0
@@ -73,7 +73,7 @@
   "check": 1.0,
   "check_n": 5,
   "check_name": "下一份公告还是同方向",
-  "check_base": 0.723
+  "check_base": 0.718
  },
  "buy:pull": {
   "n": 8,
@@ -89,7 +89,7 @@
   "check": 0.833,
   "check_n": 6,
   "check_name": "之后 3 个月跑赢指数",
-  "check_base": 0.505
+  "check_base": 0.517
  },
  "buy:short": {
   "n": 2,
@@ -105,7 +105,7 @@
   "check": 0.5,
   "check_n": 2,
   "check_name": "90 天内反向",
-  "check_base": 0.167
+  "check_base": 0.17
  },
  "sell:base": {
   "n": 2,
@@ -132,7 +132,7 @@
   "up3x": null
  },
  "sell:profit": {
-  "n": 37,
+  "n": 36,
   "n3": 22,
   "avg3": -0.035,
   "up3": 0.273,
@@ -160,7 +160,7 @@
   "check_base": 0.207
  },
  "sell:stop": {
-  "n": 18,
+  "n": 19,
   "n3": 4,
   "avg3": 0.095,
   "up3": 0.5,

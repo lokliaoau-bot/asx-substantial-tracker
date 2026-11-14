@@ -46,7 +46,7 @@
    → 命中名单的顺手 `add_detail`（持股数 + 交易明细）
 3. 命中名单但没读过明细的旧公告：`enrich_entry` 补读；然后 `add_prices`（每只股票一次）取 ASX 日线算股价背景、公司近 6 个月的大事 `ev`、行业 `sector`
 4. `update_history`：命中名单的公告要点记进 `data/history.json`（长期保存，算成本用）
-5. `build_notices`：`match_entry`（高 = 名称命中别名，中 = 第一节原文命中，低 = 标题 from 缩写）→ `insight.judge`（带 `cost`、`ev`）→ `drop_superseded` → `insight.add_context`（横向比较）
+5. `build_notices`：`match_entry`（高 = 名称命中别名，中 = 第一节原文命中，低 = 标题 from 缩写）→ `insight.judge`（带 `cost`、`ev`）→ `find_counterparty` + `insight.add_counterparty`（倒手）→ `drop_superseded` → `insight.add_context`（横向比较）
 
 `entry` 的关键字段：`status`（new/parsed/noise/unreadable/error/skipped）、`parser`、`type`、`holder_name`、`region`、
 `voting_power`、`change_date`、`ocr`、`votes`、`trades`、`detail_v`、`px`（含 `t_vol`）、`px_v`、`ev`、`sector`。
@@ -63,6 +63,29 @@ python -m pytest -q -p no:warnings                      # 全部离线
 ## 当前进度（每次更新这里）
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
+
+### 第十五轮（2026-11-14，**代码完成，还没推到 GitHub、还没真跑**）：倒手识别（找到卖出的另一头 / 接盘方）
+
+起因：用户发现 Perennial 卖 AMX（18.58% → 8.58%，11/9 一天卖掉 950 万股）被标“减仓，像获利了结”，但 ASX 上 AMX 最新一份公告是
+Landchecker 一方 11/9 成为大股东、持股 18.58%——正好等于 Perennial 卖出前的全部持股。接盘方不在关注名单里，以前完全看不到。
+
+**进行中（接手后从这里开始）**：这一轮是在没有仓库推送权限的聊天环境里做的，代码在本地分支 `dev-r15`（用户手里是 zip / patch）
+1. 推到 `dev-r15`，对它触发 `scrape.yml`（`{"ref":"dev-r15"}`），确认跑通
+2. 看 `data/notices.json`：Perennial 的 AMX 应是“整块转让给接盘方（倒手）”，小标签第一个是“倒手”，`insight.cp.name` = “Landchecker Shareholder Entities”；其余公告标签不变
+3. 没问题再 fast-forward 合并到 `main`
+
+做了什么：
+- `scrape.find_counterparty`（`build_notices` 里调，用的是**全部**大股东公告 `by_code`，不只名单里的）：同一只股票、方向相反、变动日相差 ≤ `CP_DAYS`(3) 天，且数量对得上：
+  `whole`（买方之后的持股 ≈ 卖方之前的全部持股，卖方之前 ≥ `CP_WHOLE_MIN` 6%）> `shares`（两边持股数变化差 < 3%）>
+  `block`（两边变动的百分点差不多，或 603 买方的全部持股 ≈ 卖方卖掉的；**要求这次的量集中在一天或超过全市场成交量**；有两家都差不多就不说）
+- 排除：同一家机构换名申报（`match_entry` 同一家，或名字前两个词一样 `_same_org`）、股数和比例方向相反（摊薄）、日期或数字不全
+- `scrape.clean_holder_name`：显示用名字（认 “(collectively, the XXX)”，去 ATF / and its affiliates 等尾巴，认不出返回空）
+- `insight.add_counterparty`：理由一句 + 小标签“倒手”（放最前）+ `insight.cp`（网页显示对方公告链接）+ 新目的重新打分
+- 新目的：卖 `hand`（整块转让给特定的接盘方，标签 `trim_hand` / `exit_hand`，中性），买 `take`（从别的大股东手里整块接过来，`add_take` / `build_take`，看多）；
+  先验 −2.0，`CP_SCORE` whole 4.2 / shares 3.8 / block 3.0，一天集中 +0.4；和 获利/止损/收购/分批/反弹（买方：逢低/顺势/回调/套利/建仓）兼容
+- `index.html`：解读里多一行“接盘方的公告：<链接>”
+- 只改判断规则，版本号没动；217 个测试、40 项网页检查；`tools/replay.py`：近期 84 条只有 AMX 变了，历史 257 条不变；
+  全市场 822 条公告互相配对的压力测试，收紧规则后只剩 AMX 一对（收紧前误配的：KAR、ZIP 卖方本来就在 5% 附近；PLS 大盘股百分点碰巧接近；JPMorgan 自己配自己）
 
 ### 第十四轮（2026-11-12，已完成并合并到 `main`）：逐条审查正式版 82 条解读后修判断
 

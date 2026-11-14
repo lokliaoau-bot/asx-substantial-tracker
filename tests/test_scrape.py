@@ -2647,3 +2647,178 @@ def test_previous_notice_falls_back_to_history():
     assert scrape.prev_from_history(hist, "A", "EOS", e) == {"vp": 5.047, "votes": 11_189_140, "type": "becoming", "date": "2026-10-16"}
     assert scrape.prev_from_history(hist, "A", "EOS", {"id": "1", "date": "2026-10-16", "time": "16:00"}) is None
     assert scrape.prev_from_history({"pos": {"A|EOS": ["bad"]}}, "A", "EOS", e) is None and scrape.prev_from_history(None, "A", "EOS", e) is None
+
+
+# ---------------------------------------------------------------- 第十五轮：倒手（找到卖出的另一头 / 接盘方）
+
+def test_clean_holder_name():
+    c = scrape.clean_holder_name
+    assert c("in Annexure A (collectively, the Landchecker Shareholder Entities) and each entity listed in Annexure B (collectively,") \
+        == "Landchecker Shareholder Entities"
+    assert c("Australian Retirement Trust Pty LTD ATF Australian Retirement Trust") == "Australian Retirement Trust Pty LTD"
+    assert c("JPMorgan Chase & Co. and its affiliates") == "JPMorgan Chase & Co."
+    assert c("State Street Corporation and subsidiaries named in paragraph 7") == "State Street Corporation"
+    assert c("Pinnacle Investment Management Group Limited (ACN 100 325 184)") == "Pinnacle Investment Management Group Limited"
+    for bad in ("", "   ", "in Annexure A", "each entity listed in Annexure B", "Refer to Annexure A", "12 34"):
+        assert c(bad) == ""
+    long = c("Very Long Name " * 10)
+    assert long.endswith("…") and len(long) <= 72
+
+
+def test_holding_move():
+    m = scrape.holding_move
+    assert m({"type": "becoming", "voting_power": [5.4]}) == {"side": "buy", "pre": None, "post": 5.4, "d": None, "exact": False}
+    assert m({"type": "ceasing", "voting_power": []}, 8.0) == {"side": "sell", "pre": 8.0, "post": None, "d": None, "exact": False}
+    assert m({"type": "ceasing"}, 3.0)["pre"] is None and m({"type": "ceasing"}, "x")["pre"] is None
+    assert m({"type": "change", "voting_power": [18.58, 8.58]}) == {"side": "sell", "pre": 18.58, "post": 8.58, "d": 10.0, "exact": True}
+    # 股数增加但比例下降（增发摊薄）：看不出真实买卖，不配对
+    assert m({"type": "change", "voting_power": [9.4, 8.15], "votes": [3_000_000, 3_211_000]}) == {}
+    for bad in ({"type": "change", "voting_power": [5.0, 5.0]}, {"type": "change", "voting_power": [6.0]}, {"type": "becoming"},
+                {"type": "change", "voting_power": ["x", 6]}, {"type": "change", "voting_power": [0, 6]}, {"type": "other", "voting_power": [6]}):
+        assert m(bad) == {}
+
+
+def _cp_entries(**over):
+    """AMX 的真实情况：Perennial 11/9 卖掉 950 万股（18.58% → 8.58%，一天之内），同一天 Landchecker 一方成为大股东，持股 18.58%。"""
+    seller = {"id": "S1", "code": "AMX", "date": "2026-11-10", "time": "15:41", "headline": "Change in substantial holding", "status": "parsed",
+              "type": "change", "holder_name": "Perennial Value Management Limited (PVM)", "voting_power": [18.58, 8.58],
+              "votes": [17_644_814, 8_150_859], "change_date": "2026-11-09", "url": "https://www.asx.com.au/s1",
+              "trades": {"n": 4, "buy_qty": 5109, "sell_qty": 9_499_064, "net_qty": -9_493_955,
+                         "daily": [["2026-11-03", 3819], ["2026-11-04", 1250], ["2026-11-09", -9_499_064]]},
+              "px": {"p": 0.37, "adv": 217_000, "t_vol": 10_200_000}}
+    buyer = {"id": "B1", "code": "AMX", "date": "2026-11-11", "time": "08:16", "headline": "Becoming a substantial holder", "status": "parsed",
+             "type": "becoming", "holder_name": "in Annexure A (collectively, the Landchecker Shareholder Entities) and each entity",
+             "voting_power": [18.58], "change_date": "2026-11-09", "url": "https://www.asx.com.au/b1"}
+    seller.update(over.get("seller", {}))
+    buyer.update(over.get("buyer", {}))
+    return seller, buyer
+
+
+def _find(seller, others, holder="Perennial", prev_vp=None):
+    holders, _ = scrape.load_watchlist()
+    return scrape.find_counterparty(seller, seller["code"], holder, prev_vp, {seller["code"]: [seller] + others}, holders)
+
+
+def test_find_counterparty_whole_transfer():
+    s, b = _cp_entries()
+    cp = _find(s, [b])
+    assert cp["kind"] == "whole" and cp["name"] == "Landchecker Shareholder Entities" and cp["in_list"] is False
+    assert cp["gap"] == 0 and cp["type"] == "becoming" and cp["vp"] == [18.58] and cp["url"] == "https://www.asx.com.au/b1"
+    assert cp["me"]["side"] == "sell" and cp["me"]["post"] == 8.58 and cp["more"] == 0
+    # 买方的公告晚两天、变动日差 3 天：还算；差 4 天：不算
+    assert _find(s, [dict(b, change_date="2026-11-12")])["gap"] == 3
+    assert _find(s, [dict(b, change_date="2026-11-13")]) == {}
+    # 没有变动日（任何一边）、没读成功、同一只股票之外：都不配
+    assert _find(dict(s, change_date=""), [b]) == {} and _find(s, [dict(b, change_date=None)]) == {}
+    assert _find(s, [dict(b, status="unreadable")]) == {}
+    # 卖方从买方那里看：买方是 603，卖方 605（之前 18.58%，靠上一份公告知道）
+    cease = dict(s, type="ceasing", voting_power=[], votes=[])
+    assert _find(cease, [b], prev_vp=18.58)["kind"] == "whole"
+    assert _find(cease, [b], prev_vp=None) == {}                    # 不知道它之前有多少：宁缺毋错
+
+
+def test_find_counterparty_rejects_coincidences():
+    s, b = _cp_entries()
+    # 卖方原来只在 5% 附近：任何新越过 5% 的人都“对得上”，不算（KAR、ZIP 的真实情况）
+    small = dict(s, voting_power=[5.04, 4.2], votes=[], type="change")
+    assert _find(small, [dict(b, voting_power=[5.04])]) == {}
+    assert _find(dict(s, type="ceasing", voting_power=[]), [dict(b, voting_power=[5.0])], prev_vp=5.0) == {}
+    # 同方向（对方也在卖）不是对手方
+    assert _find(s, [dict(b, type="change", voting_power=[20.0, 18.58])]) == {}
+    # 同一家机构换个名字申报（名单里的 Perennial 两个实体；名单外的 JPMorgan 两份）：不是对手方
+    assert _find(s, [dict(b, holder_name="Perennial Value Management Limited")]) == {}
+    jp = dict(s, holder_name="JPMorgan Chase & Co. and its affiliates")
+    assert _find(jp, [dict(b, holder_name="JPMorgan Chase & Co. and its affiliates")], holder="?") == {}
+
+
+def test_find_counterparty_block_needs_one_day_concentration():
+    s, _ = _cp_entries()
+    s = dict(s, voting_power=[13.13, 14.23], votes=[], type="change")         # 买方：AustralianSuper 加了 1.1 个百分点
+    jpm = {"id": "J", "code": "AMX", "status": "parsed", "type": "change", "holder_name": "JPMorgan Chase & Co. and its affiliates",
+           "voting_power": [8.76, 7.59], "change_date": "2026-11-08", "date": "2026-11-11", "url": "https://www.asx.com.au/j"}
+    spread = dict(s, trades={"buy_qty": 3_000_000, "sell_qty": 0, "daily": [[f"2026-10-{d:02d}", 300_000] for d in range(20, 30)]},
+                  px={"adv": 2_000_000, "t_vol": 40_000_000})
+    assert _find(spread, [jpm], holder="AustralianSuper") == {}      # 分 10 天在市场上买：百分点碰巧接近不说明什么（PLS 的真实情况）
+    block = dict(s, trades={"buy_qty": 3_000_000, "sell_qty": 0, "daily": [["2026-11-08", 3_000_000]]}, px={"adv": 200_000})
+    cp = _find(block, [jpm], holder="AustralianSuper")
+    assert cp["kind"] == "block" and cp["me"]["side"] == "buy" and cp["name"] == "JPMorgan Chase & Co."
+    # 两家都“差不多对得上”：说不准是哪家，不说
+    ss = dict(jpm, id="SS", holder_name="State Street Corporation and subsidiaries", voting_power=[13.8, 12.66])
+    assert _find(block, [jpm, ss], holder="AustralianSuper") == {}
+    # 差得太多不算
+    assert _find(block, [dict(jpm, voting_power=[8.76, 8.2])], holder="AustralianSuper") == {}
+    # 两边持股数都有、差不到 3%：不需要“集中在一天”也算
+    s2 = dict(s, votes=[13_000_000, 14_100_000], trades={}, px={})
+    j2 = dict(jpm, votes=[9_000_000, 7_910_000])
+    assert _find(s2, [j2], holder="AustralianSuper")["kind"] == "shares"
+    # 买方是 603：它的全部持股 ≈ 卖方这次卖掉的
+    s3, b3 = _cp_entries()
+    s3 = dict(s3, voting_power=[18.58, 12.5])
+    assert _find(s3, [dict(b3, voting_power=[6.0])])["kind"] == "block"
+    assert _find(dict(s3, trades={}, px={}), [dict(b3, voting_power=[6.0])]) == {}
+
+
+def test_add_counterparty_relabels_sell_and_buy():
+    s, b = _cp_entries()
+    cp = _find(s, [b])
+    tr = dict(_sell()["trades"], sell_qty=9_499_064, net_qty=-9_493_955, buy_qty=5109)
+    n = _sell(voting_power=[18.58, 8.58], votes=[17_644_814, 8_150_859], trades=tr,
+              px={"p": 0.37, "r1m": 0.12, "r3m": 0.25, "r6m": 0.37, "r12m": 0.32, "pos": 0.95, "hi": 0.37, "lo": 0.2, "t_lo": 0.29, "t_hi": 0.37})
+    ins = insight.judge(n)
+    assert ins["action"] == "trim_profit"
+    insight.add_counterparty(ins, cp, "Perennial")
+    assert ins["action"] == "trim_hand" and ins["tone"] == "neutral" and ins["tags"][0] == "倒手"
+    assert ins["purposes"][0]["k"] == "hand" and ins["purposes"][1]["k"] == "profit"     # 获利了结仍在，排第二（两者不冲突）
+    assert ins["cp"] == {"name": "Landchecker Shareholder Entities", "date": "2026-11-11", "type": "becoming",
+                         "url": "https://www.asx.com.au/b1", "kind": "whole", "side": "buy"}
+    line = next(r for r in ins["reasons"] if r.startswith("接盘方："))
+    assert "11/9（和这次变动同一天）「Landchecker Shareholder Entities」公告成为大股东，持股 18.58%" in line
+    assert "正好等于Perennial卖出前的全部持股（18.58%）" in line and "剩下的 8.58%" in line
+    assert not any("分不出主次" in r for r in ins["reasons"])
+    insight.add_counterparty(ins, cp, "Perennial")                       # 重复调用不重复加小标签
+    assert ins["tags"].count("倒手") == 1
+    # 买方一边
+    buy = insight.judge(_buy())
+    cpb = dict(cp, me={"side": "buy", "pre": 6.0, "post": 8.0, "d": 2.0, "exact": True},
+               other={"side": "sell", "pre": 8.0, "post": 6.0, "d": 2.0, "exact": True}, kind="block", type="change", vp=[8.0, 6.0],
+               name="Some Fund", gap=1)
+    insight.add_counterparty(buy, cpb, "L1 Capital")
+    assert buy["action"] == "add_take" and buy["tone"] == "bull" and buy["cp"]["side"] == "sell"
+    assert any(r.startswith("卖给它的一方：") and "对方变动的约 2% 和它这次买入的约 2% 对得上" in r for r in buy["reasons"])
+
+
+def test_add_counterparty_edge_cases():
+    # 提前定性的（比如“刚好跌破 5% 线”）没有打分数据：只加理由和小标签，标签不变
+    ins = {"action": "slip", "label": insight.LABELS["slip"], "reasons": ["a", "主动选股基金：x"], "style": "主动选股基金", "tags": []}
+    cp = {"kind": "whole", "name": "", "gap": 2, "type": "becoming", "vp": [9.0], "cd": "2026-11-02", "date": "2026-11-04", "url": "",
+          "me": {"side": "sell", "pre": 9.0, "post": None}, "other": {"side": "buy"}, "more": 1}
+    insight.add_counterparty(ins, cp, "X")
+    assert ins["action"] == "slip" and ins["tags"] == ["倒手"] and ins["reasons"][-1].startswith("主动选股基金")
+    assert "另一家机构（名字没读准）" in ins["reasons"][1] and "同期还有 1 家" in ins["reasons"][1] and "交给了对方" in ins["reasons"][1]
+    # 坏的输入：什么都不做
+    for bad in (None, {}, {"kind": "maybe"}, "x"):
+        before = json.dumps(ins, ensure_ascii=False)
+        insight.add_counterparty(ins, bad, "X")
+        assert json.dumps(ins, ensure_ascii=False) == before
+    # 新目的、新标签都在表里
+    for a in ("trim_hand", "exit_hand", "add_take", "build_take"):
+        assert a in insight.LABELS and a in insight.TONE and (a in insight.BUY_ACTIONS or a in insight.SELL_ACTIONS)
+    assert {"hand"} <= {p["k"] for p in insight.score_purposes(insight.judge(_sell())["_f"])}
+    assert {"take"} <= {p["k"] for p in insight.score_purposes(insight.judge(_buy())["_f"])}
+    # 没有对手方时，新目的的概率很低，不会抢标签
+    assert insight.judge(_sell())["action"] == "trim" and insight.judge(_buy())["action"] != "add_take"
+
+
+def test_build_notices_finds_counterparty_outside_watchlist():
+    holders, _ = scrape.load_watchlist()
+    s, b = _cp_entries()
+    s["trades"].update(n_buy=3, n_sell=1, first="2026-11-03", last="2026-11-09", days=4, sell_price=0.339, buy_price=0.296,
+                       kinds={"on_market": 9_504_173})
+    out = scrape.build_notices({"S1": s, "B1": b}, holders, None)
+    assert len(out) == 1 and out[0]["holder"] == "Perennial"         # 接盘方不在名单里，列表里不显示它
+    ins = out[0]["insight"]
+    assert ins["tags"][0] == "倒手" and ins["cp"]["name"] == "Landchecker Shareholder Entities" and "_f" not in ins
+    assert ins["action"] in ("trim_hand", "exit_hand") or ins["purposes"][0]["k"] == "hand"
+    # 接盘方的公告还没出来时，照旧
+    alone = scrape.build_notices({"S1": s}, holders, None)[0]["insight"]
+    assert "cp" not in alone and "倒手" not in (alone.get("tags") or [])

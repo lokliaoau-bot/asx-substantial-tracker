@@ -511,13 +511,16 @@ LABELS = {
     "add_pull": "回调时加仓（长期在涨）", "add_prog": "持续加仓，像按计划建仓", "trim_bounce": "趁反弹减仓", "exit_bounce": "趁反弹减到 5% 以下",
     "trim_wind": "分批减仓，已减掉三成以上", "exit_wind": "分几次减到 5% 以下",
     "trim_deal": "收购消息后减仓，借机退出", "exit_deal": "收购消息后减到 5% 以下，借机退出",
+    "trim_hand": "整块转让给接盘方（倒手）", "exit_hand": "整块转让给接盘方，降到 5% 以下（倒手）",
+    "add_take": "从别的大股东手里接过一大块（倒手）", "build_take": "接过别的大股东的一大块，成为大股东（倒手）",
     "own_product": "自家旗下产品的持股变化（不是选股）", "restructure": "股份合并/拆分", "unknown": "看不出来",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
         "exit_loss": "bear", "exit": "bear", "add_flow": "bull", "swap_in": "bull", "swap_out": "bear",
         "add_pull": "bull", "add_prog": "bull", "trim_bounce": "bear", "exit_bounce": "bear", "trim_wind": "bear", "exit_wind": "bear",
-        "trim_deal": "neutral", "exit_deal": "neutral", "own_product": "neutral"}
+        "trim_deal": "neutral", "exit_deal": "neutral", "own_product": "neutral",
+        "trim_hand": "neutral", "exit_hand": "neutral", "add_take": "bull", "build_take": "bull"}
 
 
 def fq(n: float) -> str:
@@ -681,8 +684,10 @@ def history_record(e: dict) -> dict:
     return rec
 
 
-BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog"}
-SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind", "trim_deal", "exit_deal"}
+BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog",
+               "add_take", "build_take"}
+SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind", "trim_deal", "exit_deal",
+                "trim_hand", "exit_hand"}
 CTX_DAYS = 21             # “同期”：前后三周
 PEER_DAYS = 30
 
@@ -694,6 +699,69 @@ def _add_reason(ins: dict, text: str, tag: str = "") -> None:
     rs.insert(idx, text)
     if tag:
         ins.setdefault("tags", []).append(tag)
+
+
+def _pct(v) -> str:
+    return f"{v:g}%" if isinstance(v, (int, float)) else "?"
+
+
+def add_counterparty(ins: dict, cp: dict, me: str) -> None:
+    """倒手（第十五轮）：scrape.find_counterparty 找到了这笔买卖的另一头。加一句理由、一个“倒手”小标签（放最前面，网页只显示前 4 个），
+    网页用的 cp（对方名字、公告日期、链接），并把证据交给打分重新算一次。"""
+    if not isinstance(cp, dict) or not isinstance(cp.get("kind"), str) or cp["kind"] not in CP_SCORE:
+        return
+    num = lambda v: v if _is_num(v) else None
+    mv = {k: num(v) if k != "side" else v for k, v in cp["me"].items()} if isinstance(cp.get("me"), dict) else {}
+    ov = {k: num(v) if k != "side" else v for k, v in cp["other"].items()} if isinstance(cp.get("other"), dict) else {}
+    if mv.get("side") not in ("buy", "sell"):
+        return
+    vp_raw = cp.get("vp") if isinstance(cp.get("vp"), list) else []
+    cp = dict(cp, vp=[v for v in vp_raw if _is_num(v)], gap=cp.get("gap") if _is_num(cp.get("gap")) else None,
+              more=cp.get("more") if _is_num(cp.get("more")) else 0,
+              name=cp.get("name") if isinstance(cp.get("name"), str) else "", cd=cp.get("cd") if isinstance(cp.get("cd"), str) else "",
+              date=cp.get("date") if isinstance(cp.get("date"), str) else "", url=cp.get("url") if isinstance(cp.get("url"), str) else "",
+              type=cp.get("type") if cp.get("type") in ("becoming", "change", "ceasing") else "")
+    sell = mv.get("side") == "sell"
+    who = cp.get("name") or "另一家机构（名字没读准）"
+    who_txt = f"名单里的 {who}" if cp.get("in_list") else f"「{who}」"
+    when = "同一天" if cp.get("gap") == 0 else f"只差 {cp['gap']:g} 天" if cp.get("gap") is not None else "时间相近"
+    otype = cp.get("type")
+    vp = cp.get("vp") or []
+    if otype == "becoming":
+        act = f"公告成为大股东，持股 {_pct(vp[0] if vp else None)}"
+    elif otype == "ceasing":
+        act = "公告降到 5% 以下"
+    else:
+        act = f"公告持股从 {_pct(vp[0] if len(vp) == 2 else None)} {'增加' if ov.get('side') == 'buy' else '减少'}到 {_pct(vp[-1] if vp else None)}"
+    head = f"{'接盘方' if sell else '卖给它的一方'}：{md(cp.get('cd') or '')}（和这次变动{when}）{who_txt}{act}"
+    kind = cp["kind"]
+    if kind == "whole" and sell:
+        rest = mv.get("post")
+        body = (f"——正好等于{me}卖出前的全部持股（{_pct(mv.get('pre'))}）。看起来这是一笔谈好的整块转让："
+                + (f"它这次先卖掉了一部分，剩下的 {_pct(rest)} 很可能也通过协议（比如约定以后卖给对方）算进了对方名下。" if rest else
+                   "它把这些股份交给了对方。")
+                + "这不是在市场上随便卖掉，而是把股份交给了一个特定的买家（倒手）。")
+    elif kind == "whole":
+        body = (f"——对方卖出前的全部持股（{_pct(ov.get('pre'))}）正好等于{me}现在的持股。看起来是它从对方手里整块接过来的（倒手），"
+                "不是在市场上一点点买的。")
+    else:
+        d_me = mv.get("d")
+        d_o = ov.get("d") if ov.get("d") is not None else (vp[0] if otype == "becoming" and vp else None)
+        nums = (f"对方变动的约 {_pct(d_o)} 和它这次{'卖出' if sell else '买入'}的约 {_pct(d_me)} 对得上" if kind == "block"
+                else "两边的持股数变化几乎一样")
+        body = (f"——{nums}。看起来是它{'把这一块直接卖给了对方' if sell else '直接从对方手里接过了这一块'}（倒手），"
+                "不是在市场上零散成交。")
+    more = f"（同期还有 {cp['more']} 家的数字也对得上，这里取最接近的一家。）" if cp.get("more") else ""
+    _add_reason(ins, head + body + more)
+    tags = ins.setdefault("tags", [])
+    if "倒手" not in tags:
+        tags.insert(0, "倒手")
+    ins["cp"] = {"name": cp.get("name") or "", "date": cp.get("date") or "", "type": otype or "", "url": cp.get("url") or "",
+                 "kind": kind, "side": "buy" if sell else "sell"}
+    f = ins.get("_f")
+    if f:
+        f["cp"] = {"kind": kind}
+        finalize(ins)
 
 
 def _names(xs: list[str], limit: int = 4, unit: str = "只") -> str:
@@ -1231,10 +1299,10 @@ SHORT_DAYS = 60
 PURPOSE_NAMES = {
     "buy": {"base": "普通加仓", "dip": "逢低买入", "mom": "顺势追加", "plc": "参与融资", "arb": "并购套利",
             "flow": "整体加仓（资金流入）", "swap": "换股调入", "short": "短线来回",
-            "pull": "回调买入（长期在涨）", "prog": "按计划持续建仓"},
+            "pull": "回调买入（长期在涨）", "prog": "按计划持续建仓", "take": "从别的大股东手里整块接过来"},
     "sell": {"base": "普通减仓", "profit": "获利了结", "stop": "止损或看法变差", "flow": "整体减仓（应付赎回）",
              "swap": "换股调出", "rebal": "仓位管理（涨多了减一点）", "short": "短线交易",
-             "bounce": "趁反弹减仓", "wind": "分批减仓（一路在减）", "deal": "借收购消息退出"},
+             "bounce": "趁反弹减仓", "wind": "分批减仓（一路在减）", "deal": "借收购消息退出", "hand": "整块转让给特定的接盘方"},
 }
 PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用基础标签（新进建仓 / 加仓越过 5% 线 / 加仓 / 减仓 / 减到 5% 以下）
     ("buy", "dip"): {"add": "add_dip"}, ("buy", "mom"): {"add": "add_chase"},
@@ -1248,13 +1316,18 @@ PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用�
     ("buy", "pull"): {"add": "add_pull"}, ("buy", "prog"): {"add": "add_prog"},
     ("sell", "bounce"): {"trim": "trim_bounce", "exit": "exit_bounce"}, ("sell", "wind"): {"trim": "trim_wind", "exit": "exit_wind"},
     ("sell", "deal"): {"trim": "trim_deal", "exit": "exit_deal"},
+    ("sell", "hand"): {"trim": "trim_hand", "exit": "exit_hand"},
+    ("buy", "take"): {"add": "add_take", "build": "build_take", "cross_up": "build_take"},
 }
 
 
 # 这些成对的目的说的是两件不冲突的事（一个讲“怎么做”，一个讲“为什么”），可以同时成立：几乎同分时不算“分不出主次”，标分数高的那个
 COMPATIBLE = {frozenset(x) for x in (("prog", "dip"), ("prog", "mom"), ("prog", "pull"), ("wind", "profit"), ("wind", "stop"),
                                      ("wind", "bounce"), ("bounce", "profit"), ("bounce", "stop"),
-                                     ("deal", "profit"), ("deal", "stop"), ("deal", "wind"))}
+                                     ("deal", "profit"), ("deal", "stop"), ("deal", "wind"),
+                                     # 倒手讲的是“卖给了谁、怎么卖的”，和“为什么卖/买”不冲突
+                                     ("hand", "profit"), ("hand", "stop"), ("hand", "deal"), ("hand", "wind"), ("hand", "bounce"),
+                                     ("take", "dip"), ("take", "mom"), ("take", "pull"), ("take", "arb"), ("take", "prog"))}
 
 
 def _clip(x: float, lo: float, hi: float) -> float:
@@ -1268,6 +1341,11 @@ def _ratio_max(pairs) -> float:
 
 
 HABIT_MIN = 6             # 一家基金至少有这么多次“有后续的动作”，才谈得上习惯
+
+# 倒手（第十五轮）：找到另一头时给“整块转让 / 整块接过来”加的分。whole 最准（数字对得一点不差），block 只是百分点差不多
+CP_SCORE = {"whole": 4.2, "shares": 3.8, "block": 3.0}
+CP_WHY = {"whole": "对方拿到的持股正好等于它卖出前的全部持股", "shares": "同期另一方的持股数变化和它的一模一样",
+          "block": "同期另一方变动的比例和它的对得上"}
 
 
 def _is_num(x) -> bool:
@@ -1314,6 +1392,7 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
     nb, ns = ctx.get("nb", 0), ctx.get("ns", 0)
     opp = f.get("opp_days")
     stage, habit, blk = f.get("stage") or {}, f.get("habit") or {}, f.get("blk") or {}
+    cp = f.get("cp") if isinstance(f.get("cp"), dict) and isinstance(f["cp"].get("kind"), str) and f["cp"]["kind"] in CP_SCORE else None
     follow_adj = _clip((habit["follow"] - 0.72) * 4, -0.5, 0.6) if habit else 0.0     # 0.72 ≈ 全体基金“下一次同方向”的平均比例
     rev_adj = _clip((habit["rev"] - 0.10) * 4, -0.4, 0.5) if habit else 0.0           # 0.10 ≈ 全体“3 个月内掉头”的平均比例
     edge = (tl["down_share"] - (tl.get("base_down") if tl.get("base_down") is not None else 0.5)) if tl.get("n") else None
@@ -1387,6 +1466,15 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             for k in ("dip", "mom"):
                 add(k, -0.5)
             add("prog", -0.8)
+        # -- 第十五轮：倒手（找到了卖给它的那一方）
+        S["take"] = -2.0
+        if cp:
+            add("take", CP_SCORE[cp["kind"]], CP_WHY[cp["kind"]])
+            add("take", 0.4 if blk or f.get("offmkt") else 0, "量集中在一天，像是谈好的大宗")
+            add("plc", -1.2)                   # 是从别的股东手里接的，不是认购新股
+            add("flow", -0.6)
+            add("prog", -0.6)
+            add("short", -0.4)
     else:
         for k, prior in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2), ("deal", -1.5)):
             S[k] = prior
@@ -1472,6 +1560,15 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
         if blk:
             add("rebal", -1.5)                 # 一次性大宗卖出不是“慢慢减一点”
             add("flow", -0.5)
+        # -- 第十五轮：倒手（找到了接盘的那一方）
+        S["hand"] = -2.0
+        if cp:
+            add("hand", CP_SCORE[cp["kind"]], CP_WHY[cp["kind"]])
+            add("hand", 0.4 if blk or f.get("offmkt") else 0, "量集中在一天，像是谈好的大宗")
+            add("rebal", -1.5)                 # 交给一个特定买家，不是“涨多了减一点”
+            add("flow", -0.8)                  # 也不像是为了应付赎回在市场上卖
+            add("short", -0.5)
+            add("swap", -0.3)
     z = sum(math.exp(v) for v in S.values())
     out = [{"k": k, "name": PURPOSE_NAMES[side][k], "s": round(v, 2), "p": round(math.exp(v) / z, 3),
             "why": [t for _, t in sorted(why.get(k, []), reverse=True)]} for k, v in S.items()]

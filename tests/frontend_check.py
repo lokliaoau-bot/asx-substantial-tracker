@@ -59,6 +59,7 @@ SAMPLE = {
                      "side": "buy",
                      "purposes": [{"k": "dip", "name": "逢低买入", "p": 0.62}, {"k": "base", "name": "<i>普通加仓</i>", "p": 0.2},
                                   {"k": "flow", "name": "整体加仓", "p": 0.02}], "strength": 71,
+                     "cp": {"name": "<b>Some Seller</b>", "date": day(2), "type": "change", "url": "https://www.asx.com.au/cp", "kind": "block", "side": "sell"},
                      "reasons": ["持股比例 6.06% → 7.11%，持股数增加 420 万股。", "<img src=x onerror=window.__xss=1>买入时股价处在低位。"]}},
         {"id": "3", "code": "OLD", "company": "Old Co", "date": day(25), "time": "10:00", "headline": "Ceasing to be a substantial holder",
          "url": "https://www.asx.com.au/c", "pdf_url": "", "price_sensitive": False, "type": "ceasing",
@@ -155,6 +156,10 @@ def main():
         check("持股数增加 420 万股" in pg.inner_text("#rows details.ins") and "推断" in pg.inner_text("#rows details.ins"),
               "点开标签能看到理由，并说明这是推断")
         check(pg.evaluate("window.__xss") is None and pg.locator("#rows details.ins img").count() == 0, "理由里的 HTML 不会被执行")
+        cp_li = pg.locator("#rows details.ins li.cp")
+        check(cp_li.count() == 1 and "卖给它的一方的公告：<b>Some Seller</b>" in cp_li.inner_text()
+              and cp_li.locator("a").get_attribute("href") == "https://www.asx.com.au/cp" and cp_li.locator("b").count() == 0,
+              "倒手：给出对方公告的链接，名字不会被当成 HTML")
         pg.click("#groupSeg button[data-group='养老金']")
         check(pg.locator("#rows tr").count() == 1 and "AustralianSuper" in pg.inner_text("#rows"), "只看养老金")
         check(pg.locator("#holders .holder").count() == 2, "只看养老金时只显示养老金的卡片")

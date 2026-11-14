@@ -575,6 +575,13 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     (Array.isArray(i.tags) ? i.tags : []).slice(0, 4).forEach((t) => sum.append(el("span", "chip", String(t))));
     const ul = document.createElement("ul");
     (Array.isArray(i.reasons) ? i.reasons : []).forEach((r) => ul.append(el("li", "", String(r))));
+    // 倒手：另一头的公告（对方不一定在关注名单里，所以列表里看不到它，这里给个链接）
+    if (i.cp && typeof i.cp === "object" && safeUrl(i.cp.url)) {
+      const li = el("li", "cp", "");
+      li.append(document.createTextNode(i.cp.side === "sell" ? "卖给它的一方的公告：" : "接盘方的公告："),
+                link(i.cp.url, String(i.cp.name || "对方的公告") + (i.cp.date ? `（${i.cp.date}）` : "")));
+      ul.append(li);
+    }
     const ps = Array.isArray(i.purposes) ? i.purposes.filter((x) => x && typeof x.p === "number" && x.p >= 0.05).slice(0, 3) : [];
     if (ps.length) {
       const box = el("div", "purposes", "");

@@ -1727,6 +1727,163 @@ def prev_from_history(history: dict | None, holder: str, code: str, e: dict) -> 
     return {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None, "type": r.get("type"), "date": r.get("date")}
 
 
+# ---------------------------------------------------------------- 倒手：卖出的一方和接盘的一方（第十五轮）
+
+CP_DAYS = 3                # 两份公告的“变动日”最多差几天，才算同一笔交易的两头（大宗交易 T+2 交割，各家写的日期可能差一两天）
+CP_MIN_DELTA = 0.5         # 按“变动了多少个百分点”配对时，至少要动这么多（太小的变动很容易碰巧相等）
+CP_WHOLE_MIN = 6.0         # “整块转让”要求卖方原来的持股至少这么多：刚好在 5% 附近时，任何新越过 5% 的人都会“对得上”
+_CP_GARBAGE = re.compile(r"^(?:in|each|the\s+entities|entities|and|of|annexure|refer|see|as\s+set)\b", re.I)
+_CP_COLLECT = re.compile(r"collectively,?\s+(?:the\s+)?[\"“']?([A-Za-z0-9&.,'’\- ]{3,80}?)[\"”']?\s*\)", re.I)
+_CP_TAIL = re.compile(r"\s+(?:ATF|as trustee for|and (?:its|their) (?:related bodies corporate|subsidiaries|associates|affiliates|controlled entities)"
+                      r"|and (?:each of )?(?:the )?(?:entities|subsidiaries|related bodies)\b|and associates\b|\(ACN|\(ABN|ACN\b|ABN\b"
+                      r"|\($|\(\s*$).*$", re.I)
+
+
+def clean_holder_name(name: str) -> str:
+    """网页显示用的申报方名字。读出来的名字有时是半句话（“in Annexure A (collectively, the Landchecker Shareholder Entities) and ...”），
+    能认出“(collectively, the XXX)”就用 XXX；去掉 “ATF …”“and its related bodies corporate” 这类尾巴；认不出返回空串（宁缺毋错）。"""
+    s = re.sub(r"\s+", " ", name or "").strip()
+    if not s:
+        return ""
+    m = _CP_COLLECT.search(s)
+    if m:
+        return m.group(1).strip(" ,.")
+    if _CP_GARBAGE.match(s) or "annexure" in s.lower()[:40]:
+        return ""
+    s = _CP_TAIL.sub("", s).strip(" ,;:-(")
+    if len(s) > 70:
+        s = s[:70].rsplit(" ", 1)[0] + "…"
+    return s if len(s) >= 3 and re.search(r"[A-Za-z]{3}", s) else ""
+
+
+def _vp_of(e: dict) -> list[float]:
+    out = []
+    raw = e.get("voting_power") if isinstance(e, dict) else None
+    for x in raw if isinstance(raw, list) else []:
+        try:
+            v = float(x)
+        except (TypeError, ValueError):
+            return []
+        if not 0 < v <= 100:
+            return []
+        out.append(v)
+    return out
+
+
+def holding_move(e: dict, prev_vp: float | None = None) -> dict:
+    """一份公告里这一方的持股怎么动的（单位：百分点）。返回 {side, pre, post, d, exact}：
+    pre / post：之前 / 之后的持股比例（不知道是 None）；d：变动了多少（不知道是 None）；exact：d 是不是确切的数。
+    603：之前在 5% 以下，所以不知道确切变动；605：之后在 5% 以下，之前的比例要靠上一份公告（prev_vp）。看不出方向返回 {}。"""
+    t, vp = e.get("type"), _vp_of(e)
+    if t == "becoming" and vp:
+        return {"side": "buy", "pre": None, "post": vp[0], "d": None, "exact": False}
+    if t == "ceasing":
+        pre = prev_vp if isinstance(prev_vp, (int, float)) and 5 <= prev_vp <= 100 else None
+        return {"side": "sell", "pre": pre, "post": None, "d": None, "exact": False}
+    if t == "change" and len(vp) == 2 and vp[0] != vp[1]:
+        votes = e.get("votes") or []
+        side = "buy" if vp[1] > vp[0] else "sell"
+        if len(votes) == 2 and all(isinstance(v, int) and v > 0 for v in votes) and votes[0] != votes[1]:
+            if (votes[1] > votes[0]) != (vp[1] > vp[0]):
+                return {}                                 # 股数和比例方向相反（增发摊薄之类）：看不出真实买卖，不配对
+        return {"side": side, "pre": vp[0], "post": vp[1], "d": round(abs(vp[1] - vp[0]), 3), "exact": True}
+    return {}
+
+
+def _org_key(name: str) -> str:
+    words = re.findall(r"[a-z0-9]+", (name or "").lower())
+    words = [w for w in words if w not in ("the", "in", "each", "and", "of")]
+    return " ".join(words[:2])
+
+
+def _same_org(a: str, b: str) -> bool:
+    """名字的前两个词一样（“JPMorgan Chase …”和“JPMorgan Chase & Co. and its affiliates”）：同一家机构。"""
+    ka, kb = _org_key(a), _org_key(b)
+    return bool(ka and len(ka) >= 6 and ka == kb)
+
+
+def _close(a: float, b: float, rel: float, floor: float) -> bool:
+    return abs(a - b) <= max(floor, rel * max(abs(a), abs(b)))
+
+
+def find_counterparty(e: dict, code: str, holder: str, prev_vp: float | None, by_code: dict, holders: list[Holder]) -> dict:
+    """见 _find_counterparty。存储里有坏数据时返回 {}（宁可不说倒手，也不能让解读出错）。"""
+    try:
+        return _find_counterparty(e, code, holder, prev_vp, by_code, holders)
+    except BAD_DATA:
+        return {}
+
+
+def _find_counterparty(e: dict, code: str, holder: str, prev_vp: float | None, by_code: dict, holders: list[Holder]) -> dict:
+    """在所有大股东公告（不只名单里的）里，找这份公告的“另一头”：同一只股票、方向相反、变动日相差不超过 CP_DAYS 天，而且数量对得上。
+    对得上的三种情况（按可信度从高到低）：
+      whole：买方之后的持股 ≈ 卖方之前的全部持股（整块转让；比如卖方先卖一部分，剩下的通过协议也算到买方名下）
+      shares：两边的持股数变化差不到 3%
+      block：两边变动的百分点差不多（两边都是 604）；或者买方是 603、它的全部持股 ≈ 卖方这次卖掉的
+    返回 {name, in_list, id, date, cd, type, vp, url, kind, gap, me: {...}, other: {...}}；找不到返回 {}。宁缺毋错：日期或数字不全的不配。"""
+    me = holding_move(e, prev_vp)
+    cd = e.get("change_date") or ""
+    tr = e.get("trades") if isinstance(e.get("trades"), dict) else {}
+    px = e.get("px") if isinstance(e.get("px"), dict) else {}
+    qty = max(tr.get("buy_qty") or 0, tr.get("sell_qty") or 0)
+    # 这次的量是不是集中在一天（或者比全市场成交量还多）：只有这样，“百分点差不多”才说明是同一笔交易。
+    # 大盘股天天有指数基金进进出出，变动的百分点碰巧接近很常见（PLS：AustralianSuper 分 10 天买，同期 JPMorgan、State Street 各卖了差不多的量）
+    conc = bool((me or {}).get("side") and insight.block_of(tr.get("daily"), px.get("adv"), me["side"])) or \
+        bool(px.get("t_vol") and qty and qty >= px["t_vol"])
+    try:
+        d0 = dt.date.fromisoformat(cd)
+    except ValueError:
+        return {}
+    if not me:
+        return {}
+    rank = {"whole": 0, "shares": 1, "block": 2}
+    best = []
+    for o in by_code.get(code, []):
+        if o is e or o.get("id") == e.get("id") or o.get("status") != "parsed":
+            continue
+        try:
+            gap = abs((dt.date.fromisoformat(o.get("change_date") or "") - d0).days)
+        except ValueError:
+            continue
+        if gap > CP_DAYS:
+            continue
+        o_holder, _ = match_entry(o, holders)
+        if o_holder == holder or _same_org(o.get("holder_name") or "", e.get("holder_name") or ""):
+            continue                                      # 同一家机构换了个实体名申报，不是对手方
+        other = holding_move(o)
+        if not other or other["side"] == me["side"]:
+            continue
+        seller, buyer = (me, other) if me["side"] == "sell" else (other, me)
+        kind = ""
+        if (seller["pre"] and buyer["post"] and seller["pre"] >= CP_WHOLE_MIN and _close(seller["pre"], buyer["post"], 0.015, 0.06)
+                and (seller["post"] is None or seller["post"] <= seller["pre"] - CP_MIN_DELTA)):
+            kind = "whole"
+        if not kind and me["exact"] and other["exact"]:
+            mv, ov = e.get("votes") or [], o.get("votes") or []
+            if (len(mv) == 2 and len(ov) == 2 and all(isinstance(v, int) and v > 0 for v in mv + ov)
+                    and _close(abs(mv[1] - mv[0]), abs(ov[1] - ov[0]), 0.03, 0) and abs(mv[1] - mv[0]) > 0):
+                kind = "shares"
+            elif conc and me["d"] >= CP_MIN_DELTA and _close(me["d"], other["d"], 0.10, 0.15):
+                kind = "block"
+        if not kind and conc and seller["exact"] and buyer["pre"] is None and buyer["post"] and seller["d"] >= CP_MIN_DELTA \
+                and _close(seller["d"], buyer["post"], 0.10, 0.2):
+            kind = "block"                                # 买方是 603，它的全部持股差不多就是卖方这次卖掉的
+        if kind:
+            best.append((rank[kind], gap, o, o_holder, kind, other))
+    if not best:
+        return {}
+    best.sort(key=lambda x: (x[0], x[1]))
+    _, gap, o, o_holder, kind, other = best[0]
+    name = o_holder or clean_holder_name(o.get("holder_name") or "")
+    others = {id(x[2]) for x in best[1:] if x[0] == best[0][0]}
+    if others and kind == "block":
+        return {}                                         # 好几家都“差不多对得上”：说不准是哪一家，宁可不说
+    txt = lambda v: v if isinstance(v, str) else ""
+    return {"name": name, "in_list": bool(o_holder), "id": txt(o.get("id")), "date": txt(o.get("date")), "cd": txt(o.get("change_date")),
+            "type": o.get("type"), "vp": _vp_of(o), "url": safe_url(o.get("url") or ""), "kind": kind, "gap": gap,
+            "me": me, "other": other, "more": len(others)}
+
+
 def build_notices(entries: dict, holders: list[Holder], history: dict | None = None, reports: dict | None = None) -> list[dict]:
     out = []
     group_of = {h.name: h.group for h in holders}
@@ -1737,6 +1894,11 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
     except Exception as ex:  # noqa: BLE001  习惯统计出错不能影响公告本身
         log(f"  基金习惯统计出错：{type(ex).__name__}: {ex}")
         habit_of = {}
+    by_code: dict[str, list[dict]] = {}                 # 所有大股东公告（不只名单里的）按股票分组，给倒手识别用
+    for e in entries.values():
+        c = headline_target(e.get("headline", ""), e.get("code", "")) or e.get("code", "")
+        if c:
+            by_code.setdefault(c, []).append(e)
     for e in sorted(entries.values(), key=lambda e: (e.get("date") or "", e.get("time") or "", str(e.get("id")))):
         holder, conf = match_entry(e, holders)
         if holder:
@@ -1749,11 +1911,12 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
             item.update(holder=holder, group=group_of.get(holder, ""), confidence=conf, ocr=bool(e.get("ocr")),
                         sector=e.get("sector") or "")
             key = (holder, item["code"])
+            prev = last_seen.get(key) or prev_from_history(history, holder, item["code"], e)
             try:
                 item["insight"] = insight.judge({
                     "type": e.get("type"), "voting_power": e.get("voting_power") or [], "votes": e.get("votes") or [],
                     "trades": e.get("trades") or {}, "px": e.get("px") or {}, "ocr": e.get("ocr"),
-                    "style": style_of.get(holder, "active"), "prev": last_seen.get(key) or prev_from_history(history, holder, item["code"], e),
+                    "style": style_of.get(holder, "active"), "prev": prev,
                     "date": e.get("date"),
                     "cost": cost_for(history, holder, item["code"], e), "ev": e.get("ev") or [],
                     "change_date": e.get("change_date"), "seq": sequence_for(history, holder, item["code"], e),
@@ -1764,6 +1927,13 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
             except Exception as ex:  # noqa: BLE001  解读出错不能影响公告本身的显示
                 log(f"  {item['code']} 操作解读出错：{type(ex).__name__}: {ex}")
                 item["insight"] = None
+            if item.get("insight"):
+                try:
+                    cp = find_counterparty(e, item["code"], holder, (prev or {}).get("vp"), by_code, holders)
+                    if cp:
+                        insight.add_counterparty(item["insight"], cp, holder)
+                except Exception as ex:  # noqa: BLE001  倒手识别出错不能影响公告本身
+                    log(f"  {item['code']} 倒手识别出错：{type(ex).__name__}: {ex}")
             vp, votes = e.get("voting_power") or [], e.get("votes") or []
             last_seen[key] = {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None,
                               "type": e.get("type"), "date": e.get("date")}

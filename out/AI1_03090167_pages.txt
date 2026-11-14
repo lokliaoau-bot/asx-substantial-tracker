@@ -1,0 +1,103 @@
+Form 603
+Corporations Act 2001
+Section 671B
+Notice of initial substantial holder
+To Company Name/Scheme Adisyn Ltd (AI1)
+ACN/ARSN 155 473 304
+1. Details of substantial holder (1)
+Name Regal Partners Funds Management Pty Ltd and its associates (see Annexure 1)
+ACN/ARSN (if applicable) -
+The holder became a substantial holder on 30/04/2026
+2. Details of voting power
+The total number of votes attached to all the voting shares in the company or voting interests in the scheme that the substantial holder or an associate (2) had a
+relevant interest (3) in on the date the substantial holder became a substantial holder are as follows:
+Class of securities (4) Number of securities Person's votes (5) Voting power (6)
+ORDINARY 112,581,760 112,581,760 10.83%*
+*The % substantial is based on the shares on issue of 1,039,832,509 as disclosed by the Company on 30-04-2026.
+3. Details of relevant interests
+The nature of the relevant interest the substantial holder or an associate had in the following voting securities on the date the substantial holder became a substantial
+holder are as follows:
+Holder of relevant interest Nature of relevant interest (7) Class and number of securities
+REGAL PARTNERS FUNDS MANAGEMENT PTY REGAL PARTNERS FUNDS MANAGEMENT PTY LIMITED AND, WHERE
+LIMITED AND REGAL PARTNERS HOLDINGS APPLICABLE, REGAL PARTNERS HOLDINGS PTY LIMITED HAVE RELEVANT 112,581,760 ORDINARY
+PTY LIMITED INTERESTS IN THEIR RESPECTIVE CAPACITIES AS INVESTMENT MANAGER
+AND TRUSTEE
+REGAL PARTNERS LIMITED CONTROLLER OF REGAL PARTNERS FUNDS MANAGEMENT PTY LIMITED AND REGAL PARTNERS HOLDINGS PTY LIMITED 112,581,760 ORDINARY
+4. Details of present registered holders
+The persons registered as holders of the securities referred to in paragraph 3 above are as follows:
+Person entitled to be registered as Nature of relevant Class and Person's
+Holder of relevant interest Registered holder of securities holder (8) interest (6) number of votes
+securities
+Regal Partners Funds Power to dispose of, or
+Management Pty Ltd and its UBS NOMINEES PTY LTD UBS AG, AUSTRALIA BRANCH control the exercise of a 29,629,630
+associates power to dispose of, the ORDINARY 29,629,630
+securities.
+Regal Partners Funds Power to dispose of, or
+Management Pty Ltd and its MERRILL LYNCH (AUS) NOMINEES PTY LTD MERRILL LYNCH INTERNATIONAL control the exercise of a 8,878,056
+associates LIMITED power to dispose of, the ORDINARY 8,878,056
+securities.
+Regal Partners Funds Power to dispose of, or
+Management Pty Ltd and its J.P. MORGAN PRIME NOMINEES LTD J.P MORGAN SECURITIES PLC control the exercise of a 29,629,630
+associates power to dispose of, the ORDINARY 29,629,630
+securities.
+Regal Partners Funds Power to dispose of, or
+Management Pty Ltd and its CITICORP NOMINEES PTY LIMITED CITIGROUP GLOBAL MARKETS control the exercise of a 44,444,444
+associates LIMITED power to dispose of, the ORDINARY 44,444,444
+securities.
+
+=====PAGE=====
+
+5. Consideration
+The consideration paid for each relevant interest referred to in paragraph 3 above, and acquired in the four months prior to the day that the substantial holder became a
+substantial holder is as follows:
+Holder of relevant interest Date of acquisition Consideration (9) Class and number of securities
+See Annexure 2
+6. Associates
+The reasons the persons named in paragraph 3 above are associates of the substantial holder are as follows:
+Name and ACN/ARSN (if applicable) Nature of association
+REGAL PARTNERS LIMITED 100% OWNER OF REGAL PARTNERS FUNDS MANAGEMENT PTY LIMITED
+REGAL PARTNERS HOLDINGS PTY LIMITED 100% OWNED BY REGAL PARTNERS LIMITED
+7. Addresses
+The addresses of persons named in this form are as follows:
+Name Address
+REGAL PARTNERS FUNDS MANAGEMENT PTY LIMITED LEVEL 46, GATEWAY, 1 MACQUARIE PLACE, SYDNEY NSW 2000
+REGAL PARTNERS HOLDINGS PTY LIMITED LEVEL 46, GATEWAY, 1 MACQUARIE PLACE, SYDNEY NSW 2000
+REGAL PARTNERS LIMITED LEVEL 46, GATEWAY, 1 MACQUARIE PLACE, SYDNEY NSW 2000
+Signature
+print name capacityCandice Driver Company Secretary
+sign here date 4/05/2026
+Annexure 1
+Details of Substantial Holders
+ACN Name
+107 576 821 REGAL PARTNERS HOLDINGS PTY LIMITED
+610 797 138 REGAL PARTNERS FUNDS MANAGEMENT PTY LIMITED
+129 188 450 REGAL PARTNERS LIMITED
+
+=====PAGE=====
+
+Annexure 2
+Changes in Relevant Interests
+Consideration
+given in Persons
+Nature of relation to Number of securities Class of votes
+Date Person whose relevant interest changed Change change affected securities affected
+Regal Partners Funds Management Pty Limited as investment
+manager (and, where applicable, Regal Partners Holdings Pty Limited
+as trustee) (and Regal Partners Limited by virtue of its control of such
+23/04/2026 Buy 310504.00 2960000 Ordinary 2960000entitles)
+Regal Partners Funds Management Pty Limited as investment
+manager (and, where applicable, Regal Partners Holdings Pty Limited
+as trustee) (and Regal Partners Limited by virtue of its control of such
+24/04/2026 Buy 38692.20 257948 Ordinary 257948entitles)
+Regal Partners Funds Management Pty Limited as investment
+manager (and, where applicable, Regal Partners Holdings Pty Limited
+as trustee) (and Regal Partners Limited by virtue of its control of such
+27/04/2026 Buy 1216000.00 5000000 Ordinary 5000000entitles)
+Regal Partners Funds Management Pty Limited as investment
+manager (and, where applicable, Regal Partners Holdings Pty Limited
+as trustee) (and Regal Partners Limited by virtue of its control of such
+29/04/2026 Buy 125354.51 660108 Ordinary 660108entitles)
+Regal Partners Funds Management Pty Limited as investment
+manager (and, where applicable, Regal Partners Holdings Pty Limited
+as trustee) (and Regal Partners Limited by virtue of its control of such
+30/04/2026 Buy 7000000.02 103703704 Ordinary 103703704entitles)

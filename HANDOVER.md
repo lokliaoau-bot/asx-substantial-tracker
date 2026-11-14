@@ -356,6 +356,21 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 
 没做到的：计划要求“逢低”占比降到 25% 以下。实际 70 条逢低里 60 条是买在一年区间低位，本来就是逢低；更严的门槛会让“逢低后跑赢指数”的比例下降，所以没硬压。
 
+### 第十八轮：认出配售、把“像调仓”说清楚
+
+1. **配售指纹**：认购配售新股是“一笔、整数金额”（Regal 认购 RIV 5,882,353 股 × $1.36 = $8,000,000.08）；在市场上一点点买的不会这么整齐。
+   多笔买入的均价乘出来碰巧接近整数的很多（试过 70 条里 31 条“像”），所以只认一笔的。没有融资公告时也可能是谈好价格的大宗交易，只加 1 分。
+2. **拆“像调仓”**：买和卖两两比日期得出“先后”（+1 先买后卖，−1 先卖后买，0 穿插）。|先后| ≥ 0.5 才说“先买后卖/先卖后买”，并说卖价比买价高还是低。
+   一笔整数金额的买入加上之后的卖出 = “认购配售后在市场上卖出”（对冲基金常见的配售套利）。对冲基金穿插着做的叫“日常交易”。
+3. **指数调整**：规则在现有数据上验证不了（只配出 1 条、还是错的），只做成调整窗口里的提醒，不打分。12 月调整（12/18）前后可以看看有没有命中、命中的对不对。
+4. **5% 线附近**：“刚好跌破 5% 线”是形式，不是目的；现在照样打分，把最像的目的写进理由和概率条。
+
+标签变化（和第十七轮比）：
+- “像调仓” → “日常交易（没有明确方向）”：Regal 的 PNR、VVA、ELS、YRL、EQT、FCL、EOL、TTT（7 月）、RTH（2025-02）等（对冲基金、穿插着做或历史里不知道先后）
+- “像调仓” → “先买后卖”：Regal NOL 2026-11-05（买的在 2025 年底到 2026 年 4 月、卖的在 2026 年 8 月前后，价格基本持平）、VVA 2026-11-12（卖价低 1.5%）、Hostplus ANN（卖价高 8.9%）
+- “像调仓” → “认购配售后在市场上卖出”：Regal RIV（$8M 整）、TTT（$4.5M 整，公司同期公告 A$16.5M 配售）
+- L1 PPC 2026-11-02：逢低加仓 → 参与配售加仓（15,795,000 股 × $1.00，公司同期公告 “Proposed issue of securities”）
+
 ## 6. 数据格式
 
 `data/notices.json`：
@@ -391,7 +406,7 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 232 passed，全部离线
+python -m pytest -q                             # 239 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
 python tools/replay.py --gold /tmp/new.json     # 和标准答案对比打分（第十六轮起每轮都要报）
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED

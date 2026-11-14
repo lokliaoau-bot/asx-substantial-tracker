@@ -1973,6 +1973,56 @@ def _close(a: float, b: float, rel: float, floor: float) -> bool:
     return abs(a - b) <= max(floor, rel * max(abs(a), abs(b)))
 
 
+INDEX_FAMILIES = {"Vanguard": r"vanguard", "State Street": r"state\s+street|\bssga\b", "BlackRock": r"blackrock|ishares",
+                  "Dimensional": r"dimensional"}
+INDEX_WINDOW = 14        # 季度指数调整（3/6/9/12 月第三个星期五生效）前后几天算“调整窗口”
+
+
+def rebalance_day(d: dt.date) -> dt.date | None:
+    """离 d 最近的季度指数调整生效日（3/6/9/12 月第三个星期五），相差超过 INDEX_WINDOW 天返回 None。"""
+    best = None
+    for y in (d.year - 1, d.year, d.year + 1):
+        for m in (3, 6, 9, 12):
+            first = dt.date(y, m, 1)
+            fri = first + dt.timedelta(days=(4 - first.weekday()) % 7 + 14)
+            if abs((fri - d).days) <= INDEX_WINDOW and (best is None or abs((fri - d).days) < abs((best - d).days)):
+                best = fri
+    return best
+
+
+def note_index_moves(ins: dict, e: dict, code: str, by_code: dict) -> None:
+    """第十八轮（4.3）：养老金 / 平台型基金的买卖落在季度指数调整窗口里，而且同期至少两家指数基金同方向变动——在理由里提一句。
+    只是提醒，不进打分：现有数据里只配出一条（AustralianSuper PLS），而且不在调整窗口里，规则没法验证。"""
+    if not isinstance(ins, dict) or ins.get("style") not in ("养老金", "平台/多经理") or ins.get("side") not in ("buy", "sell"):
+        return
+    try:
+        d0 = dt.date.fromisoformat(e.get("change_date") or e.get("date") or "")
+    except ValueError:
+        return
+    reb = rebalance_day(d0)
+    if not reb:
+        return
+    fams = set()
+    for o in by_code.get(code) or []:
+        txt = f"{o.get('holder_name') or ''} {o.get('headline') or ''}"
+        fam = next((k for k, pat in INDEX_FAMILIES.items() if re.search(pat, txt, re.I)), None)
+        if not fam or o.get("status") != "parsed":
+            continue
+        vp = o.get("voting_power") or []
+        side = ("buy" if o.get("type") == "becoming" else "sell" if o.get("type") == "ceasing"
+                else ("buy" if vp[1] > vp[0] else "sell") if len(vp) == 2 and vp[0] != vp[1] else "")
+        try:
+            od = dt.date.fromisoformat(o.get("change_date") or o.get("date") or "")
+        except ValueError:
+            continue
+        if side == ins["side"] and abs((od - d0).days) <= 10:
+            fams.add(fam)
+    if len(fams) >= 2:
+        ins.setdefault("reasons", []).insert(-1, f"变动日在季度指数调整（{reb.month}/{reb.day} 生效）前后，同期 {'、'.join(sorted(fams))} 这些指数基金"
+                                                  f"也在{'买' if ins['side'] == 'buy' else '卖'}：这次可能有一部分是跟着指数调整的，不完全代表它的看法。")
+        ins.setdefault("tags", []).append("指数调整期")
+
+
 def find_counterparty(e: dict, code: str, holder: str, prev_vp: float | None, by_code: dict, holders: list[Holder]) -> dict:
     """见 _find_counterparty。存储里有坏数据时返回 {}（宁可不说倒手，也不能让解读出错）。"""
     try:
@@ -2101,6 +2151,10 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
                         insight.add_counterparty(item["insight"], cp, holder)
                 except Exception as ex:  # noqa: BLE001  倒手识别出错不能影响公告本身
                     log(f"  {item['code']} 倒手识别出错：{type(ex).__name__}: {ex}")
+                try:
+                    note_index_moves(item["insight"], e, item["code"], by_code)
+                except Exception as ex:  # noqa: BLE001
+                    log(f"  {item['code']} 指数基金对照出错：{type(ex).__name__}: {ex}")
             vp, votes = e.get("voting_power") or [], e.get("votes") or []
             last_seen[key] = {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None,
                               "type": e.get("type"), "date": e.get("date")}

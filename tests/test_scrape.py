@@ -1486,7 +1486,8 @@ def test_real_new_position_ellerston_dxn():
 def test_real_two_way_trading_regal_nol():
     tr, j, _ = sample("nol_regal_604")
     assert tr["buy_qty"] == 14491130 and tr["sell_qty"] == 16005756
-    assert j["action"] == "rotate" and j["style"] == "多空对冲基金"
+    assert j["action"] == "flip" and j["style"] == "多空对冲基金"                 # 第十八轮：买的大多在前、卖的大多在后
+    assert any("先买进再卖出" in r and "基本持平" in r for r in j["reasons"])
     assert any("2025/10/23" in r for r in j["reasons"])                # 跨年的明细带上年份
 
 
@@ -3021,3 +3022,94 @@ def test_empty_price_series_keeps_previous_context(monkeypatch):
     scrape.add_prices([e, fresh])
     assert e["px"] == old and e["px_v"] == 5 and e["px_tries"] == 1
     assert fresh["px"] == {} and fresh["px_v"] == scrape.PX_VERSION
+
+
+# ---------------------------------------------------------------- 第十八轮：配售指纹、拆“像调仓”、指数调整
+
+def test_round_block_fingerprint():
+    assert insight.round_block({"n_buy": 1, "buy_qty": 5_882_353, "buy_price": 1.36})            # $8,000,000.08
+    assert insight.round_block({"n_buy": 1, "buy_qty": 15_795_000, "buy_price": 1.0})
+    assert not insight.round_block({"n_buy": 3, "buy_qty": 5_882_353, "buy_price": 1.36})        # 多笔的均价不认
+    assert not insight.round_block({"n_buy": 1, "buy_qty": 5_882_353, "buy_price": 1.3611})
+    assert not insight.round_block({"n_buy": 1, "buy_qty": 100_000, "buy_price": 1.0})           # 太小
+    for bad in ({}, {"n_buy": 1, "buy_qty": "x", "buy_price": 1}, {"n_buy": 1, "buy_qty": -5, "buy_price": 1}, {"n_buy": True}):
+        assert not insight.round_block(bad)
+
+
+def test_buy_sell_order():
+    assert insight.buy_sell_order([["2026-01-01", 100], ["2026-03-01", -100]]) == 1.0
+    assert insight.buy_sell_order([["2026-03-01", 100], ["2026-01-01", -100]]) == -1.0
+    assert insight.buy_sell_order([["2026-01-01", 100], ["2026-02-01", -100], ["2026-03-01", 100]]) == 0.0
+    assert insight.buy_sell_order([["2026-01-01", 100]]) is None and insight.buy_sell_order(None) is None
+    assert insight.buy_sell_order([["x"], [None, "a"], "zz"]) is None
+
+
+def _two_way(**kw):
+    tr = {"n": 20, "n_buy": 10, "n_sell": 10, "buy_qty": 1_000_000, "sell_qty": 1_100_000, "net_qty": -100_000, "first": "2026-01-05",
+          "last": "2026-10-30", "days": 20, "buy_price": 2.0, "sell_price": 2.1, "kinds": {"on_market": 2_100_000}}
+    tr.update(kw)
+    return _sell(style="hedge", voting_power=[8.0, 7.9], votes=[8_000_000, 7_900_000], trades=tr)
+
+
+def test_two_way_trading_is_split():
+    early_buys = [[f"2026-0{m}-10", 100_000] for m in range(1, 6)] + [[f"2026-0{m}-10", -110_000] for m in range(6, 10)]
+    r = insight.judge(_two_way(daily=early_buys))
+    assert r["action"] == "flip" and any("先买进再卖出" in x and "高 5.0%" in x for x in r["reasons"])
+    r = insight.judge(_two_way(daily=[[d, -q] for d, q in early_buys]))
+    assert r["action"] == "flip_back"
+    mixed = [[f"2026-0{m}-10", 100_000 if m % 2 else -110_000] for m in range(1, 10)]
+    r = insight.judge(_two_way(daily=mixed))
+    assert r["action"] == "churn" and any("穿插着做" in x and "对冲基金的日常交易" in x for x in r["reasons"])
+    r = insight.judge(_two_way())                                                # 没有逐日数字：不说“穿插”
+    assert r["action"] == "churn" and not any("穿插" in x for x in r["reasons"])
+    r = insight.judge(_two_way(ord=0.8))                                         # 历史记录只留了先后的数
+    assert r["action"] == "flip"
+    r = insight.judge(_two_way(n_buy=1, buy_qty=1_000_000, buy_price=1.5, daily=early_buys))   # 一笔 $150 万整的认购，之后卖出
+    assert r["action"] == "flip_plc" and "参与融资" in r["tags"] and any("认购配售新股" in x for x in r["reasons"])
+    r = insight.judge(_two_way(daily=early_buys, buy_qty=500_000, net_qty=-600_000))           # 明细对不上：不判先后
+    assert r["action"] in ("churn", "rotate") or r["action"].startswith("trim")
+
+
+def test_round_block_buy_points_to_placement():
+    base = _buy(trades={**_buy()["trades"], "n_buy": 1, "buy_qty": 2_000_000, "buy_price": 1.25})   # $250 万整
+    r = insight.judge(base)
+    assert "整数金额" in r["tags"] and any("谈好价格的一笔大宗交易" in x for x in r["reasons"])
+    r = insight.judge({**base, "ev": RAISE})
+    assert r["action"] == "add_placement" and any("配合公司同期的融资公告" in x for x in r["reasons"])
+
+
+def test_history_record_keeps_buy_sell_order():
+    e = {"id": "1", "type": "change", "votes": [1, 2], "trades": {"n": 2, "daily": [["2026-01-01", 5], ["2026-02-01", -3]]}}
+    rec = insight.history_record(e)
+    assert rec["tr"]["ord"] == 1.0 and "daily" not in rec["tr"]
+
+
+def test_rebalance_window_and_index_note():
+    assert scrape.rebalance_day(dt.date(2026, 12, 15)) == dt.date(2026, 12, 18)
+    assert scrape.rebalance_day(dt.date(2026, 3, 30)) == dt.date(2026, 3, 20)
+    assert scrape.rebalance_day(dt.date(2026, 11, 2)) is None
+    vg = {"status": "parsed", "holder_name": "The Vanguard Group", "headline": "Becoming a substantial holder", "type": "becoming", "change_date": "2026-12-16"}
+    ss = {"status": "parsed", "holder_name": "State Street Corporation", "headline": "Change in substantial holding", "type": "change",
+          "voting_power": [5.5, 6.1], "change_date": "2026-12-19"}
+    e = {"change_date": "2026-12-17"}
+    ins = {"style": "养老金", "side": "buy", "reasons": ["a", "最后"], "tags": []}
+    scrape.note_index_moves(ins, e, "XYZ", {"XYZ": [vg, ss]})
+    assert "指数调整期" in ins["tags"] and "Vanguard" in ins["reasons"][1] and ins["reasons"][-1] == "最后"
+    for bad_ins, bad_e, groups in (({**ins, "style": "主动选股基金", "tags": []}, e, {"XYZ": [vg, ss]}),
+                                   ({**ins, "tags": []}, {"change_date": "2026-11-02"}, {"XYZ": [vg, ss]}),
+                                   ({**ins, "tags": []}, e, {"XYZ": [vg]}), ({**ins, "side": "sell", "tags": []}, e, {"XYZ": [vg, ss]}),
+                                   ({**ins, "tags": []}, {"change_date": "x"}, {}), ({}, {}, {})):
+        scrape.note_index_moves(bad_ins, bad_e, "XYZ", groups)
+        assert "指数调整期" not in (bad_ins.get("tags") or [])
+
+
+def test_slip_keeps_label_but_gets_purposes():
+    prev = {"vp": 5.1, "votes": 5_100_000, "type": "change", "date": "2026-06-01"}
+    tr = {**_sell()["trades"], "sell_qty": 150_000, "net_qty": -150_000}
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev, trades=tr, px=_px(r6m=0.6, r12m=0.9, pos=0.95)))
+    assert r["action"] == "slip" and r["label"] == "小幅卖出，刚好跌破 5% 线"
+    assert r["purposes"] and r["purposes"][0]["k"] == "profit"
+    assert any(x.startswith("形式上只是刚好跌破 5% 线；综合打分：") for x in r["reasons"])
+    # 来回交易也不会盖过“刚好跌破”
+    tr2 = {**tr, "buy_qty": 120_000, "n_buy": 3, "buy_price": 2.0, "net_qty": -30_000, "sell_qty": 150_000}
+    assert insight.judge(_sell(type="ceasing", voting_power=[], votes=[], prev=prev, trades=tr2))["action"] == "slip"

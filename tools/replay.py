@@ -91,7 +91,8 @@ def diff(a: dict, b: dict) -> None:
 
 # 不打分、直接定性的标签 → 标准答案里用的键
 FIXED_KEY = {"passive_dilute": "passive", "passive_up": "passive", "lending": "lending", "transfer": "transfer", "own_product": "own",
-             "restructure": "restructure", "slip": "line", "back": "line", "rotate": "rotate", "takeover": "deal", "unknown": "base"}
+             "restructure": "restructure", "slip": "line", "back": "line", "rotate": "rotate", "takeover": "deal", "unknown": "base",
+             "churn": "rotate", "flip": "short", "flip_back": "short", "flip_plc": "plc"}
 BASE_ACTIONS = {"add", "build", "cross_up", "trim", "exit"}
 
 

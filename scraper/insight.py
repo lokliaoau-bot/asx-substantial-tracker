@@ -518,13 +518,57 @@ LABELS = {
     "trim_hand": "整块转让给接盘方（倒手）", "exit_hand": "整块转让给接盘方，降到 5% 以下（倒手）",
     "add_take": "从别的大股东手里接过一大块（倒手）", "build_take": "接过别的大股东的一大块，成为大股东（倒手）",
     "own_product": "自家旗下产品的持股变化（不是选股）", "restructure": "股份合并/拆分", "unknown": "看不出来",
+    "flip_plc": "认购配售后在市场上卖出（像配售套利）", "flip": "先买后卖，做了一个来回", "flip_back": "先卖后买回，做了一个来回",
+    "churn": "边买边卖，日常交易（没有明确方向）",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
         "exit_loss": "bear", "exit": "bear", "add_flow": "bull", "swap_in": "bull", "swap_out": "bear",
         "add_pull": "bull", "add_prog": "bull", "trim_bounce": "bear", "exit_bounce": "bear", "trim_wind": "bear", "exit_wind": "bear",
         "trim_deal": "neutral", "exit_deal": "neutral", "own_product": "neutral",
-        "trim_hand": "neutral", "exit_hand": "neutral", "add_take": "bull", "build_take": "bull"}
+        "trim_hand": "neutral", "exit_hand": "neutral", "add_take": "bull", "build_take": "bull",
+        "flip_plc": "neutral", "flip": "neutral", "flip_back": "neutral", "churn": "neutral"}
+
+
+RBLK_PLC = 3.5          # 一笔整数金额的买入、公司同期公告了融资：给“参与融资”加的分
+RBLK_PLC_NORAISE = 1.0  # 没看到融资公告时（也可能是谈好价格的大宗交易）
+
+
+def round_block(tr: dict) -> bool:
+    """第十八轮：明细里的买入只有一笔，而且金额正好是整数（差不到 1 块钱）——认购配售的典型样子（RIV 5,882,353 股 × $1.36 = $8,000,000）。
+    多笔买入的均价乘出来碰巧接近整数的很多，所以只认一笔的。"""
+    try:
+        q, p = float(tr.get("buy_qty") or 0), float(tr.get("buy_price") or 0)
+    except (TypeError, ValueError, AttributeError):
+        return False
+    if tr.get("n_buy") != 1 or q <= 0 or p <= 0:
+        return False
+    v = q * p
+    return v >= 200_000 and abs(v - round(v / 1000) * 1000) <= 1.0
+
+
+def _bounded(v, lo: float, hi: float) -> float | None:
+    """v 是 lo–hi 之间的数就原样返回，否则 None（坏数据当没有）。"""
+    return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and lo <= v <= hi else None
+
+
+def buy_sell_order(daily) -> float | None:
+    """买和卖谁先谁后：把每一股买入和每一股卖出两两比日期，买在前算 +1、卖在前算 −1，按股数加权平均。
+    +1 = 全部先买后卖，−1 = 全部先卖后买，0 = 穿插着做。daily 是每天的净买卖量，同一天又买又卖的看不到。"""
+    pos, neg = [], []
+    for row in daily or []:
+        try:
+            d, q = str(row[0]), float(row[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if q > 0:
+            pos.append((d, q))
+        elif q < 0:
+            neg.append((d, -q))
+    if not pos or not neg:
+        return None
+    sc = sum(q * r * ((a < b) - (a > b)) for a, q in pos for b, r in neg)
+    return round(sc / (sum(q for _, q in pos) * sum(r for _, r in neg)), 2)
 
 
 def fq(n: float) -> str:
@@ -675,7 +719,9 @@ def history_record(e: dict) -> dict:
     blk = block_of(tr.get("daily"), px.get("adv"), side) if side and (buy or sell) else {}
     if blk:
         rec["blk"] = blk
-    tr.pop("daily", None)
+    order = buy_sell_order(tr.pop("daily", None))
+    if order is not None:
+        tr["ord"] = order                     # 第十八轮：买卖谁先谁后（逐日明细不进历史，只留这个数）
     if tr:
         rec["tr"] = tr
     if px:
@@ -1037,6 +1083,7 @@ def judge(n: dict) -> dict | None:
         elif part <= 0.03 and days >= 5:
             reasons.append(f"分 {days} 天慢慢{verb}，只占同期成交量的 {max(part * 100, 0.1):.1g}% 左右，不着急。")
     churn = min(buy, sell) / max(buy, sell) if rows_ok and max(buy, sell) else 0.0
+    round_blk = bool(rows_ok and buy and round_block(tr))
     placement = rows_ok and buy and share("placement") * gross >= 0.5 * buy
 
     # ---- 4. 股价位置
@@ -1086,6 +1133,11 @@ def judge(n: dict) -> dict | None:
             tags.append("参与融资")
         else:
             reasons.append(f"期间公司公告过融资（{ev_txt(x)}），一部分买入可能来自认购新股。")
+    if direction == "buy" and round_blk and not placement and sell < 0.5 * buy:
+        reasons.append(f"明细里的买入只有一笔：{fq(buy)} × {fp(tr['buy_price'])}，金额正好是整数（约 ${buy * tr['buy_price'] / 1e6:,.2f}M）——"
+                       "在市场上一点点买的不会这么整齐，" + ("配合公司同期的融资公告，很像认购配售新股（价格是公司定的）。" if raise_ev
+                                                         else "像是认购配售新股，或者和别人谈好价格的一笔大宗交易。"))
+        tags.append("整数金额")
     tk_all = evs("takeover", 60, 0)
     # 消息一出股价跳涨：公司是被收购的一方。近期只有走流程的公告（寄出方案手册之类）时，往前找当初那条让股价跳涨的消息
     code = str(n.get("code") or "")
@@ -1125,21 +1177,38 @@ def judge(n: dict) -> dict | None:
             res_j = x.get("j") or 0.0
 
     # ---- 5. 结论
+    form = ""
     # 在 5% 披露线附近来回：这份公告本身只是很小的一步
     if t == "ceasing" and prev.get("vp") and prev["vp"] <= 5.6 and rows_ok:
         net_sold = sell - buy
         if (prev.get("votes") and 0 <= net_sold <= 0.05 * prev["votes"]) or (not prev.get("votes") and prev["vp"] <= 5.3):
             reasons.append("上一次披露时就只比 5% 高一点，这次只卖了很少一部分就跌破了披露线，谈不上清仓。")
-            return done("slip")
+            form = "slip"             # 第十八轮（4.5）：标签照旧说形式，但继续往下打分，给出目的
+
     if t == "becoming" and prev.get("type") == "ceasing" and _days_between(prev.get("date"), n.get("date")) <= 45:
         reasons.append(f"它在 {md(prev.get('date'))} 刚公告过跌破 5%，现在又回到 5% 以上：持仓一直在披露线附近，"
                        "来回越线不代表大动作。")
         return done("back")
     two_way = rows_ok and (churn >= 0.6 or (churn >= 0.45 and chg_frac is not None and abs(chg_frac) < 0.10))
-    if two_way and t != "becoming" and not (chg_frac is not None and abs(chg_frac) >= 0.25):
-        reasons.append(f"买和卖的量差不多（少的一边是多的一边的 {churn * 100:.0f}%），净变动只是来回交易后的差额，"
-                       f"更像日常调仓，{'净买入' if direction == 'buy' else '净卖出'}的信号不强。")
-        return done("rotate")
+    if two_way and t != "becoming" and not form and not (chg_frac is not None and abs(chg_frac) >= 0.25):
+        # 第十八轮：把“像调仓”拆开——认购配售再卖出 / 先买后卖 / 先卖后买 / 真的穿插着做
+        net_word = "净买入" if direction == "buy" else "净卖出"
+        order = None if mismatch else (buy_sell_order(tr.get("daily")) if tr.get("daily") else _bounded(tr.get("ord"), -1, 1))
+        gain = (sp / bp - 1) if bp and sp else None
+        g_txt = (f"，卖出均价比买入价{'高' if gain >= 0 else '低'} {abs(gain) * 100:.1f}%" + ("（赚了差价）" if gain >= 0.01 else "（这一把没赚到）" if gain <= -0.01 else "（基本持平）")
+                 if gain is not None else "")
+        if round_blk and sell >= 0.5 * buy:
+            reasons.append(f"明细里的买入只有一笔：{fq(buy)} × {fp(tr['buy_price'])}，金额正好是整数（约 ${buy * tr['buy_price'] / 1e6:,.2f}M）——"
+                           f"这是认购配售新股的样子；同期又在市场上卖出 {fq(sell)}{g_txt}。对冲基金常这么做：用折扣价认购新股，再在市场上卖掉。")
+            tags.append("参与融资")
+            return done("flip_plc")
+        if order is not None and abs(order) >= 0.5:
+            reasons.append(("买的量大多在前、卖的量大多在后：先买进再卖出" if order > 0 else "卖的量大多在前、买的量大多在后：先卖出再买回")
+                           + f"，做了一个来回{g_txt}。{net_word}只是来回之后的差额，方向信号不强。")
+            return done("flip" if order > 0 else "flip_back")
+        reasons.append(f"买和卖的量差不多（少的一边是多的一边的 {churn * 100:.0f}%）" + ("，而且是穿插着做的" if order is not None else "") + "，净变动只是来回交易后的差额，"
+                       + (f"是对冲基金的日常交易，{net_word}的信号不强。" if style == "hedge" else f"更像日常调仓，{net_word}的信号不强。"))
+        return done("churn" if style == "hedge" else "rotate")
     if two_way and t == "becoming":
         reasons.append(f"这 4 个月里也卖了不少（卖出量是买入量的 {sell / buy * 100:.0f}%），是边买边卖做上来的，"
                        "不是一路只买。" if buy >= sell else "这 4 个月里卖的比买的还多，能到 5% 靠的是更早的底仓。")
@@ -1159,7 +1228,7 @@ def judge(n: dict) -> dict | None:
          "highpos": _clip((pos - 0.5) / 0.3, 0, 1) if pos is not None else 0.0,
          "plc": 0.0, "raise": bool(raise_ev), "so_up": bool(so_chg is not None and so_chg >= 0.03), "plc_inferred": placement_said,
          "target": bool(tk_ev and churn < 0.6), "res_j": res_j, "cost_d": None, "gain": None, "own_gain": None,
-         "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
+         "rblk": bool(direction == "buy" and round_blk and sell < 0.5 * buy), "form": form, "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
     tl = {} if mismatch else (n.get("tl") or {})
     if tl.get("n") and tl.get("down_share") is not None:
         f["tl"] = tl
@@ -1453,6 +1522,10 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
                 add("mom", -1.5)
         elif f.get("offmkt"):
             add("plc", 0.5, "买入量超过同期场内成交量")
+        if f.get("rblk") and f.get("plc", 0.0) < 0.5:     # 第十八轮：一笔整数金额的买入；没有融资公告时也可能是谈好的大宗交易
+            add("plc", RBLK_PLC if f.get("raise") else RBLK_PLC_NORAISE, "只有一笔、金额正好是整数的买入，像认购配售")
+            add("dip", -1.0)
+            add("mom", -1.0)
         if f.get("target"):
             add("arb", 3.2 if style == "hedge" else 1.6, "买入发生在公司被收购的消息之后")
         if tl.get("n"):
@@ -1641,6 +1714,8 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
                                     and frozenset((x["k"], top["k"])) not in COMPATIBLE for x in ranked):
         close = True                                       # 有另一种目的和它几乎同分：分不出主次，不硬贴标签
     action = f["base"] if close else PURPOSE_ACTION.get((f["side"], top["k"]), {}).get(f["base"], f["base"])
+    if f.get("form") in LABELS:          # 形式已经确定的（刚好跌破 5% 线）：标签说形式，目的放在概率和理由里
+        action = f["form"]
     pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= 0.45 else 0) + (1 if top["k"] != "base" and top["p"] >= 0.7 else 0)
     conf = "高" if pts >= 3 else "低" if pts <= 0 else "中"
     shown = [top] + [x for x in ranked if x is not top][:2]
@@ -1653,6 +1728,8 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
         line = f"综合打分：最像「{top['name']}」（{top['p'] * 100:.0f}%）" + (f"，依据：{'；'.join(top['why'][:3])}" if top["why"] else "")
     rest = [f"「{x['name']}」{x['p'] * 100:.0f}%" for x in shown[1:] if x["p"] >= 0.08]
     line += ("。其次是" + "、".join(rest) if rest else "") + "。"
+    if f.get("form") == "slip":
+        line = "形式上只是刚好跌破 5% 线；" + line
     rs = ins["reasons"]
     idx = next((i for i, r in enumerate(rs) if r.startswith("综合打分：")), None)
     if idx is not None:

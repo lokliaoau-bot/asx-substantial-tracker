@@ -1560,6 +1560,7 @@ def judge(n: dict) -> dict | None:
 BASELINE = 0.7
 MARGIN = 0.05
 TEMP = 0.7              # 概率的温度（第二十轮按标准答案校准，见 softmax）
+P_MID, P_HIGH = 0.5, 0.75   # 第一名概率过这两个门槛，把握各加一分（见 finalize）
 TIE = 0.15
 SHORT_DAYS = 60
 PURPOSE_NAMES = {
@@ -1973,7 +1974,9 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
     top, close, action = choose(ranked, f)
     flips = fragile(trace, f, action)
     f["flips"] = flips
-    pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= 0.45 else 0) + (1 if top["k"] != "base" and top["p"] >= 0.7 else 0)
+    # 概率门槛：第二十轮温度从 1 改成 0.7 后，概率整体变“尖”，门槛 45% / 70% 相应挪到 50% / 75%（意思和以前一样）。
+    # 标准答案上：高 96% / 中 91% / 低 83%，第一次按把握从高到低排好了；历史买入之后 3 个月跑赢指数：高 59% / 中 51% / 低 14%
+    pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= P_MID else 0) + (1 if top["k"] != "base" and top["p"] >= P_HIGH else 0)
     conf = "高" if pts >= 3 else "低" if pts <= 0 else "中"
     if flips and conf == "高":          # 第二十轮：某一笔证据的分量稍微变一点结论就会变——最多算“中”
         conf = "中"

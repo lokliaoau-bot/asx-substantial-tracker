@@ -1,0 +1,360 @@
+02/09/2026 9:32 am | Proposed issue of securities - TTT 6
+										
+                                            pages 21.3KB
+
+Appendix 3B - Proposed issue of securities
+Announcement Summary
+Entity name
+TITOMIC LIMITED
+Announcement Type
+New announcement
+Date of this announcement
+2/9/2026
+The Proposed issue is:
+A placement or other type of issue
+Total number of +securities proposed to be issued for a placement or other type of issue
+Maximum Number of
+ASX +security code +Security description +securities to be issued
+New class-code to be OPTIONS EXPIRING 8-SEP-2029 EX $0.30 25,000,000
+confirmed
+TTT ORDINARY FULLY PAID 126,923,078
+Proposed +issue date
+8/9/2026
+Refer to next page for full details of the announcement
+Appendix 3B - Proposed issue of securities 1 / 6
+Appendix 3B - Proposed issue of securities
+Part 1 - Entity and announcement details
+1.1 Name of +Entity
+TITOMIC LIMITED
+We (the entity named above) give ASX the following information about a proposed issue of +securities and, if ASX agrees
+to +quote any of the +securities (including any rights) on a +deferred settlement basis, we agree to the matters set out in
+Appendix 3B of the ASX Listing Rules.
+If the +securities are being offered under a +disclosure document or +PDS and are intended to be quoted on ASX, we also
+apply for quotation of all of the +securities that may be issued under the +disclosure document or +PDS on the terms set
+out in Appendix 2A of the ASX Listing Rules (on the understanding that once the final number of +securities issued under
+the +disclosure document or +PDS is known, in accordance with Listing Rule 3.10.3C, we will complete and lodge with ASX
+an Appendix 2A online form notifying ASX of their issue and applying for their quotation).
+1.2 Registered Number Type Registration Number
+ACN 602793644
+1.3 ASX issuer code
+TTT
+1.4 The announcement is
+New announcement
+1.5 Date of this announcement
+2/9/2026
+1.6 The Proposed issue is:
+A placement or other type of issue
+Appendix 3B - Proposed issue of securities 2 / 6
+Appendix 3B - Proposed issue of securities
+Part 7 - Details of proposed placement or other issue
+Part 7A - Conditions
+7A.1 Do any external approvals need to be obtained or other conditions satisfied before the placement or other
+type of issue can proceed on an unconditional basis?
+No
+Part 7B - Issue details
+Is the proposed security a 'New Will the proposed issue of this
+class' (+securities in a class that is +security include an offer of
+not yet quoted or recorded by ASX) attaching +securities?
+or an 'Existing class' (additional No
+securities in a class that is already
+quoted or recorded by ASX)?
+Existing class
+Details of +securities proposed to be issued
+ASX +security code and description
+TTT : ORDINARY FULLY PAID
+Number of +securities proposed to be issued
+126,923,078
+Offer price details
+Are the +securities proposed to be issued being issued for a cash
+consideration?
+Yes
+In what currency is the cash What is the issue price per
+consideration being paid? +security?
+AUD - Australian Dollar AUD 0.13000
+Will these +securities rank equally in all respects from their issue date with
+the existing issued +securities in that class?
+Yes
+Is the proposed security a 'New Will the proposed issue of this
+class' (+securities in a class that is +security include an offer of
+not yet quoted or recorded by ASX) attaching +securities?
+or an 'Existing class' (additional No
+securities in a class that is already
+quoted or recorded by ASX)?
+New class
+Appendix 3B - Proposed issue of securities 3 / 6
+Appendix 3B - Proposed issue of securities
+Details of +securities proposed to be issued
+ISIN Code (if Issuer is a foreign company and +securities do not have +CDIs
+issued over them)
+Have you received confirmation from Will the entity be seeking quotation
+ASX that the terms of the proposed of the 'new' class of +securities on
++securities are appropriate and ASX?
+equitable under listing rule 6.1? No
+No
+ASX +security code +Security description
+New class-code to be confirmed OPTIONS EXPIRING 8-SEP-2029 EX $0.30
++Security type
+Options
+Number of +securities proposed to be issued
+25,000,000
+Offer price details
+Are the +securities proposed to be issued being issued for a cash consideration?
+No
+Please describe the consideration being provided for the +securities
+Options are being issued as part of fees payable to Joint Lead Managers at an issue price of $0.00000001 per option.
+Please provide an estimate of the AUD equivalent of the consideration being
+provided for the +securities
+0.250000
+Will all the +securities issued in this class rank equally in all respects from
+their issue date?
+Yes
+Options details
++Security currency Exercise price Expiry date
+AUD - Australian Dollar AUD 0.3000 8/9/2029
+Details of the type of +security that will be issued if the option is exercised
+TTT : ORDINARY FULLY PAID
+Number of securities that will be issued if the option is exercised
+One ordinary share per each option
+Please provide a URL link for a document lodged with ASX setting out the material terms of the +securities
+proposed to be issued or provide the information by separate announcement.
+Options issued for services provided with a $0.30 exercise price and three year expiry
+Appendix 3B - Proposed issue of securities 4 / 6
+Appendix 3B - Proposed issue of securities
+Part 7C - Timetable
+7C.1 Proposed +issue date
+8/9/2026
+Part 7D - Listing Rule requirements
+7D.1 Has the entity obtained, or is it obtaining, +security holder approval for the entire issue under listing rule 7.1?
+No
+7D.1b Are any of the +securities proposed to be issued without +security holder approval using the entity's 15%
+placement capacity under listing rule 7.1?
+Yes
+7D.1b ( i ) How many +securities are proposed to be issued without security holder approval using the entity's 15%
+placement capacity under listing rule 7.1?
+126,923,078 ordinary shares and 25,000,000 options
+7D.1c Are any of the +securities proposed to be issued without +security holder approval using the entity's
+additional 10% placement capacity under listing rule 7.1A (if applicable)?
+No
+7D.2 Is a party referred to in listing rule 10.11 participating in the proposed issue?
+No
+7D.3 Will any of the +securities to be issued be +restricted securities for the purposes of the listing rules?
+No
+7D.4 Will any of the +securities to be issued be subject to +voluntary escrow?
+No
+Part 7E - Fees and expenses
+7E.1 Will there be a lead manager or broker to the proposed issue?
+Yes
+7E.1a Who is the lead manager/broker?
+Canaccord Genuity (Australia) Limited and Peloton Capital Pty Ltd acted Joint Lead Managers and Bookrunners to the
+Placement. Bell Potter Securities Limited acted as Co-Manager.
+7E.1b What fee, commission or other consideration is payable to them for acting as lead manager/broker?
+6% of proceeds plus $50,000 payable to the Co-Manager plus the issue of options pursuant to this Appendix.
+7E.2 Is the proposed issue to be underwritten?
+No
+7E.4 Details of any other material fees or costs to be incurred by the entity in connection with the proposed issue
+Appendix 3B - Proposed issue of securities 5 / 6
+Appendix 3B - Proposed issue of securities
+Part 7F - Further Information
+7F.01 The purpose(s) for which the entity is issuing the securities
+Scaling capacity at Titomic's Huntsville facility through additional equipment; technical and other expansionary hires to
+support production ramp; technology, automation and digital enhancement; and working capital and reserve.
+7F.1 Will the entity be changing its dividend/distribution policy if the proposed issue proceeds?
+NoNo
+7F.2 Any other information the entity wishes to provide about the proposed issue
+7F.3 Any on-sale of the +securities proposed to be issued within 12 months of their date of issue will comply with
+the secondary sale provisions in sections 707(3) and 1012C(6) of the Corporations Act by virtue of:
+The publication of a cleansing notice under section 708A(5), 708AA(2)(f), 1012DA(5) or 1012DAA(2)(f)The publication of a cleansing notice under section 708A(5), 708AA(2)(f), 1012DA(5) or 1012DAA(2)(f)
+Appendix 3B - Proposed issue of securities 6 / 6
+
+=====
+
+Appendix 3B - Proposed issue of securities
+Appendix 3B - Proposed issue of securities 1 / 6
+Announcement Summary
+Entity name
+TITOMIC LIMITED
+Announcement Type
+New announcement
+Date of this announcement
+2/9/2026
+The Proposed issue is:
+Total number of +securities proposed to be issued for a placement or other type of issue
+ASX +security code +Security description
+Maximum Number of
++securities to be issued
+New class-code to be
+confirmed
+OPTIONS EXPIRING 8-SEP-2029 EX $0.30 25,000,000
+TTT ORDINARY FULLY PAID 126,923,078
+Proposed +issue date
+8/9/2026
+Refer to next page for full details of the announcement
+A placement or other type of issue
+Appendix 3B - Proposed issue of securities
+Appendix 3B - Proposed issue of securities 2 / 6
+Part 1 - Entity and announcement details
+1.1 Name of +Entity
+TITOMIC LIMITED
+We (the entity named above) give ASX the following information about a proposed issue of +securities and, if ASX agrees
+to +quote any of the +securities (including any rights) on a +deferred settlement basis, we agree to the matters set out in
+Appendix 3B of the ASX Listing Rules.
+If the +securities are being offered under a +disclosure document or +PDS and are intended to be quoted on ASX, we also
+apply for quotation of all of the +securities that may be issued under the +disclosure document or +PDS on the terms set
+out in Appendix 2A of the ASX Listing Rules (on the understanding that once the final number of +securities issued under
+the +disclosure document or +PDS is known, in accordance with Listing Rule 3.10.3C, we will complete and lodge with ASX
+an Appendix 2A online form notifying ASX of their issue and applying for their quotation).
+1.2 Registered Number Type
+ACN
+Registration Number
+602793644
+1.3 ASX issuer code
+TTT
+1.4 The announcement is
+1.5 Date of this announcement
+2/9/2026
+1.6 The Proposed issue is:
+A placement or other type of issue
+New announcement
+Appendix 3B - Proposed issue of securities
+Appendix 3B - Proposed issue of securities 3 / 6
+Part 7 - Details of proposed placement or other issue
+Part 7A - Conditions
+7A.1 Do any external approvals need to be obtained or other conditions satisfied before the placement or other
+type of issue can proceed on an unconditional basis?
+Part 7B - Issue details
+Is the proposed security a 'New
+class' (+securities in a class that is
+not yet quoted or recorded by ASX)
+or an 'Existing class' (additional
+securities in a class that is already
+quoted or recorded by ASX)?
+Will the proposed issue of this
++security include an offer of
+attaching +securities?
+Details of +securities proposed to be issued
+ASX +security code and description
+TTT : ORDINARY FULLY PAID
+Number of +securities proposed to be issued
+126,923,078
+Offer price details
+Are the +securities proposed to be issued being issued for a cash
+consideration?
+In what currency is the cash
+consideration being paid?
+AUD - Australian Dollar
+What is the issue price per
++security?
+AUD 0.13000
+Will these +securities rank equally in all respects from their issue date with
+the existing issued +securities in that class?
+Is the proposed security a 'New
+class' (+securities in a class that is
+not yet quoted or recorded by ASX)
+or an 'Existing class' (additional
+securities in a class that is already
+quoted or recorded by ASX)?
+Will the proposed issue of this
++security include an offer of
+attaching +securities?
+No
+New class
+Yes
+Yes
+No
+Existing class
+No
+Appendix 3B - Proposed issue of securities
+Appendix 3B - Proposed issue of securities 4 / 6
+Details of +securities proposed to be issued
+ISIN Code (if Issuer is a foreign company and +securities do not have +CDIs
+issued over them)
+Have you received confirmation from
+ASX that the terms of the proposed
++securities are appropriate and
+equitable under listing rule 6.1?
+Will the entity be seeking quotation
+of the 'new' class of +securities on
+ASX?
+ASX +security code
+New class-code to be confirmed
++Security description
+OPTIONS EXPIRING 8-SEP-2029 EX $0.30
++Security type
+Options
+Number of +securities proposed to be issued
+25,000,000
+Offer price details
+Are the +securities proposed to be issued being issued for a cash consideration?
+Please describe the consideration being provided for the +securities
+Options are being issued as part of fees payable to Joint Lead Managers at an issue price of $0.00000001 per option.
+Please provide an estimate of the AUD equivalent of the consideration being
+provided for the +securities
+0.250000
+Will all the +securities issued in this class rank equally in all respects from
+their issue date?
+Options details
++Security currency
+AUD - Australian Dollar
+Exercise price
+AUD 0.3000
+Expiry date
+8/9/2029
+Details of the type of +security that will be issued if the option is exercised
+TTT : ORDINARY FULLY PAID
+Number of securities that will be issued if the option is exercised
+One ordinary share per each option
+Please provide a URL link for a document lodged with ASX setting out the material terms of the +securities
+proposed to be issued or provide the information by separate announcement.
+Options issued for services provided with a $0.30 exercise price and three year expiry
+Yes
+No
+No
+No
+Appendix 3B - Proposed issue of securities
+Appendix 3B - Proposed issue of securities 5 / 6
+Part 7C - Timetable
+7C.1 Proposed +issue date
+8/9/2026
+Part 7D - Listing Rule requirements
+7D.1 Has the entity obtained, or is it obtaining, +security holder approval for the entire issue under listing rule 7.1?
+7D.1b Are any of the +securities proposed to be issued without +security holder approval using the entity's 15%
+placement capacity under listing rule 7.1?
+7D.1b ( i ) How many +securities are proposed to be issued without security holder approval using the entity's 15%
+placement capacity under listing rule 7.1?
+126,923,078 ordinary shares and 25,000,000 options
+7D.1c Are any of the +securities proposed to be issued without +security holder approval using the entity's
+additional 10% placement capacity under listing rule 7.1A (if applicable)?
+7D.2 Is a party referred to in listing rule 10.11 participating in the proposed issue?
+7D.3 Will any of the +securities to be issued be +restricted securities for the purposes of the listing rules?
+7D.4 Will any of the +securities to be issued be subject to +voluntary escrow?
+Part 7E - Fees and expenses
+7E.1 Will there be a lead manager or broker to the proposed issue?
+7E.1a Who is the lead manager/broker?
+Canaccord Genuity (Australia) Limited and Peloton Capital Pty Ltd acted Joint Lead Managers and Bookrunners to the
+Placement. Bell Potter Securities Limited acted as Co-Manager.
+7E.1b What fee, commission or other consideration is payable to them for acting as lead manager/broker?
+6% of proceeds plus $50,000 payable to the Co-Manager plus the issue of options pursuant to this Appendix.
+7E.2 Is the proposed issue to be underwritten?
+7E.4 Details of any other material fees or costs to be incurred by the entity in connection with the proposed issue
+No
+Yes
+No
+No
+No
+No
+Yes
+No
+Appendix 3B - Proposed issue of securities
+Appendix 3B - Proposed issue of securities 6 / 6
+Part 7F - Further Information
+7F.01 The purpose(s) for which the entity is issuing the securities
+Scaling capacity at Titomic's Huntsville facility through additional equipment; technical and other expansionary hires to
+support production ramp; technology, automation and digital enhancement; and working capital and reserve.
+7F.1 Will the entity be changing its dividend/distribution policy if the proposed issue proceeds?
+7F.2 Any other information the entity wishes to provide about the proposed issue
+7F.3 Any on-sale of the +securities proposed to be issued within 12 months of their date of issue will comply with
+the secondary sale provisions in sections 707(3) and 1012C(6) of the Corporations Act by virtue of:
+The publication of a cleansing notice under section 708A(5), 708AA(2)(f), 1012DA(5) or 1012DAA(2)(f)
+No
+The publication of a cleansing notice under section 708A(5), 708AA(2)(f), 1012DA(5) or 1012DAA(2)(f)
+No

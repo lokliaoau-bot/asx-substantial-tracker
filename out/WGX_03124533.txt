@@ -1,0 +1,365 @@
+12/08/2026 4:42 pm | Application for quotation of securities - WGX 7
+										
+                                            pages 22.7KB
+
+Appendix 2A - Application for quotation of securities
+Announcement Summary
+Entity name
+WESTGOLD RESOURCES LIMITED.
+Announcement Type
+New announcement
+Date of this announcement
+Wednesday August 12, 2026
+The +securities to be quoted are:
++Securities issued, transferred or re-classified as a result of options being exercised or other +convertible securities being
+converted
+Total number of +securities to be quoted
+ASX +security Number of +securities to
+code Security description be quoted Issue date
+WGX ORDINARY FULLY PAID 3,986,899 07/08/2026
+Refer to next page for full details of the announcement
+Appendix 2A - Application for quotation of securities 1 / 7
+Appendix 2A - Application for quotation of securities
+Part 1 - Entity and announcement details
+1.1 Name of entity
+WESTGOLD RESOURCES LIMITED.
+We (the entity named above) apply for +quotation of the following +securities and agree to the matters set out in Appendix
+2A of the ASX Listing Rules.
+1.2 Registered number type Registration number
+ABN 60009260306
+1.3 ASX issuer code
+WGX
+1.4 The announcement is
+New announcement
+1.5 Date of this announcement
+12/8/2026
+Appendix 2A - Application for quotation of securities 2 / 7
+Appendix 2A - Application for quotation of securities
+Part 2 - Type of Issue
+2.1 The +securities to be quoted are:
++Securities issued, transferred or re-classified as a result of options being exercised or other +convertible securities being
+converted
+2.2 The +class of +securities to be quoted is:
+Additional +securities in a class that is already quoted on ASX ("existing class")
+Appendix 2A - Application for quotation of securities 3 / 7
+Appendix 2A - Application for quotation of securities
+Part 3B - number and type of +securities to be quoted (existing class) where issue has not previously been notified to ASX in an
+Appendix 3B
+Existing +securities converting into additional +securities in an existing class
+FROM (Existing Class)
+ASX +security code and description
+WGXAH : PERFORMANCE RIGHTS EXPIRING 01-OCT-2026
+TO (Existing Class)
+ASX +security code and description
+WGX : ORDINARY FULLY PAID
+Please state the number of options The first date the options were The last date the options were
+that were exercised or other exercised or other +convertible exercised or other +convertible
++convertible securities that were securities were converted securities were converted
+converted 7/8/2026 7/8/2026
+3,486,899
+Is this all of the options or other +convertible securities on issue of that type (ie have all of those options now been
+exercised or have all of those convertible securities now been converted)?
+No
+The right of the holder of the options or other +convertible securities to receive the +underlying securities is being
+satisfied by:
+An issue of new +securities
+The underlying +securities being received by the holder are:
+Intended to be, but are not yet, quoted by ASX
+Were the options being exercised or other +convertible securities being converted issued under an +employee
+incentive scheme?
+Yes
+Are any of the options being exercised or other +convertible securities being converted held by +key management
+personnel (KMP) or an +associate?
+Yes
+Provide details of the KMP or +associates who are exercising options or converting convertible securities
+Number of options being exercised
+or other +convertible securities
+Name of KMP Name of registered holder being converted
+Wayne Bramwell Lisa Johnston 745,330
+Su Hau (Tommy) Heng Su Hau Heng 259,298
+Issue date
+7/8/2026
+Will the +securities to be quoted rank equally in all respects from their issue date with the existing issued
++securities in that class?
+Yes
+Appendix 2A - Application for quotation of securities 4 / 7
+Appendix 2A - Application for quotation of securities
+Issue details
+Number of +securities to be quoted
+3,486,899
+Are the +securities being issued for a cash consideration?
+No
+Please describe the consideration being provided for the +securities
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Please provide an estimate (in AUD) of the value of the consideration being provided per +security for the
++securities to be quoted
+0.000000
+Any other information the entity wishes to provide about the +securities to be quoted
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Existing +securities converting into additional +securities in an existing class
+FROM (Existing Class)
+ASX +security code and description
+WGXAJ : PERFORMANCE RIGHTS EXPIRING 30-JUN-2030
+TO (Existing Class)
+ASX +security code and description
+WGX : ORDINARY FULLY PAID
+Please state the number of options The first date the options were The last date the options were
+that were exercised or other exercised or other +convertible exercised or other +convertible
++convertible securities that were securities were converted securities were converted
+converted 7/8/2026 7/8/2026
+500,000
+Is this all of the options or other +convertible securities on issue of that type (ie have all of those options now been
+exercised or have all of those convertible securities now been converted)?
+No
+The right of the holder of the options or other +convertible securities to receive the +underlying securities is being
+satisfied by:
+An issue of new +securities
+The underlying +securities being received by the holder are:
+Intended to be, but are not yet, quoted by ASX
+Were the options being exercised or other +convertible securities being converted issued under an +employee
+incentive scheme?
+Yes
+Are any of the options being exercised or other +convertible securities being converted held by +key management
+personnel (KMP) or an +associate?
+Yes
+Provide details of the KMP or +associates who are exercising options or converting convertible securities
+Number of options being exercised
+or other +convertible securities
+Name of KMP Name of registered holder being converted
+Appendix 2A - Application for quotation of securities 5 / 7
+Appendix 2A - Application for quotation of securities
+Wayne Bramwell Lisa Johnston 500,000
+Issue date
+7/8/2026
+Will the +securities to be quoted rank equally in all respects from their issue date with the existing issued
++securities in that class?
+Yes
+Issue details
+Number of +securities to be quoted
+500,000
+Are the +securities being issued for a cash consideration?
+No
+Please describe the consideration being provided for the +securities
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Please provide an estimate (in AUD) of the value of the consideration being provided per +security for the
++securities to be quoted
+0.000000
+Any other information the entity wishes to provide about the +securities to be quoted
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Appendix 2A - Application for quotation of securities 6 / 7
+Appendix 2A - Application for quotation of securities
+Part 4 - Issued capital following quotation
+Following the quotation of the +securities the subject of this application, the issued capital of the entity will
+comprise:
+The figures in parts 4.1 and 4.2 below are automatically generated and may not reflect the entity's current issued capital if
+other Appendix 2A, Appendix 3G or Appendix 3H forms are currently with ASX for processing.
+4.1 Quoted +securities (total number of each +class of +securities quoted on ASX following the +quotation of the
++securities subject of this application)
+Total number of
+ASX +security code and description +securities on issue
+WGX : ORDINARY FULLY PAID 948,818,463
+4.2 Unquoted +securities (total number of each +class of +securities issued but not quoted on ASX)
+Total number of
+ASX +security code and description +securities on issue
+WGXAH : PERFORMANCE RIGHTS EXPIRING 01-OCT-2026 1,010,930
+WGXAI : PERFORMANCE RIGHTS EXPIRING 30-JUN-2029 3,451,439
+WGXAJ : PERFORMANCE RIGHTS EXPIRING 30-JUN-2030 4,437,743
+Appendix 2A - Application for quotation of securities 7 / 7
+
+=====
+
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 1 / 7
+Announcement Summary
+Entity name
+WESTGOLD RESOURCES LIMITED.
+Announcement Type
+New announcement
+Date of this announcement
+Wednesday August 12, 2026
+The +securities to be quoted are:
+Total number of +securities to be quoted
+ASX +security
+code Security description
+Number of +securities to
+be quoted Issue date
+WGX ORDINARY FULLY PAID 3,986,899 07/08/2026
+Refer to next page for full details of the announcement
++Securities issued, transferred or re-classified as a result of options being exercised or other +convertible securities being
+converted
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 2 / 7
+Part 1 - Entity and announcement details
+1.1 Name of entity
+WESTGOLD RESOURCES LIMITED.
+We (the entity named above) apply for +quotation of the following +securities and agree to the matters set out in Appendix
+2A of the ASX Listing Rules.
+1.2 Registered number type
+ABN
+Registration number
+60009260306
+1.3 ASX issuer code
+WGX
+1.4 The announcement is
+1.5 Date of this announcement
+12/8/2026
+New announcement
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 3 / 7
+Part 2 - Type of Issue
+2.1 The +securities to be quoted are:
+2.2 The +class of +securities to be quoted is:
+Additional +securities in a class that is already quoted on ASX ("existing class")
++Securities issued, transferred or re-classified as a result of options being exercised or other +convertible securities being
+converted
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 4 / 7
+Part 3B - number and type of +securities to be quoted (existing class) where issue has not previously been notified to ASX in an
+Appendix 3B
+Existing +securities converting into additional +securities in an existing class
+FROM (Existing Class)
+ASX +security code and description
+WGXAH : PERFORMANCE RIGHTS EXPIRING 01-OCT-2026
+TO (Existing Class)
+ASX +security code and description
+WGX : ORDINARY FULLY PAID
+Please state the number of options
+that were exercised or other
++convertible securities that were
+converted
+3,486,899
+The first date the options were
+exercised or other +convertible
+securities were converted
+7/8/2026
+The last date the options were
+exercised or other +convertible
+securities were converted
+7/8/2026
+Is this all of the options or other +convertible securities on issue of that type (ie have all of those options now been
+exercised or have all of those convertible securities now been converted)?
+The right of the holder of the options or other +convertible securities to receive the +underlying securities is being
+satisfied by:
+The underlying +securities being received by the holder are:
+Were the options being exercised or other +convertible securities being converted issued under an +employee
+incentive scheme?
+Are any of the options being exercised or other +convertible securities being converted held by +key management
+personnel (KMP) or an +associate?
+Provide details of the KMP or +associates who are exercising options or converting convertible securities
+Name of KMP Name of registered holder
+Number of options being exercised
+or other +convertible securities
+being converted
+Wayne Bramwell Lisa Johnston 745,330
+Su Hau (Tommy) Heng Su Hau Heng 259,298
+Issue date
+7/8/2026
+Will the +securities to be quoted rank equally in all respects from their issue date with the existing issued
++securities in that class?
+Yes
+Yes
+Yes
+Intended to be, but are not yet, quoted by ASX
+An issue of new +securities
+No
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 5 / 7
+Issue details
+Number of +securities to be quoted
+3,486,899
+Are the +securities being issued for a cash consideration?
+Please describe the consideration being provided for the +securities
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Please provide an estimate (in AUD) of the value of the consideration being provided per +security for the
++securities to be quoted
+0.000000
+Any other information the entity wishes to provide about the +securities to be quoted
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Existing +securities converting into additional +securities in an existing class
+FROM (Existing Class)
+ASX +security code and description
+WGXAJ : PERFORMANCE RIGHTS EXPIRING 30-JUN-2030
+TO (Existing Class)
+ASX +security code and description
+WGX : ORDINARY FULLY PAID
+Please state the number of options
+that were exercised or other
++convertible securities that were
+converted
+500,000
+The first date the options were
+exercised or other +convertible
+securities were converted
+7/8/2026
+The last date the options were
+exercised or other +convertible
+securities were converted
+7/8/2026
+Is this all of the options or other +convertible securities on issue of that type (ie have all of those options now been
+exercised or have all of those convertible securities now been converted)?
+The right of the holder of the options or other +convertible securities to receive the +underlying securities is being
+satisfied by:
+The underlying +securities being received by the holder are:
+Were the options being exercised or other +convertible securities being converted issued under an +employee
+incentive scheme?
+Are any of the options being exercised or other +convertible securities being converted held by +key management
+personnel (KMP) or an +associate?
+Provide details of the KMP or +associates who are exercising options or converting convertible securities
+Name of KMP Name of registered holder
+Number of options being exercised
+or other +convertible securities
+being converted
+Yes
+Yes
+Intended to be, but are not yet, quoted by ASX
+An issue of new +securities
+No
+No
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 6 / 7
+Wayne Bramwell Lisa Johnston 500,000
+Issue date
+7/8/2026
+Will the +securities to be quoted rank equally in all respects from their issue date with the existing issued
++securities in that class?
+Issue details
+Number of +securities to be quoted
+500,000
+Are the +securities being issued for a cash consideration?
+Please describe the consideration being provided for the +securities
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+Please provide an estimate (in AUD) of the value of the consideration being provided per +security for the
++securities to be quoted
+0.000000
+Any other information the entity wishes to provide about the +securities to be quoted
+Exercise of vested performance rights into fully paid ordinary shares in accordance with the terms and conditions of the
+Company's Employee Awards Plan.
+No
+Yes
+Appendix 2A - Application for quotation of securities
+Appendix 2A - Application for quotation of securities 7 / 7
+Part 4 - Issued capital following quotation
+Following the quotation of the +securities the subject of this application, the issued capital of the entity will
+comprise:
+The figures in parts 4.1 and 4.2 below are automatically generated and may not reflect the entity's current issued capital if
+other Appendix 2A, Appendix 3G or Appendix 3H forms are currently with ASX for processing.
+4.1 Quoted +securities (total number of each +class of +securities quoted on ASX following the +quotation of the
++securities subject of this application)
+ASX +security code and description
+Total number of
++securities on issue
+WGX : ORDINARY FULLY PAID 948,818,463
+4.2 Unquoted +securities (total number of each +class of +securities issued but not quoted on ASX)
+ASX +security code and description
+Total number of
++securities on issue
+WGXAH : PERFORMANCE RIGHTS EXPIRING 01-OCT-2026 1,010,930
+WGXAI : PERFORMANCE RIGHTS EXPIRING 30-JUN-2029 3,451,439
+WGXAJ : PERFORMANCE RIGHTS EXPIRING 30-JUN-2030 4,437,743

@@ -1,0 +1,837 @@
+[
+ {
+  "code": "PPC",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=PPC&timeframe=D&period=M6",
+  "n": 4,
+  "rows": [
+   {
+    "d": "21/09/2026 6:14 pm",
+    "h": "Notification regarding unquoted securities - PPC 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03141858"
+   },
+   {
+    "d": "03/09/2026 12:53 pm",
+    "h": "Application for quotation of securities - PPC 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03135368"
+   },
+   {
+    "d": "31/08/2026 5:05 pm",
+    "h": "Notification regarding unquoted securities - PPC 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03133570"
+   },
+   {
+    "d": "28/08/2026 6:14 pm",
+    "h": "Proposed issue of securities - PPC 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03132672"
+   }
+  ]
+ },
+ {
+  "code": "TTT",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=TTT&timeframe=D&period=M6",
+  "n": 12,
+  "rows": [
+   {
+    "d": "09/11/2026 4:21 pm",
+    "h": "Application for quotation of securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03163703"
+   },
+   {
+    "d": "20/10/2026 4:21 pm",
+    "h": "Notification regarding unquoted securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03154688"
+   },
+   {
+    "d": "08/09/2026 9:47 am",
+    "h": "Notification regarding unquoted securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03137062"
+   },
+   {
+    "d": "08/09/2026 9:37 am",
+    "h": "Cleansing Notice Under Section 708A(5) 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                       ",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03137048"
+   },
+   {
+    "d": "08/09/2026 9:35 am",
+    "h": "Application for quotation of securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03137041"
+   },
+   {
+    "d": "08/09/2026 9:28 am",
+    "h": "Application for quotation of securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03137030"
+   },
+   {
+    "d": "02/09/2026 9:32 am",
+    "h": "Proposed issue of securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 21.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03134624"
+   },
+   {
+    "d": "02/09/2026 9:31 am",
+    "h": "A$16.5M Placement Secured to Accelerate Growth 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 144.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03134621"
+   },
+   {
+    "d": "12/06/2026 4:47 pm",
+    "h": "Notification regarding unquoted securities - TTT 11\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 36.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103728"
+   },
+   {
+    "d": "12/06/2026 4:44 pm",
+    "h": "Application for quotation of securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103725"
+   },
+   {
+    "d": "12/06/2026 4:41 pm",
+    "h": "Application for quotation of securities - TTT 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103722"
+   },
+   {
+    "d": "12/06/2026 4:40 pm",
+    "h": "Cleansing Notice Under Section 708A(5)(e) 2\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 258.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103719"
+   }
+  ]
+ },
+ {
+  "code": "RIV",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=RIV&timeframe=D&period=M6",
+  "n": 3,
+  "rows": [
+   {
+    "d": "13/11/2026 7:19 pm",
+    "h": "Notification regarding unquoted securities - RIV 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03165720"
+   },
+   {
+    "d": "30/10/2026 11:22 am",
+    "h": "Application for quotation of securities - RIV 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 13.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03160125"
+   },
+   {
+    "d": "01/07/2026 5:22 pm",
+    "h": "Application for quotation of securities - RIV 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03110466"
+   }
+  ]
+ },
+ {
+  "code": "EOL",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=EOL&timeframe=D&period=M6",
+  "n": 8,
+  "rows": [
+   {
+    "d": "05/11/2026 9:58 am",
+    "h": "Application for quotation of securities - EOL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03162387"
+   },
+   {
+    "d": "30/10/2026 4:40 pm",
+    "h": "Notification regarding unquoted securities - EOL 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03160457"
+   },
+   {
+    "d": "30/10/2026 8:27 am",
+    "h": "Application for quotation of securities - EOL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03159739"
+   },
+   {
+    "d": "02/09/2026 9:24 am",
+    "h": "Notification regarding unquoted securities - EOL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03134608"
+   },
+   {
+    "d": "19/08/2026 11:19 am",
+    "h": "Proposed issue of securities - EOL 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03126938"
+   },
+   {
+    "d": "06/08/2026 10:26 am",
+    "h": "Notification regarding unquoted securities - EOL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03122583"
+   },
+   {
+    "d": "01/07/2026 10:02 am",
+    "h": "Application for quotation of securities - EOL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03110162"
+   },
+   {
+    "d": "01/07/2026 9:53 am",
+    "h": "Application for quotation of securities - EOL 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03110144"
+   }
+  ]
+ },
+ {
+  "code": "PC2",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=PC2&timeframe=D&period=M6",
+  "n": 16,
+  "rows": [
+   {
+    "d": "13/11/2026 8:23 am",
+    "h": "Notification regarding unquoted securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03165336"
+   },
+   {
+    "d": "29/10/2026 8:08 am",
+    "h": "Cleansing Notice 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 818.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03158780"
+   },
+   {
+    "d": "29/10/2026 8:08 am",
+    "h": "Application for quotation of securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03158777"
+   },
+   {
+    "d": "08/10/2026 8:22 am",
+    "h": "Proposed issue of securities - PC2 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03149833"
+   },
+   {
+    "d": "03/09/2026 1:48 pm",
+    "h": "Cleansing Notice 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 484.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03135399"
+   },
+   {
+    "d": "03/09/2026 1:04 pm",
+    "h": "Application for quotation of securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03135370"
+   },
+   {
+    "d": "03/09/2026 12:06 pm",
+    "h": "Application for quotation of securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03135351"
+   },
+   {
+    "d": "27/08/2026 9:40 am",
+    "h": "Proposed issue of securities - PC2 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03131249"
+   },
+   {
+    "d": "27/08/2026 9:40 am",
+    "h": "Proposed issue of securities - PC2 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03131247"
+   },
+   {
+    "d": "27/08/2026 9:39 am",
+    "h": "$75 Million Institutional Placement to Drive Spring Hill 4\n\t\t\t\t\t\t\t\t\t\t\n                                            pages ",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03131246"
+   },
+   {
+    "d": "16/07/2026 7:12 pm",
+    "h": "Notification regarding unquoted securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03115724"
+   },
+   {
+    "d": "16/07/2026 7:01 pm",
+    "h": "Notification regarding unquoted securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03115722"
+   },
+   {
+    "d": "16/07/2026 6:22 pm",
+    "h": "Cleansing Notice 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 433.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03115714"
+   },
+   {
+    "d": "16/07/2026 6:19 pm",
+    "h": "Application for quotation of securities - PC2 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03115711"
+   },
+   {
+    "d": "16/06/2026 6:36 pm",
+    "h": "Proposed issue of securities - PC2 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03104740"
+   },
+   {
+    "d": "11/06/2026 4:36 pm",
+    "h": "Proposed issue of securities - PC2 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103285"
+   }
+  ]
+ },
+ {
+  "code": "EMR",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=EMR&timeframe=D&period=M6",
+  "n": 16,
+  "rows": [
+   {
+    "d": "30/10/2026 7:19 pm",
+    "h": "Application for quotation of securities - EMR 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03160687"
+   },
+   {
+    "d": "09/10/2026 7:51 pm",
+    "h": "Notification regarding unquoted securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03150848"
+   },
+   {
+    "d": "09/10/2026 7:43 pm",
+    "h": "Application for quotation of securities - EMR 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03150846"
+   },
+   {
+    "d": "29/09/2026 6:35 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03145592"
+   },
+   {
+    "d": "23/09/2026 5:41 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03142931"
+   },
+   {
+    "d": "17/09/2026 7:03 pm",
+    "h": "Application for quotation of securities - EMR 8\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 21.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03140784"
+   },
+   {
+    "d": "31/08/2026 6:53 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03133767"
+   },
+   {
+    "d": "18/08/2026 7:18 pm",
+    "h": "Application for quotation of securities - EMR 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 21.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03126535"
+   },
+   {
+    "d": "18/08/2026 7:00 pm",
+    "h": "Proposed issue of securities - EMR 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03126531"
+   },
+   {
+    "d": "18/08/2026 6:52 pm",
+    "h": "Notification regarding unquoted securities - EMR 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 22.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03126529"
+   },
+   {
+    "d": "07/08/2026 5:54 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03123229"
+   },
+   {
+    "d": "20/07/2026 6:25 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116485"
+   },
+   {
+    "d": "16/07/2026 6:40 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03115717"
+   },
+   {
+    "d": "09/07/2026 6:53 pm",
+    "h": "Application for quotation of securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03113716"
+   },
+   {
+    "d": "03/07/2026 6:38 pm",
+    "h": "Application for quotation of securities - EMR 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 22.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03111773"
+   },
+   {
+    "d": "29/06/2026 6:31 pm",
+    "h": "Notification regarding unquoted securities - EMR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03109113"
+   }
+  ]
+ },
+ {
+  "code": "GTI",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=GTI&timeframe=D&period=M6",
+  "n": 15,
+  "rows": [
+   {
+    "d": "12/08/2026 9:32 am",
+    "h": "Notification regarding unquoted securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03124323"
+   },
+   {
+    "d": "27/07/2026 5:03 pm",
+    "h": "Application for quotation of securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03118578"
+   },
+   {
+    "d": "21/07/2026 3:16 pm",
+    "h": "Cleansing Statement 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                          ",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116775"
+   },
+   {
+    "d": "21/07/2026 3:11 pm",
+    "h": "Notification regarding unquoted securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116772"
+   },
+   {
+    "d": "21/07/2026 3:08 pm",
+    "h": "Notification regarding unquoted securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116771"
+   },
+   {
+    "d": "21/07/2026 2:43 pm",
+    "h": "Application for quotation of securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116767"
+   },
+   {
+    "d": "20/07/2026 5:36 pm",
+    "h": "Proposed issue of securities - GTI 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116463"
+   },
+   {
+    "d": "20/07/2026 5:29 pm",
+    "h": "Application for quotation of securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03116459"
+   },
+   {
+    "d": "22/05/2026 9:59 am",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03096643"
+   },
+   {
+    "d": "22/05/2026 9:55 am",
+    "h": "Application for quotation of securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03096641"
+   },
+   {
+    "d": "19/05/2026 4:35 pm",
+    "h": "Notification regarding unquoted securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03095432"
+   },
+   {
+    "d": "15/05/2026 9:41 am",
+    "h": "Proposed issue of securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 21.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094311"
+   },
+   {
+    "d": "15/05/2026 9:41 am",
+    "h": "Proposed issue of securities - GTI 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094308"
+   },
+   {
+    "d": "15/05/2026 9:40 am",
+    "h": "Proposed issue of securities - GTI 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094307"
+   },
+   {
+    "d": "15/05/2026 9:40 am",
+    "h": "Proposed issue of securities - GTI 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 21.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094305"
+   }
+  ]
+ },
+ {
+  "code": "YRL",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=YRL&timeframe=D&period=M6",
+  "n": 11,
+  "rows": [
+   {
+    "d": "06/11/2026 9:34 am",
+    "h": "Share Purchase Plan 16\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 964.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03162878"
+   },
+   {
+    "d": "06/11/2026 9:22 am",
+    "h": "Cleansing Notice 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 437.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03162860"
+   },
+   {
+    "d": "06/11/2026 9:21 am",
+    "h": "Application for quotation of securities - YRL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03162857"
+   },
+   {
+    "d": "30/10/2026 9:48 am",
+    "h": "Proposed issue of securities - YRL 9\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 24.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03159986"
+   },
+   {
+    "d": "30/10/2026 9:48 am",
+    "h": "$10m Placement and SPP to Expand and Accelerate Exploration 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pag",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03159984"
+   },
+   {
+    "d": "05/10/2026 11:14 am",
+    "h": "Cancel - Proposed issue of securities - YRL 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 15.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03148365"
+   },
+   {
+    "d": "09/07/2026 3:46 pm",
+    "h": "Proposed issue of securities - YRL 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03113623"
+   },
+   {
+    "d": "09/07/2026 3:26 pm",
+    "h": "Notification regarding unquoted securities - YRL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03113620"
+   },
+   {
+    "d": "09/06/2026 3:04 pm",
+    "h": "Cleansing Notice 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 439.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03102307"
+   },
+   {
+    "d": "09/06/2026 3:03 pm",
+    "h": "Application for quotation of securities - YRL 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03102306"
+   },
+   {
+    "d": "29/05/2026 10:19 am",
+    "h": "Proposed issue of securities - YRL 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03098987"
+   }
+  ]
+ },
+ {
+  "code": "SPG",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=SPG&timeframe=D&period=M6",
+  "n": 10,
+  "rows": [
+   {
+    "d": "10/06/2026 11:34 am",
+    "h": "Application for quotation of securities - SPG 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03102702"
+   },
+   {
+    "d": "04/06/2026 10:05 am",
+    "h": "Entitlement Offer Results 2\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 113.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03101077"
+   },
+   {
+    "d": "22/05/2026 9:21 am",
+    "h": "Section 708A Cleansing Statement 2\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 174.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03096607"
+   },
+   {
+    "d": "22/05/2026 9:04 am",
+    "h": "Opening of Entitlement Offer 21\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 1.5MB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03096579"
+   },
+   {
+    "d": "21/05/2026 9:13 am",
+    "h": "Application for quotation of securities - SPG 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03096184"
+   },
+   {
+    "d": "19/05/2026 2:42 pm",
+    "h": "Notification regarding unquoted securities - SPG 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 22.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03095394"
+   },
+   {
+    "d": "18/05/2026 1:08 pm",
+    "h": "SPG Entitlement Offer Booklet 79\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 3.0MB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094931"
+   },
+   {
+    "d": "14/05/2026 10:13 am",
+    "h": "Section 708AA Cleansing Statement - Entitlement Offer 2\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 168",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03093896"
+   },
+   {
+    "d": "14/05/2026 9:58 am",
+    "h": "Proposed issue of securities - SPG 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03093887"
+   },
+   {
+    "d": "14/05/2026 9:56 am",
+    "h": "Proposed issue of securities - SPG 9\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 30.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03093885"
+   }
+  ]
+ },
+ {
+  "code": "BMC",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=BMC&timeframe=D&period=M6",
+  "n": 0,
+  "rows": []
+ },
+ {
+  "code": "BMC",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=BMC&timeframe=Y&year=2026",
+  "n": 0,
+  "rows": []
+ },
+ {
+  "code": "TOR",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=TOR&timeframe=D&period=M6",
+  "n": 6,
+  "rows": [
+   {
+    "d": "15/10/2026 4:32 pm",
+    "h": "Application for quotation of securities - TOR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03152935"
+   },
+   {
+    "d": "12/10/2026 8:22 am",
+    "h": "Update - Proposed issue of securities - TOR 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03150919"
+   },
+   {
+    "d": "08/10/2026 10:01 am",
+    "h": "Proposed issue of securities - TOR 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03150027"
+   },
+   {
+    "d": "08/10/2026 10:01 am",
+    "h": "Torque Completes A$25 million Placement 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 878.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03150026"
+   },
+   {
+    "d": "03/07/2026 8:17 am",
+    "h": "Notification regarding unquoted securities - TOR 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.0KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03111209"
+   },
+   {
+    "d": "15/05/2026 9:38 am",
+    "h": "Notification regarding unquoted securities - TOR 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 17.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094302"
+   }
+  ]
+ },
+ {
+  "code": "MP1",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=MP1&timeframe=D&period=M6",
+  "n": 12,
+  "rows": [
+   {
+    "d": "03/09/2026 8:56 am",
+    "h": "Application for quotation of securities - MP1 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 19.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03135173"
+   },
+   {
+    "d": "01/09/2026 10:11 am",
+    "h": "Notification regarding unquoted securities - MP1 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03134136"
+   },
+   {
+    "d": "03/07/2026 9:22 am",
+    "h": "Application for quotation of securities - MP1 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03111314"
+   },
+   {
+    "d": "02/07/2026 9:25 am",
+    "h": "Successful Completion of Retail Entitlement Offer 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 158.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03110744"
+   },
+   {
+    "d": "12/06/2026 9:40 am",
+    "h": "Application for quotation of securities - MP1 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103494"
+   },
+   {
+    "d": "11/06/2026 9:04 am",
+    "h": "Retail Entitlement Offer Announcement and Booklet 100\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 13.5M",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103025"
+   },
+   {
+    "d": "05/06/2026 8:58 am",
+    "h": "Megaport Completes Institutional Entitlement Offer 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 158.5K",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03101439"
+   },
+   {
+    "d": "03/06/2026 8:08 am",
+    "h": "Entitlement Offer Cleansing Notice 2\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 78.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03100362"
+   },
+   {
+    "d": "03/06/2026 8:06 am",
+    "h": "Proposed issue of securities - MP1 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 24.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03100361"
+   },
+   {
+    "d": "03/06/2026 7:48 am",
+    "h": "Creation of GPU Pool, New Contracts and Entitlement Offer 12\n\t\t\t\t\t\t\t\t\t\t\n                                            page",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03100358"
+   },
+   {
+    "d": "02/06/2026 5:57 pm",
+    "h": "Application for quotation of securities - MP1 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03100324"
+   },
+   {
+    "d": "01/06/2026 4:30 pm",
+    "h": "Notification regarding unquoted securities - MP1 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03099783"
+   }
+  ]
+ },
+ {
+  "code": "GLS",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=GLS&timeframe=D&period=M6",
+  "n": 10,
+  "rows": [
+   {
+    "d": "30/10/2026 9:12 am",
+    "h": "Application for quotation of securities - GLS 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03159861"
+   },
+   {
+    "d": "30/10/2026 9:11 am",
+    "h": "Application for quotation of securities - GLS 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03159857"
+   },
+   {
+    "d": "27/10/2026 9:17 am",
+    "h": "Proposed issue of securities - GLS 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03157567"
+   },
+   {
+    "d": "14/10/2026 8:55 am",
+    "h": "Application for quotation of securities - GLS 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03152026"
+   },
+   {
+    "d": "13/10/2026 9:09 am",
+    "h": "Opening of Retail Entitlement Offer and Retail Offer Booklet 60\n\t\t\t\t\t\t\t\t\t\t\n                                            p",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151516"
+   },
+   {
+    "d": "13/10/2026 8:17 am",
+    "h": "Application for quotation of securities - GLS 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 13.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151452"
+   },
+   {
+    "d": "08/10/2026 9:28 am",
+    "h": "Completion of institutional entitlement offer 4\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 255.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03149961"
+   },
+   {
+    "d": "06/10/2026 8:38 am",
+    "h": "Proposed issue of securities - GLS 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 20.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03148680"
+   },
+   {
+    "d": "06/10/2026 8:37 am",
+    "h": "GLS non-renounceable entitlement offer 4\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 248.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03148675"
+   },
+   {
+    "d": "23/09/2026 8:18 am",
+    "h": "Application for quotation of securities - GLS 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 13.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03142505"
+   }
+  ]
+ },
+ {
+  "code": "DXN",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=DXN&timeframe=D&period=M6",
+  "n": 17,
+  "rows": [
+   {
+    "d": "12/10/2026 4:02 pm",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151263"
+   },
+   {
+    "d": "12/10/2026 3:44 pm",
+    "h": "Application for quotation of securities - DXN 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03151246"
+   },
+   {
+    "d": "01/10/2026 1:52 pm",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03147277"
+   },
+   {
+    "d": "01/10/2026 1:44 pm",
+    "h": "Application for quotation of securities - DXN 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03147267"
+   },
+   {
+    "d": "07/09/2026 11:51 am",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03136559"
+   },
+   {
+    "d": "07/09/2026 11:44 am",
+    "h": "Application for quotation of securities - DXN 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03136558"
+   },
+   {
+    "d": "26/08/2026 6:05 pm",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03130717"
+   },
+   {
+    "d": "26/08/2026 5:59 pm",
+    "h": "Application for quotation of securities - DXN 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.1KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03130711"
+   },
+   {
+    "d": "24/08/2026 5:18 pm",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03129160"
+   },
+   {
+    "d": "24/08/2026 4:57 pm",
+    "h": "Application for quotation of securities - DXN 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03129146"
+   },
+   {
+    "d": "25/06/2026 5:35 pm",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03107959"
+   },
+   {
+    "d": "25/06/2026 5:31 pm",
+    "h": "Application for quotation of securities - DXN 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.2KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03107952"
+   },
+   {
+    "d": "15/06/2026 11:31 am",
+    "h": "Cleansing Notice 1\n\t\t\t\t\t\t\t\t\t\t\n                                            \n                                            \n",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03104135"
+   },
+   {
+    "d": "12/06/2026 11:30 am",
+    "h": "Application for quotation of securities - DXN 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.4KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03103579"
+   },
+   {
+    "d": "09/06/2026 10:30 am",
+    "h": "Proposed issue of securities - DXN 5\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.3KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03102199"
+   },
+   {
+    "d": "09/06/2026 10:17 am",
+    "h": "DXN Secures Institutional Support for A$7m Placement 3\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 218.",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03102191"
+   },
+   {
+    "d": "15/05/2026 4:25 pm",
+    "h": "Notification regarding unquoted securities - DXN 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 21.6KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03094470"
+   }
+  ]
+ },
+ {
+  "code": "WGX",
+  "url": "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=WGX&timeframe=D&period=M6",
+  "n": 5,
+  "rows": [
+   {
+    "d": "18/09/2026 6:15 pm",
+    "h": "Notification regarding unquoted securities - WGX 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 16.8KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03141325"
+   },
+   {
+    "d": "18/09/2026 6:07 pm",
+    "h": "Application for quotation of securities - WGX 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 14.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03141322"
+   },
+   {
+    "d": "25/08/2026 8:03 am",
+    "h": "Notification regarding unquoted securities - WGX 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.9KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03129325"
+   },
+   {
+    "d": "25/08/2026 8:02 am",
+    "h": "Application for quotation of securities - WGX 6\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 18.5KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03129324"
+   },
+   {
+    "d": "12/08/2026 4:42 pm",
+    "h": "Application for quotation of securities - WGX 7\n\t\t\t\t\t\t\t\t\t\t\n                                            pages 22.7KB",
+    "href": "/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03124533"
+   }
+  ]
+ }
+]

@@ -1060,11 +1060,44 @@ def update_history(history: dict, entries: dict, holders: list[Holder], today: d
             added += 1
     cutoff = (today - dt.timedelta(days=HISTORY_DAYS)).isoformat()
     for k in list(pos):
-        pos[k] = sorted((r for r in pos[k] if (r.get("date") or "") >= cutoff), key=lambda r: (r.get("date") or "", r.get("time") or "", str(r.get("id"))))
+        rows = sorted((r for r in pos[k] if (r.get("date") or "") >= cutoff), key=lambda r: (r.get("date") or "", r.get("time") or "", str(r.get("id"))))
+        pos[k] = drop_dup_rows(rows)
+        added -= len(rows) - len(pos[k])
         if not pos[k]:
             del pos[k]
     history["schema"] = 1
-    return added
+    return max(added, 0)
+
+
+DUP_DAYS = 3
+
+
+def _tup(x) -> tuple:
+    return tuple(x) if isinstance(x, (list, tuple)) else ()
+
+
+def drop_dup_rows(rows: list[dict]) -> list[dict]:
+    """第二十一轮：同一份公告的原件和更正版（Amended）都进了持仓历史——原件的变动日读错了（MYG：读成 1 月 14 日），
+    “变动日 + 比例”对不上，以前的去重认不出来，成本、连续加仓次数、基金习惯都会多算一次。
+    这里按“同类型、比例和股数完全一样、3 天以内”认作同一份，留后发的那份（更正版）；同一时间的留列表页编号那份。"""
+    out: list[dict] = []
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        key = (r.get("type"), _tup(r.get("vp")), _tup(r.get("votes")))
+        j = next((i for i, x in enumerate(out) if key[1] and key[2] and (x.get("type"), _tup(x.get("vp")), _tup(x.get("votes"))) == key
+                  and 0 <= insight._days_between(x.get("date"), r.get("date")) <= DUP_DAYS), None)
+        if j is None:
+            out.append(r)
+            continue
+        old = out[j]
+        rank = lambda x: (str(x.get("date") or ""), str(x.get("time") or ""), not str(x.get("id")).startswith("mk-"))
+        keep, drop = (r, old) if rank(r) >= rank(old) else (old, r)
+        for f in ("fwd", "fwd_x", "bm", "px", "px_v", "bf"):
+            if drop.get(f) and not keep.get(f):
+                keep[f] = drop[f]
+        out[j] = keep
+    return out
 
 
 def cost_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
@@ -1076,7 +1109,8 @@ def cost_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
         return {}
     votes = e.get("votes") or []
     holding = votes[0] if e.get("type") == "change" and len(votes) == 2 else next((r["votes"][-1] for r in reversed(before) if r.get("votes")), None)
-    return insight.cost_basis(before, holding)
+    vp = e.get("voting_power") or []
+    return insight.cost_basis(before, holding, vp[0] if e.get("type") == "change" and len(vp) == 2 else None)
 
 
 SEQ_DAYS = 120
@@ -1184,7 +1218,8 @@ def _stage_for(history: dict | None, holder: str, code: str, e: dict) -> dict:
     for r in before:
         vp, votes = r.get("vp") or [], r.get("votes") or []
         for i in range(len(vp)):
-            points.append((vp[i], votes[i] if len(votes) == len(vp) else None))
+            # 604 只读出一个比例时，不知道它是“之前”还是“之后”，股数也配不上（第二十一轮：Wilson EOL 两份就是 [之后的比例] 配 [之前的股数]）
+            points.append((vp[i], votes[i] if len(votes) == len(vp) and not (r.get("type") == "change" and len(vp) != 2) else None))
     n_hist = len(points)
     if typ == "change" and len(cur_vp) == 2:
         points.append((cur_vp[0], cur_votes[0] if len(cur_votes) == 2 else None))
@@ -1806,7 +1841,7 @@ def calibrate(history: dict, holders: list[Holder], today: dt.date | None = None
                 ins = insight.judge({
                     "type": r.get("type"), "voting_power": r.get("vp") or [], "votes": r.get("votes") or [], "trades": r.get("tr") or {},
                     "px": r.get("px") or {}, "ocr": r.get("ocr"), "style": style_of.get(holder, "active"), "date": r.get("date"),
-                    "change_date": r.get("cd"), "tl": r.get("tl") or {}, "cost": insight.cost_basis(before, holding) if before else {},
+                    "change_date": r.get("cd"), "tl": r.get("tl") or {}, "cost": insight.cost_basis(before, holding, (r.get("vp") or [None])[0] if r.get("type") == "change" and len(r.get("vp") or []) == 2 else None) if before else {},
                     "seq": sequence_for(history, holder, key.split("|", 1)[1], e),
                     "stage": stage_for(history, holder, key.split("|", 1)[1], e), "blk": r.get("blk") or {},
                     "habit": habit_at(r.get("date") or "").get(holder) or {},
@@ -1889,12 +1924,14 @@ def prev_from_history(history: dict | None, holder: str, code: str, e: dict) -> 
     rows = ((history or {}).get("pos") or {}).get(pos_key(holder, code)) or []
     me = (e.get("date") or "", e.get("time") or "", str(e.get("id")))
     before = [r for r in rows if isinstance(r, dict) and r.get("id") != e.get("id")
-              and (r.get("date") or "", r.get("time") or "", str(r.get("id"))) < me]
+              and (str(r.get("date") or ""), str(r.get("time") or ""), str(r.get("id"))) < me]
     if not before:
         return None
     r = before[-1]
-    vp, votes = r.get("vp") or [], r.get("votes") or []
-    return {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None, "type": r.get("type"), "date": r.get("date")}
+    vp, votes = r.get("vp"), r.get("votes")
+    vp, votes = (vp if isinstance(vp, list) else []), (votes if isinstance(votes, list) else [])
+    num = lambda x: x if isinstance(x, (int, float)) and not isinstance(x, bool) else None
+    return {"vp": num(vp[-1]) if vp else None, "votes": num(votes[-1]) if votes else None, "type": r.get("type"), "date": r.get("date")}
 
 
 # ---------------------------------------------------------------- 倒手：卖出的一方和接盘的一方（第十五轮）
@@ -2880,6 +2917,9 @@ def main() -> int:
             log(f"股价背景按新算法重算了 {n_px} 条历史记录")
     except Exception as ex:  # noqa: BLE001  回补出错不能影响当天的抓取
         log(f"回补持仓历史出错：{type(ex).__name__}: {ex}")
+    for k in list(history["pos"]):          # 回补也可能补进同一份公告的原件（更正版已经在了），再去一次重
+        if isinstance(history["pos"][k], list):
+            history["pos"][k] = drop_dup_rows(history["pos"][k])
     pending = sum(1 for k in history["pos"] if not (history.get("meta", {}).get(k) or {}).get("done"))
     if bf.read:
         log(f"回补持仓历史：读了 {bf.read} 份旧公告，补进 {bf.added} 条，按新读法重读 {bf.refreshed} 条，还有 {pending} 个持仓没追完，用时 {time.monotonic() - t_bf:.0f} 秒")

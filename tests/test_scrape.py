@@ -3546,3 +3546,50 @@ def test_order_tags():
         ["均价存疑", "贴着20%线", "仓位难卖", "连续减仓", "换股", "已减三成", "多家同向"]
     assert o(["整体加仓", "倒手", "整体加仓", "大宗"]) == ["倒手", "大宗", "整体加仓"]          # 去重，其余保持原顺序
     assert o(["a", "b"]) == ["a", "b"] and o([]) == [] and o(None) == [] and o(["x", 3, None]) == ["x"]
+
+# ---------------------------------------------------------------- 第二十一轮
+
+def test_cost_basis_restarts_after_share_consolidation():
+    # GTI：合并前 0.4–0.5 分买了 7.8 亿股；约 6 合 1 后同样的持股比例只剩 1.3 亿股。合并前后的价格不是一个单位
+    recs = [{"date": "2024-04-04", "type": "becoming", "vp": [11.0], "votes": [180_000_000], "buy_qty": 180_000_000, "buy_price": 0.005},
+            {"date": "2024-11-06", "type": "change", "vp": [11.0, 19.4], "votes": [180_000_000, 778_000_000], "buy_qty": 598_000_000, "buy_price": 0.004},
+            {"date": "2026-07-22", "type": "change", "vp": [17.3, 19.3], "votes": [778_000_000, 131_700_000], "buy_qty": 106_000_000,
+             "buy_price": 0.06, "sell_qty": 26_000_000, "sell_price": 0.09}]
+    assert insight.cost_basis(recs, 131_700_000, 19.31) == {}
+    # 合并发生在上一份之后：比例接得上、股数少了一大半 → 不给成本
+    assert insight.cost_basis(recs[:2], 130_000_000, 19.4) == {}
+    assert insight.cost_basis(recs[:2], 778_000_000, 19.4)["avg"] == pytest.approx(0.0042, abs=1e-4)
+    # 大规模增发（总股本翻倍、它也跟着认购）：单位没变，成本照算
+    raise_ = [{"date": "2026-09-01", "type": "change", "vp": [14.2, 13.2], "votes": [36_000_000, 79_700_000], "buy_qty": 43_700_000, "buy_price": 1.63}]
+    assert insight.cost_basis(raise_, 79_700_000, 13.2)["avg"] == 1.63
+
+
+def test_history_keeps_only_the_amended_copy():
+    orig = {"id": "mk-2924-03153866-2A1706442", "date": "2026-10-27", "time": "17:40", "type": "change", "vp": [5.99, 7.12],
+            "votes": [6830893, 8356494], "cd": "2026-01-14", "px": {"p": 1}}
+    amended = dict(orig, id="mk-2924-03153906-2A1706467", time="18:34", cd="2026-10-23", px=None)
+    other = dict(orig, id="x", date="2026-12-01", time="10:00")                 # 一个多月后同样的数字：不是同一份
+    out = scrape.drop_dup_rows([orig, amended, other])
+    assert [r["id"] for r in out] == [amended["id"], "x"] and out[0]["px"] == {"p": 1}
+    assert scrape.drop_dup_rows([amended, orig])[0]["id"] == amended["id"]
+    assert scrape.drop_dup_rows([dict(orig, vp=[], votes=[]), dict(amended, vp=[], votes=[])]) and len(
+        scrape.drop_dup_rows([dict(orig, vp=[], votes=[]), dict(amended, vp=[], votes=[])])) == 2      # 没有数字的不合并
+    assert scrape.drop_dup_rows([orig, "garbage", None]) == [orig]
+
+
+def test_update_history_drops_superseded_original(monkeypatch):
+    hist = {"pos": {"Ellerston Capital|MYG": [
+        {"id": "a", "date": "2026-10-27", "time": "17:40", "type": "change", "vp": [5.99, 7.12], "votes": [1, 2], "cd": "2026-01-14"},
+        {"id": "b", "date": "2026-10-27", "time": "18:34", "type": "change", "vp": [5.99, 7.12], "votes": [1, 2], "cd": "2026-10-23"}]}}
+    scrape.update_history(hist, {}, [], dt.date(2026, 11, 14))
+    assert [r["id"] for r in hist["pos"]["Ellerston Capital|MYG"]] == ["b"]
+
+
+def test_stage_ignores_share_count_of_single_value_604():
+    # Wilson EOL：604 只读出“之后”的比例 9.11%，股数却是“之前”的——不能配成一对
+    hist = {"pos": {"W|EOL": [
+        {"id": "1", "date": "2025-08-11", "type": "change", "vp": [6.51, 7.58], "votes": [2038627, 2374248]},
+        {"id": "2", "date": "2025-08-28", "type": "change", "vp": [9.11], "votes": [2374248]}]}}
+    e = {"id": "3", "date": "2025-10-15", "type": "change", "voting_power": [9.11, 8.05], "votes": [2853623, 2530372]}
+    st = scrape.stage_for(hist, "W", "EOL", e)
+    assert st and st["peak"] == 9.11

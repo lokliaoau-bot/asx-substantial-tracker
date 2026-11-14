@@ -57,7 +57,7 @@ def run(root: Path) -> dict:
                        else next((x["votes"][-1] for x in reversed(before) if x.get("votes")), None))
             n = {"type": r.get("type"), "voting_power": r.get("vp") or [], "votes": r.get("votes") or [], "trades": r.get("tr") or {},
                  "px": r.get("px") or {}, "ocr": r.get("ocr"), "style": style_of.get(holder, "active"), "date": r.get("date"),
-                 "change_date": r.get("cd"), "tl": r.get("tl") or {}, "cost": insight.cost_basis(before, holding) if before else {},
+                 "change_date": r.get("cd"), "tl": r.get("tl") or {}, "cost": insight.cost_basis(before, holding, (r.get("vp") or [None])[0] if r.get("type") == "change" and len(r.get("vp") or []) == 2 else None) if before else {},
                  "seq": scrape.sequence_for(history, holder, code, e),
                  "prev": {"vp": (prev.get("vp") or [None])[-1], "votes": (prev.get("votes") or [None])[-1], "type": prev.get("type"),
                           "date": prev.get("date")} if prev else None}

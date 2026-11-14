@@ -772,7 +772,7 @@ def fp(p: float) -> str:
 
 
 def fr(r: float) -> str:
-    return f"{r * 100:+.0f}%"
+    return "±0%" if abs(r) < 0.005 else f"{r * 100:+.0f}%"          # 不写“+0%”“-0%”
 
 
 def md(iso: str, year: bool = False) -> str:
@@ -830,14 +830,36 @@ COST_MIN_COVER = 0.4
 LONG_603 = 135            # 603 的明细从变动日往前超过这么多天，说明列的不只是规定的 4 个月      # 已知成本的股数至少占持仓的四成，才拿来判断赚还是亏
 
 
-def cost_basis(records: list[dict], holding: int | None = None) -> dict:
+def cost_basis(records: list[dict], holding: int | None = None, vp_now: float | None = None) -> dict:
+    """见 _cost_basis。持仓历史里有坏数据（不是数字、少字段）时返回 {}：宁可不说成本，也不能让整条解读出错。"""
+    try:
+        return _cost_basis(records, holding, vp_now)
+    except (TypeError, ValueError, KeyError, AttributeError, IndexError, ZeroDivisionError):
+        return {}
+
+
+def _cost_basis(records: list[dict], holding: int | None = None, vp_now: float | None = None) -> dict:
     """由同一（申报方, 股票）之前各份公告里的买卖，按“移动平均成本”推算平均买入价。
     records：按时间升序，每条 {date, buy_qty, sell_qty, buy_price, sell_price, p（变动日收盘价）, votes}。
     没写价格的买入用当时的收盘价顶替。holding：这次变动之前的持股数，用来算“已知成本的部分占多少”。
+    vp_now：这次变动之前的持股比例（知道的话传进来，用来认出“上一份之后做过合并/拆分”）。
     返回 {avg, cov, since, n}；一笔有效买入都没有时返回 {}。"""
     shares = cost = 0.0
     since, used = "", 0
+    last_so = last_votes = None
     for r in records:
+        # 第二十一轮：股份合并（倒推的总股本少了一半以上）以前的股数和价格，和之后的不是一个单位（GTI 2026 年约 6 合 1、PNR 2025 年约 17 合 1，
+        # 以前把合并前 0.4 分的买入和合并后的卖价放在一起比）。从合并那份公告之后重新算；跨着合并的那份公告自己的买卖也不用。
+        # 总股本变多一倍以上多半是大规模增发（L1 的 GLS 配股），单位没变，不重算
+        so = [v / p * 100 for v, p in zip(r.get("votes") or [], r.get("vp") or []) if isinstance(v, (int, float)) and isinstance(p, (int, float)) and v > 0 and p > 0]
+        if so and len(so) == len(r.get("vp") or []) and len(r.get("votes") or []) == len(so):
+            jump = (last_so is not None and so[0] / last_so <= 0.5) or (len(so) == 2 and so[1] / so[0] <= 0.5)
+            last_so = so[-1]
+            if jump:
+                shares = cost = 0.0
+                since, used = "", 0
+                last_votes = (r.get("votes") or [None])[-1]
+                continue
         bq, sq = r.get("buy_qty") or 0, r.get("sell_qty") or 0
         price = r.get("buy_price")
         # 第二十一轮：那份公告的买入均价和当时的股价对不上的（金额读错、日线复权），不拿它当成本，改用当时的收盘价
@@ -856,8 +878,14 @@ def cost_basis(records: list[dict], holding: int | None = None) -> dict:
         if v and shares > v[-1] * 1.05:             # 累计出来的股数比披露的持仓还多：中间有没看到的卖出，按比例压回去
             k = v[-1] / shares
             shares, cost = shares * k, cost * k
+        if v:
+            last_votes = v[-1]
     if shares < 1 or not used:
         return {}
+    last_vp = next(((r.get("vp") or [None])[-1] for r in reversed(records) if r.get("vp")), None)
+    if (holding and last_votes and holding / last_votes <= 0.5 and isinstance(vp_now, (int, float)) and isinstance(last_vp, (int, float))
+            and abs(vp_now - last_vp) < 1.0):
+        return {}           # 持股比例接上了、股数却少了一半以上：上一份公告之后做过股份合并，之前的成本和现在不是一个单位
     cov = min(shares / holding, 1.0) if holding and holding > 0 else None
     return {"avg": round(cost / shares, 4), "cov": round(cov, 3) if cov is not None else None, "since": since, "n": used}
 
@@ -1673,8 +1701,13 @@ def judge(n: dict) -> dict | None:
     if f["pull"]:
         reasons.append(f"长短期方向不一样：长期是涨的（{long_txt}），最近才回落（{short_txt}），股价也不在一年的低位——是在上涨途中的回调里买，和“跌了很久去抄底”不是一回事。")
     if f["bounce"]:
-        reasons.append(f"长短期方向不一样：长期跌了很多（{long_txt}），最近在反弹（{short_txt}）——是趁反弹卖。"
-                       "不知道它的成本时，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。")
+        g = f.get("gain")
+        # 第二十一轮：以前不管知不知道成本都写“不知道它的成本时……”，和上面“按成本算是亏钱卖的”那句打架（GTI）
+        tail = ("不知道它的成本，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。" if g is None
+                else "按它的成本算还是亏的：是借反弹减少亏损，不是“越跌越卖”。" if g <= -0.10
+                else "按它的成本算是赚的：就是借反弹获利了结。" if g >= 0.10
+                else "按它的成本算基本不赚不亏。")
+        reasons.append(f"长短期方向不一样：长期跌了很多（{long_txt}），最近在反弹（{short_txt}）——是趁反弹卖。" + tail)
 
     stage = _checked(n.get("stage"), ("off", "off_before", "n_buy", "n_sell", "hist"), ("age", "peak"))
     if stage and stage["peak"] > 0 and stage["age"] >= 0:

@@ -371,6 +371,19 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 - “像调仓” → “认购配售后在市场上卖出”：Regal RIV（$8M 整）、TTT（$4.5M 整，公司同期公告 A$16.5M 配售）
 - L1 PPC 2026-11-02：逢低加仓 → 参与配售加仓（15,795,000 股 × $1.00，公司同期公告 “Proposed issue of securities”）
 
+### 第十九轮：拿公司的发行文件核对“参与融资”
+
+公司发新股要交固定格式的表：Appendix 3B（拟发行）、2A（申请挂牌）。里面写明发行价、股数、发行日、是什么发行（配售/配股/SPP/员工计划/期权行权/股息再投资/换股）。
+`insight.parse_issue_form` 只读普通股那一项；`scrape.read_issue_forms` 在取股价背景时顺便下载（每只股票最多 10 份，3B 优先）。
+
+- 对上（价格差 ≤ 2%、发行日在交易期间 ±7 天、而且四成以上的买入量在发行前后 5 天）→ 理由引用文件 + “参与融资”加 4.5 分
+- 否定：第十八轮的“整数金额”指纹，如果那一两天的买入在近 6 个月内、前后 10 天没有这个价格的融资文件 → 取消（PPC）
+- 标题是 “Proposed issue of securities” 但正文是员工计划/期权行权/股息再投资/换股/抵服务费的，不再算融资（以前的已知限制）
+
+月报原话（计划 3.4 / 5.3）量过之后决定不进打分：46 份月报里只有 2 句说了具体动作，而且会过时（WAM 10/14 还说看好 DXN，两周后 DXN 跌 75%、WAM 亏本卖出）。
+
+已知局限：公司公告页只看得到近 6 个月，更早的配售核对不了；逐日明细是净额，同一天又买又卖时看不到那笔认购（RIV 就是这样，既不能确认也不能否定）。
+
 ## 6. 数据格式
 
 `data/notices.json`：
@@ -406,7 +419,7 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 239 passed，全部离线
+python -m pytest -q                             # 244 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
 python tools/replay.py --gold /tmp/new.json     # 和标准答案对比打分（第十六轮起每轮都要报）
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
@@ -431,7 +444,7 @@ python tests/frontend_check.py                  # 需要 playwright + chromium�
 - 养老金只看得到自营部分；605（退出）不披露剩余持仓，是否清仓看不出来。
 - 操作解读是规则推断，阈值（15%、25%、60% 等）是按 77 条真实公告调的，没有做过回测。
 - 成本价靠回补（第十轮）：大部分持仓能追到最初的 603，但 603 只披露前 4 个月的买入，更早的底仓成本不知道；已知成本的股数不到持仓四成时不用。约一成持仓追不回去（上一份公告的日期对不上、或超过 3 年）。
-- 公司大事只看公告**标题**（不读正文），靠关键词分类；`Proposed issue of securities` 也可能是员工持股计划之类的小额发行，所以单凭它不改标签。
+- 公司大事只看公告**标题**（不读正文），靠关键词分类；第十九轮起 Appendix 3B / 2A 会读正文（发行价、类型），员工计划之类不再算融资。
 - “同期在别的股票上的动作”只看得到 5% 以上的持仓变动，基金在小仓位上的买卖看不到。
 
 ## 9. 可以继续做的事（按价值排序的建议）

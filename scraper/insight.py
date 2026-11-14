@@ -606,6 +606,17 @@ def parse_issue_form(text: str, code: str = "") -> dict:
 ISSUE_NAMES = {"plc": "配售", "pro": "配股", "spp": "股东认购计划（SPP）", "follow": "新股发行", "other": "新股发行"}
 
 
+def form_line(hit: dict, tr: dict) -> str:
+    """“公司的发行文件对得上……”那一句（不含结尾）。折价只在 −50% 到 +5% 之间时说：日线是复权价，太离谱的多半是价格没对齐。"""
+    iss = hit["iss"]
+    disc = iss.get("disc")
+    ok = isinstance(disc, (int, float)) and not isinstance(disc, bool) and -0.5 < disc <= 0.05
+    return (f"公司的发行文件对得上：{md(iss.get('d') or hit.get('d') or '')} 按 {fp(iss['p'])} 发行 {fq(iss['q'])}新股"
+            f"（{ISSUE_NAMES.get(iss.get('kind'), '新股发行')}，Appendix {iss.get('f')}）"
+            + (f"，发行价比公告前一天的收盘价{'低' if disc < 0 else '高'} {abs(disc) * 100:.0f}%" if ok else "")
+            + f"；它的买入均价约 {fp(tr['buy_price'])}，")
+
+
 def issue_check(ev: list[dict], tr: dict, iss_ok: bool, ref_date: str) -> tuple[dict | None, bool]:
     """第十九轮：拿公司的发行文件（Appendix 3B / 2A）对基金的买入。返回 (对上的那份文件, 是否否定“像配售”)。
     对上 = 文件是真的融资（不是员工计划/期权行权/股息再投资/换股），价格和基金的买入均价差 2% 以内，发行日在交易期间前后 7 天内。
@@ -1236,13 +1247,7 @@ def judge(n: dict) -> dict | None:
     # 第十九轮：标题是“Proposed issue of securities”、读过正文发现是员工计划/期权行权/股息再投资/收购换股的，不算融资
     raise_ev = [x for x in evs("raise", 10, 5) if not (isinstance(x.get("iss"), dict) and x["iss"].get("kind") not in ISSUE_NAMES)]
     if direction == "buy" and form_hit:
-        iss = form_hit["iss"]
-        disc = iss.get("disc")
-        reasons.append(f"公司的发行文件对得上：{md(iss.get('d') or form_hit['d'])} 按 {fp(iss['p'])} 发行 {fq(iss['q'])}新股"
-                       f"（{ISSUE_NAMES[iss['kind']]}，Appendix {iss['f']}）"
-                       + (f"，发行价比公告前一天的收盘价{'低' if disc < 0 else '高'} {abs(disc) * 100:.0f}%"
-                          if isinstance(disc, (int, float)) and not isinstance(disc, bool) and -0.9 < disc < 1 else "")
-                       + f"；它的买入均价约 {fp(tr['buy_price'])}，就是在认购这次发行。")
+        reasons.append(form_line(form_hit, tr) + "就是在认购这次发行。")
         if "参与融资" not in tags:
             tags.append("参与融资")
         placement = True
@@ -1323,9 +1328,10 @@ def judge(n: dict) -> dict | None:
         gain = (sp / bp - 1) if bp and sp else None
         g_txt = (f"，卖出均价比买入价{'高' if gain >= 0 else '低'} {abs(gain) * 100:.1f}%" + ("（赚了差价）" if gain >= 0.01 else "（这一把没赚到）" if gain <= -0.01 else "（基本持平）")
                  if gain is not None else "")
-        if round_blk and sell >= 0.5 * buy:
-            reasons.append(f"明细里的买入只有一笔：{fq(buy)} × {fp(tr['buy_price'])}，金额正好是整数（约 ${buy * tr['buy_price'] / 1e6:,.2f}M）——"
-                           f"这是认购配售新股的样子；同期又在市场上卖出 {fq(sell)}{g_txt}。对冲基金常这么做：用折扣价认购新股，再在市场上卖掉。")
+        if (round_blk or form_hit) and sell >= 0.5 * buy:
+            first = (form_line(form_hit, tr) + "就是认购的这次发行" if form_hit else
+                     f"明细里的买入只有一笔：{fq(buy)} × {fp(tr['buy_price'])}，金额正好是整数（约 ${buy * tr['buy_price'] / 1e6:,.2f}M）——这是认购配售新股的样子")
+            reasons.append(first + f"；同期又在市场上卖出 {fq(sell)}{g_txt}。对冲基金常这么做：用折扣价认购新股，再在市场上卖掉。")
             tags.append("参与融资")
             return done("flip_plc")
         if order is not None and abs(order) >= 0.5:

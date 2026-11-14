@@ -3164,6 +3164,12 @@ def test_judge_uses_issue_forms():
     r = insight.judge(n)
     assert r["action"] == "add_placement" and r["purposes"][0]["p"] > 0.7
     assert any(x.startswith("公司的发行文件对得上：10/30 按 $1.25 发行 1,000 万股新股（配售，Appendix 3B），发行价比公告前一天的收盘价低 8%") for x in r["reasons"])
+    premium = insight.judge({**n, "ev": [{**_iss("2026-10-30", 1.25), "iss": {**_iss("2026-10-30", 1.25)["iss"], "disc": 0.19}}]})
+    assert any(x.startswith("公司的发行文件对得上") and "收盘价" not in x for x in premium["reasons"])     # 溢价 19%：多半价格没对齐，不说
+    # 认购配售后又卖出：发行文件对上了也写进去
+    two = _two_way(n_buy=4, buy_qty=1_000_000, buy_price=1.5, daily=[["2026-01-10", 1_000_000], ["2026-03-10", -1_100_000]])
+    r2 = insight.judge({**two, "ev": [_iss("2026-01-12", 1.5)], "iss_ok": True})
+    assert r2["action"] == "flip_plc" and any(x.startswith("公司的发行文件对得上：1/12 按 $1.50") for x in r2["reasons"])
     # PPC 那种：一笔整数金额，但同期只有员工持股的发行
     r = insight.judge(_buy(trades=trades, ev=[_iss("2026-08-28", 1.97, kind="emp")], iss_ok=True))
     assert r["action"] != "add_placement" and "整数金额" not in r["tags"] and any("不是认购配售" in x for x in r["reasons"])

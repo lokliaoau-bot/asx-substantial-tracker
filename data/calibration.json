@@ -117,11 +117,7 @@
   "rev_next": 0.0,
   "n3x": 3,
   "avg3x": -0.123,
-  "up3x": 0.0,
-  "check": 0.0,
-  "check_n": 3,
-  "check_name": "之后 3 个月跑赢指数",
-  "check_base": 0.321
+  "up3x": 0.0
  },
  "sell:bounce": {
   "n": 3,

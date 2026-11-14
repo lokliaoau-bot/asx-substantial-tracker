@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-14T15:02:36+11:00",
- "last_success_at": "2026-11-14T15:02:26+11:00",
+ "updated_at": "2026-11-14T16:55:06+11:00",
+ "last_success_at": "2026-11-14T16:54:56+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -27,7 +27,7 @@
   "2026-11-14"
  ],
  "partial_days": {
-  "2026-11-14": "15:02"
+  "2026-11-14": "16:54"
  },
  "last_run": {
   "ok": true,
@@ -138,7 +138,14 @@
    "up3": 0.429,
    "n_next": 18,
    "same_next": 0.722,
-   "rev_next": 0.056
+   "rev_next": 0.056,
+   "n3x": 14,
+   "avg3x": -0.052,
+   "up3x": 0.357,
+   "check": 0.357,
+   "check_n": 14,
+   "check_name": "之后 3 个月跑赢指数",
+   "check_base": 0.511
   },
   "buy:dip": {
    "n": 77,
@@ -147,7 +154,14 @@
    "up3": 0.634,
    "n_next": 55,
    "same_next": 0.691,
-   "rev_next": 0.127
+   "rev_next": 0.127,
+   "n3x": 41,
+   "avg3x": 0.143,
+   "up3x": 0.585,
+   "check": 0.585,
+   "check_n": 41,
+   "check_name": "之后 3 个月跑赢指数",
+   "check_base": 0.511
   },
   "buy:mom": {
    "n": 38,
@@ -156,7 +170,14 @@
    "up3": 0.56,
    "n_next": 34,
    "same_next": 0.794,
-   "rev_next": 0.118
+   "rev_next": 0.118,
+   "n3x": 25,
+   "avg3x": 0.145,
+   "up3x": 0.52,
+   "check": 0.52,
+   "check_n": 25,
+   "check_name": "之后 3 个月跑赢指数",
+   "check_base": 0.511
   },
   "buy:plc": {
    "n": 2,
@@ -165,7 +186,10 @@
    "up3": null,
    "n_next": 0,
    "same_next": null,
-   "rev_next": null
+   "rev_next": null,
+   "n3x": 0,
+   "avg3x": null,
+   "up3x": null
   },
   "buy:prog": {
    "n": 5,
@@ -174,7 +198,14 @@
    "up3": 0.0,
    "n_next": 4,
    "same_next": 1.0,
-   "rev_next": 0.0
+   "rev_next": 0.0,
+   "n3x": 3,
+   "avg3x": -0.158,
+   "up3x": 0.0,
+   "check": 1.0,
+   "check_n": 4,
+   "check_name": "下一份公告还是同方向",
+   "check_base": 0.725
   },
   "buy:pull": {
    "n": 7,
@@ -183,7 +214,14 @@
    "up3": 0.8,
    "n_next": 7,
    "same_next": 0.571,
-   "rev_next": 0.143
+   "rev_next": 0.143,
+   "n3x": 5,
+   "avg3x": 0.389,
+   "up3x": 0.8,
+   "check": 0.8,
+   "check_n": 5,
+   "check_name": "之后 3 个月跑赢指数",
+   "check_base": 0.511
   },
   "buy:short": {
    "n": 2,
@@ -192,7 +230,14 @@
    "up3": 1.0,
    "n_next": 2,
    "same_next": 0.5,
-   "rev_next": 0.5
+   "rev_next": 0.5,
+   "n3x": 2,
+   "avg3x": -0.087,
+   "up3x": 0.0,
+   "check": 0.5,
+   "check_n": 2,
+   "check_name": "90 天内反向",
+   "check_base": 0.167
   },
   "sell:base": {
    "n": 4,
@@ -201,7 +246,14 @@
    "up3": 0.0,
    "n_next": 2,
    "same_next": 1.0,
-   "rev_next": 0.0
+   "rev_next": 0.0,
+   "n3x": 3,
+   "avg3x": -0.123,
+   "up3x": 0.0,
+   "check": 0.0,
+   "check_n": 3,
+   "check_name": "之后 3 个月跑赢指数",
+   "check_base": 0.321
   },
   "sell:bounce": {
    "n": 3,
@@ -210,7 +262,10 @@
    "up3": null,
    "n_next": 2,
    "same_next": 1.0,
-   "rev_next": 0.0
+   "rev_next": 0.0,
+   "n3x": 0,
+   "avg3x": null,
+   "up3x": null
   },
   "sell:profit": {
    "n": 32,
@@ -219,7 +274,10 @@
    "up3": 0.273,
    "n_next": 25,
    "same_next": 0.64,
-   "rev_next": 0.2
+   "rev_next": 0.2,
+   "n3x": 22,
+   "avg3x": -0.042,
+   "up3x": 0.318
   },
   "sell:stop": {
    "n": 14,
@@ -228,7 +286,14 @@
    "up3": 0.667,
    "n_next": 6,
    "same_next": 0.833,
-   "rev_next": 0.0
+   "rev_next": 0.0,
+   "n3x": 3,
+   "avg3x": 0.152,
+   "up3x": 0.667,
+   "check": 1.0,
+   "check_n": 2,
+   "check_name": "半年内没有买回",
+   "check_base": 0.692
   },
   "sell:wind": {
    "n": 1,
@@ -237,7 +302,10 @@
    "up3": null,
    "n_next": 0,
    "same_next": null,
-   "rev_next": null
+   "rev_next": null,
+   "n3x": 0,
+   "avg3x": null,
+   "up3x": null
   }
  },
  "notices": [

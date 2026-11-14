@@ -375,6 +375,10 @@ def price_context(series: list, ref: str, first: str = "", last: str = "") -> di
     out = {"ref": upto[-1][0].isoformat(), "p": round(p, 4), "r1m": back(30), "r3m": back(91), "r6m": back(182),
            "r12m": back(365), "hi": round(hi, 4), "lo": round(lo, 4),
            "pos": round((p - lo) / (hi - lo), 3) if hi > lo and len(year) >= 60 else None}
+    rets = [math.log(b[1] / a[1]) for a, b in zip(upto[-251:], upto[-250:])]
+    if len(rets) >= 60:                          # 第十七轮：这只股票自己平时一天涨跌多少（近一年日涨跌的标准差）
+        mean = sum(rets) / len(rets)
+        out["vol"] = round(math.sqrt(sum((x - mean) ** 2 for x in rets) / (len(rets) - 1)), 4)
     vols = [x[2] for x in upto[-60:] if x[2] > 0]
     out["adv"] = int(sum(vols) / len(vols)) if len(vols) >= 20 else None       # 近 60 个交易日的日均成交量
     try:
@@ -1052,7 +1056,7 @@ def judge(n: dict) -> dict | None:
         r1x = r1x - mk["m1"] if r1x is not None and "m1" in mk else r1x
         if abs(mk.get("m3", 0)) >= 0.06 or abs(mk.get("m12", 0)) >= 0.12:
             bits = [f"{lab} {fr(mk[k])}" for lab, k in (("3 个月", "m3"), ("12 个月", "m12")) if k in mk]
-            reasons.append("同期大盘（ASX 200）" + "、".join(bits) + "：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。")
+            reasons.append(("同期小盘股指数（Small Ordinaries）" if px.get("mb") == "XSO" else "同期大盘（ASX 200）") + "、".join(bits) + "：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。")
     up = (r6 is not None and r6 >= 0.25) or (r12 is not None and r12 >= 0.40) or (r3 is not None and r3 >= 0.20)
     down = (r6 is not None and r6 <= -0.25) or (r3 is not None and r3 <= -0.20) or (r12 is not None and r12 <= -0.35)
     high = pos is not None and pos >= 0.65

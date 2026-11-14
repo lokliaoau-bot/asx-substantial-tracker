@@ -81,6 +81,7 @@ DAY_COMPLETE_AT = "21:00"   # 悉尼时间。ASX 晚上 8 点多还会发公告�
 WORKERS = int(os.environ.get("WORKERS", "4"))             # 同时下载、解析几份 PDF（GitHub 的机器是 4 核）
 API_OVERLAP_HOURS = 6                                     # 增量补抓时，往上次同步点之前多翻几个小时，防止接口里顺序略有错位
 API_FULL_EVERY_DAYS = 7                                   # 每隔几天把整个补抓窗口重新翻一遍，查漏补缺
+PX_VERSION = 6                                            # 股价背景的算法改了就加 1（第十七轮：加了自身波动 vol、小盘股对照小盘指数），近期和历史记录都会重算
 INSIGHT_VERSION = 5                                       # 交易明细的读法改进后加 1，命中名单的旧公告会重新下载读一次明细
 TRADE_PAGES = int(os.environ.get("TRADE_PAGES", "40"))    # 交易明细最多读前多少页（附件可能很长）
 TRADE_SECONDS = 25                                        # 一份公告读明细最多花多少秒
@@ -1043,12 +1044,15 @@ def update_history(history: dict, entries: dict, holders: list[Holder], today: d
         if not holder:
             continue
         rec = dict(insight.history_record(e), dv=e.get("detail_v"))
+        if e.get("px_v") and rec.get("px"):
+            rec["px_v"] = e["px_v"]
         rows = pos.setdefault(pos_key(holder, target_code(e)), [])
         same = lambda r: (r.get("type"), r.get("cd"), r.get("vp")) == (rec["type"], rec["cd"], rec["vp"]) and rec["cd"] and rec["vp"]
         idx = next((i for i, r in enumerate(rows) if r.get("id") == rec["id"]), None)
         if idx is not None:
-            if rows[idx].get("fwd") and not rec.get("fwd"):
-                rec["fwd"] = rows[idx]["fwd"]
+            for k in ("fwd", "fwd_x", "bm"):
+                if rows[idx].get(k) and not rec.get(k):
+                    rec[k] = rows[idx][k]
             rows[idx] = rec
         elif not any(same(r) for r in rows):
             rows.append(rec)
@@ -1370,9 +1374,9 @@ class Backfill:
                     series = self.prices(code)
                     tr = e.get("trades") or {}
                     if series:
-                        e["px"] = insight.price_context(series, e.get("change_date") or tr.get("last") or e["date"], tr.get("first", ""), tr.get("last", ""))
+                        e["px"] = insight.price_context(series, price_ref(e.get("change_date"), tr, e["date"]), tr.get("first", ""), tr.get("last", ""))
                         add_timeline(e, series)
-                    rec = dict(insight.history_record(e), bf=1, dv=INSIGHT_VERSION)
+                    rec = dict(insight.history_record(e), bf=1, dv=INSIGHT_VERSION, px_v=PX_VERSION)
                     dest = self.h["pos"].setdefault(pos_key(who, code), [])
                     if not any(x.get("id") == rec["id"] for x in dest):
                         dest.append(rec)
@@ -1413,14 +1417,12 @@ class Backfill:
                 series = self.prices(code)
                 tr = e.get("trades") or {}
                 if series:
-                    e["px"] = insight.price_context(series, e.get("change_date") or tr.get("last") or e["date"], tr.get("first", ""), tr.get("last", ""))
+                    e["px"] = insight.price_context(series, price_ref(e.get("change_date"), tr, e["date"]), tr.get("first", ""), tr.get("last", ""))
                     add_timeline(e, series)
-                new = dict(insight.history_record(e), dv=INSIGHT_VERSION)
-                for k in ("bf", "fwd"):
+                new = dict(insight.history_record(e), dv=INSIGHT_VERSION, px_v=PX_VERSION)
+                for k in ("bf", "fwd", "fwd_x", "bm"):
                     if r.get(k) and not new.get(k):
                         new[k] = r[k]
-                if isinstance(r.get("px"), dict) and r["px"].get("m") and isinstance(new.get("px"), dict):
-                    new["px"]["m"] = r["px"]["m"]
                 rows[idx] = new
                 done += 1
                 self.refreshed += 1
@@ -1444,6 +1446,28 @@ class Backfill:
                 log(f"  回补 {key} 出错：{type(ex).__name__}: {ex}")
                 self.h.setdefault("meta", {}).setdefault(key, {})["done"] = "error"
 
+    def refresh_px(self) -> int:
+        """股价背景算法改过（px_v 不是 PX_VERSION）的历史记录，用日线重算（不用重新下载 PDF）。大盘对照留给 add_market 重算。返回重算了几条。"""
+        need: dict[str, list] = {}
+        for key, rows in self.h.get("pos", {}).items():
+            for r in rows:
+                if isinstance(r.get("px"), dict) and r["px"] and r.get("px_v") != PX_VERSION and r.get("px_tries", 0) < 3:
+                    need.setdefault(key.split("|", 1)[1], []).append(r)
+        done = 0
+        for code in sorted(need, key=lambda c: c not in self.series):
+            if self.out_of_budget():
+                break
+            series = self.prices(code)
+            for r in need[code]:
+                tr = r.get("tr") if isinstance(r.get("tr"), dict) else {}
+                px = insight.price_context(series, price_ref(r.get("cd"), tr, r.get("date") or ""), tr.get("first", ""), tr.get("last", "")) if series else {}
+                if px:
+                    r["px"], r["px_v"] = px, PX_VERSION
+                    done += 1
+                else:
+                    r["px_tries"] = r.get("px_tries", 0) + 1
+        return done
+
     def refresh_forward(self, max_codes: int = 40) -> None:
         """旧记录的“公告后 1/3/6 个月涨跌”到期了就补上。"""
         need: dict[str, list] = {}
@@ -1462,6 +1486,20 @@ class Backfill:
                     r["fwd"] = fwd
                 else:
                     r["fwd_tries"] = r.get("fwd_tries", 0) + 1
+
+
+REF_SLACK = 30      # 变动日比逐笔明细的最后一笔早这么多天以上，就是变动日读错了（第十七轮：MYG 读成了上一份公告的日期）
+
+
+def price_ref(change_date: str, tr: dict, date: str) -> str:
+    """算股价背景用哪一天：平常用变动日；变动日比明细最后一笔早 REF_SLACK 天以上（读错了）就用明细最后一笔；都没有时用公告日。"""
+    last = (tr or {}).get("last") if isinstance(tr, dict) else None
+    try:
+        if change_date and last and (dt.date.fromisoformat(last) - dt.date.fromisoformat(change_date)).days > REF_SLACK:
+            return last
+    except (TypeError, ValueError):
+        pass
+    return change_date or last or date or ""
 
 
 SMALL_INDEX = "XSO"                 # 小盘股对照 S&P/ASX Small Ordinaries
@@ -1514,40 +1552,36 @@ def add_forward_excess(history: dict) -> int:
     return done
 
 
-def index_points() -> list[tuple[str, float]]:
-    pts = []
-    for row in price_series(INDEX_CODE):
-        try:
-            d = dt.datetime.fromtimestamp(row[0] / 1000, dt.timezone.utc).date().isoformat()
-            p = float(row[4] if len(row) >= 5 else row[1])
-        except (TypeError, ValueError, IndexError, OverflowError, OSError):
-            continue
-        if p > 0:
-            pts.append((d, p))
-    pts.sort()
-    return pts
-
-
 def add_market(entries: dict, history: dict) -> int:
     """给还没有大盘对照的股价背景补上 px["m"]（大盘同期涨跌）。只在有需要时取一次指数日线。返回补了几条。"""
     todo = []
     for e in entries.values():
         px = e.get("px")
-        if isinstance(px, dict) and px.get("p") and "m" not in px:
-            todo.append((px, e.get("change_date") or (e.get("trades") or {}).get("last") or e.get("date") or ""))
+        if isinstance(px, dict) and px.get("p") and ("m" not in px or px.get("mb") != benchmark_of(px)):
+            todo.append((px, price_ref(e.get("change_date"), e.get("trades") or {}, e.get("date") or "")))
     for rows in (history.get("pos") or {}).values():
         for r in rows:
             px = r.get("px")
-            if isinstance(px, dict) and px.get("p") and "m" not in px:
-                todo.append((px, r.get("cd") or r.get("date") or ""))
+            if isinstance(px, dict) and px.get("p") and ("m" not in px or px.get("mb") != benchmark_of(px)):
+                todo.append((px, price_ref(r.get("cd"), r.get("tr") or {}, r.get("date") or "")))
     if not todo:
         return 0
-    pts = index_points()
-    if len(pts) < 50:
-        raise FetchError("指数日线太短")
-    for px, ref in todo:
-        px["m"] = insight.market_returns(pts, ref)
-    return len(todo)
+    done, failed = 0, []
+    for code in sorted({benchmark_of(px) for px, _ in todo}):
+        try:
+            pts = [(dt.datetime.fromtimestamp(t / 1000, dt.timezone.utc).date().isoformat(), p) for t, p in index_series(code) if p > 0]
+        except (FetchError, TypeError, ValueError, OverflowError, OSError):
+            pts = []
+        if len(pts) < 50:
+            failed.append(code)
+            continue
+        for px, ref in todo:
+            if benchmark_of(px) == code:
+                px["m"], px["mb"] = insight.market_returns(pts, ref), code
+                done += 1
+    if failed and not done:
+        raise FetchError("指数日线取不到：" + "、".join(failed))
+    return done
 
 
 def report_codes() -> dict[str, list[str]]:
@@ -2429,9 +2463,9 @@ def add_prices(entries: list[dict]) -> tuple[int, int]:
         for e in by_code[code]:
             e.pop("ev", None)
             tr = e.get("trades") or {}
-            ref = e.get("change_date") or tr.get("last") or e.get("date", "")
+            ref = price_ref(e.get("change_date"), tr, e.get("date", ""))
             e["px"] = insight.price_context(series, ref, tr.get("first", ""), tr.get("last", ""))
-            e["px_v"] = INSIGHT_VERSION
+            e["px_v"] = PX_VERSION
             add_timeline(e, series)
         time.sleep(PAUSE)
         try:
@@ -2497,6 +2531,7 @@ def mark_days(days: set, today: dt.date, hhmm: str, scanned: set, partial: dict)
 
 
 def main() -> int:
+    _INDEX.clear()
     now = now_syd()
     today = now.date()
     holders, noise = load_watchlist()
@@ -2687,7 +2722,7 @@ def main() -> int:
     t_px = time.monotonic()
     need_px = [e for e in entries.values()
                if e.get("status") == "parsed" and e.get("detail_v") == INSIGHT_VERSION
-               and e.get("px_v") != INSIGHT_VERSION and e.get("px_tries", 0) < DETAIL_TRIES and is_matched(e)]
+               and e.get("px_v") != PX_VERSION and e.get("px_tries", 0) < DETAIL_TRIES and is_matched(e)]
     px_ok, px_failed = add_prices(need_px)
     if need_px:
         log(f"股价背景：{len(need_px)} 条公告、{px_ok + px_failed} 只股票，取到 {px_ok} 只，用时 {time.monotonic() - t_px:.0f} 秒")
@@ -2702,6 +2737,9 @@ def main() -> int:
         bf.run()
         bf.refresh_old()
         bf.refresh_forward()
+        n_px = bf.refresh_px()
+        if n_px:
+            log(f"股价背景按新算法重算了 {n_px} 条历史记录")
     except Exception as ex:  # noqa: BLE001  回补出错不能影响当天的抓取
         log(f"回补持仓历史出错：{type(ex).__name__}: {ex}")
     pending = sum(1 for k in history["pos"] if not (history.get("meta", {}).get(k) or {}).get("done"))

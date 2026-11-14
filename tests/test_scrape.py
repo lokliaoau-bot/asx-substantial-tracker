@@ -2405,15 +2405,17 @@ def test_add_market_only_fetches_when_needed(sandbox, monkeypatch):
     day = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
     idx = [[day(dt.date(2025, 6, 1) + dt.timedelta(days=i)), 0, 0, 0, 8000 + i, 1] for i in range(600)]
     monkeypatch.setitem(PDFS, "1001", TRADE_604)
-    fake = FakeASX(prices={"SLC": falling_prices(), "XJO": idx})
+    fake = FakeASX(prices={"SLC": falling_prices(), "XJO": idx, "XSO": [[t, 0, 0, 0, 3000 - i, 1] for i, (t, *_r) in enumerate(idx)]})
     monkeypatch.setattr(scrape, "fetch", fake)
     assert scrape.main() == 0
     e = read(sandbox / "data" / "all_notices.json")["entries"]["1001"]
-    assert e["px"]["m"]["m3"] > 0 and fake.price_calls.count("XJO") == 1
+    bm = scrape.benchmark_of(e["px"])
+    assert e["px"]["mb"] == bm and fake.price_calls.count(bm) == 1
+    assert (e["px"]["m"]["m3"] > 0) == (bm == "XJO")                       # 小盘股和小盘指数（这里在跌）比
     hist = read(sandbox / "data" / "history.json")
     assert all("m" in r["px"] for rows in hist["pos"].values() for r in rows if r.get("px", {}).get("p"))
     scrape.main()
-    assert fake.price_calls.count("XJO") == 1                              # 都补过了：不再取
+    assert fake.price_calls.count(bm) == 1                                 # 都补过了：不再取
     # 指数取不到：照常跑，用股票自己的涨跌
     fake2 = FakeASX(prices={"SLC": falling_prices()})
     monkeypatch.setattr(scrape, "fetch", fake2)
@@ -2911,3 +2913,49 @@ def test_gold_file_is_well_formed():
         assert it["id"] not in ids
         ids.add(it["id"])
     assert len(g["items"]) >= 100
+
+
+# ---------------------------------------------------------------- 第十七轮：自身波动、小盘对照、变动日读错
+
+def test_price_ref_falls_back_when_change_date_is_wrong():
+    tr = {"first": "2026-04-02", "last": "2026-10-26"}
+    assert scrape.price_ref("2026-01-14", tr, "2026-10-27") == "2026-10-26"      # MYG：读成了上一份公告的日期
+    assert scrape.price_ref("2026-10-29", {"last": "2026-11-02"}, "2026-11-02") == "2026-10-29"   # 列交收日，早 4 天：照旧
+    assert scrape.price_ref("", tr, "2026-10-27") == "2026-10-26"
+    assert scrape.price_ref("", {}, "2026-10-27") == "2026-10-27"
+    assert scrape.price_ref("bad", tr, "x") == "bad" and scrape.price_ref(None, None, None) == ""
+
+
+def test_price_context_has_own_volatility():
+    day = lambda i: int(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc).timestamp() * 1000) + i * 86_400_000
+    calm = [[day(i), 10 * (1.01 if i % 2 else 1.0), 1000] for i in range(400)]
+    wild = [[day(i), 10 * (1.10 if i % 2 else 1.0), 1000] for i in range(400)]
+    a, b = insight.price_context(calm, "2026-01-20"), insight.price_context(wild, "2026-01-20")
+    assert 0.008 < a["vol"] < 0.012 and 0.08 < b["vol"] < 0.11
+    assert "vol" not in insight.price_context(calm[:40], "2025-02-05")              # 不到 60 天：不算
+
+
+def test_refresh_px_recomputes_history_without_pdfs(monkeypatch):
+    holders, _ = scrape.load_watchlist()
+    h = {"pos": {"A|SLC": [{"id": "1", "date": "2026-10-20", "cd": "2026-01-14", "tr": {"first": "2026-10-01", "last": "2026-10-16"},
+                            "px": {"p": 1.0, "m": {"m3": 0.1}}, "px_v": 5},
+                           {"id": "2", "date": "2026-10-20", "px": {"p": 1.0}, "px_v": scrape.PX_VERSION},
+                           {"id": "3", "date": "2026-10-20"}]}}
+    calls = []
+    monkeypatch.setattr(scrape, "price_series", lambda c: calls.append(c) or falling_prices())
+    monkeypatch.setattr(scrape, "PAUSE", 0)
+    bf = scrape.Backfill(h, holders, dt.date(2026, 11, 14))
+    assert bf.refresh_px() == 1 and calls == ["SLC"]
+    r = h["pos"]["A|SLC"][0]
+    assert r["px_v"] == scrape.PX_VERSION and r["px"]["ref"] <= "2026-10-16" and r["px"]["ref"] >= "2026-10-06" and "m" not in r["px"]
+    assert h["pos"]["A|SLC"][1]["px"] == {"p": 1.0} and "px" not in h["pos"]["A|SLC"][2]
+    monkeypatch.setattr(scrape, "price_series", lambda c: (_ for _ in ()).throw(scrape.FetchError("down")))
+    h["pos"]["A|SLC"][0]["px_v"] = 1
+    bf = scrape.Backfill(h, holders, dt.date(2026, 11, 14))
+    assert bf.refresh_px() == 0 and h["pos"]["A|SLC"][0]["px_tries"] == 1
+
+
+def test_small_cap_reason_names_small_ords():
+    n = _buy()
+    n["px"].update(r3m=-0.22, r6m=-0.22, r12m=-0.22, pos=0.5, m={"m1": -0.05, "m3": -0.20, "m6": -0.20, "m12": -0.20}, mb="XSO")
+    assert any("同期小盘股指数（Small Ordinaries）3 个月 -20%" in x for x in insight.judge(n)["reasons"])

@@ -15,10 +15,12 @@
 from __future__ import annotations
 
 import bisect
+import collections
 import datetime as dt
 import math
 import re
 import statistics
+import sys
 
 # ---------------------------------------------------------------- 逐笔交易表
 
@@ -520,6 +522,11 @@ LABELS = {
     "own_product": "自家旗下产品的持股变化（不是选股）", "restructure": "股份合并/拆分", "unknown": "看不出来",
     "flip_plc": "认购配售后在市场上卖出（像配售套利）", "flip": "先买后卖，做了一个来回", "flip_back": "先卖后买回，做了一个来回",
     "churn": "边买边卖，日常交易（没有明确方向）",
+    # 第二十轮：新进建仓的 603 也说出目的——以前打分已经算出“逢低”“顺势”，标签却只写“新进建仓”。
+    # “加仓越过 5% 线”不跟着改：4 个月里只买了持仓的一小部分，看不出它为什么拿着这只股票（标准答案也是这么标的）
+    "build_dip": "逢低建仓", "build_chase": "顺势建仓", "build_pull": "回调时建仓（长期在涨）",
+    "build_flow": "新进建仓（多只股票一起买，像有新资金）",
+    "add_fixed": "按约定价格拿新股加仓（行权/转股/配售）", "build_fixed": "按约定价格拿新股，成为大股东（行权/转股/配售）",
 }
 TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip": "bull", "add_chase": "bull", "add": "bull",
         "add_placement": "bull", "trim_profit": "bear", "trim_loss": "bear", "trim": "bear", "exit_profit": "bear",
@@ -527,7 +534,8 @@ TONE = {"build": "bull", "cross_up": "bull", "build_placement": "bull", "add_dip
         "add_pull": "bull", "add_prog": "bull", "trim_bounce": "bear", "exit_bounce": "bear", "trim_wind": "bear", "exit_wind": "bear",
         "trim_deal": "neutral", "exit_deal": "neutral", "own_product": "neutral",
         "trim_hand": "neutral", "exit_hand": "neutral", "add_take": "bull", "build_take": "bull",
-        "flip_plc": "neutral", "flip": "neutral", "flip_back": "neutral", "churn": "neutral"}
+        "flip_plc": "neutral", "flip": "neutral", "flip_back": "neutral", "churn": "neutral",
+        "build_dip": "bull", "build_chase": "bull", "build_pull": "bull", "build_flow": "bull", "add_fixed": "bull", "build_fixed": "bull"}
 
 
 ISSUE_KINDS = (       # 第十九轮：Appendix 3B / 2A 里“这是什么发行”→ 分类。顺序有意义
@@ -665,6 +673,30 @@ def round_block(tr: dict) -> bool:
         return False
     v = q * p
     return v >= 200_000 and abs(v - round(v / 1000) * 1000) <= 1.0
+
+
+MEGA_X = 10.0           # 第二十轮：一两笔就是同期全市场成交量的这么多倍——一整块谈好的交易
+MEGA_PEN = 1.0
+FIXED_PLC = 3.0         # 第二十轮：好几笔买入全是同一个整数价、而且远离市场价——按定价从公司拿的新股
+
+
+def fixed_price(tr: dict, px: dict, side: str = "buy") -> float | None:
+    """第二十轮：这个方向至少 2 笔，均价正好是 5 分钱的整数倍（至少 $0.10），而且在同期市场价区间之外（低于最低价的 8 成或高于最高价的 1.25 倍）。
+    在市场上分几笔买，均价不可能正好这么整、还离市价那么远：只能是按事先定好的价格成交（期权行权、可转债转股、配售）。
+    L1 买 BMC：2、3、10 笔全是 $1.00，同期市价 $2.3–2.9。返回这个价格，不像时返回 None。
+    为什么要“5 分钱的整数倍、至少 1 毛”：股份合并后日线是复权价，旧的成交价会显得离谱（GTI 0.4 分、PNR 3.75 分），
+    而 1 毛以下的股票本来就按 0.1 分一档成交，整不整说明不了什么。全部真实数据里只有 BMC 符合。"""
+    try:
+        n = int(tr.get("n_buy" if side == "buy" else "n_sell") or 0)
+        p = float(tr.get("buy_price" if side == "buy" else "sell_price") or 0)
+        lo, hi = float(px.get("t_lo") or 0), float(px.get("t_hi") or 0)
+    except (TypeError, ValueError, AttributeError):
+        return None
+    if n < 2 or p <= 0 or lo <= 0 or hi < lo:
+        return None
+    if p < 0.10 or abs(p / 0.05 - round(p / 0.05)) > 1e-6:
+        return None
+    return p if (p < lo * 0.8 or p > hi * 1.25) else None
 
 
 def _bounded(v, lo: float, hi: float) -> float | None:
@@ -855,7 +887,7 @@ def history_record(e: dict) -> dict:
 
 
 BUY_ACTIONS = {"build", "cross_up", "build_placement", "add_dip", "add_chase", "add", "add_placement", "add_pull", "add_prog",
-               "add_take", "build_take"}
+               "add_take", "build_take", "build_dip", "build_chase", "build_pull", "build_flow", "add_flow", "add_fixed", "build_fixed"}
 SELL_ACTIONS = {"trim_profit", "trim_loss", "trim", "exit_profit", "exit_loss", "exit", "trim_bounce", "exit_bounce", "trim_wind", "exit_wind", "trim_deal", "exit_deal",
                 "trim_hand", "exit_hand"}
 CTX_DAYS = 21             # “同期”：前后三周
@@ -1069,6 +1101,7 @@ def judge(n: dict) -> dict | None:
     reconciled = bool(rows_ok and dsh is not None and abs(tr.get("net_qty", 0) - dsh) <= max(abs(dsh) * 0.05, 10))
     # 第十七轮：604 的明细加总和持股数变化对不上——明细没读全。方向和幅度按持股数，来自明细的均价、时间线、交易形状都不用
     mismatch = bool(t == "change" and rows_ok and dsh is not None and not reconciled)
+    fixed = fixed_price(tr, px, "buy") if rows_ok and buy and not mismatch else None
     # 明细里的均价和当时的市场价差太远：多半是把总金额或别的数字当成了价格，不用
     bp, sp = tr.get("buy_price"), tr.get("sell_price")
     if px.get("t_lo") and px.get("t_hi"):
@@ -1187,7 +1220,7 @@ def judge(n: dict) -> dict | None:
         if reconciled or (t != "change" and tr["n"] >= 2):
             score += 1
     # 买卖量和同期全市场成交量比：看它急不急、是不是在场内做的
-    offmkt = False
+    offmkt = mega = False
     t_vol, days, big = px.get("t_vol"), tr.get("days") or 0, max(buy, sell)
     vol_part = None
     if rows_ok and t_vol and big and (reconciled or t != "change"):
@@ -1197,6 +1230,10 @@ def judge(n: dict) -> dict | None:
             offmkt = True
             reasons.append(f"它{verb}的量是同期整个市场成交量的 {min(part, 99):.1f} 倍：不可能都是在场内成交的，"
                            + ("大部分应该是认购新股（配售）、大宗交易或场外转让。" if buy >= sell else "大部分应该是大宗交易或场外转让（一次性卖给了接盘方）。"))
+            so = votes[-1] / vp[-1] * 100 if votes and vp and vp[-1] > 0 and votes[-1] > 0 and len(votes) == len(vp) else None
+            n_side = tr.get("n_buy") if buy >= sell else tr.get("n_sell")
+            # 第二十轮：一两笔就是全市场成交量的 10 倍以上、占公司 2% 以上——一整块谈好的交易（配售或从别的股东手里接），价格不是在市场上挑的
+            mega = bool(part >= MEGA_X and isinstance(n_side, int) and n_side <= 2 and (so is None or big / so >= 0.02))
         elif part >= 0.25:
             reasons.append(f"它{verb}的量占了同期全市场成交量的 {part * 100:.0f}%：是这段时间最主要的{'买家' if buy >= sell else '卖家'}之一，"
                            f"{'买' if buy >= sell else '卖'}得很坚决。")
@@ -1361,7 +1398,13 @@ def judge(n: dict) -> dict | None:
          "plc": 0.0, "raise": bool(raise_ev), "so_up": bool(so_chg is not None and so_chg >= 0.03), "plc_inferred": placement_said,
          "target": bool(tk_ev and churn < 0.6), "res_j": res_j, "cost_d": None, "gain": None, "own_gain": None,
          "rblk": bool(direction == "buy" and round_blk and sell < 0.5 * buy), "form": form,
-         "plc_form": bool(direction == "buy" and form_hit), "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said}
+         "plc_form": bool(direction == "buy" and form_hit), "seq_same": int(seq.get("same") or 0), "opp_days": seq.get("opp_days"), "base": "", "said_plc": placement_said,
+         "fixed": bool(direction == "buy" and fixed), "mega": bool(direction == "buy" and mega and buy >= sell)}
+    if f["fixed"]:
+        reasons.append(f"这 {tr.get('n_buy')} 笔买入的均价正好是 {fp(fixed)}，而同期市场价在 {fp(px['t_lo'])}–{fp(px['t_hi'])}："
+                       "在市场上分几笔买不可能这么整齐、还离市价这么远，是按事先定好的价格从公司拿的股票（期权行权、可转债转股或配售），"
+                       "价格不是它挑的，谈不上“逢低”或“追涨”。")
+        tags.append("定价认购")
     tl = {} if mismatch else (n.get("tl") or {})
     if tl.get("n") and tl.get("down_share") is not None:
         f["tl"] = tl
@@ -1516,6 +1559,7 @@ def judge(n: dict) -> dict | None:
 
 BASELINE = 0.7
 MARGIN = 0.05
+TEMP = 0.7              # 概率的温度（第二十轮按标准答案校准，见 softmax）
 TIE = 0.15
 SHORT_DAYS = 60
 PURPOSE_NAMES = {
@@ -1527,15 +1571,15 @@ PURPOSE_NAMES = {
              "bounce": "趁反弹减仓", "wind": "分批减仓（一路在减）", "deal": "借收购消息退出", "hand": "整块转让给特定的接盘方"},
 }
 PURPOSE_ACTION = {      # (方向, 目的) → 标签代码；None 表示沿用基础标签（新进建仓 / 加仓越过 5% 线 / 加仓 / 减仓 / 减到 5% 以下）
-    ("buy", "dip"): {"add": "add_dip"}, ("buy", "mom"): {"add": "add_chase"},
+    ("buy", "dip"): {"add": "add_dip", "build": "build_dip"}, ("buy", "mom"): {"add": "add_chase", "build": "build_chase"},
     ("buy", "plc"): {"add": "add_placement", "build": "build_placement", "cross_up": "build_placement"},
     ("buy", "arb"): {"add": "arb", "build": "arb", "cross_up": "arb"},
-    ("buy", "flow"): {"add": "add_flow"}, ("buy", "swap"): {"add": "swap_in", "build": "swap_in"},
+    ("buy", "flow"): {"add": "add_flow", "build": "build_flow"}, ("buy", "swap"): {"add": "swap_in", "build": "swap_in"},
     ("buy", "short"): {"add": "short_in", "build": "short_in", "cross_up": "short_in"},
     ("sell", "profit"): {"trim": "trim_profit", "exit": "exit_profit"}, ("sell", "stop"): {"trim": "trim_loss", "exit": "exit_loss"},
     ("sell", "flow"): {"trim": "trim_flow", "exit": "exit_flow"}, ("sell", "swap"): {"trim": "swap_out", "exit": "swap_out"},
     ("sell", "rebal"): {"trim": "trim_rebal"}, ("sell", "short"): {"trim": "short_out", "exit": "short_out"},
-    ("buy", "pull"): {"add": "add_pull"}, ("buy", "prog"): {"add": "add_prog"},
+    ("buy", "pull"): {"add": "add_pull", "build": "build_pull"}, ("buy", "prog"): {"add": "add_prog"},
     ("sell", "bounce"): {"trim": "trim_bounce", "exit": "exit_bounce"}, ("sell", "wind"): {"trim": "trim_wind", "exit": "exit_wind"},
     ("sell", "deal"): {"trim": "trim_deal", "exit": "exit_deal"},
     ("sell", "hand"): {"trim": "trim_hand", "exit": "exit_hand"},
@@ -1604,21 +1648,32 @@ def _trend(r3, r6, r12, sign: int, vol=None) -> float:
     return _clip(max(vals), 0.0, 1.3) if vals else 0.0
 
 
-def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
+def score_purposes(f: dict, ctx: dict | None = None, trace: list | None = None) -> list[dict]:
     """f：单只股票的证据（judge 里算的）；ctx：横向证据（add_context 里算的，可以没有）。
-    返回按概率从高到低排的 [{k, name, s: 分数, p: 概率, why: [加分的依据]}]。"""
+    返回按概率从高到低排的 [{k, name, s: 分数, p: 概率, why: [加分的依据]}]。
+    trace：给一个空列表时，把每一笔先验和加减分记成 (目的, 分数, 权重编号, 说明) 放进去（第二十轮：判断“一碰就翻”用）。"""
     ctx = ctx or {}
     side, style = f["side"], f.get("style") or "active"
     single = style in ("active", "hedge", "strategic")
     S: dict[str, float] = {}
+    P: dict[str, tuple[float, int]] = {}
+    adds: list[tuple[str, float, int]] = []
     why: dict[str, list[tuple[float, str]]] = {}
 
     def add(k: str, pts: float, text: str = "") -> None:
         if not pts:
             return
         S[k] = S.get(k, 0.0) + pts
+        if trace is not None:
+            adds.append((k, pts, sys._getframe(1).f_lineno, text))
         if text and pts > 0:
             why.setdefault(k, []).append((pts, text))
+
+    def prior(k: str, v: float) -> None:
+        """先验。同一个目的再设一次先验只替换先验（“没有这类证据时压到 −3”），已经加减过的分照留。"""
+        old = P.get(k, (0.0, 0))[0]
+        S[k] = S.get(k, 0.0) - old + v
+        P[k] = (v, sys._getframe(1).f_lineno)
 
     size, part = f.get("size"), f.get("part")
     tl = f.get("tl") or {}
@@ -1629,10 +1684,11 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
     follow_adj = _clip((habit["follow"] - 0.72) * 4, -0.5, 0.6) if habit else 0.0     # 0.72 ≈ 全体基金“下一次同方向”的平均比例
     rev_adj = _clip((habit["rev"] - 0.10) * 4, -0.4, 0.5) if habit else 0.0           # 0.10 ≈ 全体“3 个月内掉头”的平均比例
     edge = (tl["down_share"] - (tl.get("base_down") if tl.get("base_down") is not None else 0.5)) if tl.get("n") else None
-    S["base"] = BASELINE
+    prior("base", BASELINE)
     if side == "buy":
-        for k, prior in (("dip", -0.3), ("mom", -0.3), ("plc", -1.5), ("arb", -2.0), ("flow", -1.0), ("swap", -1.0), ("short", -1.2)):
-            S[k] = prior
+        for k, v in (("dip", -0.3), ("mom", -0.3), ("plc", -1.5), ("arb", -2.0), ("flow", -1.0), ("swap", -1.0), ("short", -1.2),
+                     ("pull", -0.6), ("prog", -1.0), ("take", -2.0)):
+            prior(k, v)
         add("dip", 1.2 * f["f_down"], "买之前股价跌了一轮")
         add("dip", 1.0 * f["lowpos"], "股价在一年区间的低位")
         add("mom", 1.0 * f["u3"], "近 3 个月股价在涨")
@@ -1664,6 +1720,11 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("plc", RBLK_PLC if f.get("raise") else RBLK_PLC_NORAISE, "只有一笔、金额正好是整数的买入，像认购配售")
             add("dip", -1.0)
             add("mom", -1.0)
+        if f.get("fixed"):                             # 第二十轮：好几笔全是同一个整数价、远离市场价
+            add("plc", FIXED_PLC, "好几笔买入全是同一个整数价、远离市场价：按定价从公司拿的股票")
+            add("dip", -1.5)
+            add("mom", -1.5)
+            add("prog", -0.8)
         if f.get("target"):
             add("arb", 3.2 if style == "hedge" else 1.6, "买入发生在公司被收购的消息之后")
         if tl.get("n"):
@@ -1682,14 +1743,13 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
         if opp is not None and opp <= SHORT_DAYS:
             add("short", 2.0 + (0.4 if style == "hedge" else 0), f"{opp} 天前还在减仓")
         # -- 第十一轮
-        S["pull"], S["prog"] = -0.6, -1.0
         if f.get("pull"):
             add("pull", 1.5 * f["pull"], "长期在涨、最近回落，股价不在低位")
             add("pull", 0.2 if f["highpos"] > 0 else 0)
             add("dip", -0.8)
             add("mom", -0.5)
         else:
-            S["pull"] = -3.0
+            prior("pull", -3.0)
         add("prog", 0.7 * min(f.get("seq_same", 0), 2), f"近 4 个月连续第 {f.get('seq_same', 0) + 1} 次加仓")
         add("prog", follow_adj, "这家基金一旦开始加仓，通常会一路加下去")
         if tl.get("n", 0) >= 8:
@@ -1703,13 +1763,15 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("dip", tilt, "这家基金习惯在股价弱的时候买")
             add("mom", -tilt, "这家基金习惯在股价强的时候买")
         add("short", rev_adj, "这家基金经常买了不久就反手")
-        if blk:
-            add("plc", 1.2 if f.get("raise") else 0.8, "大部分是一天之内一次性拿下的")
+        if f.get("mega"):                              # 第二十轮：一两笔就是全市场成交量的 10 倍以上、占公司 2% 以上——一整块谈好的交易，
+            add("dip", -MEGA_PEN)                      # 价格不是在市场上挑的。可能是配售，也可能是从别的股东手里接（Regal 和别家机构对倒 NOL），
+            add("mom", -MEGA_PEN)                      # 所以只压“逢低/顺势”，不替它说是哪一种
+        if blk or f.get("offmkt"):                     # 第二十轮：买入量超过全市场成交量的，比“一天的大宗”更不可能是在市场上挑价格买的
+            add("plc", 1.2 if f.get("raise") else 0.8, "大部分是一天之内一次性拿下的" if blk else "买入量超过同期全市场成交量，是一次性拿下的")
             for k in ("dip", "mom"):
                 add(k, -0.5)
             add("prog", -0.8)
         # -- 第十五轮：倒手（找到了卖给它的那一方）
-        S["take"] = -2.0
         if cp:
             add("take", CP_SCORE[cp["kind"]], CP_WHY[cp["kind"]])
             add("take", 0.4 if blk or f.get("offmkt") else 0, "量集中在一天，像是谈好的大宗")
@@ -1718,8 +1780,9 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("prog", -0.6)
             add("short", -0.4)
     else:
-        for k, prior in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2), ("deal", -1.5)):
-            S[k] = prior
+        for k, v in (("profit", -0.3), ("stop", -0.3), ("flow", -1.0), ("swap", -1.0), ("rebal", -0.8), ("short", -1.2), ("deal", -1.5),
+                     ("bounce", -0.6), ("wind", -1.2), ("hand", -2.0)):
+            prior(k, v)
         add("profit", 1.0 * f["f_up"], "卖之前股价涨了一大段")
         add("profit", 1.0 * f["highpos"] if f["f_up"] > 0 else 0, "股价在一年区间的高位")
         add("stop", 1.2 * f["f_down"], "卖之前股价跌了不少")
@@ -1753,7 +1816,8 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("stop", 0.5 if edge >= 0.15 and tl["r_win"] <= -0.05 else 0, "股价越跌它卖得越多")
         if ns >= 2 and nb == 0:
             add("flow", 1.2 + 0.3 * (min(ns, 5) - 2), f"同期在另外 {ns} 只股票上也只卖不买")
-            add("flow", {"super": 0.3, "platform": 0.5}.get(style, 0.0))
+            # 养老金有源源不断的供款（第二十轮核对）：多只一起卖更像调低配置，不是“应付赎回”，不再加分；平台型有赎回，照旧
+            add("flow", {"platform": 0.5}.get(style, 0.0))
             add("flow", 0.3 if size is not None and size < 0.15 else 0, "这次减的幅度不大")
         if nb >= 1:
             add("swap", (1.2 if single else 0.5) + 0.3 * (min(nb, 4) - 1), f"同期在另外 {nb} 只股票上加仓")
@@ -1766,7 +1830,6 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
         if opp is not None and opp <= SHORT_DAYS:
             add("short", 2.0 + (0.4 if style == "hedge" else 0), f"{opp} 天前还在加仓")
         # -- 第十一轮
-        S["bounce"], S["wind"] = -0.6, -1.2
         if f.get("bounce"):
             add("bounce", 1.5 * f["bounce"], "长期跌了很多、最近反弹时卖")
             if g is None:                      # 不知道成本：单看最近的反弹，既不能算“获利”，也不能算“越跌越卖”
@@ -1777,7 +1840,7 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             elif g <= -0.10:
                 add("bounce", 0.3, "按它的成本算还是亏的")
         else:
-            S["bounce"] = -3.0
+            prior("bounce", -3.0)
         off, sold_before = stage.get("off") or 0.0, (stage.get("n_sell") or 0) >= 1 or f.get("seq_same", 0) >= 1
         if off >= 0.30:
             add("wind", 1.0 + 0.8 * _clip((off - 0.30) / 0.30, 0, 1), f"已经比最高点少了 {off * 100:.0f}%")
@@ -1799,11 +1862,10 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
         if age is not None and age >= 540 and f["f_up"] > 0 and (g is None or g >= 0.10):
             add("profit", 0.3, "已经拿了一年半以上")
         add("short", rev_adj, "这家基金经常卖了不久就反手")
-        if blk:
+        if blk or f.get("offmkt"):
             add("rebal", -1.5)                 # 一次性大宗卖出不是“慢慢减一点”
             add("flow", -0.5)
         # -- 第十五轮：倒手（找到了接盘的那一方）
-        S["hand"] = -2.0
         if cp:
             add("hand", CP_SCORE[cp["kind"]], CP_WHY[cp["kind"]])
             add("hand", 0.4 if blk or f.get("offmkt") else 0, "量集中在一天，像是谈好的大宗")
@@ -1811,11 +1873,22 @@ def score_purposes(f: dict, ctx: dict | None = None) -> list[dict]:
             add("flow", -0.8)                  # 也不像是为了应付赎回在市场上卖
             add("short", -0.5)
             add("swap", -0.3)
-    z = sum(math.exp(v) for v in S.values())
-    out = [{"k": k, "name": PURPOSE_NAMES[side][k], "s": round(v, 2), "p": round(math.exp(v) / z, 3),
+    if trace is not None:
+        trace.extend((k, v, f"{k}@{ln}", "") for k, (v, ln) in P.items())
+        trace.extend((k, pts, f"{k}@{ln}", text) for k, pts, ln, text in adds)
+    probs = softmax(S)
+    out = [{"k": k, "name": PURPOSE_NAMES[side][k], "s": round(v, 2), "p": round(probs[k], 3),
             "why": [t for _, t in sorted(why.get(k, []), reverse=True)]} for k, v in S.items()]
     out.sort(key=lambda x: -x["s"])
     return out
+
+
+def softmax(S: dict[str, float]) -> dict[str, float]:
+    """分数 → 概率。分数先除以温度 TEMP（第二十轮按标准答案校准：说 70% 的那批要真有七成对）。"""
+    m = max(S.values())
+    e = {k: math.exp((v - m) / TEMP) for k, v in S.items()}
+    z = sum(e.values())
+    return {k: v / z for k, v in e.items()}
 
 
 def strength_of(f: dict, ctx: dict | None = None) -> int | None:
@@ -1837,12 +1910,8 @@ def strength_of(f: dict, ctx: dict | None = None) -> int | None:
     return round(100 * sum(a * b for a, b in parts) / w)
 
 
-def finalize(ins: dict, ctx: dict | None = None) -> None:
-    """按当前证据（可带横向证据）给出最终标签、把握、目的概率和力度。judge 结束时调一次，add_context 有了横向证据后再调一次。"""
-    f = ins.get("_f")
-    if not f:
-        return
-    ranked = score_purposes(f, ctx)
+def choose(ranked: list[dict], f: dict) -> tuple[dict, bool, str]:
+    """按分数挑结论：(第一名, 是否“分不出主次”, 标签代码)。只看分数，和概率的温度无关。"""
     top = ranked[0]
     base = next(x for x in ranked if x["k"] == "base")
     close = False
@@ -1852,10 +1921,68 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
                                     and frozenset((x["k"], top["k"])) not in COMPATIBLE for x in ranked):
         close = True                                       # 有另一种目的和它几乎同分：分不出主次，不硬贴标签
     action = f["base"] if close else PURPOSE_ACTION.get((f["side"], top["k"]), {}).get(f["base"], f["base"])
+    if f["base"] == "build" and top["k"] in WHY_603 and (f.get("size") or 0) < FRESH_603:
+        action = "build"       # 4 个月里只买了持仓的一半不到：说不清它为什么拿着这只股票，标签只说“新进建仓”
+    if f.get("fixed") and action in ("add_placement", "build_placement"):     # 价格全是约定价：不一定是配售，也可能是行权、转股
+        action = "add_fixed" if action == "add_placement" else "build_fixed"
     if f.get("form") in LABELS:          # 形式已经确定的（刚好跌破 5% 线）：标签说形式，目的放在概率和理由里
         action = f["form"]
+    return top, close, action
+
+
+FRESH_603 = 0.5        # 第二十轮：603 的现有持仓至少一半是最近 4 个月买的，标签才说目的（和持仓阶段里的“fresh”同一个标准）
+WHY_603 = {"dip", "mom", "pull", "flow"}
+FRAGILE_STEP = 0.3      # 第二十轮：每一笔权重单独放大/缩小 30%
+
+
+def fragile(trace: list, f: dict, action: str, step: float = FRAGILE_STEP) -> list[tuple[str, float, str, str]]:
+    """“一碰就翻”：把每一笔先验或加减分单独乘 (1 ± step)，看标签会不会变。
+    返回会让标签变的 [(权重编号, 倍数, 变成的标签代码, 这笔分数的说明)]。
+    trace 来自 score_purposes(..., trace=[])；同一个权重编号（同一行代码、同一个目的）的几笔一起变。"""
+    S: dict[str, float] = {}
+    by_id: dict[str, list[tuple[str, float]]] = {}
+    text: dict[str, str] = {}
+    for k, v, wid, *t in trace:
+        S[k] = S.get(k, 0.0) + v
+        by_id.setdefault(wid, []).append((k, v))
+        if t and t[0] and v > 0:
+            text.setdefault(wid, t[0])
+    out = []
+    for wid, parts in by_id.items():
+        for mult in (1 - step, 1 + step):
+            S2 = dict(S)
+            for k, v in parts:
+                S2[k] += (mult - 1) * v
+            ranked = sorted(({"k": k, "s": round(v, 2)} for k, v in S2.items()), key=lambda x: -x["s"])
+            alt = choose(ranked, f)[2]
+            if alt != action:
+                out.append((wid, mult, alt, text.get(wid, "")))
+    return out
+
+
+EDGE_HEAD = "这个结论贴着边："
+
+
+def finalize(ins: dict, ctx: dict | None = None) -> None:
+    """按当前证据（可带横向证据）给出最终标签、把握、目的概率和力度。judge 结束时调一次，add_context 有了横向证据后再调一次。"""
+    f = ins.get("_f")
+    if not f:
+        return
+    trace: list = []
+    ranked = score_purposes(f, ctx, trace)
+    top, close, action = choose(ranked, f)
+    flips = fragile(trace, f, action)
+    f["flips"] = flips
     pts = f.get("q", 0) + (1 if top["k"] != "base" and top["p"] >= 0.45 else 0) + (1 if top["k"] != "base" and top["p"] >= 0.7 else 0)
     conf = "高" if pts >= 3 else "低" if pts <= 0 else "中"
+    if flips and conf == "高":          # 第二十轮：某一笔证据的分量稍微变一点结论就会变——最多算“中”
+        conf = "中"
+    edge = ""
+    if flips:
+        alt = collections.Counter(a for _, _, a, _ in flips).most_common(1)[0][0]
+        said = [t for _, _, a, t in flips if a == alt and t]
+        edge = (EDGE_HEAD + (f"「{said[0]}」这条证据的分量差三成，" if said else "打分里某一项的分量差三成，")
+                + f"结论就会变成「{LABELS.get(alt, alt)}」。" + ("所以把握最多算“中”。" if pts >= 3 else ""))
     shown = [top] + [x for x in ranked if x is not top][:2]
     word = "加仓" if f["side"] == "buy" else "减仓"
     if close:
@@ -1869,10 +1996,15 @@ def finalize(ins: dict, ctx: dict | None = None) -> None:
     if f.get("form") == "slip":
         line = "形式上只是刚好跌破 5% 线；" + line
     rs = ins["reasons"]
-    idx = next((i for i, r in enumerate(rs) if r.startswith("综合打分：")), None)
+    rs[:] = [r for r in rs if not r.startswith(EDGE_HEAD)]
+    # 找上一次写的“综合打分”那句来替换（“刚好跌破 5% 线”的那句前面多了半句——以前认不出来，网页上会出现两句）
+    idx = next((i for i, r in enumerate(rs) if r.startswith("综合打分：") or r.startswith("形式上只是刚好跌破 5% 线；综合打分：")), None)
     if idx is not None:
         rs[idx] = line
     else:
-        rs.insert(next((i for i, r in enumerate(rs) if r.startswith(ins.get("style", "\0") + "：")), len(rs)), line)
+        idx = next((i for i, r in enumerate(rs) if r.startswith(ins.get("style", "\0") + "：")), len(rs))
+        rs.insert(idx, line)
+    if edge:
+        rs.insert(idx + 1, edge)
     ins.update(action=action, label=LABELS[action], tone=TONE.get(action, "neutral"), confidence=conf,
                purposes=[{"k": x["k"], "name": x["name"], "p": x["p"]} for x in shown], strength=strength_of(f, ctx))

@@ -6,6 +6,7 @@
     python tools/replay.py out_old.json --root ../旧代码目录    # 用另一份代码（比如 main 的检出）跑一遍
     python tools/replay.py --diff out_old.json out_new.json   # 逐条列出标签变了的公告
     python tools/replay.py --gold out_new.json                # 和人工标准答案（tests/fixtures/gold_purposes.json）对比打分
+    python tools/replay.py --fragile out_new.json             # 哪些标签“一碰就翻”、哪几个权重最关键（第二十轮）
 
 回头看（history）部分和 scrape.calibrate 一样只用“那一天之前”的信息；最近公告（live）部分和网页上看到的一致。
 """
@@ -25,6 +26,17 @@ def run(root: Path) -> dict:
     import insight
     import scrape
 
+    flips: dict[int, list] = {}          # id(解读) → 最后一次打分时“一碰就翻”的权重
+    fin = insight.finalize
+
+    scores: dict[int, dict] = {}         # id(解读) → 最后一次打分时每个目的的分数（校准温度用）
+
+    def finalize(ins, ctx=None):
+        fin(ins, ctx)
+        if isinstance(ins.get("_f"), dict) and "flips" in ins["_f"]:
+            flips[id(ins)] = ins["_f"]["flips"]
+            scores[id(ins)] = {x["k"]: x["s"] for x in insight.score_purposes(ins["_f"], ctx)}
+    insight.finalize = finalize
     history = json.loads((HERE / "data" / "history.json").read_text("utf-8"))
     store = json.loads((HERE / "data" / "all_notices.json").read_text("utf-8"))
     holders, _ = scrape.load_watchlist()
@@ -61,12 +73,15 @@ def run(root: Path) -> dict:
             out["history"][f"{key}|{r.get('id')}"] = {
                 "who": key, "date": r.get("date"), "action": ins["action"], "label": ins["label"], "side": (ins.get("_f") or {}).get("side"),
                 "confidence": ins.get("confidence"),
-                "purposes": [(p["k"], p["p"]) for p in ins.get("purposes") or []], "next": nxt, "fwd3": (r.get("fwd") or {}).get("3m")}
+                "purposes": [(p["k"], p["p"]) for p in ins.get("purposes") or []], "next": nxt, "fwd3": (r.get("fwd") or {}).get("3m"),
+                "flips": flips.get(id(ins)), "scores": scores.get(id(ins))}
     for x in scrape.build_notices(store.get("entries", {}), holders, history):
         ins = x.get("insight") or {}
         out["live"][str(x.get("id"))] = {"who": f"{x.get('holder')}|{x.get('code')}", "date": x.get("date"), "action": ins.get("action"),
                                          "label": ins.get("label"), "side": ins.get("side"), "confidence": ins.get("confidence"),
-                                         "purposes": [(p["k"], p["p"]) for p in ins.get("purposes") or []]}
+                                         "purposes": [(p["k"], p["p"]) for p in ins.get("purposes") or []], "flips": flips.get(id(ins)),
+                                         "scores": scores.get(id(ins))}
+    insight.finalize = fin
     return out
 
 
@@ -92,7 +107,7 @@ def diff(a: dict, b: dict) -> None:
 # 不打分、直接定性的标签 → 标准答案里用的键
 FIXED_KEY = {"passive_dilute": "passive", "passive_up": "passive", "lending": "lending", "transfer": "transfer", "own_product": "own",
              "restructure": "restructure", "slip": "line", "back": "line", "rotate": "rotate", "takeover": "deal", "unknown": "base",
-             "churn": "rotate", "flip": "short", "flip_back": "short", "flip_plc": "plc"}
+             "churn": "rotate", "flip": "short", "flip_back": "short", "flip_plc": "plc", "add_fixed": "plc", "build_fixed": "plc"}
 BASE_ACTIONS = {"add", "build", "cross_up", "trim", "exit"}
 
 
@@ -149,6 +164,27 @@ def print_gold(sc: dict) -> None:
         print(f"    {m[0]} {m[1]} {m[2]}：程序说 {m[3]}，标准答案 {m[4]}")
 
 
+def fragile_report(res: dict, root: Path) -> None:
+    """第二十轮（ACCURACY_PLAN 6.2）：哪些权重一动（±30%）标签就翻。只有这几个值得拿标准答案去校，其余的不用动。"""
+    import linecache
+    src = root / "scraper" / "insight.py"
+    for part in ("live", "history"):
+        rows = [v for v in res.get(part, {}).values() if v.get("flips") is not None]
+        frag = [v for v in rows if v["flips"]]
+        print(f"== {part}：走打分的 {len(rows)} 条里，“一碰就翻”的 {len(frag)} 条（{100 * len(frag) / max(len(rows), 1):.0f}%）")
+        cnt: dict[str, list[int]] = collections.defaultdict(lambda: [0, 0])
+        for v in frag:
+            for wid, mult in {(w, m) for w, m in v["flips"]}:
+                cnt[wid][0 if mult < 1 else 1] += 1
+        for wid, (lo, hi) in sorted(cnt.items(), key=lambda kv: -sum(kv[1]))[:12]:
+            line = linecache.getline(str(src), int(wid.rsplit("@", 1)[1])).strip()
+            if line.startswith("prior(k, v)") or line.startswith("prior("):
+                line = f"（「{wid.split('@')[0]}」的先验）"
+            print(f"  {wid:12s} 调小翻 {lo:2d} 条 / 调大翻 {hi:2d} 条   {line[:110]}")
+        for v in sorted(frag, key=lambda v: v.get("date") or "")[-8:] if part == "live" else []:
+            print(f"    例：{v['who']} {v['date']} {v['label']}  ← {sorted({w for w, _ in v['flips']})}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("out", nargs="?")
@@ -156,7 +192,11 @@ def main() -> int:
     ap.add_argument("--diff", nargs=2, metavar=("OLD", "NEW"))
     ap.add_argument("--gold", metavar="OUT", help="拿一份已经跑出来的结果和人工标准答案对比")
     ap.add_argument("--gold-file", default=str(HERE / "tests" / "fixtures" / "gold_purposes.json"))
+    ap.add_argument("--fragile", metavar="OUT", help="拿一份已经跑出来的结果，列出“一碰就翻”的标签和最关键的权重")
     args = ap.parse_args()
+    if args.fragile:
+        fragile_report(json.loads(Path(args.fragile).read_text("utf-8")), Path(args.root).resolve())
+        return 0
     if args.gold:
         print_gold(gold_score(json.loads(Path(args.gold).read_text("utf-8")), Path(args.gold_file), Path(args.root).resolve()))
         return 0

@@ -1456,7 +1456,7 @@ def test_real_603_rows_with_holder_name_before_the_date():
     tr, j, mid = sample("mp1_art_603")                                 # “… Trust 26/06/2026 365,077.25 Ordinary Fully Paid 17,848”
     assert tr["n"] == 52 and tr["buy_qty"] == 2462905 and tr["sell_qty"] == 0
     assert tr["buy_price"] == pytest.approx(18.68, abs=0.01)           # 对价是总金额，要除以股数
-    assert j["action"] == "cross_up"                                   # 4 个月只买了现有持仓的两成：早有底仓
+    assert j["action"] == "cross_up"                                   # 4 个月只买了现有持仓的两成：早有底仓（标签不说目的）
 
 
 def test_real_issuer_share_issue_row_is_not_a_trade():
@@ -1480,7 +1480,7 @@ def test_real_collateral_is_not_a_sale_cbus_acl():
 def test_real_new_position_ellerston_dxn():
     tr, j, mid = sample("dxn_ellerston_603")
     assert tr["n"] == 23 and tr["buy_qty"] == 42325943
-    assert j["action"] == "build" and j["tone"] == "bull"
+    assert j["action"] == "build_dip" and j["tone"] == "bull" and j["label"] == "逢低建仓"      # 第二十轮：603 的标签也说目的
 
 
 def test_real_two_way_trading_regal_nol():
@@ -1569,7 +1569,7 @@ TRADE_604 = ["Form 604", "To Company Name/Scheme Superloop Limited", "1. Details
 def falling_prices():
     day = lambda d: int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp() * 1000)
     d0 = dt.date(2025, 10, 1)
-    return [[day(d0 + dt.timedelta(days=i)), round(3.0 - i / 400, 4), 50_000] for i in range(400)
+    return [[day(d0 + dt.timedelta(days=i)), round(3.0 - i / 400, 4), 2_000_000] for i in range(400)
             if (d0 + dt.timedelta(days=i)).weekday() < 5]
 
 
@@ -1985,7 +1985,9 @@ def test_close_call_keeps_generic_label():
     insight.finalize(ins, {"nb": 5, "ns": 0})     # 整体加仓 0.9：两种目的几乎同分
     assert ins["action"] == "add" and "分不出主次" in ins["reasons"][0] and ins["purposes"][0]["k"] in ("flow", "dip")
     insight.finalize(ins, {"nb": 0, "ns": 0})     # 没有横向证据时，逢低是唯一高过基准线的
-    assert ins["action"] == "add_dip" and "最像「逢低买入」" in ins["reasons"][0] and len(ins["reasons"]) == 2
+    assert ins["action"] == "add_dip" and "最像「逢低买入」" in ins["reasons"][0]
+    assert len([r for r in ins["reasons"] if not r.startswith(insight.EDGE_HEAD)]) == 2          # 再打一次分不会多出一句
+    assert sum(r.startswith(insight.EDGE_HEAD) for r in ins["reasons"]) <= 1
 
 
 # ---------------------------------------------------------------- 第十轮：回补历史、逐笔时间线、回测
@@ -2120,9 +2122,9 @@ def test_pullback_buy_is_not_dip_or_chase():
     assert r["action"] != "add_pull" and not any("上涨途中的回调" in x for x in r["reasons"])
     # 长期没涨：不算
     assert insight.judge(_buy(px=_px(r12m=0.1, r3m=-0.2, pos=0.5)))["action"] != "add_pull"
-    # 603 的基础标签不变（和逢低/顺势一样，只进理由和概率）
+    # 新进建仓的 603：第二十轮起标签也说目的（“回调时建仓”）
     r = insight.judge(_buy(type="becoming", voting_power=[5.5], votes=[8_000_000], px=_px(r12m=0.8, r3m=-0.2, pos=0.55)))
-    assert r["action"] in ("build", "cross_up") and r["purposes"][0]["k"] == "pull"
+    assert r["action"] in ("build_pull", "cross_up") and r["purposes"][0]["k"] == "pull"
 
 
 def test_bounce_sell_depends_on_cost():
@@ -3205,3 +3207,93 @@ def test_read_issue_forms(monkeypatch):
     evs = [{"d": "2026-09-02", "k": "raise", "u": "9"}]
     scrape.read_issue_forms("TTT", evs, series)
     assert "iss" not in evs[0]
+
+
+# ---------------------------------------------------------------- 第二十轮
+
+def test_fresh_603_label_says_the_purpose_but_cross_up_does_not():
+    falling = _px(r12m=-0.45, r6m=-0.4, r3m=-0.3, r1m=-0.1, pos=0.05)
+    trades = {"n": 6, "n_buy": 6, "n_sell": 0, "buy_qty": 6_000_000, "sell_qty": 0, "net_qty": 6_000_000, "first": "2026-08-01",
+              "last": "2026-11-03", "days": 6, "buy_price": 1.95, "sell_price": None, "kinds": {"on_market": 6_000_000}}
+    r = insight.judge(_buy(type="becoming", voting_power=[6.0], votes=[8_000_000], trades=trades, px=falling))
+    assert r["action"] == "build_dip" and r["label"] == "逢低建仓" and r["tone"] == "bull"
+    # 早有底仓、4 个月只买了一小部分：标签只说“越过 5% 线”，目的放在概率里
+    small = dict(trades, buy_qty=1_000_000, net_qty=1_000_000)
+    r = insight.judge(_buy(type="becoming", voting_power=[6.0], votes=[8_000_000], trades=small, px=falling))
+    assert r["action"] == "cross_up" and r["purposes"][0]["k"] == "dip"
+
+
+def test_fixed_price_far_from_market_is_new_shares_from_the_company():
+    tr = {"n": 3, "n_buy": 3, "n_sell": 0, "buy_qty": 2_753_422, "sell_qty": 0, "net_qty": 2_753_422, "first": "2026-09-15",
+          "last": "2026-09-23", "days": 3, "buy_price": 1.0, "sell_price": None, "kinds": {"on_market": 2_753_422}}
+    px = _px(p=2.88, t_lo=2.53, t_hi=2.9, r3m=-0.16, pos=0.37)
+    assert insight.fixed_price(tr, px) == 1.0
+    r = insight.judge(_buy(trades=tr, votes=[41_032_365, 43_785_787], voting_power=[14.94, 15.94], px=px))
+    assert r["action"] == "add_fixed" and "定价认购" in r["tags"] and r["purposes"][0]["k"] == "plc"
+    assert any("按事先定好的价格" in x for x in r["reasons"])
+    # 不认的：只有一笔、价格在市场区间里、不是整数价、一毛以下（复权价的老问题）、坏数据
+    assert insight.fixed_price(dict(tr, n_buy=1), px) is None
+    assert insight.fixed_price(tr, _px(t_lo=0.95, t_hi=1.1)) is None
+    assert insight.fixed_price(dict(tr, buy_price=1.36), px) is None
+    assert insight.fixed_price(dict(tr, buy_price=0.004), _px(t_lo=0.05, t_hi=0.13)) is None
+    assert insight.fixed_price(dict(tr, buy_price=0.0375), _px(t_lo=0.51, t_hi=0.97)) is None
+    assert insight.fixed_price({"n_buy": "x", "buy_price": None}, {}) is None
+    assert insight.fixed_price(tr, {"t_lo": None}) is None
+
+
+def test_off_market_buy_is_not_picked_on_price():
+    # 买入量是同期全市场成交量的 4 倍：不可能是在市场上挑价格买的，“逢低”要打折
+    falling = _px(r12m=-0.45, r6m=-0.4, r3m=-0.3, r1m=-0.1, pos=0.05)
+    on = insight.judge(_buy(px=dict(falling, t_vol=20_000_000)))
+    off = insight.judge(_buy(px=dict(falling, t_vol=500_000)))
+    p = lambda r, k: next(x["p"] for x in r["purposes"] if x["k"] == k) if any(x["k"] == k for x in r["purposes"]) else 0.0
+    assert on["purposes"][0]["k"] == "dip" and p(off, "dip") < p(on, "dip")
+
+
+def test_score_trace_adds_up_and_priors_do_not_wipe_evidence():
+    f = {"side": "buy", "style": "active", "f_down": 0.5, "lowpos": 0.3, "u3": 0.0, "highpos": 0.0, "plc": 0.0, "plc_form": True,
+         "t": "change", "seq_same": 0}
+    trace = []
+    ranked = insight.score_purposes(f, None, trace)
+    tot = {}
+    for k, v, wid, text in trace:
+        tot[k] = tot.get(k, 0.0) + v
+        assert "@" in wid and isinstance(text, str)
+    for x in ranked:
+        assert x["s"] == pytest.approx(tot[x["k"]], abs=0.01)
+    # 发行文件对得上时给“按计划建仓”的 −1.0 以前会被后面的先验覆盖掉
+    assert tot["prog"] == pytest.approx(-2.0)
+    assert abs(sum(x["p"] for x in ranked) - 1) < 0.01
+
+
+def test_fragile_flags_borderline_labels_only():
+    # 一条“逢低”只比“普通加仓”高一点点：把某一笔分数挪 30% 就会翻
+    edge = insight.judge(_buy(px=_px(r12m=-0.05, r6m=-0.1, r3m=-0.11, r1m=-0.05, pos=0.3)))
+    strong = insight.judge(_buy(px=_px(r12m=-0.6, r6m=-0.5, r3m=-0.4, r1m=-0.2, pos=0.02)))
+    for r in (edge, strong):
+        f = r["_f"]
+        trace = []
+        ranked = insight.score_purposes(f, None, trace)
+        assert insight.choose(ranked, f)[2] == r["action"]
+        assert insight.fragile(trace, f, r["action"]) == f["flips"]
+    assert strong["action"] == "add_dip" and strong["_f"]["flips"] == []
+
+
+def test_slip_score_line_is_replaced_not_duplicated():
+    # “刚好跌破 5% 线”的综合打分那句前面多半句，以前第二次打分认不出来，网页上出现两句
+    tr = {"n": 2, "n_buy": 0, "n_sell": 2, "buy_qty": 0, "sell_qty": 100_000, "net_qty": -100_000, "first": "2026-10-30",
+          "last": "2026-11-03", "days": 2, "sell_price": 2.0, "buy_price": None, "kinds": {"on_market": 100_000}}
+    r = insight.judge(_sell(type="ceasing", voting_power=[], votes=[], trades=tr,
+                            prev={"vp": 5.04, "votes": 5_040_000, "type": "change", "date": "2026-10-01"}))
+    assert r["action"] == "slip"
+    insight.finalize(r, {"nb": 0, "ns": 0})
+    insight.finalize(r, {"nb": 0, "ns": 0})
+    assert sum("综合打分" in x for x in r["reasons"]) == 1
+
+
+def test_edge_line_names_the_evidence_and_the_alternative():
+    r = insight.judge(_buy(px=_px(r12m=-0.05, r6m=-0.1, r3m=-0.11, r1m=-0.05, pos=0.3)))
+    if not r["_f"]["flips"]:
+        pytest.skip("这个样本不贴边")
+    line = next(x for x in r["reasons"] if x.startswith(insight.EDGE_HEAD))
+    assert "结论就会变成「" in line and r["confidence"] != "高"

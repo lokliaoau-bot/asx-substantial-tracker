@@ -1,6 +1,6 @@
 # 大股东公告雷达 — 交接文件（给接手的 AI）
 
-> 版本：2026-11-14（第十五轮代码完成，**还没推到 GitHub、还没合并**，见 `CLAUDE.md` 当前进度）。把这份文件和代码一起交给接手的 AI 即可。
+> 版本：2026-11-14（第十五轮完成并合并后）。把这份文件和代码一起交给接手的 AI 即可。
 > 用户 Lok 是会计师，不写代码，用中文沟通，喜欢大白话和例子。所有对用户的说明都要用中文、少术语。
 
 ## 1. 一句话说明
@@ -37,10 +37,10 @@
 | `data/calibration.json` | 回头看的统计（第十轮），每次运行重算 |
 | `data/fund_reports.json` | 名单基金上市产品的月报正文（第十二轮），找“基金自己怎么说” |
 | `data/notices.json` | 网页用的结果：只含命中名单的 |
-| `tests/test_scrape.py` | 209 个离线测试 |
+| `tests/test_scrape.py` | 218 个离线测试 |
 | `tools/replay.py` | 离线回放：按当前规则重判 history 和近期公告，和旧代码逐条对比（第十一轮） |
 | `tests/fixtures/` | 真实公告样本（PDF 只留前几页；`insight_samples.json` 是 10 份真实公告的文字 + 对应股价） |
-| `tests/frontend_check.py` | Playwright 网页检查（39 项），含 GitHub API 的模拟 |
+| `tests/frontend_check.py` | Playwright 网页检查（40 项），含 GitHub API 的模拟 |
 | `README.md` | 给用户的使用说明 |
 | `DEPLOY.md` | 最初的部署说明 + 历次审查记录（第一到第七轮，查某个 bug 的来历看这里） |
 | `CLAUDE.md` | 给 AI 的工作笔记：代码地图、规矩、当前进度 |
@@ -315,6 +315,8 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 卖方本来就在 5% 附近（KAR、ZIP）时任何新越过 5% 的人都“对得上”；大盘股（PLS）指数基金天天进出，百分点碰巧接近；JPMorgan 两份公告自己配自己。
 宁缺毋错：说不准是哪一家时不说。
 
+2026-11-14 在 `dev-r15` 真实运行通过后合并：84 条里只有 AMX 变了。同时修了周末误报“当天公告页认不出来”的老问题（周末页面写的是 “No company announcements …”）。
+
 局限：只看得到持股 5% 以上一方的公告；对方公告晚到时，要等下一次抓取才会补上这句；对方名字读不准时显示“另一家机构（名字没读准）”。
 
 ## 6. 数据格式
@@ -352,7 +354,7 @@ Wilson = WAM/WAX/WMI/WLE/WAA，L1 = LSF，Regal = RF1。每次运行读这些代
 ```bash
 python3 -m venv venv && . venv/bin/activate && pip install -r requirements-dev.txt
 sudo apt-get install -y tesseract-ocr          # OCR 测试需要；没有时相关测试自动跳过
-python -m pytest -q                             # 209 passed，全部离线
+python -m pytest -q                             # 218 passed，全部离线
 python tools/replay.py /tmp/new.json            # 改了判断规则后：离线重判真实数据，再 --diff 和旧代码对比
 python tests/frontend_check.py                  # 需要 playwright + chromium；ALL FRONTEND CHECKS PASSED
 ```

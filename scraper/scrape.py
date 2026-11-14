@@ -259,7 +259,8 @@ def parse_listing(html: str, today: dt.date) -> tuple[list[dict], bool]:
             "price_sensitive": is_price_sensitive(tr, tds),
         })
 
-    recognised = bool(rows) or bool(re.search(r"ASX\s*Code|no announcements", html, re.I))
+    # 周末和公众假期页面写的是 “No company announcements have been published by ASX on …”：认得出，只是当天没有公告
+    recognised = bool(rows) or bool(re.search(r"ASX\s*Code|no\s+(?:company\s+)?announcements", html, re.I))
     return rows, recognised
 
 

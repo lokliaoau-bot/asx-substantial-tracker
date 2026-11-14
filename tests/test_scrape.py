@@ -2822,3 +2822,10 @@ def test_build_notices_finds_counterparty_outside_watchlist():
     # 接盘方的公告还没出来时，照旧
     alone = scrape.build_notices({"S1": s}, holders, None)[0]["insight"]
     assert "cp" not in alone and "倒手" not in (alone.get("tags") or [])
+
+
+def test_weekend_listing_page_is_recognised():
+    html = (FIXTURES / "todayAnns_weekend.html").read_text(encoding="utf-8")
+    rows, recognised = scrape.parse_listing(html, dt.date(2026, 11, 14))
+    assert rows == [] and recognised                    # 周末没有公告不是“ASX 改版了”
+    assert scrape.parse_listing("<html><body>Something else entirely</body></html>", dt.date(2026, 11, 14)) == ([], False)

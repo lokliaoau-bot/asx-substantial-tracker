@@ -64,15 +64,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 第十五轮（2026-11-14，**代码完成，还没推到 GitHub、还没真跑**）：倒手识别（找到卖出的另一头 / 接盘方）
+### 第十五轮（2026-11-14，已完成并合并到 `main`）：倒手识别（找到卖出的另一头 / 接盘方）
 
 起因：用户发现 Perennial 卖 AMX（18.58% → 8.58%，11/9 一天卖掉 950 万股）被标“减仓，像获利了结”，但 ASX 上 AMX 最新一份公告是
 Landchecker 一方 11/9 成为大股东、持股 18.58%——正好等于 Perennial 卖出前的全部持股。接盘方不在关注名单里，以前完全看不到。
 
-**进行中（接手后从这里开始）**：这一轮是在没有仓库推送权限的聊天环境里做的，代码在本地分支 `dev-r15`（用户手里是 zip / patch）
-1. 推到 `dev-r15`，对它触发 `scrape.yml`（`{"ref":"dev-r15"}`），确认跑通
-2. 看 `data/notices.json`：Perennial 的 AMX 应是“整块转让给接盘方（倒手）”，小标签第一个是“倒手”，`insight.cp.name` = “Landchecker Shareholder Entities”；其余公告标签不变
-3. 没问题再 fast-forward 合并到 `main`
+代码是另一边（没有推送权限的聊天环境）做的，以 patch 交回；这边核对 patch 和 zip 一致、217 个测试 + 40 项网页检查通过，
+`dev-r15` 真实运行：84 条里只有 Perennial AMX 变了（→ “整块转让给接盘方（倒手）”，`cp.name` = Landchecker Shareholder Entities，链接正常），然后合并。
+顺手修了老 bug：周末/假期的当天公告页写 “No company announcements have been published”，`parse_listing` 只认 “no announcements”，
+每个周末点抓取都会误报“ASX 可能改版了”（样本 `tests/fixtures/todayAnns_weekend.html`）。
 
 做了什么：
 - `scrape.find_counterparty`（`build_notices` 里调，用的是**全部**大股东公告 `by_code`，不只名单里的）：同一只股票、方向相反、变动日相差 ≤ `CP_DAYS`(3) 天，且数量对得上：

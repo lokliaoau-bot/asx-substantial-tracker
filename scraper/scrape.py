@@ -1683,8 +1683,8 @@ def fund_quotes(store: dict | None, holder: str, code: str, company: str, date: 
 
 
 # 每个目的判对了的话，之后应该发生什么（第十六轮“可检验的预言”）。只用之后的记录检验，判断时不用（as_of）。
-CHECK_OF = {"prog": "next_same", "wind": "next_same", "short": "rev90", "stop": "nobuy180", "rebal": "no_big_cut",
-            "dip": "beat3", "pull": "beat3", "mom": "beat3", "base": "beat3"}
+CHECK_OF = {"buy:prog": "next_same", "sell:wind": "next_same", "buy:short": "rev90", "sell:short": "rev90", "sell:stop": "nobuy180",
+            "sell:rebal": "no_big_cut", "buy:dip": "beat3", "buy:pull": "beat3", "buy:mom": "beat3", "buy:base": "beat3"}
 CHECK_NAMES = {"next_same": "下一份公告还是同方向", "rev90": "90 天内反向", "nobuy180": "半年内没有买回",
                "no_big_cut": "下一份不是大幅减仓（< 20%）", "beat3": "之后 3 个月跑赢指数"}
 
@@ -1782,7 +1782,7 @@ def calibrate(history: dict, holders: list[Holder], today: dt.date | None = None
                 b = base_ck.setdefault(f"{side}:{name}", [0, 0])
                 b[0] += 1
                 b[1] += ok
-            name = CHECK_OF.get(top)
+            name = CHECK_OF.get(f"{side}:{top}")
             if name and name in checks:
                 a["ck"] += 1
                 a["ck_ok"] += checks[name]
@@ -1800,7 +1800,7 @@ def calibrate(history: dict, holders: list[Holder], today: dt.date | None = None
                   "rev_next": round(a["rev"] / a["n_next"], 3) if a["n_next"] else None,
                   "n3x": a["n3x"], "avg3x": round(a["sum3x"] / a["n3x"], 3) if a["n3x"] else None,
                   "up3x": round(a["up3x"] / a["n3x"], 3) if a["n3x"] else None}
-        name = CHECK_OF.get(k.split(":", 1)[1])
+        name = CHECK_OF.get(k)
         if name and a["ck"]:
             b = base_ck.get(f"{k.split(':', 1)[0]}:{name}") or [0, 0]
             out[k].update(check=round(a["ck_ok"] / a["ck"], 3), check_n=a["ck"], check_name=CHECK_NAMES[name],

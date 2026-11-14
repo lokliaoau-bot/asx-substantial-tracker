@@ -2893,7 +2893,7 @@ def test_calibrate_reports_excess_and_checks():
     assert round(sum(v["up3x"] * v["n3x"] for v in buys)) == 5
     for k, v in cal.items():
         if "check" in v:
-            assert scrape.CHECK_OF[k.split(":")[1]] and v["check_n"] >= 1 and 0 <= v["check"] <= 1 and v["check_base"] is not None and v["check_name"]
+            assert scrape.CHECK_OF[k] and v["check_n"] >= 1 and 0 <= v["check"] <= 1 and v["check_base"] is not None and v["check_name"]
     assert any("check" in v for v in buys)
     # 坏数据不出错
     rows[0]["fwd_x"] = "x"

@@ -103,8 +103,20 @@ def _num(s: str) -> float:
     return float(s.replace(",", "").replace(" ", ""))
 
 
+GLUED_MONEY_RE = re.compile(r"(?<![\d.,])(\d{1,3}(?:,\d{3})+\.\d{2})(?=[A-Za-z])")
+NIL_DOLLAR_RE = re.compile(r"\$\s*-\s+(?=\d)")
+TRAILING_DOLLAR_RE = re.compile(r"(?<![\d.,])(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+)\$(?=\s|$)")
+
+
 def _row_numbers(rest: str) -> tuple[list[float], list[tuple[float, bool]]]:
     """返回 (带 $ 的金额列表, 其他数字列表[(值, 是否负数)])。"""
+    # 第二十一轮：有的表格金额靠右对齐、“$”单独在格子左边，版面文字读成“447,000.89$ 1,082,851”——$ 跑到了金额后面。
+    # 以前把“$ 1,082,851”（后面那个股数）当成了金额，对价 = 股数、每股 $1.00（L1 的 LIN、EMR，近期和历史都有）。先把 $ 挪回金额前面
+    rest = TRAILING_DOLLAR_RE.sub(r"$\1 ", rest)
+    # 金额和后面的名字粘在一起（“21,718,125.00L1 Capital Pty Ltd$ 15,795,000”，L1 的 PPC）：拆开，金额才认得出来
+    rest = GLUED_MONEY_RE.sub(r"\1 ", rest)
+    # “$ -”是“没有对价”（实物转出等），不是“负的 95,378 元”（L1 的 MIN）
+    rest = NIL_DOLLAR_RE.sub(" ", rest)
     money = [_num(m.group(1)) for m in MONEY_RE.finditer(rest)]
     stripped = MONEY_RE.sub(" ", rest)
     nums = []
@@ -204,6 +216,11 @@ def parse_trades(pages: list[str], notice_date: str = "", ntype: str = "") -> di
             b, s_ = bool(g and g.group(1) in ("Buy", "Purchase")), bool(g and g.group(1) in ("Sell", "Sale"))
         side = "sell" if (neg or (s_ and not b)) else "buy" if (b and not s_) else ""
         cons = money[0] if money else None
+        if cons is not None and qty is not None and cons == qty:
+            # 读出来的“对价”正好等于股数：多半是把股数当成了金额（$ 的位置不对）。同一行里另有一个带两位小数的数，那才是金额
+            alt = [v for v, _ in nums if v != qty and 0.0005 <= v / qty <= 5000]
+            if alt:
+                cons = alt[0]
         if cons is None:
             # 没有 $ 的对价：数量前面的那个数（带小数，或者和数量不同的数）
             before = [v for v, _ in nums[:-1]] if nums else []

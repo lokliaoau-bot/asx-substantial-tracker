@@ -3593,3 +3593,26 @@ def test_stage_ignores_share_count_of_single_value_604():
     e = {"id": "3", "date": "2025-10-15", "type": "change", "voting_power": [9.11, 8.05], "votes": [2853623, 2530372]}
     st = scrape.stage_for(hist, "W", "EOL", e)
     assert st and st["peak"] == 9.11
+
+
+def test_trade_rows_with_dollar_sign_in_the_wrong_place():
+    # 第二十一轮：L1 的明细里“$”和金额分在两格，版面文字读成“447,000.89$ 1,082,851”——以前把股数当成了金额，每股 $1.00
+    head = ("Date of change Person whose relevant interest changed Nature of change (6) Consideration given in relation to change (7) "
+            "Class and number of securities affected Person's votes affected\n")
+    lin = head + ("21/10/2026 L1 Capital Pty Ltd On-Market Purchase 447,000.89$ 1,082,851 FPO 1,082,851\n"
+                  "23/10/2026 L1 Capital Pty Ltd On-Market Purchase $ 2,835,083.18 7,604,710 FPO 7,604,710\n")
+    rows = insight.parse_trades([lin], "2026-10-30", "change")["rows"]
+    assert [(r["qty"], r["cons"]) for r in rows] == [(1082851, 447000.89), (7604710, 2835083.18)]
+    # 金额和名字粘在一起、$ 在股数前面（L1 的 PPC：$21,718,125 买 15,795,000 股 = 每股 $1.375，不是 $1.00）
+    ppc = head + ("28/02/2025 On-Market Sale 3,000,000.00L1 Capital Pty Ltd$ 2,000,000 FPO 2,000,000\n"
+                  "29/10/2026 On-Market Purchase 21,718,125.00L1 Capital Pty Ltd$ 15,795,000 FPO 15,795,000\n")
+    s = insight.parse_trades([ppc], "2026-11-02", "change")["summary"]
+    assert s["buy_price"] == 1.375 and s["sell_price"] == 1.5
+    # “$ -”是没有对价（实物转出），不是 95,378 元（L1 的 MIN）
+    mn = head + ("28/10/2026 L1 Capital Pty Ltd On-Market Sale $ 529,445.09 11,674 FPO 11,674\n"
+                 "30/10/2026 L1 Capital Strategic Equity Management Pty Ltd In-specie transfer out $ - 95,378 FPO 95,378\n")
+    s = insight.parse_trades([mn], "2026-11-12", "change")["summary"]
+    assert abs(s["sell_price"] - 45.3525) < 1e-3
+    # 真的是每股 $1.00、而且一行里没有别的金额：照旧
+    one = head + "05/10/2026 L1 Capital Pty Ltd On-Market Purchase $ 50,000 50,000 FPO 50,000\n"
+    assert insight.parse_trades([one], "2026-10-10", "change")["rows"][0]["cons"] == 50000

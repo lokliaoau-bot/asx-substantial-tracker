@@ -878,11 +878,10 @@ def _cost_basis(records: list[dict], holding: int | None = None, vp_now: float |
                 last_votes = (r.get("votes") or [None])[-1]
                 continue
         bq, sq = r.get("buy_qty") or 0, r.get("sell_qty") or 0
-        price = r.get("buy_price")
-        # 第二十一轮：那份公告的买入均价和当时的股价对不上的（金额读错、日线复权），不拿它当成本，改用当时的收盘价
-        if price and price_doubt(price, "b", r.get("tr") if isinstance(r.get("tr"), dict) else {}, r.get("px") if isinstance(r.get("px"), dict) else {}):
-            price = None
-        price = price or r.get("p")
+        # 第二十一轮（接手后）：聊天环境那版在这里用 price_doubt 把“和股价对不上”的均价换成收盘价。读错的根子（$ 的位置）已经在 parse_trades 修了，
+        # 剩下对不上的多半是真的：配售价（Regal 的 AI1：$700 万认购 1.04 亿股、每股 $0.0675，当天收盘 $0.215）、一边买一边卖时按净额推的参考价不准
+        # （AustralianSuper 的 SGH、PLS 等 90 多天的明细）。换成收盘价反而把 AI1 的成本从 $0.093 算成 $0.221、“获利了结”变成“止损 99%”。所以不再换
+        price = r.get("buy_price") or r.get("p")
         if bq > 0 and price and price > 0:
             cost += bq * price
             shares += bq
@@ -942,10 +941,6 @@ def history_record(e: dict) -> dict:
     if px.get("t_lo") and px.get("t_hi"):
         ok = lambda v: v is not None and px["t_lo"] * 0.6 <= v <= px["t_hi"] * 1.6
         bp, sp = (bp if ok(bp) else None), (sp if ok(sp) else None)
-    if bp and price_doubt(bp, "b", tr, px):        # 第二十一轮：和同期股价对不上的均价不进历史（以后算成本会用到）
-        bp = None
-    if sp and price_doubt(sp, "s", tr, px):
-        sp = None
     rec = {"id": e.get("id"), "date": e.get("date") or "", "time": e.get("time") or "", "type": e.get("type"),
            "cd": e.get("change_date") or "", "vp": list(e.get("voting_power") or []), "votes": list(votes),
            "buy_qty": int(buy), "sell_qty": int(sell), "buy_price": bp, "sell_price": sp, "p": px.get("p"),
@@ -1209,13 +1204,11 @@ def price_doubt(avg, side: str, tr: dict, px: dict) -> str:
             continue
         if 0 < q < 1e15:
             qs.append(q)
-    tol = PX_TOL_ONE_DAY if qs and max(qs) >= 0.6 * sum(qs) else PX_TOL
-    vw = px.get("vw") if isinstance(px.get("vw"), dict) else {}
-    if _is_num(vw.get(side)) and vw[side] > 0 and cnt(vw.get("n" + side)) >= PX_MIN_DAYS:
-        r = avg / vw[side]
-        if abs(r - 1) > tol:
-            return f"而按这 {vw['n' + side]} 天每天的收盘价算应该在 {fp(vw[side])} 左右（差 {abs(r - 1) * 100:.0f}%）"
+    # 第二十一轮（接手后）：不知道量在各天怎么分布（历史记录不存逐日明细），或者量集中在一天（多半是配售、大宗，价格本来就可以离市价很远）——都不查。
+    # 也不再拿 px["vw"]（按每天净额和收盘价推的参考价）来比：同一天又买又卖时净额不等于成交量，AustralianSuper 90 多天的明细会差一成以上，误报很多
+    if not qs or max(qs) >= 0.6 * sum(qs):
         return ""
+    tol = PX_TOL
     lo, hi = px.get("t_lo"), px.get("t_hi")
     if not (_is_num(lo) and _is_num(hi) and lo > 0) or cnt(tr.get("days")) < PX_MIN_DAYS:
         return ""

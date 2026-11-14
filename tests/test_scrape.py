@@ -2052,9 +2052,7 @@ def test_backfill_chases_previous_notices(sandbox, monkeypatch):
     n = next(x for x in read(sandbox / "data" / "notices.json")["notices"] if x["code"] == "SLC")
     assert "连续加仓" in n["insight"]["tags"] and any("连续第 2 次加仓" in r for r in n["insight"]["reasons"])
     c = scrape.cost_for(hist, key.split("|")[0], "SLC", {"id": "1001", "date": "2026-10-30", "time": "17:00", "type": "change", "votes": [10_000_000, 12_000_000]})
-    # 第二十一轮：这份假公告的买入均价（约 $3.3）比假日线同期的股价（约 $2.2）高五成、分 4 天买的——均价存疑，成本改用当时的收盘价
-    assert c["n"] == 1 and 2.1 < c["avg"] < 2.2 and c["cov"] == 0.15           # 只知道 150 万股的成本，不到四成，所以解读里不拿它下结论
-    assert rows[1].get("buy_price") is None
+    assert c["n"] == 1 and 3.3 < c["avg"] < 3.4 and c["cov"] == 0.15           # 只知道 150 万股的成本，不到四成，所以解读里不拿它下结论
     # 追完了：再跑不再读旧公告
     fake.pdf_downloads.clear()
     scrape.main()
@@ -3490,26 +3488,27 @@ def test_implied_vwap():
 
 def test_price_doubt():
     pd_ = insight.price_doubt
-    tr = {"days": 8, "n_buy": 8, "n_sell": 0}
+    spread = [["2026-10-%02d" % d, 1_000_000] for d in (13, 14, 15, 16, 19, 20, 21, 22)]
+    tr = {"days": 8, "n_buy": 8, "n_sell": 0, "daily": spread}
     px = {"t_lo": 0.375, "t_hi": 0.43}
-    assert "同期股价一直在 $0.375–$0.430 之间" in pd_(0.6058, "b", tr, px)        # L1 LIN 的真实数字
+    assert "同期股价一直在 $0.375–$0.430 之间" in pd_(0.6058, "b", tr, px)        # 分 8 天在市场上买，均价却在股价之外
     assert pd_(0.41, "b", tr, px) == "" and pd_(0.46, "b", tr, px) == ""            # 在区间里、或只略高一点
     assert pd_(0.30, "b", tr, px) != ""
-    assert pd_(0.6058, "b", {"days": 2, "n_buy": 2}, px) == ""                      # 一两天的成交不查（可能是场外）
+    assert pd_(0.6058, "b", dict(tr, days=2, n_buy=2), px) == ""                    # 一两天的成交不查（可能是场外）
     assert pd_(0.6058, "s", tr, px) == ""                                           # 卖出那边没几笔
     assert pd_(None, "b", tr, px) == "" and pd_(0.6, "b", tr, {}) == "" and pd_(0.6, "b", tr, {"t_lo": 0, "t_hi": 1}) == ""
-    # 量集中在一天：放宽到 20%
-    one = dict(tr, daily=[["2026-10-20", 10], ["2026-10-21", 10], ["2026-10-22", 10], ["2026-10-23", 900]])
-    assert pd_(0.33, "b", one, px) == "" and pd_(0.28, "b", one, px) != ""
-    # 有“按每天收盘价推出来的均价”时用它
-    pxv = {"t_lo": 1.0, "t_hi": 3.0, "vw": {"b": 2.0, "nb": 6}}
-    assert "应该在 $2.00 左右（差 25%）" in pd_(2.5, "b", tr, pxv) and pd_(2.1, "b", tr, pxv) == ""
-    assert pd_(2.5, "b", tr, {"t_lo": 1.0, "t_hi": 3.0, "vw": {"b": 2.0, "nb": 2}}) == ""   # 只有两天：退回区间检查，在区间里
+    # 接手后：量集中在一天（配售、大宗，Regal 的 AI1 九成是一笔 $0.0675 的认购）、或不知道逐日分布（历史记录）——都不查
+    one = dict(tr, daily=spread[:3] + [["2026-10-23", 90_000_000]])
+    assert pd_(0.0675, "b", one, {"t_lo": 0.135, "t_hi": 0.245}) == ""
+    assert pd_(0.6058, "b", {"days": 8, "n_buy": 8}, px) == ""
+    # 不再拿“按每天净额推的参考价”来比（同一天又买又卖时不准）
+    assert pd_(2.5, "b", dict(tr, daily=spread), {"t_lo": 1.0, "t_hi": 3.0, "vw": {"b": 2.0, "nb": 6}}) == ""
 
 
 def test_doubtful_average_price_is_not_used():
     # 买入均价 $1.47，同期股价 $0.90–$1.05，8 个交易日 8 笔：均价不用——不拿它说“比成本高、在加码”，也不拿它判断逢低
-    tr = dict(_buy()["trades"], buy_price=1.47, sell_qty=0, n_buy=8, n_sell=0, days=8, first="2026-10-20", last="2026-10-30")
+    tr = dict(_buy()["trades"], buy_price=1.47, sell_qty=0, n_buy=8, n_sell=0, days=8, first="2026-10-20", last="2026-10-30",
+              daily=[["2026-10-%02d" % d, 250_000] for d in (20, 21, 22, 23, 24, 27, 28, 30)])
     px = _px(p=1.0, t_lo=0.9, t_hi=1.05)
     cost = {"avg": 1.2, "cov": 0.9, "since": "2026-01-10", "n": 3}
     r = insight.judge(_buy(trades=tr, px=px, cost=cost))
@@ -3521,23 +3520,16 @@ def test_doubtful_average_price_is_not_used():
     assert "均价存疑" not in ok["tags"] and "px_doubt" not in ok["_f"]
 
 
-def test_doubtful_price_does_not_become_cost():
-    # 上一份公告的买入均价 $0.84，可当时股价只有 $0.38–0.47（L1 LIN 的真实数字）：算成本时不用它，用当时的收盘价
-    rec = {"date": "2026-10-20", "buy_qty": 1_000_000, "sell_qty": 0, "buy_price": 0.84, "p": 0.41, "votes": [5_000_000, 6_000_000],
-           "tr": {"days": 11, "n_buy": 11, "n_sell": 0}, "px": {"t_lo": 0.375, "t_hi": 0.465, "p": 0.41}}
-    assert insight.cost_basis([rec])["avg"] == 0.41
-    ok = dict(rec, buy_price=0.42)
-    assert insight.cost_basis([ok])["avg"] == 0.42
-    # 没有 tr / px 的老记录照旧用均价；坏数据不出错
-    assert insight.cost_basis([{"date": "2026-10-20", "buy_qty": 10, "buy_price": 0.84, "p": 0.41}])["avg"] == 0.84
-    assert insight.cost_basis([dict(rec, tr="x", px=None)])["avg"] == 0.84
-    # 进历史之前也过一遍
-    e = {"id": "1", "date": "2026-10-20", "type": "change", "voting_power": [5.0, 6.0], "votes": [5_000_000, 6_000_000],
-         "trades": {"buy_qty": 1_000_000, "sell_qty": 0, "buy_price": 0.84, "sell_price": None, "days": 11, "n_buy": 11, "n_sell": 0},
-         "px": {"t_lo": 0.375, "t_hi": 0.465, "p": 0.41}}
-    assert insight.history_record(e)["buy_price"] is None
-    e["trades"]["buy_price"] = 0.42
-    assert insight.history_record(e)["buy_price"] == 0.42
+def test_cost_basis_keeps_real_off_market_prices():
+    # 接手后：读错的根子（$ 的位置）在 parse_trades 修了；剩下“均价和股价对不上”的多半是真的（配售价），成本照用明细里的均价。
+    # Regal AI1：603 里 1.04 亿股是 $700 万认购的（每股 $0.0675，当天收盘 $0.215）——真实成本约 $0.077，不是收盘价
+    rec = {"date": "2026-05-04", "type": "becoming", "vp": [10.83], "votes": [112_581_760], "buy_qty": 112_581_760, "sell_qty": 0,
+           "buy_price": 0.0772, "p": 0.215, "px": {"t_lo": 0.074, "t_hi": 0.245, "vw": {"b": 0.214, "nb": 5}}, "tr": {"days": 5, "n_buy": 5}}
+    assert insight.cost_basis([rec])["avg"] == 0.0772
+    e = {"id": "1", "date": "2026-05-04", "type": "becoming", "voting_power": [10.83], "votes": [112_581_760],
+         "trades": {"buy_qty": 112_581_760, "sell_qty": 0, "buy_price": 0.0772, "sell_price": None, "days": 5, "n_buy": 5, "n_sell": 0},
+         "px": {"t_lo": 0.074, "t_hi": 0.245, "p": 0.215, "vw": {"b": 0.214, "nb": 5}}}
+    assert insight.history_record(e)["buy_price"] == 0.0772
 
 
 def test_order_tags():

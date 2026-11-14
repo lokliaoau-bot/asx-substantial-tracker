@@ -1,7 +1,7 @@
 {
  "schema": 2,
- "updated_at": "2026-11-12T18:59:46+11:00",
- "last_success_at": "2026-11-12T18:59:36+11:00",
+ "updated_at": "2026-11-14T13:38:53+11:00",
+ "last_success_at": "2026-11-14T13:38:18+11:00",
  "scanned_days": [
   "2026-10-19",
   "2026-10-20",
@@ -22,22 +22,24 @@
   "2026-11-09",
   "2026-11-10",
   "2026-11-11",
-  "2026-11-12"
+  "2026-11-12",
+  "2026-11-13",
+  "2026-11-14"
  ],
  "partial_days": {
-  "2026-11-12": "18:59"
+  "2026-11-14": "13:38"
  },
  "last_run": {
   "ok": true,
-  "list_pages_ok": 2,
-  "substantial_found": 95,
-  "pdf_checked": 0,
+  "list_pages_ok": 1,
+  "substantial_found": 74,
+  "pdf_checked": 25,
   "skipped_noise": 0,
   "deferred": 0,
   "backfill": {
    "ok": true,
    "from": "2026-10-26",
-   "added": 0,
+   "added": 5,
    "incremental": true
   },
   "insight": {
@@ -51,7 +53,9 @@
    "history_refreshed": 0,
    "backfill_pending": 0
   },
-  "errors": []
+  "errors": [
+   "todayAnns.do 的页面结构认不出来，ASX 可能改版了，需要调整 parse_listing()"
+  ]
  },
  "watchlist": [
   "Paradice Investment Management",
@@ -2599,10 +2603,20 @@
      "持股比例 9.76% → 7.68%，持股数减少 9.1 万股（相当于原持仓的 3%）。",
      "持股数几乎没动，比例却掉了 2.08 个百分点：公司总股本变大了约 23%（增发、配售或期权行权），它没有跟着买，所以被摊薄。",
      "对得上：公司在 8/19「Proposed issue of securities - EOL」公告了融资。",
+     "这只股票出现在它的月报（WMI《October 2026 Investment Update》，2026-11-13）的持仓表里，但没有文字说明。",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
-    "tags": []
+    "tags": [],
+    "quotes": [
+     {
+      "fund": "WMI",
+      "title": "October 2026 Investment Update",
+      "date": "2026-11-13",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03165442",
+      "text": ""
+     }
+    ]
    }
   },
   {

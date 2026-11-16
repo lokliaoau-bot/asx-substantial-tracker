@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -75,7 +76,16 @@ def run(root: Path) -> dict:
                 "confidence": ins.get("confidence"),
                 "purposes": [(p["k"], p["p"]) for p in ins.get("purposes") or []], "next": nxt, "fwd3": (r.get("fwd") or {}).get("3m"),
                 "flips": flips.get(id(ins)), "scores": scores.get(id(ins))}
-    for x in scrape.build_notices(store.get("entries", {}), holders, history):
+    # 第二十二轮：和真实运行一样把“基金月报里的重仓股”也传进去（以前漏了，回放出来的 live 部分和网页上的会差一点）；旧代码不认这个参数就不传
+    reports = None
+    rp = HERE / "data" / "fund_reports.json"
+    if rp.exists() and "reports" in inspect.signature(scrape.build_notices).parameters:
+        try:
+            reports = json.loads(rp.read_text("utf-8"))
+        except ValueError:
+            reports = None
+    for x in (scrape.build_notices(store.get("entries", {}), holders, history, reports) if reports is not None
+              else scrape.build_notices(store.get("entries", {}), holders, history)):
         ins = x.get("insight") or {}
         out["live"][str(x.get("id"))] = {"who": f"{x.get('holder')}|{x.get('code')}", "date": x.get("date"), "action": ins.get("action"),
                                          "label": ins.get("label"), "side": ins.get("side"), "confidence": ins.get("confidence"),

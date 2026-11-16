@@ -15,6 +15,7 @@ ASX 公开的全市场列表只提供当天和上一交易日，所以“近两�
 from __future__ import annotations
 
 import bisect
+import copy
 import datetime as dt
 import io
 import json
@@ -984,19 +985,148 @@ def load_json(path: Path, default):
     if path.exists():
         try:
             return json.loads(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
+        except (ValueError, OSError):      # ValueError 包住了 JSON 格式错和文字编码错
             log(f"警告：{path.name} 读取失败，按空文件处理")
     return default
+
+
+def json_safe(obj):
+    """把 NaN / 无穷大换成 null。Python 能读写 NaN，但浏览器的 JSON.parse 不认——数据文件里只要有一个，整个网页就读不出数据。"""
+    if isinstance(obj, float):
+        return obj if obj == obj and abs(obj) != float("inf") else None
+    if isinstance(obj, dict):
+        return {k: json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_safe(v) for v in obj]
+    return obj
 
 
 def write_json(path: Path, obj, pretty: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    if pretty:
-        tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=1), encoding="utf-8")
-    else:
-        tmp.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    kw = {"indent": 1} if pretty else {"separators": (",", ":")}
+    try:
+        text = json.dumps(obj, ensure_ascii=False, allow_nan=False, **kw)
+    except ValueError:                           # 里面有 NaN / 无穷大（第二十二轮）：换成 null 再写，不能让网页读不出来
+        log(f"警告：{path.name} 里有不是数字的数字（NaN），已换成空值")
+        text = json.dumps(json_safe(obj), ensure_ascii=False, allow_nan=False, **kw)
+    tmp.write_text(text, encoding="utf-8")
     os.replace(tmp, path)
+
+
+# ---------------------------------------------------------------- 第二十二轮：读进来的存储先洗一遍
+#
+# 存储文件是程序自己写的，正常不会坏。但只要有一条记录的一个字段坏了（手工改过、合并冲突、以前版本的遗留），
+# update_history / build_notices 就会整个出错，之后每次点“抓取”都失败，直到有人去修文件。所以读进来先洗：坏字段丢掉，核心字段坏了的整条丢掉。
+_DAY_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_ENTRY_STR = ("time", "url", "pdf_url", "status", "type", "holder_name", "change_date", "company", "sector", "lodged_code", "region",
+              "hint", "prev_notice", "checked_at", "text_hit")
+
+
+def _valid_day(v) -> bool:
+    if not (isinstance(v, str) and _DAY_RE.fullmatch(v)):
+        return False
+    try:
+        dt.date.fromisoformat(v)
+        return True
+    except ValueError:
+        return False
+
+
+def _strip_none(o):
+    if isinstance(o, dict):
+        return {k: _strip_none(v) for k, v in o.items() if v is not None}
+    if isinstance(o, list):
+        return [_strip_none(v) for v in o]
+    return o
+
+
+def _fix(d: dict, key: str, cleaner) -> int:
+    """d[key] 洗过以后和原来（不算值为 null 的键）不一样：换成洗过的，返回 1；一样就原样不动，返回 0。"""
+    v = d.get(key)
+    if v is None:
+        return 0
+    c = cleaner(v)
+    if json.dumps(_strip_none(v), sort_keys=True, default=str) == json.dumps(c, sort_keys=True, default=str):
+        return 0
+    if c:
+        d[key] = c
+    else:
+        d.pop(key)
+    return 1
+
+
+def sanitize_entries(entries) -> tuple[dict, int]:
+    """洗 all_notices.json 的 entries。返回（洗过的, 修掉的处数）。日期、标题、代码坏了的整条丢掉（还在列表窗口里的下次会重新抓到）。"""
+    if not isinstance(entries, dict):
+        return {}, 1
+    out, fixed = {}, 0
+    for k, e in entries.items():
+        if not (isinstance(e, dict) and _valid_day(e.get("date")) and isinstance(e.get("headline"), str) and isinstance(e.get("code"), str)
+                and isinstance(e.get("id"), (str, int)) and not isinstance(e.get("id"), bool)):
+            fixed += 1
+            continue
+        for f in _ENTRY_STR:
+            if f in e and e[f] is not None and not isinstance(e[f], str):
+                e.pop(f)
+                fixed += 1
+        if e.get("voting_power") is not None or e.get("votes") is not None:
+            vp, votes = insight.clean_ratio_votes(e.get("voting_power") or [], e.get("votes") or [])
+            for f, c in (("voting_power", vp), ("votes", votes)):
+                if e.get(f) is not None and e[f] != c:
+                    e[f] = c
+                    fixed += 1
+        fixed += _fix(e, "trades", insight.clean_trades) + _fix(e, "px", insight.clean_px) + _fix(e, "tl", insight.clean_tl) + _fix(e, "ev", insight.clean_ev)
+        out[k] = e
+    return out, fixed
+
+
+def sanitize_history(history) -> tuple[dict, int]:
+    """洗 history.json。返回（洗过的, 修掉的处数）。日期或类型坏了的行丢掉；数字字段坏了的清空。"""
+    if not isinstance(history, dict) or not isinstance(history.get("pos"), dict):
+        return {"pos": {}}, 0
+    fixed = 0
+    num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and abs(v) < 1e15
+    for k in list(history["pos"]):
+        rows = history["pos"][k]
+        if not isinstance(k, str) or "|" not in k or not isinstance(rows, list):
+            history["pos"].pop(k)
+            fixed += 1
+            continue
+        good = []
+        for r in rows:
+            if not (isinstance(r, dict) and _valid_day(r.get("date")) and r.get("type") in ("becoming", "change", "ceasing") and r.get("id") is not None):
+                fixed += 1
+                continue
+            for f in ("time", "cd", "first", "prev_notice"):
+                if f in r and not isinstance(r[f], str):
+                    r[f] = ""
+                    fixed += 1
+            vp, votes = insight.clean_ratio_votes(r.get("vp") or [], r.get("votes") or [])
+            for f, c in (("vp", vp), ("votes", votes)):
+                if r.get(f) != c:
+                    fixed += r.get(f) is not None
+                    r[f] = c
+            for f in ("buy_qty", "sell_qty"):
+                if f in r and (not num(r[f]) or r[f] < 0):
+                    fixed += r[f] is not None
+                    r[f] = 0
+            for f in ("buy_price", "sell_price", "p"):
+                if r.get(f) is not None and not (num(r[f]) and r[f] > 0):
+                    r[f] = None
+                    fixed += 1
+            fixed += _fix(r, "tr", insight.clean_trades) + _fix(r, "px", insight.clean_px) + _fix(r, "tl", insight.clean_tl)
+            for f in ("fwd", "fwd_x", "blk"):
+                if f in r and not (isinstance(r[f], dict) and all(num(v) or (f == "blk" and isinstance(v, str)) for v in r[f].values())):
+                    r.pop(f)
+                    fixed += 1
+            good.append(r)
+        history["pos"][k] = good
+    meta = history.get("meta")
+    if meta is not None and not (isinstance(meta, dict) and all(isinstance(v, dict) for v in meta.values())):
+        history["meta"] = {a: b for a, b in meta.items() if isinstance(b, dict)} if isinstance(meta, dict) else {}
+        fixed += 1
+    return history, fixed
 
 
 def load_store() -> dict:
@@ -2151,6 +2281,8 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
     except Exception as ex:  # noqa: BLE001  习惯统计出错不能影响公告本身
         log(f"  基金习惯统计出错：{type(ex).__name__}: {ex}")
         habit_of = {}
+    if not all(isinstance(e, dict) and _valid_day(e.get("date")) and isinstance(e.get("headline"), str) for e in entries.values()):
+        entries = sanitize_entries(copy.deepcopy(entries))[0]      # 平时走不到：main 里已经洗过；别处直接调用时防一手
     by_code: dict[str, list[dict]] = {}                 # 所有大股东公告（不只名单里的）按股票分组，给倒手识别用
     for e in entries.values():
         c = headline_target(e.get("headline", ""), e.get("code", "")) or e.get("code", "")
@@ -2199,7 +2331,7 @@ def build_notices(entries: dict, holders: list[Holder], history: dict | None = N
             last_seen[key] = {"vp": vp[-1] if vp else None, "votes": votes[-1] if votes else None,
                               "type": e.get("type"), "date": e.get("date")}
             out.append(item)
-    out.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", n.get("id") or ""), reverse=True)
+    out.sort(key=lambda n: (n.get("date") or "", n.get("time") or "", str(n.get("id") or "")), reverse=True)
     # 保险：同一份公告从列表页和接口各来一条、时间又差了一分钟时，按内容再去重一次（优先保留列表页那条）
     seen, uniq = set(), []
     for n in sorted(out, key=lambda n: str(n.get("id", "")).startswith("mk-")):
@@ -2711,11 +2843,15 @@ def main() -> int:
     today = now.date()
     holders, noise = load_watchlist()
     store = load_store()
+    store["entries"], n_bad = sanitize_entries(store.get("entries"))
     entries: dict = store["entries"]
     scanned = set(store.get("scanned_days", []))           # 完整抓到的日子
     partial = dict(store.get("partial_days", {}) or {})    # 只抓到一部分的日子：{日期: 抓取时间}
     hhmm = now.strftime("%H:%M")
     errors: list[str] = []
+    if n_bad:
+        log(f"警告：存储（all_notices.json）里有 {n_bad} 处坏数据，已丢掉坏的部分")
+        errors.append(f"存储文件里有 {n_bad} 处坏数据，已自动跳过（不影响其余公告）")
     pages_ok = 0
 
     rows = []
@@ -2902,10 +3038,24 @@ def main() -> int:
     if need_px:
         log(f"股价背景：{len(need_px)} 条公告、{px_ok + px_failed} 只股票，取到 {px_ok} 只，用时 {time.monotonic() - t_px:.0f} 秒")
 
+    # 持仓历史是攒了三年的东西，重抓不全。文件在、却读不出来（或不是预期的样子）时：先把坏文件原样另存一份，再从空的开始，并在网页上提醒。
     history = load_json(HISTORY_FILE, {})
     if not isinstance(history, dict) or not isinstance(history.get("pos"), dict):
+        try:
+            if HISTORY_FILE.exists() and HISTORY_FILE.stat().st_size > 2:
+                bad_copy = HISTORY_FILE.with_name("history.bad.json")
+                bad_copy.write_bytes(HISTORY_FILE.read_bytes())
+                log(f"警告：history.json 读不出来，原文件另存为 {bad_copy.name}，这次从空的历史开始")
+                errors.append(f"持仓历史文件读不出来，已另存为 data/{bad_copy.name}，这次从头开始攒（成本价和持仓阶段会暂时变少）")
+        except OSError as ex:
+            log(f"警告：坏的 history.json 另存失败：{ex}")
         history = {"pos": {}}
+    history, n_bad_h = sanitize_history(history)
+    if n_bad_h:
+        log(f"警告：持仓历史里有 {n_bad_h} 处坏数据，已丢掉坏的部分")
+        errors.append(f"持仓历史里有 {n_bad_h} 处坏数据，已自动跳过")
     hist_added = update_history(history, entries, holders, today)
+    rows_before = sum(len(v) for v in history["pos"].values())      # 过期的行已经在上一步清掉；这之后只该多、不该少
     bf = Backfill(history, holders, today)
     t_bf = time.monotonic()
     try:
@@ -2962,6 +3112,12 @@ def main() -> int:
         store["last_success_at"] = now.isoformat(timespec="seconds")
 
     notices = build_notices(entries, holders, history, reports)
+    rows_after = sum(len(v) for v in history["pos"].values() if isinstance(v, list))
+    save_history = not (rows_before >= 40 and rows_after < rows_before * 0.5)
+    if not save_history:
+        # 一次运行里历史少了一半以上，肯定不对：不写，保住原文件
+        log(f"警告：持仓历史从 {rows_before} 条变成 {rows_after} 条，少得不正常，这次不覆盖 history.json")
+        errors.append("持仓历史这次少了一半以上，不正常，没有保存这次的改动")
     out = {
         "schema": SCHEMA,
         "updated_at": dt.datetime.now(SYD).isoformat(timespec="seconds"),
@@ -2990,7 +3146,8 @@ def main() -> int:
         "notices": notices,
     }
     write_json(STORE_FILE, store)
-    write_json(HISTORY_FILE, history)
+    if save_history:
+        write_json(HISTORY_FILE, history)
     write_json(REPORTS_FILE, reports)
     write_json(CALIBRATION_FILE, calibration, pretty=True)
     write_json(NOTICES_FILE, out, pretty=True)

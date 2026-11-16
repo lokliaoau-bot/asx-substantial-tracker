@@ -2,6 +2,7 @@
 
 运行：pip install -r requirements-dev.txt && python -m pytest -q
 """
+import copy
 import datetime as dt
 import io
 import json
@@ -3608,3 +3609,123 @@ def test_trade_rows_with_dollar_sign_in_the_wrong_place():
     # 真的是每股 $1.00、而且一行里没有别的金额：照旧
     one = head + "05/10/2026 L1 Capital Pty Ltd On-Market Purchase $ 50,000 50,000 FPO 50,000\n"
     assert insight.parse_trades([one], "2026-10-10", "change")["rows"][0]["cons"] == 50000
+
+
+# ---------------------------------------------------------------- 第二十二轮：深度查错（坏数据不能让程序停、不能让网页读不出、不能丢历史）
+
+def test_judge_survives_corrupt_fields():
+    good = insight.judge(_win_buy(1.05, 1.9, r1m=0.7, r3m=0.8, r6m=0.8, r12m=0.8, pos=0.8))
+    assert good
+    for key, bad in [("trades", "x"), ("trades", {"buy_qty": "1,000", "daily": [[1], "x", None]}), ("px", {"p": float("nan"), "t_lo": "1"}),
+                     ("px", [1, 2]), ("tl", {"n": "8"}), ("ev", [{"d": 5}, "x", {"d": "2026-10-01", "k": "raise", "p": float("inf")}]),
+                     ("voting_power", ["5.1", None]), ("votes", [float("nan"), 1]), ("cost", "x"), ("seq", [1]), ("habit", 3), ("stage", "x"),
+                     ("prev", 7), ("blk", "x"), ("date", 20261030), ("style", None)]:
+        n = _win_buy(1.05, 1.9, r1m=0.7, r3m=0.8, r6m=0.8, r12m=0.8, pos=0.8)
+        n[key] = bad
+        r = insight.judge(n)                                   # 不能抛异常；读不准的那部分当作没有
+        assert r is None or isinstance(r["label"], str)
+        assert "nan" not in json.dumps(r, ensure_ascii=False).lower().replace("finance", "")
+
+
+def test_clean_input_keeps_good_data_untouched():
+    n = _win_buy(1.05, 1.9, r1m=0.7, r3m=0.8, r6m=0.8, r12m=0.8, pos=0.8)
+    before = json.dumps(n, sort_keys=True, default=str)
+    assert insight.judge(insight.clean_input(n)) == insight.judge(n)
+    assert json.dumps(n, sort_keys=True, default=str) == before                      # 不改调用方的数据
+    # 没有价格的“发新股”事件要留着（它用来说明“这不是一次真的融资”）；价格和数量只留成对的
+    ev = insight.clean_ev([{"d": "2026-10-01", "k": "iss", "iss": {"kind": "esop"}}, {"d": 1, "k": "iss"}, "x",
+                           {"d": "2026-10-02", "k": "iss", "iss": {"p": 1.0, "q": float("nan"), "kind": "plc"}}])
+    assert ev == [{"d": "2026-10-01", "k": "iss", "iss": {"kind": "esop"}}, {"d": "2026-10-02", "k": "iss", "iss": {"kind": "plc"}}]
+    assert insight.clean_ratio_votes([5.1, 120.0], [1, 2]) == ([], [1, 2])           # 持股比例超过 100%：整组不要
+
+
+def test_write_json_never_emits_nan(tmp_path):
+    p = tmp_path / "x.json"
+    scrape.write_json(p, {"a": float("nan"), "b": [1.5, float("inf"), {"c": -float("inf")}], "d": "ok"})
+    text = p.read_text("utf-8")
+    assert "NaN" not in text and "Infinity" not in text                              # 浏览器的 JSON.parse 不认这两个
+    assert json.loads(text) == {"a": None, "b": [1.5, None, {"c": None}], "d": "ok"}
+
+
+def test_sanitize_entries_and_history_drop_only_the_bad_parts():
+    ok = {"id": "1", "code": "ABC", "date": "2026-10-30", "time": "10:00", "headline": "Change in substantial holding", "type": "change",
+          "voting_power": [5.1, 6.2], "votes": [100, 120]}
+    entries, fixed = scrape.sanitize_entries({"1": dict(ok), "2": dict(ok, date=20261030), "3": "x", "4": dict(ok, headline=None),
+                                              "5": dict(ok, voting_power=["a", 6.2], time=930, px="x")})
+    assert set(entries) == {"1", "5"} and fixed >= 4
+    assert entries["1"] == ok and not entries["5"].get("voting_power")
+    assert not isinstance(entries["5"].get("time"), int) and not isinstance(entries["5"].get("px"), str)
+    row = {"id": "1", "date": "2026-10-30", "type": "change", "vp": [5.1, 6.2], "votes": [100, 120]}
+    hist, fixed = scrape.sanitize_history({"pos": {"Fund|ABC": [dict(row), dict(row, id="2", date=None), "x", dict(row, id="3", buy_price="1.2")],
+                                                   "bad key": [dict(row)], "Fund|XYZ": "x"}})
+    assert list(hist["pos"]) == ["Fund|ABC"] and [r["id"] for r in hist["pos"]["Fund|ABC"]] == ["1", "3"] and fixed >= 4
+    assert hist["pos"]["Fund|ABC"][0] == row and hist["pos"]["Fund|ABC"][1].get("buy_price") is None
+    assert scrape.sanitize_history(["not", "a dict"]) == ({"pos": {}}, 0)
+    # 真实数据原样通过（一处不改）
+    real_h = json.loads((ROOT / "data" / "history.json").read_text("utf-8"))
+    real_s = json.loads((ROOT / "data" / "all_notices.json").read_text("utf-8"))
+    assert scrape.sanitize_history(copy.deepcopy(real_h)) == (real_h, 0)
+    assert scrape.sanitize_entries(copy.deepcopy(real_s["entries"])) == (real_s["entries"], 0)
+
+
+def test_corrupt_history_is_backed_up_and_reported(sandbox, monkeypatch):
+    bad = '{"pos": {"Fund|ABC": [{"id": "1", "date": "2026-10-30"'                    # 写到一半断掉的文件
+    (sandbox / "data" / "history.json").write_text(bad, encoding="utf-8")
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    assert scrape.main() == 0
+    assert (sandbox / "data" / "history.bad.json").read_text("utf-8") == bad           # 原样另存，没有被悄悄盖掉
+    assert isinstance(read(sandbox / "data" / "history.json")["pos"], dict)
+    assert any("持仓历史文件读不出来" in e for e in read(sandbox / "data" / "notices.json")["last_run"]["errors"])
+
+
+def test_bad_records_in_store_and_history_do_not_stop_the_run(sandbox, monkeypatch):
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    assert scrape.main() == 0
+    n_before = len(read(sandbox / "data" / "notices.json")["notices"])
+    store = read(sandbox / "data" / "all_notices.json")
+    store["entries"]["junk1"] = "x"
+    store["entries"]["junk2"] = {"id": "junk2", "date": 20261030, "headline": None}
+    first = next(iter(store["entries"].values()))
+    first["px"], first["trades"], first["time"] = "x", [1, 2], 930
+    (sandbox / "data" / "all_notices.json").write_text(json.dumps(store), encoding="utf-8")
+    hist = read(sandbox / "data" / "history.json")
+    hist["pos"]["Junk|ZZZ"] = [{"id": 5, "date": None}, "x"]
+    (sandbox / "data" / "history.json").write_text(json.dumps(hist), encoding="utf-8")
+    assert scrape.main() == 0                                                          # 以前这里会直接出错，而且之后每次都出错
+    out = read(sandbox / "data" / "notices.json")
+    assert len(out["notices"]) == n_before and any("坏数据" in e for e in out["last_run"]["errors"])
+    assert "junk1" not in read(sandbox / "data" / "all_notices.json")["entries"]
+
+
+def test_history_is_not_overwritten_when_it_shrinks_a_lot(sandbox, monkeypatch):
+    row = lambda i: {"id": f"h{i}", "date": "2026-10-01", "time": "10:00", "type": "change", "vp": [5.0 + i / 100, 6.0 + i / 100], "votes": [100 + i, 120 + i]}
+    hist = {"pos": {f"Fund {k}|AB{k}": [row(k * 10 + i) for i in range(10)] for k in range(6)}}
+    (sandbox / "data" / "history.json").write_text(json.dumps(hist), encoding="utf-8")
+    monkeypatch.setattr(scrape, "fetch", FakeASX())
+    real = scrape.add_forward_excess
+    def wipe(history, *a, **k):                                                        # 模拟某一步出错把历史清掉了大半
+        for key in list(history["pos"])[1:]:
+            history["pos"][key] = []
+        return real(history, *a, **k)
+    monkeypatch.setattr(scrape, "add_forward_excess", wipe)
+    assert scrape.main() == 0
+    assert read(sandbox / "data" / "history.json") == hist                             # 原文件没动
+    assert any("少了一半以上" in e for e in read(sandbox / "data" / "notices.json")["last_run"]["errors"])
+
+
+def test_drawn_out_buying_does_not_claim_bought_before_the_move():
+    # 七个月里陆续买、现在的股价还在买入期间的区间里：分不清“先买后跌”还是“一路跌一路买”，不下结论、不挂小标签
+    r = insight.judge(_win_buy(1.9, 1.2, first="2026-03-01", last="2026-10-30", days=80, r1m=-0.1, r3m=-0.35, r6m=-0.3, r12m=-0.3, pos=0.25))
+    assert r["action"] == "add_dip" and "买在高处" not in r["tags"]
+    assert any(x.startswith("买入位置：") and "这一条不用来判断" in x for x in r["reasons"])
+    assert not any("不是等跌下来才买" in x for x in r["reasons"])
+    # 两周内买完的照旧
+    r = insight.judge(_win_buy(1.9, 1.2, r1m=-0.35, r3m=-0.35, r6m=-0.3, r12m=-0.3, pos=0.25))
+    assert "买在高处" in r["tags"]
+
+
+def test_bought_low_in_an_uptrend_is_worded_consistently():
+    # 买在 $1.05，现在 $1.90；但按 $1.05 算之前 3 个月也已经涨了很多 → 是在上涨途中买的：不能再说“不是看到涨了才去追”
+    r = insight.judge(_win_buy(1.05, 1.9, r1m=2.0, r3m=3.0, r6m=3.0, r12m=3.0, pos=0.9))
+    assert "买在低处" in r["tags"]
+    assert any("是在上涨途中买的" in x for x in r["reasons"]) and not any("不是看到涨了才去追" in x for x in r["reasons"])

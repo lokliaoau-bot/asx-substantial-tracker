@@ -327,7 +327,14 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
     el.classList.toggle("err", isErr);
   }
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : "");
+  // 只放行 ASX 自己的网址（公告页和 PDF）：数据文件万一被改坏，也不会把人带到别的网站
+  const safeUrl = (u) => {
+    if (typeof u !== "string" || !/^https?:\/\//i.test(u)) return "";
+    try {
+      const h = new URL(u).hostname.toLowerCase();
+      return /(^|\.)asx\.com\.au$/.test(h) || /(^|\.)markitdigital\.com$/.test(h) ? u : "";
+    } catch { return ""; }
+  };
 
   function sydneyToday() {
     return new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney" }).format(new Date());
@@ -417,8 +424,10 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
   }
 
   // ---------- 触发抓取
+  // 只看“自己这个分支”的运行：别人（或别的 AI）在测试分支上跑的那一次，不能当成这次的结果
+  const runsPath = (n) => `/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=${n}` + (cfg.branch ? `&branch=${encodeURIComponent(cfg.branch)}` : "");
   async function latestRunId() {
-    const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=1`, { cache: "no-store" });
+    const r = await api(runsPath(1), { cache: "no-store" });
     if (!r.ok) throw new Error(await apiError(r, "查询运行记录"));
     const runs = (await r.json()).workflow_runs || [];
     return runs.length ? runs[0].id : 0;
@@ -447,10 +456,19 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); max-width: 80ch
       });
       if (res.status !== 204) return setStatus(await apiError(res, "启动抓取"), true);
 
-      while (Date.now() - started < 30 * 60 * 1000) {      // 和工作流的 30 分钟超时一致（积压多、扫描件多时会比较久）
+      let misses = 0;                                       // 连续几次没问到进度（手机切到后台、网络抖一下、GitHub 临时出错都会这样）
+      let last = false;                                     // 超过 30 分钟以后再问最后一次：手机锁屏时计时照走、但没在问
+      while (!last) {                                       // 30 分钟和工作流的超时一致（积压多、扫描件多时会比较久）
         await sleep(Date.now() - started < 30000 ? 4000 : 8000);
-        const r = await api(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`, { cache: "no-store" });
+        last = Date.now() - started >= 30 * 60 * 1000;
+        let r = null;
+        try { r = await api(runsPath(5), { cache: "no-store" }); } catch {}
+        if (!r || r.status >= 500) {
+          if (++misses >= 6) return setStatus("连续几次问不到进度（网络不稳）。抓取多半还在 GitHub 上跑，过几分钟刷新页面看结果。", true);
+          continue;
+        }
         if (!r.ok) return setStatus(await apiError(r, "查询进度"), true);
+        misses = 0;
         const runs = (await r.json()).workflow_runs || [];
         const run = runs.filter((x) => x.id > before).sort((a, b) => a.id - b.id)[0];
         const secs = Math.round((Date.now() - started) / 1000);

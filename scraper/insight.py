@@ -1227,12 +1227,140 @@ def days_to_trade(shares, adv) -> int | None:
     return min(int(round(shares / adv)), 9999)
 
 
+# ---------------------------------------------------------------- 第二十二轮：进门先洗一遍数据
+#
+# 存储文件里万一有一个字段坏了（不是数字的数字、NaN、该是字典的成了字符串），以前整条解读都会出错、网页上这条就没有解读了。
+# 现在只丢掉坏的那一个字段，其余照常判断（宁缺毋错：坏的不用，好的不浪费）。
+_STR_KEYS = {"first", "last", "ref", "mb", "since", "date", "type", "d", "by", "u", "k", "h", "kind", "why", "top_date"}
+
+
+def _clean(v, depth: int = 0):
+    """递归清洗：数字必须是有限的（NaN、无穷大、布尔值、超大数都丢掉）；字符串原样；字典/列表往下洗；其余类型丢掉。"""
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)):
+        return v if v == v and abs(v) < 1e15 else None
+    if isinstance(v, str):
+        return v
+    if depth > 6:
+        return None
+    if isinstance(v, dict):
+        return {k: c for k, c in ((k, _clean(x, depth + 1)) for k, x in v.items() if isinstance(k, str)) if c is not None}
+    if isinstance(v, (list, tuple)):
+        return [_clean(x, depth + 1) for x in v]
+    return None
+
+
+def _num_dict(d, keep_dicts: tuple = (), keep_lists: tuple = ()) -> dict:
+    """一层字典里：名字在 _STR_KEYS 的必须是字符串，keep_dicts / keep_lists 里的必须是字典 / 列表，其余必须是数字（布尔值也行）；不合格的丢掉。"""
+    if not isinstance(d, dict):
+        return {}
+    out = {}
+    for k, v in d.items():
+        if k in keep_dicts:
+            if isinstance(v, dict):
+                out[k] = v
+        elif k in keep_lists:
+            if isinstance(v, list):
+                out[k] = v
+        elif k in _STR_KEYS:
+            if isinstance(v, str):
+                out[k] = v
+        elif isinstance(v, (int, float)):
+            out[k] = v
+    return out
+
+
+_num_list = lambda xs: [x for x in xs if isinstance(x, (int, float)) and not isinstance(x, bool)] if isinstance(xs, list) else []
+
+
+def clean_trades(tr) -> dict:
+    """交易明细汇总：数字字段必须是数字，kinds / kind_rows 是 {性质: 数字}，daily 是 [[日期, 数量], ...]；不合格的字段丢掉。"""
+    tr = _num_dict(_clean(tr) if isinstance(tr, dict) else {}, keep_dicts=("kinds", "kind_rows"), keep_lists=("daily",))
+    for k in ("kinds", "kind_rows"):
+        if k in tr:
+            tr[k] = {a: b for a, b in tr[k].items() if isinstance(b, (int, float)) and not isinstance(b, bool)}
+    if "daily" in tr:
+        tr["daily"] = [r for r in tr["daily"] if isinstance(r, list) and len(r) >= 2 and isinstance(r[0], str)
+                       and isinstance(r[1], (int, float)) and not isinstance(r[1], bool)]
+    return tr
+
+
+def clean_px(px) -> dict:
+    """股价背景：都是数字（ref / mb 是字符串，m / vw 是小字典）；互相依赖的字段缺一个就一起不用。"""
+    px = _num_dict(_clean(px) if isinstance(px, dict) else {}, keep_dicts=("m", "vw"))
+    for k in ("m", "vw"):
+        if k in px:
+            px[k] = _num_dict(px[k])
+    if "pos" in px and not ("lo" in px and "hi" in px):
+        px.pop("pos")                             # “一年区间里的位置”离不开区间的高低点
+    if not ("t_lo" in px and "t_hi" in px and px["t_lo"] > 0 and px["t_hi"] >= px["t_lo"]):
+        px.pop("t_lo", None)
+        px.pop("t_hi", None)
+    if "p" in px and not px["p"] > 0:
+        px.pop("p")
+    return px
+
+
+def clean_tl(tl) -> dict:
+    tl = _num_dict(_clean(tl) if isinstance(tl, dict) else {})
+    return tl if all(k in tl for k in ("n", "down_share", "r_win")) or not tl.get("n") else {}      # 时间线缺一项就整组不用
+
+
+def clean_ev(ev) -> list:
+    """公司同期大事：每条要有日期 d 和类别 k（字符串）；发行文件 iss 的价格和股数要么都有，要么都不用。"""
+    out = []
+    for x in ev if isinstance(ev, list) else []:
+        x = _clean(x) if isinstance(x, dict) else None
+        if not (isinstance(x, dict) and isinstance(x.get("d"), str) and isinstance(x.get("k"), str)):
+            continue
+        y = {k: v for k, v in x.items() if (isinstance(v, str) if k in ("d", "k", "h", "u") else isinstance(v, (int, float, dict)))}
+        iss = y.get("iss")
+        if "iss" in y and not isinstance(iss, dict):
+            y.pop("iss")
+        elif "iss" in y:                          # 发行文件：没写价格的（换股、员工、行权）也有用——用来说明“这不是融资”，所以留着
+            iss = {k: v for k, v in iss.items() if (isinstance(v, str) if k in ("f", "kind", "d", "why") else
+                                                    isinstance(v, (int, float)) and not isinstance(v, bool))}
+            if not all(k in iss and iss[k] > 0 for k in ("p", "q")):
+                iss.pop("p", None)                # 价格和股数要么都有，要么都不用
+                iss.pop("q", None)
+            y["iss"] = iss
+        for k in ("j", "s", "disc"):
+            if k in y and not isinstance(y[k], (int, float)):
+                y.pop(k)
+        out.append(y)
+    return out
+
+
+def clean_ratio_votes(vp, votes) -> tuple[list, list]:
+    """持股比例（0–100% 之间）和持股数（不为负）：一组里有一个坏的就整组不用。"""
+    a, b = _clean(vp), _clean(votes)
+    a = _num_list(a) if isinstance(a, list) and len(_num_list(a)) == len(a) else []
+    b = _num_list(b) if isinstance(b, list) and len(_num_list(b)) == len(b) else []
+    return (a if all(0 < x <= 100 for x in a) else []), (b if all(x >= 0 for x in b) else [])
+
+
+def clean_input(n: dict) -> dict:
+    """judge 的入口清洗。返回一份新的字典，不改传进来的那份。"""
+    c = _clean(n) if isinstance(n, dict) else {}
+    c["voting_power"], c["votes"] = clean_ratio_votes(c.get("voting_power"), c.get("votes"))
+    c["trades"], c["px"], c["tl"], c["ev"] = clean_trades(c.get("trades")), clean_px(c.get("px")), clean_tl(c.get("tl")), clean_ev(c.get("ev"))
+    c["seq"] = _num_dict(c.get("seq"))
+    c["cost"] = _num_dict(c.get("cost"))
+    c["prev"] = _num_dict(c.get("prev")) if isinstance(c.get("prev"), dict) else None
+    for k in ("date", "change_date", "code", "style"):
+        if not isinstance(c.get(k), str):
+            c[k] = None
+    return c
+
+
 def judge(n: dict) -> dict | None:
     """n：一条公告的字段——type, voting_power, votes, trades(summary), px, ocr, style, prev（上一份公告的 [比例, 持股数]，
     只有退出类用得上）。返回 {"action","label","tone","confidence","reasons":[...],"style":...}；信息太少时返回 None。
 
     规则只能给出“最可能的解释”。公告里不会写买卖的原因。
     """
+    n = clean_input(n)
     t = n.get("type")
     if t not in ("becoming", "change", "ceasing"):
         return None
@@ -1466,6 +1594,7 @@ def judge(n: dict) -> dict | None:
     # 拖了好几个月的买卖，均价是一路上的平均，和“3 个月前”比没有意义（AustralianSuper 买 A4N 七个月一路跌一路买，那就是逢低）
     asof = bool(where and abs(where[1]) >= ASOF_MIN and span is not None and 0 <= span <= ASOF_SPAN
                 and px["t_lo"] <= main_px <= px["t_hi"])        # 均价落在同期市价之外的（折价配售等）不换算
+    rose_before = fell_before = False      # 按成交价位算，买之前已经涨过/跌过一段（给“买在低处/高处”那句话用，免得和标签说反）
     if asof:
         k = 1 + where[1]
         adj = lambda r: (1 + r) / k - 1 if r is not None else None
@@ -1479,6 +1608,8 @@ def judge(n: dict) -> dict | None:
                        f"判断它是不是逢低、追涨、止损，要看它{verb}的时候股价在哪：按成交均价算，之前" + "、".join(bits)
                        + (f"，处在一年区间的{pos_word(pos)}" if pos is not None else "") + "。下面按这组数字判断。")
         r3, r6, r12 = r3a, r6a, r12a
+        near = [v for v in (r3a, r6a) if v is not None]
+        rose_before, fell_before = any(v >= 0.15 for v in near), any(v <= -0.15 for v in near)
     if mk:
         r3 = r3 - mk["m3"] if r3 is not None and "m3" in mk else r3
         r6 = r6 - mk["m6"] if r6 is not None and "m6" in mk else r6
@@ -1763,6 +1894,8 @@ def judge(n: dict) -> dict | None:
         tags.append("大宗")
     if f_px_doubt:
         f["px_doubt"] = True
+    if asof:
+        f["asof"] = True
     # ---- 6c. 第二十一轮：基金经理视角（跟投比例、20% 收购线、流动性）。都是事实，写进理由和小标签；只有“没跟足”会改标签
     fol = follow_ratio(chg_frac, so_chg) if direction == "buy" and t == "change" else None
     if fol is not None:
@@ -1790,15 +1923,27 @@ def judge(n: dict) -> dict | None:
         loc, mtm = where
         f["loc"], f["mtm"] = loc, mtm
         rng = f"这批买入的均价约 {fp(bp)}，买入期间股价在 {fp(px['t_lo'])}–{fp(px['t_hi'])} 之间"
-        if loc <= LOC_LOW and mtm >= EARLY_GAIN:
+        # 第二十二轮：买了一个半月以上的，均价是一路上的平均——“一路涨一路买”和“先买后涨”、“一路跌一路买”和“先买后跌”分不出来，
+        # 所以只摆事实，不下“不是追涨/不是逢低”的结论，也不挂小标签（以前会出现“顺势加仓”挂着“买在低处”、“逢低加仓”挂着“买在高处”）
+        # 例外：现在的股价已经跑到买入期间的区间之外——那段涨跌确实发生在买完以后，照旧说
+        drawn_out = span is not None and span > ASOF_SPAN and px["t_lo"] <= px["p"] <= px["t_hi"]
+        if loc <= LOC_LOW and mtm >= EARLY_GAIN and bp < px["t_lo"]:
+            # 均价比同期最低收盘价还低（但够不上上面“折价拿货”的门槛）：多半是折价拿的，谈不上“涨之前买的”
+            reasons.append(f"买入位置：{rng}——均价比这段时间的最低收盘价还低，多半是按折扣价拿的（配售或大宗），不是在市场上挑的价；现在 {fp(px['p'])}，高出 {mtm * 100:.0f}%。")
+        elif drawn_out and ((loc <= LOC_LOW and mtm >= EARLY_GAIN) or (loc >= LOC_HIGH and mtm <= LATE_LOSS)):
+            reasons.append(f"买入位置：{rng}，现在 {fp(px['p'])}，比均价{'高' if mtm > 0 else '低'} {abs(mtm) * 100:.0f}%。"
+                           f"这批是 {span} 天里陆续买的，均价是一路上的平均：分不清是{'先买后涨还是一路涨一路买' if mtm > 0 else '先买后跌还是一路跌一路买'}，这一条不用来判断。")
+        elif loc <= LOC_LOW and mtm >= EARLY_GAIN:
             f["early"] = True
             reasons.append(f"买入位置：{rng}——买在了这段时间的最低处附近，现在 {fp(px['p'])}，已经高出 {mtm * 100:.0f}%。"
-                           "它是在涨起来之前买的（或者是按折扣价拿的新股），不是看到涨了才去追。")
+                           + ("买完之后又涨了一截；不过按它的成交价算，之前已经涨过一段（见上面“成交价位”）——是在上涨途中买的，只是没追在最高处。" if rose_before
+                              else "它是在涨起来之前买的（或者是按折扣价拿的新股），不是看到涨了才去追。"))
             tags.append("买在低处")
         elif loc >= LOC_HIGH and mtm <= LATE_LOSS:
             f["late"] = True
             reasons.append(f"买入位置：{rng}——买在了这段时间的高处，现在 {fp(px['p'])}，比均价低 {-mtm * 100:.0f}%。"
-                           "它是先买、之后才跌的，不是等跌下来才买。")
+                           + ("买完之后又跌了一截；不过按它的成交价算，之前已经跌过一段（见上面“成交价位”）——是在下跌途中买的，只是没买在最低处。" if fell_before
+                              else "它是先买、之后才跌的，不是等跌下来才买。"))
             tags.append("买在高处")
     after_vp = vp[-1] if vp and t in ("change", "becoming") else None
     if after_vp is not None and NEAR_LINE <= after_vp < TAKEOVER_LINE + 0.01 and direction == "buy":

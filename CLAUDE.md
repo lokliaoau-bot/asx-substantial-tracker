@@ -64,12 +64,15 @@ python -m pytest -q -p no:warnings                      # 全部离线
 
 **用户说“继续”时：读这一节，从“进行中”的第一项接着干，不用重读代码。**
 
-### 进行中：第二十二轮（2026-11-16）深度查错——代码在 `dev-r22`，**待推送、待真跑、待合并**
+### 进行中：没有
 
-没有新规则、没有调权重；标签 0 条变化（离线回放 254 + 84 条）。修的是：坏记录让每次抓取都失败（`sanitize_entries` / `sanitize_history`）、
-`judge` 碰到坏字段抛异常（`clean_input`）、数据文件可能写出 NaN（`write_json`）、`history.json` 读不出来被悄悄覆盖（另存 `history.bad.json` + 少一半不覆盖）、
-“买在低处/高处”那句话和标签说反（只改话）、网页查进度不分分支/网络抖一下就停、`replay.py` 漏传月报。细节和**接手要做的三步**在 `HANDOVER.md` 第二十二轮。
-281 个测试通过。合并后把这一节改回“进行中：没有”。
+### 第二十二轮（2026-11-16，已完成并合并到 `main`）：深度查错（聊天环境做的，按 patch 合入）
+
+`sanitize_entries` / `sanitize_history`（坏记录不再让每次抓取都失败）、`insight.clean_input`、`write_json` 不写 NaN、`history.json` 读不出来另存 `history.bad.json` / 少一半不覆盖、
+“买在低处/高处”的说法、网页查进度按分支过滤并容忍网络抖动、`safeUrl` 只放行 ASX、`replay.py` 传月报。
+这边核对：patch 和 zip、上传的 HANDOVER 逐文件一致；281 个测试、网页检查、pyflakes 通过；回放和 `main` 比 254 + 84 条 0 变化（近期 84 条的理由文字也逐字相同）；
+真实数据洗一遍 0 处改动；300 次随机弄坏存储和历史后跑 洗 → update_history → build_notices 不出错。`dev-r22` 真实运行：成功、`last_run.errors` 为空、没有 `history.bad.json`、
+标签和 `main` 一样（多了一条当天新公告 Aware Super GYG），然后合并。细节在 `HANDOVER.md` 第二十二轮。
 
 下一步候选（按价值，来自第二十一轮的审稿意见，细节在 `HANDOVER.md` 第二十一轮末尾）：
 1. **请 Lok（或没看过规则的模型）盲标 30 条**，量两个标注者的一致率；在那之前不要再对着 `gold_purposes.json` 调权重、温度或门槛

@@ -1,9 +1,8 @@
 {
  "schema": 2,
- "updated_at": "2026-11-16T16:30:53+11:00",
- "last_success_at": "2026-11-16T16:30:14+11:00",
+ "updated_at": "2026-11-24T21:51:07+11:00",
+ "last_success_at": "2026-11-24T21:45:10+11:00",
  "scanned_days": [
-  "2026-10-19",
   "2026-10-20",
   "2026-10-21",
   "2026-10-22",
@@ -25,37 +24,41 @@
   "2026-11-12",
   "2026-11-13",
   "2026-11-14",
-  "2026-11-16"
+  "2026-11-16",
+  "2026-11-17",
+  "2026-11-18",
+  "2026-11-19",
+  "2026-11-20",
+  "2026-11-23",
+  "2026-11-24"
  ],
- "partial_days": {
-  "2026-11-16": "16:30"
- },
+ "partial_days": {},
  "last_run": {
   "ok": true,
   "list_pages_ok": 2,
-  "substantial_found": 57,
-  "pdf_checked": 18,
-  "skipped_noise": 2,
+  "substantial_found": 564,
+  "pdf_checked": 300,
+  "skipped_noise": 18,
   "deferred": 0,
   "backfill": {
    "ok": true,
-   "from": "2026-10-26",
-   "added": 0,
-   "incremental": true
+   "from": "2026-11-08",
+   "added": 206,
+   "incremental": false
   },
   "insight": {
-   "detail_added": 1,
-   "prices_ok": 1,
+   "detail_added": 29,
+   "prices_ok": 25,
    "prices_failed": 0,
-   "history_added": 1,
-   "positions": 71,
-   "backfill_read": 0,
-   "backfill_added": 0,
+   "history_added": 29,
+   "positions": 93,
+   "backfill_read": 51,
+   "backfill_added": 42,
    "history_refreshed": 0,
    "backfill_pending": 0,
    "reconcile": {
-    "ok": 40,
-    "bad": 4
+    "ok": 53,
+    "bad": 7
    }
   },
   "errors": []
@@ -137,67 +140,67 @@
  },
  "calibration": {
   "buy:base": {
-   "n": 28,
-   "n3": 18,
-   "avg3": -0.016,
-   "up3": 0.5,
-   "n_next": 24,
-   "same_next": 0.667,
-   "rev_next": 0.125,
-   "n3x": 18,
-   "avg3x": -0.046,
-   "up3x": 0.444,
-   "check": 0.444,
-   "check_n": 18,
+   "n": 36,
+   "n3": 22,
+   "avg3": -0.02,
+   "up3": 0.455,
+   "n_next": 29,
+   "same_next": 0.655,
+   "rev_next": 0.103,
+   "n3x": 22,
+   "avg3x": -0.051,
+   "up3x": 0.455,
+   "check": 0.455,
+   "check_n": 22,
    "check_name": "之后 3 个月跑赢指数",
-   "check_base": 0.517
+   "check_base": 0.509
   },
   "buy:dip": {
-   "n": 67,
-   "n3": 34,
-   "avg3": 0.174,
-   "up3": 0.618,
-   "n_next": 46,
-   "same_next": 0.717,
-   "rev_next": 0.087,
-   "n3x": 34,
-   "avg3x": 0.154,
-   "up3x": 0.559,
-   "check": 0.559,
-   "check_n": 34,
+   "n": 82,
+   "n3": 41,
+   "avg3": 0.167,
+   "up3": 0.634,
+   "n_next": 53,
+   "same_next": 0.679,
+   "rev_next": 0.113,
+   "n3x": 41,
+   "avg3x": 0.146,
+   "up3x": 0.585,
+   "check": 0.585,
+   "check_n": 41,
    "check_name": "之后 3 个月跑赢指数",
-   "check_base": 0.517
+   "check_base": 0.509
   },
   "buy:mom": {
-   "n": 37,
-   "n3": 23,
-   "avg3": 0.151,
-   "up3": 0.565,
-   "n_next": 31,
-   "same_next": 0.774,
-   "rev_next": 0.129,
-   "n3x": 23,
-   "avg3x": 0.152,
-   "up3x": 0.522,
-   "check": 0.522,
-   "check_n": 23,
+   "n": 45,
+   "n3": 29,
+   "avg3": 0.097,
+   "up3": 0.517,
+   "n_next": 40,
+   "same_next": 0.75,
+   "rev_next": 0.1,
+   "n3x": 29,
+   "avg3x": 0.106,
+   "up3x": 0.483,
+   "check": 0.483,
+   "check_n": 29,
    "check_name": "之后 3 个月跑赢指数",
-   "check_base": 0.517
+   "check_base": 0.509
   },
   "buy:plc": {
-   "n": 3,
-   "n3": 1,
-   "avg3": 0.167,
-   "up3": 1.0,
-   "n_next": 1,
-   "same_next": 0.0,
-   "rev_next": 1.0,
-   "n3x": 1,
-   "avg3x": 0.194,
-   "up3x": 1.0
+   "n": 6,
+   "n3": 3,
+   "avg3": 0.337,
+   "up3": 0.667,
+   "n_next": 4,
+   "same_next": 0.5,
+   "rev_next": 0.25,
+   "n3x": 3,
+   "avg3x": 0.253,
+   "up3x": 0.667
   },
   "buy:prog": {
-   "n": 6,
+   "n": 8,
    "n3": 5,
    "avg3": 0.028,
    "up3": 0.2,
@@ -210,51 +213,51 @@
    "check": 1.0,
    "check_n": 5,
    "check_name": "下一份公告还是同方向",
-   "check_base": 0.718
+   "check_base": 0.694
   },
   "buy:pull": {
-   "n": 8,
-   "n3": 6,
-   "avg3": 0.393,
-   "up3": 0.833,
-   "n_next": 8,
-   "same_next": 0.625,
-   "rev_next": 0.125,
-   "n3x": 6,
-   "avg3x": 0.373,
-   "up3x": 0.833,
-   "check": 0.833,
-   "check_n": 6,
+   "n": 9,
+   "n3": 7,
+   "avg3": 0.309,
+   "up3": 0.714,
+   "n_next": 9,
+   "same_next": 0.667,
+   "rev_next": 0.111,
+   "n3x": 7,
+   "avg3x": 0.299,
+   "up3x": 0.714,
+   "check": 0.714,
+   "check_n": 7,
    "check_name": "之后 3 个月跑赢指数",
-   "check_base": 0.517
+   "check_base": 0.509
   },
   "buy:short": {
-   "n": 2,
-   "n3": 2,
-   "avg3": 0.044,
-   "up3": 1.0,
-   "n_next": 2,
+   "n": 4,
+   "n3": 3,
+   "avg3": -0.01,
+   "up3": 0.667,
+   "n_next": 4,
    "same_next": 0.5,
    "rev_next": 0.5,
-   "n3x": 2,
-   "avg3x": -0.087,
+   "n3x": 3,
+   "avg3x": -0.097,
    "up3x": 0.0,
    "check": 0.5,
-   "check_n": 2,
+   "check_n": 4,
    "check_name": "90 天内反向",
-   "check_base": 0.17
+   "check_base": 0.163
   },
   "sell:base": {
-   "n": 2,
-   "n3": 2,
-   "avg3": -0.08,
+   "n": 4,
+   "n3": 3,
+   "avg3": -0.086,
    "up3": 0.0,
-   "n_next": 1,
+   "n_next": 3,
    "same_next": 1.0,
    "rev_next": 0.0,
-   "n3x": 2,
-   "avg3x": -0.153,
-   "up3x": 0.0
+   "n3x": 3,
+   "avg3x": -0.099,
+   "up3x": 0.333
   },
   "sell:bounce": {
    "n": 3,
@@ -269,16 +272,28 @@
    "up3x": null
   },
   "sell:profit": {
-   "n": 37,
-   "n3": 22,
-   "avg3": -0.035,
-   "up3": 0.273,
-   "n_next": 25,
-   "same_next": 0.64,
-   "rev_next": 0.2,
-   "n3x": 22,
+   "n": 43,
+   "n3": 26,
+   "avg3": -0.047,
+   "up3": 0.308,
+   "n_next": 30,
+   "same_next": 0.633,
+   "rev_next": 0.233,
+   "n3x": 26,
    "avg3x": -0.042,
-   "up3x": 0.318
+   "up3x": 0.346
+  },
+  "sell:rebal": {
+   "n": 1,
+   "n3": 0,
+   "avg3": null,
+   "up3": null,
+   "n_next": 0,
+   "same_next": null,
+   "rev_next": null,
+   "n3x": 0,
+   "avg3x": null,
+   "up3x": null
   },
   "sell:short": {
    "n": 2,
@@ -294,23 +309,23 @@
    "check": 1.0,
    "check_n": 1,
    "check_name": "90 天内反向",
-   "check_base": 0.207
+   "check_base": 0.222
   },
   "sell:stop": {
-   "n": 18,
-   "n3": 4,
-   "avg3": 0.095,
-   "up3": 0.5,
-   "n_next": 7,
-   "same_next": 0.857,
+   "n": 27,
+   "n3": 5,
+   "avg3": -0.045,
+   "up3": 0.4,
+   "n_next": 10,
+   "same_next": 0.9,
    "rev_next": 0.0,
-   "n3x": 4,
-   "avg3x": 0.099,
-   "up3x": 0.5,
+   "n3x": 5,
+   "avg3x": -0.017,
+   "up3x": 0.4,
    "check": 1.0,
-   "check_n": 3,
+   "check_n": 4,
    "check_name": "半年内没有买回",
-   "check_base": 0.667
+   "check_base": 0.645
   },
   "sell:wind": {
    "n": 1,
@@ -326,6 +341,1905 @@
   }
  },
  "notices": [
+  {
+   "id": "03169998",
+   "code": "SK1",
+   "company": "SkinKandy Limited",
+   "date": "2026-11-24",
+   "time": "17:42",
+   "headline": "Change in substantial holding from WAM/WAA/WAX/WMI",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169998",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261124/pdf/07709345l9lvn0.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-24",
+   "voting_power": [
+    6.3,
+    7.33
+   ],
+   "lodged_code": "",
+   "holder": "Wilson Asset Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Consumer Discretionary",
+   "insight": {
+    "action": "add",
+    "label": "加仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 6.3% → 7.33%，持股数增加 115 万股（相当于原持仓的 16%）。",
+     "这次披露的明细里（9/15–11/24，58 笔）：买入 115 万股（均价约 $2.72）。",
+     "变动时股价约 $2.36，之前近 1 个月 -13%、3 个月 -4%、6 个月 ±0%，处在一年区间（$2.18–$2.90）的低位。",
+     "同期小盘股指数（Small Ordinaries）12 个月 -17%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这是它近 4 个月在这只股票上连续第 2 次加仓。",
+     "逐笔看（31 个交易日）：买入的量有 42% 发生在股价下跌的日子（同期下跌的日子占 37%），这段时间股价 +2%。",
+     "它之前的平均买入成本约 $2.36，这次买入价约 $2.72，比成本高 15%：已经赚钱了还在加，是加码。",
+     "持仓阶段：从建仓算起约 6 个月，持股比例最高到过 6.3%；这次之后是它在这只股票上持仓的新高。之前公告过 2 次买入、0 次减仓。",
+     "这家基金的习惯（按它过去 17 次有后续的动作统计）：约 74% 的情况下一份公告还是同方向，约 12% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（31%）。其次是「顺势追加」19%、「按计划持续建仓」17%。",
+     "怎么做的：在市场上买。",
+     "前后三周它在 DXN 减仓：像是把钱从那边挪到这只（调仓）。",
+     "这只股票出现在它的月报（WMI《October 2026 Investment Update》，2026-11-13）的持仓表里，但没有文字说明。",
+     "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
+    ],
+    "style": "主动选股基金",
+    "tags": [
+     "连续加仓",
+     "换股"
+    ],
+    "how": "在市场上买",
+    "purposes": [
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.313
+     },
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.19
+     },
+     {
+      "k": "prog",
+      "name": "按计划持续建仓",
+      "p": 0.171
+     }
+    ],
+    "strength": 53,
+    "quotes": [
+     {
+      "fund": "WMI",
+      "title": "October 2026 Investment Update",
+      "date": "2026-11-13",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03165442",
+      "text": ""
+     }
+    ],
+    "side": "buy"
+   }
+  },
+  {
+   "id": "03169987",
+   "code": "WZR",
+   "company": "WISR LTD",
+   "date": "2026-11-24",
+   "time": "17:31",
+   "headline": "Ceasing to be a substantial holder",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169987",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261124/pdf/077088gjdf921n.pdf",
+   "price_sensitive": false,
+   "type": "ceasing",
+   "change_date": "2026-11-20",
+   "voting_power": [],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Financials",
+   "insight": {
+    "action": "exit_profit",
+    "label": "减到 5% 以下，像获利了结",
+    "tone": "bear",
+    "confidence": "高",
+    "reasons": [
+     "持股比例降到 5% 以下（上一次披露是 5.32%）。之后的买卖不用再公告。",
+     "这次披露的明细里（10/8–11/20，9 笔）：买入 150 万股（均价约 $0.040），卖出 2,062 万股（均价约 $0.037）。",
+     "变动时股价约 $0.039，之前近 1 个月 +22%、3 个月 +39%、6 个月 +86%、12 个月 +30%，处在一年区间（$0.017–$0.041）的高位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -16%、12 个月 -16%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这是它近 4 个月在这只股票上连续第 2 次减仓。",
+     "逐笔看（8 个交易日）：卖出的量有 6% 发生在股价下跌的日子（同期下跌的日子占 38%），这段时间股价 +30%；后半段的量是前半段的 5.4 倍，越做越多。",
+     "上一份公告时持有 9,378 万股，这次明细里净卖出 1,912 万股：估计还剩约 7,466 万股（约 4.2%，没算总股本的变化）。",
+     "它之前的平均买入成本约 $0.031（按 2025/8/25 以来的公告累计，覆盖了卖出前持仓的 97%），这次卖出价约 $0.037，高出 20%：是赚钱卖的。",
+     "持仓阶段：从建仓算起约 15 个月，持股比例最高到过 6.32%；这次之后比最高点至少少了 21%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 2 次买入、1 次减仓。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "交易形状：这次卖的量有 73% 集中在 11/20 一天，是平时日成交量的 5 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
+     "综合打分：最像「获利了结」（98%），依据：卖出价高于自己的买入成本；卖之前股价涨了一大段；股价在一年区间的高位。",
+     "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是金融、买的多是科技，像行业轮动。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "大宗",
+     "连续减仓",
+     "换股"
+    ],
+    "how": "一次性的大宗交易，不是在市场上零散成交",
+    "purposes": [
+     {
+      "k": "profit",
+      "name": "获利了结",
+      "p": 0.979
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.01
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.008
+     }
+    ],
+    "strength": 58,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "03169984",
+   "code": "AI1",
+   "company": "Adisyn Ltd",
+   "date": "2026-11-24",
+   "time": "17:29",
+   "headline": "Change in substantial holding",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169984",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261124/pdf/077081x7ys7vhy.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-20",
+   "voting_power": [
+    8.51,
+    7.5
+   ],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Information Technology",
+   "insight": {
+    "action": "trim_loss",
+    "label": "减仓，像止损",
+    "tone": "bear",
+    "confidence": "高",
+    "reasons": [
+     "持股比例 8.51% → 7.5%，持股数减少 1,177 万股（相当于原持仓的 12%）。",
+     "这次披露的明细里（11/4–11/19，15 笔）：卖出 1,177 万股（均价约 $0.069）。",
+     "它卖出的量占了同期全市场成交量的 41%：是这段时间最主要的卖家之一，卖得很坚决。",
+     "变动时股价约 $0.059，之前近 1 个月 -29%、3 个月 -63%、6 个月 -71%、12 个月 -6%，处在一年区间（$0.038–$0.300）的低位。",
+     "成交价位：它这批卖的均价约 $0.069，变动那天股价已经是 $0.059（低了 14%）。判断它是不是逢低、追涨、止损，要看它卖的时候股价在哪：按成交均价算，之前3 个月 -57%、6 个月 -66%、12 个月 +10%，处在一年区间的低位。下面按这组数字判断。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -16%、12 个月 -16%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "卖出紧跟在公司 10/29「Quarterly Activities/Appendix 4C Cash Flow Report」（公布后股价 -5%）之后：像是对这份业绩的反应。",
+     "这是它近 4 个月在这只股票上连续第 2 次减仓。",
+     "逐笔看（11 个交易日）：卖出的量有 23% 发生在股价下跌的日子（同期下跌的日子占 58%），这段时间股价 -4%；后半段的量是前半段的 0.6 倍，越做越少。",
+     "减掉的不到原持仓的一成多，属于小幅减仓。",
+     "它之前的平均买入成本约 $0.095（按 2026/4/23 以来的公告累计，覆盖了卖出前持仓的 100%），这次卖出价约 $0.069，低了 27%：是亏钱卖的。",
+     "持仓阶段：从建仓算起约 7 个月，持股比例最高到过 10.83%；这次之后比最高点少了 22%（按股数算）。之前公告过 2 次买入、1 次减仓。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「止损或看法变差」（98%），依据：卖出价低于自己的买入成本；卖之前股价跌了不少；股价在一年区间的低位。",
+     "怎么做的：在市场上卖，是同期最主要的卖家之一。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。而且买的多是同一个行业的，像是在行业里挑了更看好的。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "业绩后",
+     "连续减仓",
+     "换股"
+    ],
+    "how": "在市场上卖，是同期最主要的卖家之一",
+    "purposes": [
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.978
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.008
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.006
+     }
+    ],
+    "strength": 56,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "03169879",
+   "code": "VNT",
+   "company": "VENTIA SERVICES GROUP LIMITED",
+   "date": "2026-11-24",
+   "time": "15:09",
+   "headline": "Becoming a substantial holder",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169879",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261124/pdf/076zzxhyfqtym5.pdf",
+   "price_sensitive": false,
+   "type": "becoming",
+   "change_date": "2026-11-19",
+   "voting_power": [
+    5.42
+   ],
+   "lodged_code": "",
+   "holder": "Aware Super",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Industrials",
+   "insight": {
+    "action": "build",
+    "label": "新进建仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例首次达到 5.42%，共 4,422 万股。",
+     "变动时股价约 $4.71，之前近 1 个月 -20%、3 个月 -16%、6 个月 -23%、12 个月 -15%，处在一年区间（$4.71–$6.76）的低位。",
+     "综合打分：最像「逢低买入」（74%），依据：买之前股价跌了一轮；股价在一年区间的低位。其次是「普通加仓」16%。",
+     "怎么做的：在市场上买。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [],
+    "how": "在市场上买",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.745
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.16
+     },
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.038
+     }
+    ],
+    "strength": null,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "03169342",
+   "code": "SKS",
+   "company": "SKS TECHNOLOGIES GROUP LIMITED",
+   "date": "2026-11-23",
+   "time": "18:25",
+   "headline": "Becoming a substantial holder",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169342",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261123/pdf/076yjhm20dlk4f.pdf",
+   "price_sensitive": false,
+   "type": "becoming",
+   "change_date": "2026-11-19",
+   "voting_power": [
+    5.21
+   ],
+   "lodged_code": "",
+   "holder": "Ellerston Capital",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Industrials",
+   "insight": {
+    "action": "cross_up",
+    "label": "加仓越过 5% 线",
+    "tone": "bull",
+    "confidence": "高",
+    "reasons": [
+     "持股比例首次达到 5.21%，共 601 万股。",
+     "成为大股东前 4 个月（7/23–11/19，42 笔）：买入 330 万股（均价约 $6.18），卖出 142 万股（均价约 $9.42）。",
+     "变动时股价约 $5.49，之前近 1 个月 -14%、3 个月 -35%、6 个月 -29%、12 个月 +66%，处在一年区间（$3.31–$11.17）的中低位。",
+     "这只股票平时波动就大（一天约 ±4.6%），上面这种幅度的跌在它身上算正常起伏，不当作“跌了一大段”。",
+     "逐笔看（18 个交易日）：买入的量有 73% 发生在股价下跌的日子（同期下跌的日子占 57%），这段时间股价 -36%；后半段的量是前半段的 4.6 倍，越做越多。",
+     "最近 4 个月净买入的只占现有持仓的 31%：早就有底仓，这次只是加到了 5% 披露线以上。",
+     "综合打分：最像「逢低买入」（90%），依据：买之前股价跌了一轮；买入的量集中在股价下跌的日子；股价在一年区间的低位。",
+     "怎么做的：在市场上分 18 个交易日慢慢买，不显眼。",
+     "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
+    ],
+    "style": "主动选股基金",
+    "tags": [],
+    "how": "在市场上分 18 个交易日慢慢买，不显眼",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.895
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.065
+     },
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.016
+     }
+    ],
+    "strength": 44,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "03169324",
+   "code": "TUA",
+   "company": "TUAS LIMITED",
+   "date": "2026-11-23",
+   "time": "17:42",
+   "headline": "Change in substantial holding from SOL",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169324",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261123/pdf/076ygz86wq23rc.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-19",
+   "voting_power": [
+    14.67,
+    13.35
+   ],
+   "lodged_code": "",
+   "holder": "Washington H. Soul Pattinson",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Communication Services",
+   "insight": {
+    "action": "trim_loss",
+    "label": "减仓，像止损",
+    "tone": "bear",
+    "confidence": "高",
+    "reasons": [
+     "注意：这份公告的逐笔明细加总和持股数的变化对不上（明细多半没读全）。下面的方向和幅度按持股数判断，明细里的均价、买卖时间和交易形状不可信，没有用。",
+     "持股比例 14.67% → 13.35%，持股数减少 570 万股（相当于原持仓的 7%）。",
+     "这次披露的明细里（3/26–11/23，10 笔）：卖出 652 万股。",
+     "变动时股价约 $1.38，之前近 1 个月 -21%、3 个月 -33%、6 个月 -40%、12 个月 -79%，处在一年区间（$1.25–$7.64）的低位。",
+     "减掉的不到原持仓的一成多，属于小幅减仓。",
+     "持仓阶段：从能查到的最早一份公告算起约 23 个月，持股比例最高到过 25.26%；这次之后比最高点少了 38%（按股数算）。之前公告过 1 次买入、2 次减仓。",
+     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 61% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「止损或看法变差」（84%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「普通减仓」9%。",
+     "怎么做的：在市场上卖。",
+     "战略/家族投资者：用自有资金长期持有，有时会谋求话语权，增减持的分量比较重。"
+    ],
+    "style": "战略/家族投资者",
+    "tags": [
+     "已减三成"
+    ],
+    "how": "在市场上卖",
+    "purposes": [
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.839
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.09
+     },
+     {
+      "k": "profit",
+      "name": "获利了结",
+      "p": 0.022
+     }
+    ],
+    "strength": 14,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "03169277",
+   "code": "OSL",
+   "company": "ONCOSIL MEDICAL",
+   "date": "2026-11-23",
+   "time": "16:44",
+   "headline": "Change in substantial holding",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169277",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261123/pdf/076yccbgwcvs4n.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-19",
+   "voting_power": [
+    13.82,
+    12.57
+   ],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "trim_loss",
+    "label": "减仓，像止损",
+    "tone": "bear",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 13.82% → 12.57%，持股数减少 45.5 万股（相当于原持仓的 9%）。",
+     "这次披露的明细里（9/28–11/19，17 笔）：卖出 45.5 万股（均价约 $0.688）。",
+     "它卖出的量占了同期全市场成交量的 31%：是这段时间最主要的卖家之一，卖得很坚决。",
+     "变动时股价约 $0.585，之前近 1 个月 -28%、3 个月 -50%、6 个月 +15%、12 个月 -49%，处在一年区间（$0.390–$1.54）的低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -16%、12 个月 -18%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这只股票平时波动就大（一天约 ±6.0%），上面这种幅度的涨在它身上算正常起伏，不当作“涨了一大段”。",
+     "逐笔看（16 个交易日）：卖出的量有 83% 发生在股价下跌的日子（同期下跌的日子占 56%），这段时间股价 -31%。",
+     "减掉的不到原持仓的一成多，属于小幅减仓。",
+     "它之前的平均买入成本约 $0.870（按 2026/2/9 以来的公告累计，覆盖了卖出前持仓的 98%），这次卖出价约 $0.688，低了 21%：是亏钱卖的。",
+     "持仓阶段：从建仓算起约 9 个月，持股比例最高到过 13.82%。之前公告过 2 次买入、1 次减仓。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "流动性：卖之前的持仓相当于这只股票约 66 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
+     "综合打分：最像「止损或看法变差」（98%），依据：卖出价低于自己的买入成本；卖之前股价跌了不少；股价在一年区间的低位。",
+     "怎么做的：在市场上卖，是同期最主要的卖家之一。",
+     "注意：这次只减了持仓的 9%，大头还留着，而且这个仓位在市场上本来就卖不动。“止损”是认错离场的意思，用在这里重了：更像是在股价不好的时候先降一点风险。所以把握最多算“中”。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是医疗、买的多是科技，像行业轮动。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "仓位难卖",
+     "换股"
+    ],
+    "how": "在市场上卖，是同期最主要的卖家之一",
+    "purposes": [
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.976
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.009
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.008
+     }
+    ],
+    "strength": 42,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "03169276",
+   "code": "FLC",
+   "company": "Fluence Corp Ltd",
+   "date": "2026-11-23",
+   "time": "16:43",
+   "headline": "Ceasing to be a substantial holder",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169276",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261123/pdf/076yc8y0j9710h.pdf",
+   "price_sensitive": false,
+   "type": "ceasing",
+   "change_date": "2026-11-19",
+   "voting_power": [],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Utilities",
+   "insight": {
+    "action": "exit_loss",
+    "label": "减到 5% 以下，像止损离场",
+    "tone": "bear",
+    "confidence": "中",
+    "reasons": [
+     "持股比例降到 5% 以下（上一次披露是 5.7%）。之后的买卖不用再公告。",
+     "这次披露的明细里（10/2–11/19，13 笔）：卖出 678 万股（均价约 $0.060）。",
+     "它卖出的量占了同期全市场成交量的 38%：是这段时间最主要的卖家之一，卖得很坚决。",
+     "变动时股价约 $0.058，之前近 1 个月 -9%、3 个月 -15%、6 个月 -32%、12 个月 -45%，处在一年区间（$0.047–$0.110）的低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -16%、12 个月 -18%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这是它近 4 个月在这只股票上连续第 2 次减仓。",
+     "逐笔看（12 个交易日）：卖出的量有 86% 发生在股价下跌的日子（同期下跌的日子占 47%），这段时间股价 -16%。",
+     "上一份公告时持有 6,531 万股，这次明细里净卖出 678 万股：估计还剩约 5,854 万股（约 5.1%，没算总股本的变化）。",
+     "持仓阶段：从能查到的最早一份公告算起约 36 个月，持股比例最高到过 9.01%；这次之后比最高点至少少了 44%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 1 次买入、3 次减仓。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "流动性：卖之前的持仓相当于这只股票约 126 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
+     "综合打分：最像「止损或看法变差」（52%），依据：股价在一年区间的低位；卖之前股价跌了不少；股价越跌它卖得越多。其次是「分批减仓（一路在减）」14%、「换股调出」14%。",
+     "怎么做的：在市场上卖，是同期最主要的卖家之一。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是公用事业、买的多是科技，像行业轮动。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "仓位难卖",
+     "连续减仓",
+     "已减三成",
+     "换股"
+    ],
+    "how": "在市场上卖，是同期最主要的卖家之一",
+    "purposes": [
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.52
+     },
+     {
+      "k": "wind",
+      "name": "分批减仓（一路在减）",
+      "p": 0.141
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.138
+     }
+    ],
+    "strength": 54,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "03169175",
+   "code": "GMD",
+   "company": "GENESIS MINERALS LIMITED",
+   "date": "2026-11-23",
+   "time": "13:40",
+   "headline": "Becoming a substantial holder",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169175",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261123/pdf/076y33hjzz7c3t.pdf",
+   "price_sensitive": false,
+   "type": "becoming",
+   "change_date": "2026-11-19",
+   "voting_power": [
+    5.714
+   ],
+   "lodged_code": "",
+   "holder": "Australian Retirement Trust",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Materials",
+   "insight": {
+    "action": "build",
+    "label": "新进建仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例首次达到 5.714%，共 6,714 万股。",
+     "成为大股东前 4 个月（7/24–11/19，70 笔）：买入 2,740 万股（均价约 $6.66）。",
+     "变动时股价约 $6.20，之前近 1 个月 -13%、3 个月 -23%、6 个月 +6%、12 个月 -2%，处在一年区间（$4.80–$8.67）的中低位。",
+     "期间公司公告过融资（10/27「BTR:Genesis Leads $82m Placement to Accelerate Sandstone Gro」），一部分买入可能来自认购新股。",
+     "期间公司有并购相关的公告（11/17「VAU: Scheme Becomes Effective」），从标题看这家公司是出手收购的一方（或者只是对方的公告），这里不据此下结论。",
+     "逐笔看（51 个交易日）：买入的量有 91% 发生在股价下跌的日子（同期下跌的日子占 53%），这段时间股价 +1%；后半段的量是前半段的 10 倍以上，越做越多。",
+     "现有持仓里约 41% 是最近 4 个月净买入的。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：最像「逢低买入」（53%），依据：买入的量集中在股价下跌的日子；买之前股价跌了一轮；股价在一年区间的低位。其次是「普通加仓」24%。",
+     "怎么做的：在市场上分 51 个交易日慢慢买，不显眼。",
+     "前后三周它在 EOS、MP1 减仓：有买有卖，属于正常调整。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [],
+    "how": "在市场上分 51 个交易日慢慢买，不显眼",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.533
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.242
+     },
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.068
+     }
+    ],
+    "strength": 43,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "03169171",
+   "code": "SSM",
+   "company": "SERVICE STREAM LIMITED",
+   "date": "2026-11-23",
+   "time": "13:36",
+   "headline": "Change in substantial holding",
+   "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03169171",
+   "pdf_url": "https://announcements.asx.com.au/asxpdf/20261123/pdf/076y2td5qty0yr.pdf",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-19",
+   "voting_power": [
+    5.066,
+    6.253
+   ],
+   "lodged_code": "",
+   "holder": "Australian Retirement Trust",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Industrials",
+   "insight": {
+    "action": "add_placement",
+    "label": "参与配售加仓",
+    "tone": "bull",
+    "confidence": "高",
+    "reasons": [
+     "持股比例 5.066% → 6.253%，持股数增加 1,977 万股（相当于原持仓的 63%）。",
+     "这次披露的明细里（9/24–11/19，16 笔）：买入 1,988 万股（均价约 $2.04），卖出 10.0 万股（均价约 $2.21）。",
+     "变动时股价约 $2.01，之前近 1 个月 -4%、3 个月 -22%、6 个月 -11%、12 个月 -4%，处在一年区间（$1.84–$2.64）的低位。",
+     "公司的发行文件对得上：11/19 按 $2.03 发行 2.34 亿股新股（配股，Appendix 3B），发行价比公告前一天的收盘价低 6%；它的买入均价约 $2.04，就是在认购这次发行。",
+     "这是它近 4 个月在这只股票上连续第 2 次加仓。",
+     "逐笔看（7 个交易日）：买入的量有 90% 发生在股价下跌的日子（同期下跌的日子占 57%），这段时间股价 -18%；后半段的量是前半段的 10 倍以上，越做越多。",
+     "持仓阶段：从首次越过 5% 披露线算起约 2 个月，持股比例最高到过 5.07%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "交易形状：这次买的量有 88% 集中在 11/19 一天，是平时日成交量的 7 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
+     "跟投比例：这段时间公司的总股本增加了约 32%（发了新股），它的持股数增加了 63%——比按比例跟投多得多（约 2.0 倍），是借这次发新股主动提高了自己的份额。",
+     "综合打分：最像「参与融资」（100%），依据：公司的发行文件（Appendix 3B/2A）价格、日期都对得上；公司同期公告了融资，而且买入量超过场内成交量或总股本明显增加；大部分是一天之内一次性拿下的。",
+     "怎么做的：认购公司发的新股（公司的发行文件对得上）。至于为什么：从股价和成本上看不出特别的动机。",
+     "前后三周它在 EOS、MP1 减仓：有买有卖，属于正常调整。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [
+     "超比例",
+     "大宗",
+     "参与融资",
+     "连续加仓"
+    ],
+    "how": "认购公司发的新股（公司的发行文件对得上）",
+    "why": {
+     "k": "base",
+     "name": "普通加仓",
+     "p": 0.624
+    },
+    "purposes": [
+     {
+      "k": "plc",
+      "name": "参与融资",
+      "p": 1.0
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.0
+     },
+     {
+      "k": "swap",
+      "name": "换股调入",
+      "p": 0.0
+     }
+    ],
+    "strength": 69,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03164656-6A1356192",
+   "code": "EMR",
+   "company": "EMERALD RESOURCES NL",
+   "date": "2026-11-20",
+   "time": "18:41",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164656-6A1356192",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164656-6A1356192",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-18",
+   "voting_power": [
+    6.29,
+    7.88
+   ],
+   "lodged_code": "",
+   "holder": "L1 Capital",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Materials",
+   "insight": {
+    "action": "add_prog",
+    "label": "持续加仓，像按计划建仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 6.29% → 7.88%，持股数增加 1,059 万股（相当于原持仓的 25%）。",
+     "这次披露的明细里（10/26–11/20，16 笔）：买入 1,059 万股（均价约 $6.38）。",
+     "它买入的量占了同期全市场成交量的 28%：是这段时间最主要的买家之一，买得很坚决。",
+     "变动时股价约 $6.61，之前近 1 个月 +2%、3 个月 +2%、6 个月 +17%、12 个月 +31%，处在一年区间（$4.57–$8.00）的中间。",
+     "期间公司公告过融资（11/18「Manda Resources Limited IPO Prospectus Lodged」），一部分买入可能来自认购新股。",
+     "这是它近 4 个月在这只股票上连续第 3 次加仓。",
+     "逐笔看（16 个交易日）：买入的量有 70% 发生在股价下跌的日子（同期下跌的日子占 60%），这段时间股价 +1%；后半段的量是前半段的 1.9 倍，越做越多。",
+     "持仓阶段：从建仓算起约 6 个月，持股比例最高到过 6.29%；这次之后是它在这只股票上持仓的新高。之前公告过 2 次买入、0 次减仓。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「按计划持续建仓」（36%），依据：近 4 个月连续第 3 次加仓；涨的日子跌的日子都在买，不挑价格；这家基金一旦开始加仓，通常会一路加下去。其次是「整体加仓（资金流入）」24%、「普通加仓」18%。",
+     "怎么做的：在市场上买，是同期最主要的买家之一。",
+     "这个结论贴着边：打分里某一项的分量差三成，结论就会变成「加仓」。",
+     "前后三周它在 BMC、EWC、IMD、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "连续加仓",
+     "整体加仓"
+    ],
+    "how": "在市场上买，是同期最主要的买家之一",
+    "purposes": [
+     {
+      "k": "prog",
+      "name": "按计划持续建仓",
+      "p": 0.355
+     },
+     {
+      "k": "flow",
+      "name": "整体加仓（资金流入）",
+      "p": 0.245
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.184
+     }
+    ],
+    "strength": 82,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03164651-6A1356187",
+   "code": "IMD",
+   "company": "Imdex Limited",
+   "date": "2026-11-20",
+   "time": "18:38",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164651-6A1356187",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164651-6A1356187",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-18",
+   "voting_power": [
+    12.18,
+    13.53
+   ],
+   "lodged_code": "",
+   "holder": "L1 Capital",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Materials",
+   "insight": {
+    "action": "add_dip",
+    "label": "逢低加仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 12.18% → 13.53%，持股数增加 805 万股（相当于原持仓的 13%）。",
+     "这次披露的明细里（2025/10/31–2026/11/20，28 笔）：买入 1,544 万股（均价约 $3.38），卖出 739 万股（均价约 $4.17）。",
+     "变动时股价约 $3.21，之前近 1 个月 -4%、3 个月 -14%、6 个月 -16%、12 个月 -3%，处在一年区间（$3.10–$4.43）的低位。",
+     "逐笔看（16 个交易日）：买入的量有 42% 发生在股价下跌的日子（同期下跌的日子占 46%），这段时间股价 -13%。",
+     "持仓阶段：从能查到的最早一份公告算起约 13 个月，持股比例最高到过 13.25%；这次之后是它在这只股票上持仓的新高。之前公告过 0 次买入、1 次减仓。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「逢低买入」（61%），依据：股价在一年区间的低位；买之前股价跌了一轮；买的过程中股价一直在跌，它没有停。其次是「整体加仓（资金流入）」16%、「普通加仓」12%。",
+     "怎么做的：在市场上分 16 个交易日慢慢买，不显眼。",
+     "前后三周它在 BMC、EMR、EWC、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "整体加仓"
+    ],
+    "how": "在市场上分 16 个交易日慢慢买，不显眼",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.611
+     },
+     {
+      "k": "flow",
+      "name": "整体加仓（资金流入）",
+      "p": 0.162
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.122
+     }
+    ],
+    "strength": 22,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03164037-2A1711703",
+   "code": "HLS",
+   "company": "Healius Ltd",
+   "date": "2026-11-19",
+   "time": "17:32",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164037-2A1711703",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164037-2A1711703",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-16",
+   "voting_power": [
+    13.02,
+    14.55
+   ],
+   "lodged_code": "",
+   "holder": "Hostplus",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "add_chase",
+    "label": "顺势加仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 13.02% → 14.55%，持股数增加 1,113 万股（相当于原持仓的 12%）。",
+     "这次披露的明细里（11/12–11/16，3 笔）：买入 1,115 万股（均价约 $0.576），卖出 2.0 万股（均价约 $0.539）。",
+     "它买入的量占了同期全市场成交量的 50%：是这段时间最主要的买家之一，买得很坚决。",
+     "变动时股价约 $0.580，之前近 1 个月 +55%、3 个月 +27%、6 个月 +63%、12 个月 -35%，处在一年区间（$0.315–$1.04）的中低位。",
+     "这只股票平时波动就大（一天约 ±3.9%），上面这种幅度的跌在它身上算正常起伏，不当作“跌了一大段”。",
+     "这是它近 4 个月在这只股票上连续第 2 次加仓。",
+     "持仓阶段：从能查到的最早一份公告算起约 36 个月，持股比例最高到过 13.02%；这次之后是它在这只股票上持仓的新高。之前公告过 3 次买入、0 次减仓。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 73% 的情况下一份公告还是同方向，约 6% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「顺势追加」（34%），依据：近 3 个月股价在涨。其次是「逢低买入」27%、「普通加仓」22%。",
+     "怎么做的：在市场上买，是同期最主要的买家之一。",
+     "这个结论贴着边：「买之前股价跌了一轮」这条证据的分量差三成，结论就会变成「加仓」。",
+     "前后三周它在 BAP 减仓：有买有卖，属于正常调整。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [
+     "连续加仓"
+    ],
+    "how": "在市场上买，是同期最主要的买家之一",
+    "purposes": [
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.34
+     },
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.271
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.221
+     }
+    ],
+    "strength": 56,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03164016-3A706988",
+   "code": "ADR",
+   "company": "Adherium Limited",
+   "date": "2026-11-19",
+   "time": "17:15",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164016-3A706988",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164016-3A706988",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-17",
+   "voting_power": [
+    15.06,
+    13.86
+   ],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "restructure",
+    "label": "股份合并/拆分",
+    "tone": "neutral",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 15.06% → 13.86%，持股数减少 4.58 亿股（相当于原持仓的 98%）。",
+     "倒推出来的公司总股本前后差了几倍，应该是股份合并或拆分，前后的股数不能直接比。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": []
+   }
+  },
+  {
+   "id": "mk-2924-03164015-3A706987",
+   "code": "MVP",
+   "company": "MEDICAL DEVELOPMENTS INTERNATIONAL LIMITED",
+   "date": "2026-11-19",
+   "time": "17:14",
+   "headline": "Ceasing to be a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164015-3A706987",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03164015-3A706987",
+   "price_sensitive": false,
+   "type": "ceasing",
+   "change_date": "2026-11-17",
+   "voting_power": [],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "exit_loss",
+    "label": "减到 5% 以下，像止损离场",
+    "tone": "bear",
+    "confidence": "中",
+    "reasons": [
+     "持股比例降到 5% 以下（上一次披露是 6.67%）。之后的买卖不用再公告。",
+     "这次披露的明细里（11/16–11/17，3 笔）：卖出 273 万股（均价约 $0.401）。",
+     "它卖出的量占了同期全市场成交量的 95%：是这段时间最主要的卖家之一，卖得很坚决。",
+     "变动时股价约 $0.415，之前近 1 个月 +1%、3 个月 -15%、6 个月 +1%、12 个月 -26%，处在一年区间（$0.365–$0.575）的低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -12%、12 个月 -14%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这是它近 4 个月在这只股票上连续第 3 次减仓。",
+     "上一份公告时持有 752 万股，这次明细里净卖出 273 万股：估计还剩约 479 万股（约 4.2%，没算总股本的变化）。",
+     "它之前的平均买入成本约 $0.455（按 2024/8/5 以来的公告累计，覆盖了卖出前持仓的 57%），这次卖出价约 $0.401，低了 12%：是亏钱卖的。",
+     "持仓阶段：从建仓算起约 28 个月，持股比例最高到过 10.16%；这次之后比最高点至少少了 51%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 1 次买入、3 次减仓。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "交易形状：这次卖的量有 100% 集中在 11/17 一天，是平时日成交量的 12 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
+     "综合打分：最像「止损或看法变差」（52%），依据：卖出价低于自己的买入成本；股价在一年区间的低位；卖之前股价跌了不少。其次是「分批减仓（一路在减）」27%、「换股调出」10%。",
+     "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是医疗、买的多是科技，像行业轮动。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "大宗",
+     "连续减仓",
+     "已减三成",
+     "换股"
+    ],
+    "how": "一次性的大宗交易，不是在市场上零散成交",
+    "purposes": [
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.524
+     },
+     {
+      "k": "wind",
+      "name": "分批减仓（一路在减）",
+      "p": 0.267
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.101
+     }
+    ],
+    "strength": 90,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "mk-2924-03163997-6A1355922",
+   "code": "WGX",
+   "company": "Westgold Resources Limited",
+   "date": "2026-11-19",
+   "time": "16:59",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163997-6A1355922",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163997-6A1355922",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-17",
+   "voting_power": [
+    11.86,
+    13.19
+   ],
+   "lodged_code": "",
+   "holder": "L1 Capital",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Materials",
+   "insight": {
+    "action": "add_prog",
+    "label": "持续加仓，像按计划建仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 11.86% → 13.19%，持股数增加 1,232 万股（相当于原持仓的 11%）。",
+     "这次披露的明细里（11/3–11/19，11 笔）：买入 1,232 万股（均价约 $5.55）。",
+     "变动时股价约 $5.64，之前近 1 个月 +11%、3 个月 -3%、6 个月 +8%、12 个月 -1%，处在一年区间（$4.35–$8.05）的中低位。",
+     "这是它近 4 个月在这只股票上连续第 3 次加仓。",
+     "逐笔看（11 个交易日）：买入的量有 76% 发生在股价下跌的日子（同期下跌的日子占 77%），这段时间股价 ±0%。",
+     "它之前的平均买入成本约 $4.75，这次买入价约 $5.55，比成本高 17%：已经赚钱了还在加，是加码。",
+     "持仓阶段：从能查到的最早一份公告算起约 31 个月，持股比例最高到过 15.25%；这次之后是它在这只股票上持仓的新高。之前公告过 10 次买入、2 次减仓。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「按计划持续建仓」（38%），依据：近 4 个月连续第 3 次加仓；涨的日子跌的日子都在买，不挑价格；这家基金一旦开始加仓，通常会一路加下去。其次是「整体加仓（资金流入）」26%、「普通加仓」20%。",
+     "怎么做的：在市场上买。",
+     "这个结论贴着边：打分里某一项的分量差三成，结论就会变成「加仓」。",
+     "前后三周它在 BMC、EMR、EWC、IMD（共 8 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "基金自己的说法（LSF《Monthly Report - August 2026》，2026-09-08，英文原文）：“Gold equities, including Eldorado Gold and Westgold Resources, materially outperformed the index, with producers across the sector benefiting from operating leverage and record cash flow, which supported dividends substantially above market expectations.”",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "连续加仓",
+     "整体加仓",
+     "有基金原话"
+    ],
+    "how": "在市场上买",
+    "purposes": [
+     {
+      "k": "prog",
+      "name": "按计划持续建仓",
+      "p": 0.376
+     },
+     {
+      "k": "flow",
+      "name": "整体加仓（资金流入）",
+      "p": 0.259
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.195
+     }
+    ],
+    "strength": 55,
+    "quotes": [
+     {
+      "fund": "LSF",
+      "title": "Monthly Report - August 2026",
+      "date": "2026-09-08",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03136966",
+      "text": "Gold equities, including Eldorado Gold and Westgold Resources, materially outperformed the index, with producers across the sector benefiting from operating leverage and record cash flow, which supported dividends substantially above market expectations."
+     }
+    ],
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03163966-2A1711666",
+   "code": "QBE",
+   "company": "QBE Insurance Group Limited",
+   "date": "2026-11-19",
+   "time": "16:20",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163966-2A1711666",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163966-2A1711666",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-17",
+   "voting_power": [
+    8.36,
+    7.33
+   ],
+   "lodged_code": "",
+   "holder": "AustralianSuper",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Financials",
+   "insight": {
+    "action": "trim_profit",
+    "label": "减仓，像获利了结",
+    "tone": "bear",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 8.36% → 7.33%，持股数减少 1,544 万股（相当于原持仓的 12%）。",
+     "这次披露的明细里（8/4–11/17，126 笔）：买入 24.1 万股（均价约 $23.87），卖出 1,568 万股（均价约 $25.44）。",
+     "变动时股价约 $26.64，之前近 1 个月 +4%、3 个月 +18%、6 个月 +11%、12 个月 +31%，处在一年区间（$18.83–$26.87）的高位。",
+     "这是它近 4 个月在这只股票上连续第 2 次减仓。",
+     "逐笔看（42 个交易日）：卖出的量有 41% 发生在股价下跌的日子（同期下跌的日子占 45%），这段时间股价 +7%；后半段的量是前半段的 3.4 倍，越做越多。",
+     "持仓阶段：从能查到的最早一份公告算起约 26 个月，持股比例最高到过 9.4%；这次之后比最高点少了 22%（按股数算）。之前公告过 1 次买入、1 次减仓。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「获利了结」（66%），依据：卖之前股价涨了一大段；股价在一年区间的高位；已经拿了一年半以上。其次是「仓位管理（涨多了减一点）」13%、「普通减仓」10%。",
+     "怎么做的：在市场上分 42 个交易日慢慢卖，不显眼。",
+     "前后三周它在 A4N、PLS、SGH 加仓：这边卖、那边买，整体并没有在撤。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [
+     "连续减仓"
+    ],
+    "how": "在市场上分 42 个交易日慢慢卖，不显眼",
+    "purposes": [
+     {
+      "k": "profit",
+      "name": "获利了结",
+      "p": 0.662
+     },
+     {
+      "k": "rebal",
+      "name": "仓位管理（涨多了减一点）",
+      "p": 0.13
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.098
+     }
+    ],
+    "strength": 32,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "mk-2924-03163677-2A1711487",
+   "code": "OML",
+   "company": "OOH!MEDIA LIMITED",
+   "date": "2026-11-19",
+   "time": "09:39",
+   "headline": "Ceasing to be a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163677-2A1711487",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163677-2A1711487",
+   "price_sensitive": false,
+   "type": "ceasing",
+   "change_date": "2026-11-17",
+   "voting_power": [],
+   "lodged_code": "",
+   "holder": "Australian Retirement Trust",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Communication Services",
+   "insight": {
+    "action": "flip",
+    "label": "先买后卖，做了一个来回",
+    "tone": "neutral",
+    "confidence": "中",
+    "reasons": [
+     "持股比例降到 5% 以下（上一次披露是 5.247%）。之后的买卖不用再公告，是否清仓看不出来。",
+     "这次披露的明细里（2025/3/31–2026/11/17，89 笔）：买入 745 万股（均价约 $1.44），卖出 1,115 万股（均价约 $1.43）。",
+     "分 70 天慢慢卖出，只占同期成交量的 1% 左右，不着急。",
+     "变动时股价约 $1.57，之前近 1 个月 +1%、3 个月 +1%、6 个月 +25%、12 个月 +29%，处在一年区间（$0.799–$1.57）的高位。",
+     "期间公司是被收购的一方（11/13「Scheme of Arrangement - Receipt of FIRB Approval」），但它买卖两边都有，这里不据此判断它是在套利还是借机退出。",
+     "买的量大多在前、卖的量大多在后：先买进再卖出，做了一个来回，卖出均价比买入价低 0.6%（基本持平）。净卖出只是来回之后的差额，方向信号不强。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": []
+   }
+  },
+  {
+   "id": "mk-2924-03163406-6A1355687",
+   "code": "SGI",
+   "company": "Stealth Group Holdings Limited",
+   "date": "2026-11-18",
+   "time": "18:40",
+   "headline": "Change in substantial holding from WAM/WAX/WMI",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163406-6A1355687",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163406-6A1355687",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-16",
+   "voting_power": [
+    13.57,
+    14.71
+   ],
+   "lodged_code": "",
+   "holder": "Wilson Asset Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Industrials",
+   "insight": {
+    "action": "add",
+    "label": "加仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 13.57% → 14.71%，持股数增加 177 万股（相当于原持仓的 9%）。",
+     "这次披露的明细里（6/9–11/17，124 笔）：买入 270 万股（均价约 $1.21），卖出 93.5 万股（均价约 $1.23）。",
+     "变动时股价约 $1.15，之前近 1 个月 -4%、3 个月 -12%、6 个月 +10%、12 个月 -8%，处在一年区间（$0.740–$1.54）的中间。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -11%、12 个月 -15%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "逐笔看（58 个交易日）：买入的量有 35% 发生在股价下跌的日子（同期下跌的日子占 44%），这段时间股价 +24%。",
+     "持仓阶段：从建仓算起约 12 个月，持股比例最高到过 13.57%；这次之后是它在这只股票上持仓的新高。之前公告过 4 次买入、0 次减仓。",
+     "这家基金的习惯（按它过去 17 次有后续的动作统计）：约 74% 的情况下一份公告还是同方向，约 12% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（37%）。其次是「顺势追加」22%、「换股调入」18%。",
+     "怎么做的：在市场上买。",
+     "前后三周它在 DXN 减仓：像是把钱从那边挪到这只（调仓）。",
+     "这只股票出现在它的月报（WMI《October 2026 Investment Update》，2026-11-13）的持仓表里，但没有文字说明。",
+     "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
+    ],
+    "style": "主动选股基金",
+    "tags": [
+     "换股"
+    ],
+    "how": "在市场上买",
+    "purposes": [
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.366
+     },
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.223
+     },
+     {
+      "k": "swap",
+      "name": "换股调入",
+      "p": 0.179
+     }
+    ],
+    "strength": 36,
+    "quotes": [
+     {
+      "fund": "WMI",
+      "title": "October 2026 Investment Update",
+      "date": "2026-11-13",
+      "url": "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03165442",
+      "text": ""
+     }
+    ],
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03163390-2A1711371",
+   "code": "PCG",
+   "company": "PENGANA CAPITAL GROUP LIMITED",
+   "date": "2026-11-18",
+   "time": "18:08",
+   "headline": "Change in substantial holding from SOL",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163390-2A1711371",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163390-2A1711371",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-16",
+   "voting_power": [
+    40.76,
+    42.0
+   ],
+   "lodged_code": "",
+   "holder": "Washington H. Soul Pattinson",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Financials",
+   "insight": {
+    "action": "passive_up",
+    "label": "被动上升（没怎么买）",
+    "tone": "neutral",
+    "confidence": "高",
+    "reasons": [
+     "持股比例 40.76% → 42%，持股数没变。",
+     "持股数几乎没动，比例却升了 1.24 个百分点：公司总股本变小了约 3%（回购或注销）。",
+     "对得上：公司这段时间在回购股票（5/26「Update - Notification of buy-back - PCG」）。",
+     "战略/家族投资者：用自有资金长期持有，有时会谋求话语权，增减持的分量比较重。"
+    ],
+    "style": "战略/家族投资者",
+    "tags": []
+   }
+  },
+  {
+   "id": "mk-2924-03163354-3A706852",
+   "code": "DXN",
+   "company": "DXN Ltd",
+   "date": "2026-11-18",
+   "time": "17:09",
+   "headline": "Becoming a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163354-3A706852",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163354-3A706852",
+   "price_sensitive": false,
+   "type": "becoming",
+   "change_date": "2026-11-16",
+   "voting_power": [
+    5.27
+   ],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Information Technology",
+   "insight": {
+    "action": "build",
+    "label": "新进建仓",
+    "tone": "bull",
+    "confidence": "低",
+    "reasons": [
+     "持股比例首次达到 5.27%，共 1,986 万股。",
+     "变动时股价约 $0.150，之前近 1 个月 -45%、3 个月 -29%、6 个月 +614%、12 个月 +206%，处在一年区间（$0.016–$0.550）的中低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -11%、12 个月 -15%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "逐笔看（19 个交易日）：买入的量有 60% 发生在股价下跌的日子（同期下跌的日子占 47%），这段时间股价 -30%。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「逢低买入」（48%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「换股调入」28%、「普通加仓」16%。",
+     "怎么做的：在市场上买。",
+     "这个结论贴着边：「同期在另外 7 只股票上减仓」这条证据的分量差三成，结论就会变成「换股调入（卖别的、买这只）」。",
+     "前后三周它在 AI1、FLC、MVP、OSL（共 7 只） 减仓：像是把钱从那边挪到这只（调仓）。",
+     "同一只股票上，名单里的 Ellerston Capital 最近一个月也在加仓：多家同向，信号更强。",
+     "同一只股票上，名单里的 Wilson Asset Management 最近一个月却在减仓：机构之间看法不一。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "换股",
+     "多家同向",
+     "有人反向"
+    ],
+    "how": "在市场上买",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.485
+     },
+     {
+      "k": "swap",
+      "name": "换股调入",
+      "p": 0.277
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.157
+     }
+    ],
+    "strength": null,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03163311-2A1711333",
+   "code": "CU6",
+   "company": "CLARITY PHARMACEUTICALS LTD",
+   "date": "2026-11-18",
+   "time": "16:30",
+   "headline": "Becoming a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163311-2A1711333",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163311-2A1711333",
+   "price_sensitive": false,
+   "type": "becoming",
+   "change_date": "",
+   "voting_power": [
+    5.07
+   ],
+   "lodged_code": "",
+   "holder": "Rest",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "build_dip",
+    "label": "逢低建仓",
+    "tone": "bull",
+    "confidence": "高",
+    "reasons": [
+     "持股比例首次达到 5.07%，共 1,890 万股。",
+     "这份 603 列出的明细（比规定的 4 个月更长）（2024/1/9–2026/11/16，198 笔）：买入 2,105 万股，卖出 246 万股。",
+     "分 119 天慢慢买入，只占同期成交量的 1% 左右，不着急。",
+     "变动时股价约 $1.82，之前近 1 个月 -2%、3 个月 -30%、6 个月 -30%、12 个月 -53%，处在一年区间（$1.38–$4.06）的低位。",
+     "逐笔看（77 个交易日）：买入的量有 61% 发生在股价下跌的日子（同期下跌的日子占 50%），这段时间股价 -13%。",
+     "明细从 2024/1/9 开始，净买入正好等于现有持仓：这个仓位是那时候从零建起来的。",
+     "现有持仓的 66% 是最近 4 个月净买入的，属于快速建仓。",
+     "综合打分：最像「逢低买入」（86%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「普通加仓」8%。",
+     "怎么做的：在市场上分 77 个交易日慢慢买，不显眼。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [],
+    "how": "在市场上分 77 个交易日慢慢买，不显眼",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.864
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.085
+     },
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.02
+     }
+    ],
+    "strength": 41,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03163275-3A706837",
+   "code": "FLX",
+   "company": "FELIX GROUP HOLDINGS LIMITED",
+   "date": "2026-11-18",
+   "time": "15:38",
+   "headline": "Change in substantial holding for FLX",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163275-3A706837",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163275-3A706837",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "",
+   "voting_power": [
+    11.8,
+    14.36
+   ],
+   "lodged_code": "TEK",
+   "holder": "Thorney / Tiga Trading",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": true,
+   "sector": "Information Technology",
+   "insight": {
+    "action": "add_dip",
+    "label": "逢低加仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 11.8% → 14.36%。",
+     "变动时股价约 $0.036，之前近 1 个月 +16%、3 个月 -28%、6 个月 -51%、12 个月 -79%，处在一年区间（$0.030–$0.175）的低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -13%、12 个月 -14%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这是它近 4 个月在这只股票上连续第 2 次加仓。",
+     "持仓阶段：从能查到的最早一份公告算起约 1 个月，持股比例最高到过 14.36%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
+     "综合打分：最像「逢低买入」（82%），依据：买之前股价跌了一轮；股价在一年区间的低位。其次是「普通加仓」10%。",
+     "怎么做的：在市场上买。",
+     "同一只股票上，名单里的 Perennial 最近一个月也在加仓：多家同向，信号更强。",
+     "战略/家族投资者：用自有资金长期持有，有时会谋求话语权，增减持的分量比较重。",
+     "这份是扫描件，数字靠文字识别，可能有错。"
+    ],
+    "style": "战略/家族投资者",
+    "tags": [
+     "连续加仓",
+     "多家同向"
+    ],
+    "how": "在市场上买",
+    "purposes": [
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.815
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.098
+     },
+     {
+      "k": "prog",
+      "name": "按计划持续建仓",
+      "p": 0.031
+     }
+    ],
+    "strength": null,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03163257-2A1711307",
+   "code": "FLX",
+   "company": "FEL IX GROUP HOL DINGS L IMITED",
+   "date": "2026-11-18",
+   "time": "14:56",
+   "headline": "Change in substantial holding from Tiga Trading Pty Ltd",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163257-2A1711307",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03163257-2A1711307",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "",
+   "voting_power": [
+    11.8,
+    14.36
+   ],
+   "lodged_code": "",
+   "holder": "Thorney / Tiga Trading",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Information Technology",
+   "insight": {
+    "action": "add_placement",
+    "label": "参与配售加仓",
+    "tone": "bull",
+    "confidence": "高",
+    "reasons": [
+     "注意：这份公告的逐笔明细加总和持股数的变化对不上（明细多半没读全）。下面的方向和幅度按持股数判断，明细里的均价、买卖时间和交易形状不可信，没有用。",
+     "持股比例 11.8% → 14.36%，持股数增加 2,137 万股（相当于原持仓的 49%）。",
+     "这次披露的明细里（11/16，1 笔）：买入 2 股。",
+     "变动时股价约 $0.036，之前近 1 个月 +6%、3 个月 -28%、6 个月 -52%、12 个月 -79%，处在一年区间（$0.030–$0.180）的低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -11%、12 个月 -15%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "跟投比例：这段时间公司的总股本增加了约 23%（发了新股），它的持股数增加了 49%——比按比例跟投多得多（约 2.2 倍），是借这次发新股主动提高了自己的份额。",
+     "综合打分：最像「参与融资」（89%），依据：明细里写的是配售/认购新股。",
+     "怎么做的：多半是认购新股（配售）。至于为什么：撇开成交方式不看，动机上最像「逢低买入」（在各种动机里占 59%）。",
+     "同一只股票上，名单里的 Perennial 最近一个月也在加仓：多家同向，信号更强。",
+     "战略/家族投资者：用自有资金长期持有，有时会谋求话语权，增减持的分量比较重。"
+    ],
+    "style": "战略/家族投资者",
+    "tags": [
+     "超比例",
+     "多家同向"
+    ],
+    "how": "多半是认购新股（配售）",
+    "why": {
+     "k": "dip",
+     "name": "逢低买入",
+     "p": 0.592
+    },
+    "purposes": [
+     {
+      "k": "plc",
+      "name": "参与融资",
+      "p": 0.89
+     },
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.065
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.033
+     }
+    ],
+    "strength": 71,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03162729-3A706730",
+   "code": "MVP",
+   "company": "MEDICAL DEVELOPMENTS INTERNATIONAL LIMITED",
+   "date": "2026-11-17",
+   "time": "17:03",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162729-3A706730",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162729-3A706730",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-13",
+   "voting_power": [
+    7.91,
+    6.67
+   ],
+   "lodged_code": "",
+   "holder": "Regal Funds Management",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "swap_out",
+    "label": "换股调出（卖这只、买别的）",
+    "tone": "bear",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 7.91% → 6.67%，持股数减少 139 万股（相当于原持仓的 16%）。",
+     "这次披露的明细里（8/14–11/13，8 笔）：卖出 139 万股（均价约 $0.461）。",
+     "变动时股价约 $0.430，之前近 1 个月 +8%、3 个月 -5%、6 个月 ±0%、12 个月 -26%，处在一年区间（$0.365–$0.580）的中低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -8%、12 个月 -12%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "这是它近 4 个月在这只股票上连续第 2 次减仓。",
+     "逐笔看（8 个交易日）：卖出的量有 75% 发生在股价下跌的日子（同期下跌的日子占 42%），这段时间股价 -6%。",
+     "它之前的平均买入成本约 $0.455（按 2024/8/5 以来的公告累计，覆盖了卖出前持仓的 64%），这次卖出价约 $0.461，和成本差不多：不像获利了结，也谈不上止损。",
+     "持仓阶段：从建仓算起约 27 个月，持股比例最高到过 10.16%；这次之后比最高点少了 29%（按股数算）。之前公告过 1 次买入、2 次减仓。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "流动性：卖之前的持仓相当于这只股票约 49 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
+     "综合打分：最像「换股调出」（38%），依据：同期在另外 2 只股票上加仓；卖的和买的不在一个行业。其次是「普通减仓」33%、「止损或看法变差」12%。",
+     "怎么做的：在市场上卖。",
+     "这个结论贴着边：「同期在另外 2 只股票上加仓」这条证据的分量差三成，结论就会变成「减仓」。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是医疗、买的多是科技，像行业轮动。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "仓位难卖",
+     "连续减仓",
+     "换股"
+    ],
+    "how": "在市场上卖",
+    "purposes": [
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.378
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.328
+     },
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.124
+     }
+    ],
+    "strength": 42,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "mk-2924-03162694-2A1711064",
+   "code": "CKF",
+   "company": "Collins Foods Ltd",
+   "date": "2026-11-17",
+   "time": "16:13",
+   "headline": "Ceasing to be a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162694-2A1711064",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162694-2A1711064",
+   "price_sensitive": false,
+   "type": "ceasing",
+   "change_date": "2026-11-16",
+   "voting_power": [],
+   "lodged_code": "",
+   "holder": "Colonial First State (CFS)",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Consumer Discretionary",
+   "insight": {
+    "action": "slip",
+    "label": "小幅卖出，刚好跌破 5% 线",
+    "tone": "neutral",
+    "confidence": "低",
+    "reasons": [
+     "持股比例降到 5% 以下（上一次披露是 5.05%）。之后的买卖不用再公告。",
+     "这次披露的明细里（7/15–11/16，782 笔）：买入 123 万股（均价约 $8.06），卖出 143 万股（均价约 $8.78）。",
+     "变动时股价约 $9.35，之前近 1 个月 +7%、3 个月 +15%、6 个月 +18%、12 个月 -15%，处在一年区间（$7.67–$11.68）的中低位。",
+     "上一次披露时就只比 5% 高一点，这次只卖了很少一部分就跌破了披露线，谈不上清仓。",
+     "逐笔看（42 个交易日）：卖出的量有 48% 发生在股价下跌的日子（同期下跌的日子占 47%），这段时间股价 +18%；后半段的量是前半段的 3.9 倍，越做越多。",
+     "上一份公告时持有 596 万股，这次明细里净卖出 19.8 万股：估计还剩约 577 万股（约 4.9%，没算总股本的变化）。",
+     "持仓阶段：从首次越过 5% 披露线算起约 4 个月，持股比例最高到过 5.05%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 50% 的情况下一份公告还是同方向，约 30% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "形式上只是刚好跌破 5% 线；综合打分：最像「仓位管理（涨多了减一点）」（28%），依据：只减了一小部分；股价涨过一段。其次是「普通减仓」24%、「获利了结」20%。",
+     "怎么做的：在市场上分 42 个交易日慢慢卖，不显眼。",
+     "前后三周它在 KAR 加仓：这边卖、那边买，整体并没有在撤。",
+     "平台/多经理：把钱分给很多外部经理和指数组合，合计持仓的变化信号最弱。"
+    ],
+    "style": "平台/多经理",
+    "tags": [],
+    "how": "在市场上分 42 个交易日慢慢卖，不显眼",
+    "purposes": [
+     {
+      "k": "rebal",
+      "name": "仓位管理（涨多了减一点）",
+      "p": 0.285
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.239
+     },
+     {
+      "k": "profit",
+      "name": "获利了结",
+      "p": 0.2
+     }
+    ],
+    "strength": 10,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "mk-2924-03162651-2A1711046",
+   "code": "HLS",
+   "company": "Healius Ltd",
+   "date": "2026-11-17",
+   "time": "14:52",
+   "headline": "Change in substantial holding",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162651-2A1711046",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162651-2A1711046",
+   "price_sensitive": false,
+   "type": "change",
+   "change_date": "2026-11-12",
+   "voting_power": [
+    11.94,
+    13.02
+   ],
+   "lodged_code": "",
+   "holder": "Hostplus",
+   "group": "养老金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Health Care",
+   "insight": {
+    "action": "add",
+    "label": "加仓",
+    "tone": "bull",
+    "confidence": "中",
+    "reasons": [
+     "持股比例 11.94% → 13.02%，持股数增加 779 万股（相当于原持仓的 9%）。",
+     "这次披露的明细里（2025/8/29–2026/11/12，159 笔）：买入 1,138 万股（均价约 $0.493），卖出 359 万股（均价约 $0.476）。",
+     "分 135 天慢慢买入，只占同期成交量的 1% 左右，不着急。",
+     "变动时股价约 $0.540，之前近 1 个月 +40%、3 个月 +29%、6 个月 +46%、12 个月 -41%，处在一年区间（$0.315–$1.04）的中低位。",
+     "这只股票平时波动就大（一天约 ±3.9%），上面这种幅度的跌在它身上算正常起伏，不当作“跌了一大段”。",
+     "逐笔看（80 个交易日）：买入的量有 25% 发生在股价下跌的日子（同期下跌的日子占 47%），这段时间股价 -41%；后半段的量是前半段的 10 倍以上，越做越多。",
+     "持仓阶段：从能查到的最早一份公告算起约 36 个月，持股比例最高到过 11.94%；这次之后是它在这只股票上持仓的新高。之前公告过 2 次买入、0 次减仓。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 73% 的情况下一份公告还是同方向，约 6% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：几种目的的可能性接近，分不出主次，先按普通加仓看。最高的是「顺势追加」（45%）。其次是「逢低买入」38%、「普通加仓」11%。",
+     "怎么做的：在市场上分 80 个交易日慢慢买，不显眼。",
+     "这个结论贴着边：「买之前股价跌了一轮」这条证据的分量差三成，结论就会变成「顺势加仓」。",
+     "前后三周它在 BAP 减仓：有买有卖，属于正常调整。",
+     "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
+    ],
+    "style": "养老金",
+    "tags": [],
+    "how": "在市场上分 80 个交易日慢慢买，不显眼",
+    "purposes": [
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.448
+     },
+     {
+      "k": "dip",
+      "name": "逢低买入",
+      "p": 0.379
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.107
+     }
+    ],
+    "strength": 13,
+    "side": "buy"
+   }
+  },
+  {
+   "id": "mk-2924-03162559-2A1710999",
+   "code": "FLX",
+   "company": "Felix Group Holdings Ltd",
+   "date": "2026-11-17",
+   "time": "11:57",
+   "headline": "Ceasing to be a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162559-2A1710999",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162559-2A1710999",
+   "price_sensitive": false,
+   "type": "ceasing",
+   "change_date": "2026-11-16",
+   "voting_power": [],
+   "lodged_code": "",
+   "holder": "Perennial",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Information Technology",
+   "insight": {
+    "action": "exit_loss",
+    "label": "减到 5% 以下，像止损离场",
+    "tone": "bear",
+    "confidence": "高",
+    "reasons": [
+     "持股比例降到 5% 以下（上一次披露是 5.04%）。之后的买卖不用再公告，是否清仓看不出来。",
+     "这次披露的明细里（10/21–11/10，10 笔）：买入 102 万股（均价约 $0.034）。",
+     "它买入的量占了同期全市场成交量的 48%：是这段时间最主要的买家之一，买得很坚决。",
+     "变动时股价约 $0.036，之前近 1 个月 +6%、3 个月 -28%、6 个月 -52%、12 个月 -79%，处在一年区间（$0.030–$0.180）的低位。",
+     "同期小盘股指数（Small Ordinaries）3 个月 -11%、12 个月 -15%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
+     "它 27 天前的公告还是加仓，这么快就掉头。",
+     "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5.04%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "流动性：卖之前的持仓相当于这只股票约 44 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
+     "综合打分：最像「止损或看法变差」（59%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「短线交易」17%、「换股调出」13%。",
+     "怎么做的：在市场上卖，是同期最主要的卖家之一。",
+     "前后三周它在 3PL、AMX、CYG、CYM（共 6 只） 加仓：这边卖、那边买，像是换股（调仓）。",
+     "同一只股票上，名单里的 Thorney / Tiga Trading 最近一个月却在加仓：机构之间看法不一。",
+     "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
+    ],
+    "style": "主动选股基金",
+    "tags": [
+     "仓位难卖",
+     "换股",
+     "有人反向"
+    ],
+    "how": "在市场上卖，是同期最主要的卖家之一",
+    "purposes": [
+     {
+      "k": "stop",
+      "name": "止损或看法变差",
+      "p": 0.59
+     },
+     {
+      "k": "short",
+      "name": "短线交易",
+      "p": 0.171
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.128
+     }
+    ],
+    "strength": null,
+    "side": "sell"
+   }
+  },
+  {
+   "id": "mk-2924-03162142-2A1710792",
+   "code": "EWC",
+   "company": "ENERGY W ORLD CORPORATION LTD",
+   "date": "2026-11-16",
+   "time": "16:43",
+   "headline": "Becoming a substantial holder",
+   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162142-2A1710792",
+   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03162142-2A1710792",
+   "price_sensitive": false,
+   "type": "becoming",
+   "change_date": "2026-11-12",
+   "voting_power": [
+    19.9
+   ],
+   "lodged_code": "",
+   "holder": "L1 Capital",
+   "group": "主动基金",
+   "confidence": "高",
+   "ocr": false,
+   "sector": "Utilities",
+   "insight": {
+    "action": "build_chase",
+    "label": "顺势建仓",
+    "tone": "bull",
+    "confidence": "低",
+    "reasons": [
+     "持股比例首次达到 19.9%，共 7.67 亿股。",
+     "成为大股东前 4 个月（11/12，1 笔）：买入 7.67 亿股（均价约 $0.068）。",
+     "它买入的量占了同期全市场成交量的 38%：是这段时间最主要的买家之一，买得很坚决。",
+     "明细里有一笔整数金额的买入（7.67 亿股 × $0.068），但公司那段时间的发行文件里没有这个价格的新股：不是认购配售（可能是场外协议、互换，或者价格栏填的不是成交价），不当作参与融资。",
+     "变动时股价约 $0.072，之前近 1 个月 +1%、3 个月 +14%、6 个月 +71%、12 个月 +16%，处在一年区间（$0.029–$0.075）的高位。",
+     "现有持仓的 100% 是最近 4 个月净买入的，属于快速建仓。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "交易形状：这次买的量有 100% 集中在 11/12 一天，是平时日成交量的 22 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
+     "收购线：买完之后持股 19.9%，已经顶到 20% 的收购线（超过 20% 一般要向所有股东发收购要约或经股东批准，另外只允许每 6 个月多买 3%）。它在这只股票上基本没有再买的空间了：之后不再加仓不代表看法变了。",
+     "综合打分：最像「顺势追加」（39%），依据：股价在一年区间的高位；近 3 个月股价在涨。其次是「整体加仓（资金流入）」29%、「普通加仓」22%。",
+     "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
+     "这个结论贴着边：「近 3 个月股价在涨」这条证据的分量差三成，结论就会变成「新进建仓」。",
+     "前后三周它在 BMC、EMR、IMD、LIN（共 8 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
+    ],
+    "style": "多空对冲基金",
+    "tags": [
+     "顶到20%线",
+     "大宗",
+     "整体加仓"
+    ],
+    "how": "一次性的大宗交易，不是在市场上零散成交",
+    "purposes": [
+     {
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.391
+     },
+     {
+      "k": "flow",
+      "name": "整体加仓（资金流入）",
+      "p": 0.289
+     },
+     {
+      "k": "base",
+      "name": "普通加仓",
+      "p": 0.217
+     }
+    ],
+    "strength": 70,
+    "side": "buy"
+   }
+  },
   {
    "id": "03166146",
    "code": "GYG",
@@ -458,10 +2372,10 @@
      "这是它近 4 个月在这只股票上连续第 2 次加仓。",
      "逐笔看（12 个交易日）：买入的量有 29% 发生在股价下跌的日子（同期下跌的日子占 31%），这段时间股价 +18%。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5.53%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「逢低买入」（62%），依据：买之前股价跌了一轮；股价在一年区间的低位；这家基金习惯在股价弱的时候买。其次是「整体加仓（资金流入）」14%、「普通加仓」11%。",
      "怎么做的：在市场上买。",
-     "前后三周它在 BMC、EMR、LIN、PPC（共 6 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 BMC、EMR、EWC、IMD（共 8 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "基金自己的说法（LSF《Monthly Report - October 2026》，2026-11-09，英文原文）：“Key detractors included Mineral Resources and Lloyds, while The Lottery Corporation contributed positively. Mineral Resources fell 15.7% over the month as prices weakened for iron ore (-2%) and lithium (-30%).”",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
@@ -477,17 +2391,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.617
+      "p": 0.625
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.144
+      "p": 0.143
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.108
+      "p": 0.107
      }
     ],
     "strength": 49,
@@ -536,8 +2450,8 @@
      "买入发生在收购消息（7/1「Perpetual rejects non-binding indicative proposal」，消息出来后股价 +21%）之后：可能在赌收购成功，或者赌有人出更高的价。",
      "逐笔看（43 个交易日）：买入的量有 34% 发生在股价下跌的日子（同期下跌的日子占 49%），这段时间股价 -6%。",
      "最近 4 个月净买入的只占现有持仓的 25%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（36%）。其次是「换股调入」23%、「逢低买入」14%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（36%）。其次是「换股调入」24%、「逢低买入」12%。",
      "怎么做的：在市场上分 43 个交易日慢慢买，不显眼。",
      "前后三周它在 ANN、BAP、EOS、MP1（共 5 只） 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -551,17 +2465,17 @@
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.357
+      "p": 0.361
      },
      {
       "k": "swap",
       "name": "换股调入",
-      "p": 0.232
+      "p": 0.235
      },
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.141
+      "p": 0.121
      }
     ],
     "strength": 39,
@@ -604,7 +2518,7 @@
      "它 10 天前的公告还是加仓，这么快就掉头。",
      "上一份公告时持有 1,961 万股，这次明细里净卖出 58.6 万股：估计还剩约 1,902 万股（约 4.9%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5.06%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "流动性：卖之前的持仓相当于这只股票约 76 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
      "形式上只是刚好跌破 5% 线；综合打分：几种目的的可能性接近，分不出主次，先按普通减仓看。最高的是「短线交易」（25%）。其次是「获利了结」22%、「换股调出」19%。",
      "怎么做的：在市场上卖，是同期最主要的卖家之一。",
@@ -622,17 +2536,17 @@
      {
       "k": "short",
       "name": "短线交易",
-      "p": 0.249
+      "p": 0.254
      },
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.224
+      "p": 0.223
      },
      {
       "k": "swap",
       "name": "换股调出",
-      "p": 0.192
+      "p": 0.191
      }
     ],
     "strength": 34,
@@ -677,32 +2591,32 @@
      "逐笔看（15 个交易日）：买入的量有 32% 发生在股价下跌的日子（同期下跌的日子占 44%），这段时间股价 +4%；后半段的量是前半段的 0.5 倍，越做越少。",
      "明细从 2025/8/29 开始，净买入正好等于现有持仓：这个仓位是那时候从零建起来的。",
      "现有持仓的 68% 是最近 4 个月净买入的，属于快速建仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「逢低买入」（62%），依据：买之前股价跌了一轮；股价在一年区间的低位。其次是「整体加仓（资金流入）」17%、「普通加仓」13%。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「逢低买入」（70%），依据：买之前股价跌了一轮；股价在一年区间的低位。其次是「普通加仓」14%。",
      "怎么做的：在市场上买，是同期最主要的买家之一。",
-     "前后三周它在 3PL、AMX、CYG、LUX（共 5 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 FLX 减仓：像是把钱从那边挪到这只（调仓）。",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
     "tags": [
-     "整体加仓"
+     "换股"
     ],
     "how": "在市场上买，是同期最主要的买家之一",
     "purposes": [
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.621
-     },
-     {
-      "k": "flow",
-      "name": "整体加仓（资金流入）",
-      "p": 0.171
+      "p": 0.696
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.128
+      "p": 0.144
+     },
+     {
+      "k": "swap",
+      "name": "换股调入",
+      "p": 0.07
      }
     ],
     "strength": 67,
@@ -847,11 +2761,11 @@
      "变动时股价约 $0.380，之前近 1 个月 -31%、3 个月 -29%、6 个月 -42%、12 个月 -49%，处在一年区间（$0.335–$0.930）的低位。",
      "逐笔看（86 个交易日）：买入的量有 39% 发生在股价下跌的日子（同期下跌的日子占 51%），这段时间股价 -26%；后半段的量是前半段的 2.4 倍，越做越多。",
      "持仓阶段：从首次越过 5% 披露线算起约 20 个月，持股比例最高到过 5%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
      "跟投比例：这段时间公司的总股本增加了约 28%（发了新股），它的持股数增加了 53%——比按比例跟投多得多（约 1.9 倍），是借这次发新股主动提高了自己的份额。",
      "综合打分：最像「逢低买入」（86%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。",
      "怎么做的：在市场上分 86 个交易日慢慢买，不显眼。",
-     "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
+     "前后三周它在 CPU、PWH、QBE 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
     "style": "养老金",
@@ -863,12 +2777,12 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.859
+      "p": 0.855
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.051
+      "p": 0.05
      },
      {
       "k": "plc",
@@ -913,8 +2827,8 @@
      "变动时股价约 $3.85，之前近 1 个月 +5%、3 个月 -8%、6 个月 -3%、12 个月 +13%，处在一年区间（$3.42–$4.38）的中低位。",
      "逐笔看（31 个交易日）：买入的量有 30% 发生在股价下跌的日子（同期下跌的日子占 44%），这段时间股价 -8%；后半段的量是前半段的 1.8 倍，越做越多。",
      "最近 4 个月净买入的只占现有持仓的 18%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（38%）。其次是「换股调入」24%、「逢低买入」16%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（38%）。其次是「换股调入」25%、「逢低买入」14%。",
      "怎么做的：在市场上分 31 个交易日慢慢买，不显眼。",
      "前后三周它在 ANN、BAP、EOS、FPR（共 5 只） 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -926,17 +2840,17 @@
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.376
+      "p": 0.382
      },
      {
       "k": "swap",
       "name": "换股调入",
-      "p": 0.245
+      "p": 0.249
      },
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.164
+      "p": 0.141
      }
     ],
     "strength": 26,
@@ -979,12 +2893,12 @@
      "上一份公告时持有 311 万股，这次明细里净卖出 311 万股：基本卖光了，是清仓。",
      "它之前的平均买入成本约 $1.19（按 2024/4/10 以来的公告累计，覆盖了卖出前持仓的 100%），这次卖出价约 $1.02，低了 14%：是亏钱卖的。",
      "持仓阶段：从建仓算起约 31 个月，持股比例最高到过 7.53%；这次之后比最高点至少少了 34%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 2 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
      "交易形状：这次卖的量有 95% 集中在 11/6 一天，是平时日成交量的 17 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
-     "综合打分：最像「借收购消息退出」（30%），依据：卖出发生在公司被收购的消息之后。其次是「普通减仓」17%、「获利了结」17%。",
+     "综合打分：最像「借收购消息退出」（27%），依据：卖出发生在公司被收购的消息之后。其次是「换股调出」18%、「普通减仓」15%。",
      "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
      "这个结论贴着边：「卖出发生在公司被收购的消息之后」这条证据的分量差三成，结论就会变成「减到 5% 以下」。",
-     "前后三周它在 ELS 加仓：这边卖、那边买，像是换股（调仓）。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是工业、买的多是科技，像行业轮动。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -1001,17 +2915,17 @@
      {
       "k": "deal",
       "name": "借收购消息退出",
-      "p": 0.303
+      "p": 0.272
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.177
      },
      {
       "k": "base",
       "name": "普通减仓",
-      "p": 0.171
-     },
-     {
-      "k": "profit",
-      "name": "获利了结",
-      "p": 0.166
+      "p": 0.154
      }
     ],
     "strength": 80,
@@ -1055,12 +2969,12 @@
      "逐笔看（10 个交易日）：买入的量有 4% 发生在股价下跌的日子（同期下跌的日子占 50%），这段时间股价 -15%；后半段的量是前半段的 10 倍以上，越做越多。",
      "它之前的平均买入成本约 $2.79，这次买入价约 $2.45，比成本低 12%：在摊低成本。",
      "持仓阶段：从建仓算起约 8 个月，持股比例最高到过 15.94%；这次之后是它在这只股票上持仓的新高。之前公告过 3 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
      "交易形状：这次买的量有 66% 集中在 10/16 一天，是平时日成交量的 8 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
-     "综合打分：最像「逢低买入」（47%），依据：买入价低于自己的成本；股价在一年区间的低位；买之前股价跌了一轮。其次是「整体加仓（资金流入）」27%、「普通加仓」13%。",
+     "综合打分：最像「逢低买入」（48%），依据：买入价低于自己的成本；股价在一年区间的低位；买之前股价跌了一轮。其次是「整体加仓（资金流入）」27%、「普通加仓」13%。",
      "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
-     "这个结论贴着边：「买入价低于自己的成本」这条证据的分量差三成，结论就会变成「加仓」。",
-     "前后三周它在 BM1、EMR、LIN、MIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "这个结论贴着边：打分里某一项的分量差三成，结论就会变成「加仓」。",
+     "前后三周它在 BM1、EMR、EWC、IMD（共 9 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -1074,17 +2988,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.47
+      "p": 0.477
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.271
+      "p": 0.27
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.133
+      "p": 0.132
      }
     ],
     "strength": 60,
@@ -1127,10 +3041,10 @@
      "它 7 天前的公告还是加仓，这么快就掉头。",
      "一次减掉了四成以上的持仓，幅度很大。",
      "持仓阶段：从能查到的最早一份公告算起约 10 个月，持股比例最高到过 18.58%；这次之后比最高点少了 54%（按股数算）。之前公告过 3 次买入、0 次减仓。这是它有记录以来第一次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "交易形状：这次卖的量有 100% 集中在 11/9 一天，是平时日成交量的 44 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
      "流动性：卖之前的持仓相当于这只股票约 81 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
-     "综合打分：最像「整块转让给特定的接盘方」（64%），依据：对方拿到的持股正好等于它卖出前的全部持股；量集中在一天，像是谈好的大宗。其次是「获利了结」21%。",
+     "综合打分：最像「整块转让给特定的接盘方」（63%），依据：对方拿到的持股正好等于它卖出前的全部持股；量集中在一天，像是谈好的大宗。其次是「获利了结」21%。",
      "怎么做的：整块转给了一个特定的接盘方（倒手）。至于为什么：撇开成交方式不看，动机上最像「获利了结」（在各种动机里占 57%）。",
      "这个结论贴着边：「对方拿到的持股正好等于它卖出前的全部持股」这条证据的分量差三成，结论就会变成「减仓，像获利了结」。所以把握最多算“中”。",
      "接盘方：11/9（和这次变动同一天）「Landchecker Shareholder Entities」公告成为大股东，持股 18.58%——正好等于Perennial卖出前的全部持股（18.58%）。看起来这是一笔谈好的整块转让：它这次先卖掉了一部分，剩下的 8.58% 很可能也通过协议（比如约定以后卖给对方）算进了对方名下。这不是在市场上随便卖掉，而是把股份交给了一个特定的买家（倒手）。",
@@ -1149,7 +3063,7 @@
      {
       "k": "hand",
       "name": "整块转让给特定的接盘方",
-      "p": 0.635
+      "p": 0.634
      },
      {
       "k": "profit",
@@ -1159,7 +3073,7 @@
      {
       "k": "swap",
       "name": "换股调出",
-      "p": 0.049
+      "p": 0.048
      }
     ],
     "strength": 70,
@@ -1174,7 +3088,7 @@
     "why": {
      "k": "profit",
      "name": "获利了结",
-     "p": 0.57
+     "p": 0.568
     },
     "side": "sell"
    }
@@ -1215,7 +3129,7 @@
      "逐笔看（78 个交易日）：买入的量有 56% 发生在股价下跌的日子（同期下跌的日子占 37%），这段时间股价 -63%。",
      "明细从 2024/11/7 开始，净买入正好等于现有持仓：这个仓位是那时候从零建起来的。",
      "现有持仓里约 37% 是最近 4 个月净买入的。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "综合打分：最像「逢低买入」（85%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入的量集中在股价下跌的日子。",
      "怎么做的：在市场上买，是同期最主要的买家之一。",
      "前后三周它在 AMX、CYG、CYM、FLX（共 6 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
@@ -1281,7 +3195,7 @@
      "逐笔看（15 个交易日）：买入的量有 92% 发生在股价下跌的日子（同期下跌的日子占 41%），这段时间股价 -72%；后半段的量是前半段的 10 倍以上，越做越多。",
      "明细从 2024/11/7 开始，净买入正好等于现有持仓：这个仓位是那时候从零建起来的。",
      "现有持仓的 100% 是最近 4 个月净买入的，属于快速建仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "交易形状：这次买的量有 91% 集中在 11/9 一天，是平时日成交量的 39 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
      "综合打分：最像「逢低买入」（58%），依据：股价在一年区间的低位；买入的量集中在股价下跌的日子；买之前股价跌了一轮。其次是「整体加仓（资金流入）」18%、「普通加仓」14%。",
      "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
@@ -1298,7 +3212,7 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.58
+      "p": 0.579
      },
      {
       "k": "flow",
@@ -1348,10 +3262,10 @@
      "它 1 天前的公告还是加仓，这么快就掉头。",
      "上一份公告时持有 3,488 万股，这次明细里净卖出 6.3 万股：估计还剩约 3,482 万股（约 5.0%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 8 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 32% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "形式上只是刚好跌破 5% 线；综合打分：最像「短线交易」（33%），依据：1 天前还在加仓；这家基金经常卖了不久就反手。其次是「止损或看法变差」23%、「整体减仓（应付赎回）」22%。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 50% 的情况下一份公告还是同方向，约 30% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "形式上只是刚好跌破 5% 线；综合打分：几种目的的可能性接近，分不出主次，先按普通减仓看。最高的是「整体减仓（应付赎回）」（30%）。其次是「短线交易」30%、「止损或看法变差」21%。",
      "怎么做的：在市场上卖。",
-     "前后三周它在 ACL、CAR 也在减仓，没看到加仓：更像整体降仓或应付赎回，不一定是单独看空这一只。",
+     "前后三周它在 ACL、CAR、CKF 也在减仓，没看到加仓：更像整体降仓或应付赎回，不一定是单独看空这一只。",
      "平台/多经理：把钱分给很多外部经理和指数组合，合计持仓的变化信号最弱。"
     ],
     "style": "平台/多经理",
@@ -1361,19 +3275,19 @@
     "how": "在市场上卖",
     "purposes": [
      {
+      "k": "flow",
+      "name": "整体减仓（应付赎回）",
+      "p": 0.298
+     },
+     {
       "k": "short",
       "name": "短线交易",
-      "p": 0.333
+      "p": 0.298
      },
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.234
-     },
-     {
-      "k": "flow",
-      "name": "整体减仓（应付赎回）",
-      "p": 0.217
+      "p": 0.21
      }
     ],
     "strength": 2,
@@ -1414,10 +3328,10 @@
      "变动时股价约 $3.33，之前近 1 个月 +11%、3 个月 +7%、6 个月 +20%、12 个月 -13%，处在一年区间（$2.65–$3.97）的中间。",
      "逐笔看（83 个交易日）：买入的量有 42% 发生在股价下跌的日子（同期下跌的日子占 45%），这段时间股价 -13%；后半段的量是前半段的 2.4 倍，越做越多。",
      "持仓阶段：从首次越过 5% 披露线算起约 13 个月，持股比例最高到过 5.03%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（28%）。其次是「逢低买入」25%、「换股调入」18%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（28%）。其次是「逢低买入」22%、「顺势追加」21%。",
      "怎么做的：在市场上分 83 个交易日慢慢买，不显眼。",
-     "这个结论贴着边：「买之前股价跌了一轮」这条证据的分量差三成，结论就会变成「逢低加仓」。",
+     "这个结论贴着边：「同期在另外 5 只股票上减仓」这条证据的分量差三成，结论就会变成「换股调入（卖别的、买这只）」。",
      "前后三周它在 ANN、BAP、EOS、FPR（共 5 只） 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
@@ -1428,17 +3342,17 @@
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.278
+      "p": 0.281
      },
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.252
+      "p": 0.216
      },
      {
-      "k": "swap",
-      "name": "换股调入",
-      "p": 0.181
+      "k": "mom",
+      "name": "顺势追加",
+      "p": 0.207
      }
     ],
     "strength": 29,
@@ -1478,8 +3392,8 @@
      "变动时股价约 $6.31，之前近 1 个月 +13%、3 个月 +20%、6 个月 +45%、12 个月 +8%，处在一年区间（$3.37–$6.35）的高位。",
      "逐笔看（41 个交易日）：买入的量有 54% 发生在股价下跌的日子（同期下跌的日子占 46%），这段时间股价 +41%；后半段的量是前半段的 1.8 倍，越做越多。",
      "最近 4 个月净买入的只占现有持仓的 19%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「顺势追加」（84%），依据：近 3 个月股价在涨；股价在一年区间的高位；买的过程中股价一直在涨，它还在追。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：最像「顺势追加」（86%），依据：近 3 个月股价在涨；股价在一年区间的高位；买的过程中股价一直在涨，它还在追。",
      "怎么做的：在市场上分 41 个交易日慢慢买，不显眼。",
      "前后三周它在 ANN、BAP、EOS、FPR（共 5 只） 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -1491,17 +3405,17 @@
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.836
+      "p": 0.86
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.074
+      "p": 0.064
      },
      {
       "k": "swap",
       "name": "换股调入",
-      "p": 0.048
+      "p": 0.042
      }
     ],
     "strength": 28,
@@ -1619,10 +3533,10 @@
      "它 16 天前的公告还是加仓，这么快就掉头。",
      "上一份公告时持有 1,191 万股，这次明细里净卖出 5.3 万股：估计还剩约 1,186 万股（约 5.0%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "形式上只是刚好跌破 5% 线；综合打分：几种目的的可能性接近，分不出主次，先按普通减仓看。最高的是「获利了结」（30%）。其次是「短线交易」25%、「仓位管理（涨多了减一点）」21%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "形式上只是刚好跌破 5% 线；综合打分：最像「获利了结」（31%），依据：卖之前股价涨了一大段；股价在一年区间的高位。其次是「短线交易」22%、「仓位管理（涨多了减一点）」22%。",
      "怎么做的：在市场上卖。",
-     "前后三周它在 AZJ、MTS、NWH、PPT（共 5 只） 加仓：这边卖、那边买，整体并没有在撤。",
+     "前后三周它在 AZJ、GMD、MTS、NWH（共 7 只） 加仓：这边卖、那边买，整体并没有在撤。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
     "style": "养老金",
@@ -1632,17 +3546,17 @@
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.297
+      "p": 0.306
      },
      {
       "k": "short",
       "name": "短线交易",
-      "p": 0.246
+      "p": 0.224
      },
      {
       "k": "rebal",
       "name": "仓位管理（涨多了减一点）",
-      "p": 0.213
+      "p": 0.219
      }
     ],
     "strength": 2,
@@ -1682,10 +3596,10 @@
      "它 21 天前的公告还是加仓，这么快就掉头。",
      "上一份公告时持有 1,119 万股，这次明细里净卖出 20.2 万股：估计还剩约 1,099 万股（约 5.0%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5.05%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "形式上只是刚好跌破 5% 线；综合打分：最像「短线交易」（34%），依据：21 天前还在加仓；这家基金经常卖了不久就反手。其次是「止损或看法变差」20%、「仓位管理（涨多了减一点）」15%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "形式上只是刚好跌破 5% 线；综合打分：最像「短线交易」（31%），依据：21 天前还在加仓；这家基金经常卖了不久就反手。其次是「止损或看法变差」21%、「仓位管理（涨多了减一点）」15%。",
      "怎么做的：在市场上卖。",
-     "前后三周它在 AZJ、MP1、MTS、NWH（共 6 只） 加仓：这边卖、那边买，整体并没有在撤。",
+     "前后三周它在 AZJ、GMD、MP1、MTS（共 8 只） 加仓：这边卖、那边买，整体并没有在撤。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
     "style": "养老金",
@@ -1695,17 +3609,17 @@
      {
       "k": "short",
       "name": "短线交易",
-      "p": 0.341
+      "p": 0.314
      },
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.204
+      "p": 0.212
      },
      {
       "k": "rebal",
       "name": "仓位管理（涨多了减一点）",
-      "p": 0.146
+      "p": 0.152
      }
     ],
     "strength": 4,
@@ -1745,8 +3659,8 @@
      "变动时股价约 $6.33，之前近 1 个月 -21%、3 个月 -12%、6 个月 -5%、12 个月 +34%，处在一年区间（$4.67–$8.20）的中间。",
      "逐笔看（11 个交易日）：买入的量有 51% 发生在股价下跌的日子（同期下跌的日子占 53%），这段时间股价 -14%。",
      "最近 4 个月净买入的只占现有持仓的 3%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（31%）。其次是「逢低买入」31%、「换股调入」20%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（32%）。其次是「逢低买入」28%、「换股调入」21%。",
      "怎么做的：在市场上分 11 个交易日慢慢买，不显眼。",
      "前后三周它在 ANN、BAP、EOS、FPR（共 5 只） 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -1758,17 +3672,17 @@
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.308
+      "p": 0.32
      },
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.314
+      "p": 0.277
      },
      {
       "k": "swap",
       "name": "换股调入",
-      "p": 0.2
+      "p": 0.209
      }
     ],
     "strength": 4,
@@ -1812,8 +3726,10 @@
      "这是它近 4 个月在这只股票上连续第 2 次加仓。",
      "它之前的平均买入成本约 $0.268，这次买入价约 $0.127，比成本低 53%：在摊低成本。",
      "持仓阶段：从建仓算起约 2 个月，持股比例最高到过 11.1%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "综合打分：最像「逢低买入」（88%），依据：股价在一年区间的低位；买入价低于自己的成本；业绩后股价大跌时买入。",
+     "综合打分：最像「逢低买入」（85%），依据：股价在一年区间的低位；买入价低于自己的成本；业绩后股价大跌时买入。",
      "怎么做的：在市场上买，是同期最主要的买家之一。",
+     "前后三周它在 MYG、SKS 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "同一只股票上，名单里的 Regal Funds Management 最近一个月也在加仓：多家同向，信号更强。",
      "同一只股票上，名单里的 Wilson Asset Management 最近一个月却在减仓：机构之间看法不一。",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
@@ -1821,6 +3737,8 @@
     "tags": [
      "业绩后",
      "连续加仓",
+     "整体加仓",
+     "多家同向",
      "有人反向"
     ],
     "how": "在市场上买，是同期最主要的买家之一",
@@ -1828,20 +3746,20 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.881
+      "p": 0.853
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.07
+      "p": 0.067
      },
      {
-      "k": "prog",
-      "name": "按计划持续建仓",
-      "p": 0.017
+      "k": "flow",
+      "name": "整体加仓（资金流入）",
+      "p": 0.038
      }
     ],
-    "strength": 53,
+    "strength": 63,
     "side": "buy"
    }
   },
@@ -1879,10 +3797,10 @@
      "上一份公告时持有 1.01 亿股，这次明细里净卖出 1.01 亿股：基本卖光了，是清仓。",
      "它之前的平均买入成本约 $0.100（按 2026/6/10 以来的公告累计，覆盖了卖出前持仓的 100%），这次卖出价约 $0.066，低了 34%：是亏钱卖的。",
      "持仓阶段：从建仓算起约 5 个月，持股比例最高到过 14.35%；这次之后比最高点至少少了 65%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 1 次买入、2 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「止损或看法变差」（97%），依据：卖出价低于自己的买入成本；卖之前股价跌了不少；股价在一年区间的低位。",
      "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
-     "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是必需消费、买的多是科技，像行业轮动。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -1897,7 +3815,7 @@
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.973
+      "p": 0.974
      },
      {
       "k": "wind",
@@ -1950,10 +3868,10 @@
      "减掉的不到原持仓的一成多，属于小幅减仓。",
      "它之前的平均买入成本约 $0.093（按 2026/4/23 以来的公告累计，覆盖了卖出前持仓的 100%），这次卖出价约 $0.140，高出 50%：是赚钱卖的。",
      "持仓阶段：从建仓算起约 6 个月，持股比例最高到过 10.83%；这次之后比最高点少了 12%（按股数算）。之前公告过 2 次买入、0 次减仓。这是它建仓以来第一次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
-     "综合打分：最像「获利了结」（64%），依据：卖出价高于自己的买入成本；卖之前股价涨了一大段。其次是「换股调出」10%、「止损或看法变差」9%。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「获利了结」（66%），依据：卖出价高于自己的买入成本；卖之前股价涨了一大段。其次是「止损或看法变差」10%、「普通减仓」9%。",
      "怎么做的：在市场上分 11 个交易日慢慢卖，不显眼。",
-     "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。而且买的多是同一个行业的，像是在行业里挑了更看好的。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -1965,17 +3883,17 @@
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.639
-     },
-     {
-      "k": "swap",
-      "name": "换股调出",
-      "p": 0.1
+      "p": 0.661
      },
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.094
+      "p": 0.098
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.09
      }
     ],
     "strength": 20,
@@ -2094,10 +4012,10 @@
      "逐笔看（13 个交易日）：买入的量有 91% 发生在股价下跌的日子（同期下跌的日子占 79%），这段时间股价 -64%；后半段的量是前半段的 3.6 倍，越做越多。",
      "它之前的平均买入成本约 $3.25，这次买入价约 $2.19，比成本低 33%：在摊低成本。",
      "持仓阶段：从建仓算起约 22 个月，持股比例最高到过 13.47%；这次之后是它在这只股票上持仓的新高。之前公告过 4 次买入、3 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
-     "综合打分：最像「逢低买入」（93%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入价低于自己的成本。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「逢低买入」（94%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入价低于自己的成本。",
      "怎么做的：在市场上买。",
-     "前后三周它在 AI1、EQT、GTI、RTH（共 6 只） 减仓：像是把钱从那边挪到这只（调仓）。",
+     "前后三周它在 AI1、FLC、GTI、MVP（共 9 只） 减仓：像是把钱从那边挪到这只（调仓）。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -2110,17 +4028,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.93
+      "p": 0.94
      },
      {
       "k": "swap",
       "name": "换股调入",
-      "p": 0.037
+      "p": 0.032
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.021
+      "p": 0.018
      }
     ],
     "strength": 63,
@@ -2159,10 +4077,10 @@
      "它 2 天前的公告还是加仓，这么快就掉头。",
      "上一份公告时持有 3,487 万股，这次明细里净卖出 2.4 万股：估计还剩约 3,484 万股（约 5.0%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 8 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 32% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "形式上只是刚好跌破 5% 线；综合打分：最像「短线交易」（33%），依据：2 天前还在加仓；这家基金经常卖了不久就反手。其次是「整体减仓（应付赎回）」22%、「普通减仓」14%。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 50% 的情况下一份公告还是同方向，约 30% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "形式上只是刚好跌破 5% 线；综合打分：几种目的的可能性接近，分不出主次，先按普通减仓看。最高的是「整体减仓（应付赎回）」（30%）。其次是「短线交易」30%、「普通减仓」13%。",
      "怎么做的：在市场上卖。",
-     "前后三周它在 ACL、CAR 也在减仓，没看到加仓：更像整体降仓或应付赎回，不一定是单独看空这一只。",
+     "前后三周它在 ACL、CAR、CKF 也在减仓，没看到加仓：更像整体降仓或应付赎回，不一定是单独看空这一只。",
      "平台/多经理：把钱分给很多外部经理和指数组合，合计持仓的变化信号最弱。"
     ],
     "style": "平台/多经理",
@@ -2172,19 +4090,19 @@
     "how": "在市场上卖",
     "purposes": [
      {
-      "k": "short",
-      "name": "短线交易",
-      "p": 0.33
-     },
-     {
       "k": "flow",
       "name": "整体减仓（应付赎回）",
-      "p": 0.215
+      "p": 0.296
+     },
+     {
+      "k": "short",
+      "name": "短线交易",
+      "p": 0.296
      },
      {
       "k": "base",
       "name": "普通减仓",
-      "p": 0.14
+      "p": 0.126
      }
     ],
     "strength": 0,
@@ -2228,12 +4146,12 @@
      "逐笔看（12 个交易日）：卖出的量有 5% 发生在股价下跌的日子（同期下跌的日子占 47%），这段时间股价 -18%；后半段的量是前半段的 9.7 倍，越做越多。",
      "它之前的平均买入成本约 $0.100（按 2026/6/10 以来的公告累计，覆盖了卖出前持仓的 100%），这次卖出价约 $0.066，低了 34%：是亏钱卖的。",
      "持仓阶段：从建仓算起约 5 个月，持股比例最高到过 14.35%；这次之后比最高点少了 41%（按股数算）。之前公告过 1 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
      "交易形状：这次卖的量有 79% 集中在 11/2 一天，是平时日成交量的 12 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
      "流动性：卖之前的持仓相当于这只股票约 43 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
      "综合打分：最像「止损或看法变差」（98%），依据：卖出价低于自己的买入成本；卖之前股价跌了不少；股价在一年区间的低位。",
      "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
-     "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "前后三周它在 DXN、ELS 加仓：这边卖、那边买，像是换股（调仓）。卖的是必需消费、买的多是科技，像行业轮动。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -2301,9 +4219,11 @@
      "这是它近 4 个月在这只股票上连续第 3 次减仓。",
      "长短期方向不一样：长期跌了很多（近 12 个月 -53%），最近在反弹（近 3 个月 +94%）——是趁反弹卖。不知道它的成本，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。",
      "持仓阶段：从能查到的最早一份公告算起约 8 个月，持股比例最高到过 12.8%；这次之后比最高点少了 30%（按股数算）。之前公告过 1 次买入、2 次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 8% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「趁反弹减仓」（42%），依据：长期跌了很多、最近反弹时卖。其次是「普通减仓」17%、「分批减仓（一路在减）」16%。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 73% 的情况下一份公告还是同方向，约 6% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「趁反弹减仓」（39%），依据：长期跌了很多、最近反弹时卖。其次是「分批减仓（一路在减）」20%、「普通减仓」16%。",
      "怎么做的：在市场上卖，是同期最主要的卖家之一。",
+     "这个结论贴着边：「长期跌了很多、最近反弹时卖」这条证据的分量差三成，结论就会变成「分批减仓，已减掉三成以上」。",
+     "前后三周它在 HLS 加仓：这边卖、那边买，整体并没有在撤。",
      "同一只股票上，名单里的 Australian Retirement Trust 最近一个月也在减仓：多家同向，信号更强。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
@@ -2318,17 +4238,17 @@
      {
       "k": "bounce",
       "name": "趁反弹减仓",
-      "p": 0.421
-     },
-     {
-      "k": "base",
-      "name": "普通减仓",
-      "p": 0.166
+      "p": 0.394
      },
      {
       "k": "wind",
       "name": "分批减仓（一路在减）",
-      "p": 0.155
+      "p": 0.196
+     },
+     {
+      "k": "base",
+      "name": "普通减仓",
+      "p": 0.156
      }
     ],
     "strength": 82,
@@ -2369,10 +4289,10 @@
      "这是它近 4 个月在这只股票上连续第 2 次加仓。",
      "逐笔看（10 个交易日）：买入的量有 99% 发生在股价下跌的日子（同期下跌的日子占 60%），这段时间股价 -10%；后半段的量是前半段的 0.6 倍，越做越少。",
      "持仓阶段：从首次越过 5% 披露线算起约 35 个月，持股比例最高到过 17.54%；之前已经从最高点减掉过 25%，这次是往回买。之前公告过 12 次买入、5 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
      "综合打分：最像「逢低买入」（95%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入的量集中在股价下跌的日子。",
      "怎么做的：在市场上分 10 个交易日慢慢买，不显眼。",
-     "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
+     "前后三周它在 CPU、PWH、QBE 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
     "style": "养老金",
@@ -2384,7 +4304,7 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.953
+      "p": 0.952
      },
      {
       "k": "base",
@@ -2394,7 +4314,7 @@
      {
       "k": "prog",
       "name": "按计划持续建仓",
-      "p": 0.015
+      "p": 0.013
      }
     ],
     "strength": 31,
@@ -2426,7 +4346,7 @@
     "action": "build_dip",
     "label": "逢低建仓",
     "tone": "bull",
-    "confidence": "高",
+    "confidence": "中",
     "reasons": [
      "持股比例首次达到 11.1%，共 4,181 万股。",
      "成为大股东前 4 个月（9/2–11/2，23 笔）：买入 4,233 万股（均价约 $0.268），卖出 108 万股（均价约 $0.282）。",
@@ -2434,13 +4354,17 @@
      "同期小盘股指数（Small Ordinaries）3 个月 -5%、12 个月 -17%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
      "逐笔看（22 个交易日）：买入的量有 61% 发生在股价下跌的日子（同期下跌的日子占 55%），这段时间股价 -69%；后半段的量是前半段的 2.7 倍，越做越多。",
      "现有持仓的 99% 是最近 4 个月净买入的，属于快速建仓。",
-     "综合打分：最像「逢低买入」（53%），依据：股价在一年区间的低位；买的过程中股价一直在跌，它没有停；买之前股价跌了一轮。其次是「普通加仓」29%。",
+     "综合打分：最像「逢低买入」（49%），依据：股价在一年区间的低位；买的过程中股价一直在跌，它没有停；买之前股价跌了一轮。其次是「普通加仓」27%、「整体加仓（资金流入）」10%。",
      "怎么做的：在市场上买。",
+     "前后三周它在 MYG、SKS 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "同一只股票上，名单里的 Regal Funds Management 最近一个月也在加仓：多家同向，信号更强。",
      "同一只股票上，名单里的 Wilson Asset Management 最近一个月却在减仓：机构之间看法不一。",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
     "tags": [
+     "整体加仓",
+     "多家同向",
      "有人反向"
     ],
     "how": "在市场上买",
@@ -2448,20 +4372,20 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.534
+      "p": 0.494
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.29
+      "p": 0.268
      },
      {
-      "k": "mom",
-      "name": "顺势追加",
-      "p": 0.07
+      "k": "flow",
+      "name": "整体加仓（资金流入）",
+      "p": 0.099
      }
     ],
-    "strength": 54,
+    "strength": 64,
     "side": "buy"
    }
   },
@@ -2498,10 +4422,10 @@
      "变动时股价约 $1.71，之前近 1 个月 +10%、3 个月 -1%、6 个月 -18%、12 个月 +7%，处在一年区间（$1.26–$2.24）的中间。",
      "逐笔看（39 个交易日）：买入的量有 38% 发生在股价下跌的日子（同期下跌的日子占 43%），这段时间股价 +26%；后半段的量是前半段的 1.9 倍，越做越多。",
      "最近 4 个月净买入的只占现有持仓的 15%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 8 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 32% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（37%）。其次是「逢低买入」22%、「顺势追加」18%。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 50% 的情况下一份公告还是同方向，约 30% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：没有哪种特别的目的明显占上风，按普通加仓看（35%）。其次是「逢低买入」21%、「顺势追加」17%。",
      "怎么做的：在市场上分 39 个交易日慢慢买，不显眼。",
-     "前后三周它在 ACL、CAR 减仓：有买有卖，属于正常调整。",
+     "前后三周它在 ACL、CAR、CKF 减仓：有买有卖，属于正常调整。",
      "平台/多经理：把钱分给很多外部经理和指数组合，合计持仓的变化信号最弱。"
     ],
     "style": "平台/多经理",
@@ -2511,17 +4435,17 @@
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.37
+      "p": 0.351
      },
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.223
+      "p": 0.212
      },
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.179
+      "p": 0.17
      }
     ],
     "strength": 20,
@@ -2551,7 +4475,7 @@
     "action": "exit_loss",
     "label": "减到 5% 以下，像止损离场",
     "tone": "bear",
-    "confidence": "中",
+    "confidence": "高",
     "reasons": [
      "持股比例降到 5% 以下（上一次披露是 8.7%）。之后的买卖不用再公告。",
      "这次披露的明细里（10/14–10/30，9 笔）：卖出 1,649 万股（均价约 $0.178）。",
@@ -2562,17 +4486,18 @@
      "上一份公告时持有 3,266 万股，这次明细里净卖出 1,649 万股：估计还剩约 1,617 万股（约 4.3%，没算总股本的变化）。",
      "它之前的平均买入成本约 $0.203（按 2026/6/15 以来的公告累计，覆盖了卖出前持仓的 100%），这次卖出价约 $0.178，低了 12%：是亏钱卖的。",
      "持仓阶段：从建仓算起约 5 个月，持股比例最高到过 8.7%；这次之后比最高点至少少了 42%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 4 次买入、0 次减仓。这是它建仓以来第一次减仓。",
-     "这家基金的习惯（按它过去 11 次有后续的动作统计）：约 66% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「止损或看法变差」（56%），依据：卖出价低于自己的买入成本；建仓没多久、股价不如意就卖，像认错。其次是「短线交易」23%、「普通减仓」14%。",
+     "这家基金的习惯（按它过去 17 次有后续的动作统计）：约 74% 的情况下一份公告还是同方向，约 12% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「止损或看法变差」（54%），依据：卖出价低于自己的买入成本；建仓没多久、股价不如意就卖，像认错。其次是「短线交易」18%、「普通减仓」14%。",
      "怎么做的：在市场上卖。",
-     "这个结论贴着边：「21 天前还在加仓」这条证据的分量差三成，结论就会变成「减到 5% 以下」。所以把握最多算“中”。",
-     "同一只股票上，名单里的 Ellerston Capital 最近一个月却在加仓：机构之间看法不一。",
+     "前后三周它在 SGI、SK1 加仓：这边卖、那边买，像是换股（调仓）。",
+     "同一只股票上，名单里的 Ellerston Capital、Regal Funds Management 最近一个月却在加仓：机构之间看法不一。",
      "基金自己的说法（WAA《September 2026 Investment Update》，2026-10-14，英文原文）：“During the month, modular data centre manufacturer and operator DXN (ASX: DXN) and Network-as-a-Service provider Megaport (ASX: MP1) were both contributors to the investment portfolio performance. DXN is a modular data centre manufacturer and operator, scaled across the Asia -Pacific region. We remain positive on DXN's outlook given its growing exposure to the rapidly expanding AI data centre sector, supported by strong contract momentum and pipeline opportunities across Australia and the Asia-Pacific region,…”",
      "基金自己的说法（WMI《August 2026 Investment Update》，2026-09-14，英文原文）：“During the month, DXN (ASX: DXN) and Beacon Lighting Group (ASX: BLX) were contributors to the investment portfolio performance. DXN is a prefabricated data centre manufacturer and operator, scaled across the Asia- Pacific region. DXN’s FY2026 results also highlighted a record order backlog of $40.9 million and growing demand for its artificial intelligence (AI)-ready modular data centre solutions.”",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
     "tags": [
+     "换股",
      "有人反向",
      "有基金原话"
     ],
@@ -2581,17 +4506,17 @@
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.562
+      "p": 0.537
      },
      {
       "k": "short",
       "name": "短线交易",
-      "p": 0.232
+      "p": 0.177
      },
      {
       "k": "base",
       "name": "普通减仓",
-      "p": 0.141
+      "p": 0.135
      }
     ],
     "strength": 53,
@@ -2648,7 +4573,7 @@
      "同期小盘股指数（Small Ordinaries）3 个月 -7%、12 个月 -16%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
      "逐笔看（47 个交易日）：买入的量有 64% 发生在股价下跌的日子（同期下跌的日子占 43%），这段时间股价 -11%；后半段的量是前半段的 0.5 倍，越做越少。",
      "持仓阶段：从能查到的最早一份公告算起约 9 个月，持股比例最高到过 17.57%；这次之后是它在这只股票上持仓的新高。之前公告过 2 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "综合打分：最像「顺势追加」（50%），依据：近 3 个月股价在涨；股价在一年区间的高位。其次是「整体加仓（资金流入）」22%、「逢低买入」12%。",
      "怎么做的：在市场上买。",
      "这个结论贴着边：「同期在另外 6 只股票上也只买不卖」这条证据的分量差三成，结论就会变成「加仓」。所以把握最多算“中”。",
@@ -2664,7 +4589,7 @@
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.503
+      "p": 0.504
      },
      {
       "k": "flow",
@@ -2863,11 +4788,11 @@
      "逐笔看（14 个交易日）：买入的量有 71% 发生在股价下跌的日子（同期下跌的日子占 46%），这段时间股价 -7%。",
      "它之前的平均买入成本约 $4.66，这次买入价约 $5.17，比成本高 11%：已经赚钱了还在加，是加码。",
      "持仓阶段：从能查到的最早一份公告算起约 31 个月，持股比例最高到过 15.25%；这次之后是它在这只股票上持仓的新高。之前公告过 9 次买入、2 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
-     "综合打分：最像「顺势追加」（32%），依据：近 3 个月股价在涨；已经赚钱了还在加。其次是「按计划持续建仓」26%、「整体加仓（资金流入）」17%。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「顺势追加」（32%），依据：近 3 个月股价在涨；已经赚钱了还在加。其次是「按计划持续建仓」25%、「整体加仓（资金流入）」17%。",
      "怎么做的：在市场上分 14 个交易日慢慢买，不显眼。",
      "这个结论贴着边：「近 3 个月股价在涨」这条证据的分量差三成，结论就会变成「持续加仓，像按计划建仓」。",
-     "前后三周它在 BM1、BMC、EMR、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 BM1、BMC、EMR、EWC（共 9 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "基金自己的说法（LSF《Monthly Report - August 2026》，2026-09-08，英文原文）：“Gold equities, including Eldorado Gold and Westgold Resources, materially outperformed the index, with producers across the sector benefiting from operating leverage and record cash flow, which supported dividends substantially above market expectations.”",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
@@ -2882,17 +4807,17 @@
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.319
+      "p": 0.32
      },
      {
       "k": "prog",
       "name": "按计划持续建仓",
-      "p": 0.263
+      "p": 0.25
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.168
+      "p": 0.172
      }
     ],
     "strength": 42,
@@ -2941,12 +4866,12 @@
      "变动时股价约 $1.40，之前近 1 个月 -15%、3 个月 -23%、6 个月 -22%、12 个月 -27%，处在一年区间（$1.40–$2.19）的低位。",
      "买入发生在收购消息（10/12「Lodgement of Scheme Booklet with ASIC」，从标题看这家公司是被收购的一方）之后：对冲基金这时候买，常见的是做并购套利（赚收购价和市价之间的差价），不代表看好公司本身。",
      "持仓阶段：从能查到的最早一份公告算起约 29 个月，持股比例最高到过 9.34%；之前已经从最高点减掉过 40%，这次是往回买。之前公告过 1 次买入、2 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
      "交易形状：这次买的量有 100% 集中在 10/29 一天，是平时日成交量的 7 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
-     "综合打分：最像「逢低买入」（42%），依据：买之前股价跌了一轮；股价在一年区间的低位；这家基金习惯在股价弱的时候买。其次是「并购套利」25%、「整体加仓（资金流入）」16%。",
+     "综合打分：最像「逢低买入」（42%），依据：买之前股价跌了一轮；股价在一年区间的低位；这家基金习惯在股价弱的时候买。其次是「并购套利」24%、「整体加仓（资金流入）」16%。",
      "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
      "这个结论贴着边：「买之前股价跌了一轮」这条证据的分量差三成，结论就会变成「加仓」。",
-     "前后三周它在 BM1、BMC、EMR、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 BM1、BMC、EMR、EWC（共 9 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -2960,17 +4885,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.415
+      "p": 0.421
      },
      {
       "k": "arb",
       "name": "并购套利",
-      "p": 0.247
+      "p": 0.245
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.161
+      "p": 0.16
      }
     ],
     "strength": 44,
@@ -3094,10 +5019,10 @@
      "变动时股价约 $39.94，之前近 1 个月 +10%、3 个月 -9%、6 个月 +3%、12 个月 -19%，处在一年区间（$36.10–$50.91）的中低位。",
      "逐笔看（95 个交易日）：买入的量有 38% 发生在股价下跌的日子（同期下跌的日子占 51%），这段时间股价 -20%；后半段的量是前半段的 10 倍以上，越做越多。",
      "持仓阶段：从能查到的最早一份公告算起约 14 个月，持股比例最高到过 6.06%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「逢低买入」（60%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「普通加仓」19%。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「逢低买入」（59%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「普通加仓」19%、「换股调入」8%。",
      "怎么做的：在市场上分 95 个交易日慢慢买，不显眼。",
-     "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
+     "前后三周它在 CPU、PWH、QBE 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
     "style": "养老金",
@@ -3107,17 +5032,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.597
+      "p": 0.586
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.193
+      "p": 0.188
      },
      {
-      "k": "prog",
-      "name": "按计划持续建仓",
-      "p": 0.072
+      "k": "swap",
+      "name": "换股调入",
+      "p": 0.08
      }
     ],
     "strength": 25,
@@ -3158,7 +5083,7 @@
      "期间公司公告过融资（8/27「Proposed issue of securities - PC2」），一部分买入可能来自认购新股。",
      "逐笔看（25 个交易日）：买入的量有 34% 发生在股价下跌的日子（同期下跌的日子占 40%），这段时间股价 -12%；后半段的量是前半段的 1.8 倍，越做越多。",
      "最近 4 个月净买入的只占现有持仓的 8%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "综合打分：最像「整体加仓（资金流入）」（40%），依据：同期在另外 6 只股票上也只买不卖；这次加的幅度不大。其次是「普通加仓」20%、「逢低买入」17%。",
      "怎么做的：在市场上买。",
      "前后三周它在 3PL、AMX、CYG、CYM（共 6 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
@@ -3226,10 +5151,10 @@
      "逐笔看（8 个交易日）：买入的量有 61% 发生在股价下跌的日子（同期下跌的日子占 50%），这段时间股价 ±0%；后半段的量是前半段的 0.4 倍，越做越少。",
      "它之前的平均买入成本约 $0.620，这次买入价约 $0.394，比成本低 36%：在摊低成本。",
      "持仓阶段：从建仓算起约 8 个月，持股比例最高到过 12.56%；这次之后是它在这只股票上持仓的新高。之前公告过 4 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「逢低买入」（85%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入价低于自己的成本。",
      "怎么做的：在市场上买。",
-     "前后三周它在 BM1、BMC、EMR、MIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 BM1、BMC、EMR、EWC（共 9 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -3242,17 +5167,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.849
+      "p": 0.854
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.065
+      "p": 0.064
      },
      {
       "k": "prog",
       "name": "按计划持续建仓",
-      "p": 0.043
+      "p": 0.039
      }
     ],
     "strength": 54,
@@ -3358,8 +5283,8 @@
      "这是它近 4 个月在这只股票上连续第 2 次减仓。",
      "逐笔看（25 个交易日）：卖出的量有 32% 发生在股价下跌的日子（同期下跌的日子占 58%），这段时间股价 -4%；后半段的量是前半段的 6.0 倍，越做越多。",
      "持仓阶段：从能查到的最早一份公告算起约 32 个月，持股比例最高到过 8.65%；这次之后比最高点少了 31%（按股数算）。之前公告过 3 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「获利了结」（80%），依据：卖之前股价涨了一大段；股价在一年区间的高位；卖出的量集中在股价上涨的日子（逢高卖）。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「获利了结」（81%），依据：卖之前股价涨了一大段；股价在一年区间的高位；卖出的量集中在股价上涨的日子（逢高卖）。",
      "怎么做的：在市场上卖。",
      "前后三周它在 A4N、CAR、PLS、QAN（共 6 只） 加仓：这边卖、那边买，整体并没有在撤。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -3374,12 +5299,12 @@
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.801
+      "p": 0.806
      },
      {
       "k": "wind",
       "name": "分批减仓（一路在减）",
-      "p": 0.073
+      "p": 0.067
      },
      {
       "k": "base",
@@ -3426,9 +5351,10 @@
      "逐笔看（7 个交易日）：卖出的量有 3% 发生在股价下跌的日子（同期下跌的日子占 54%），这段时间股价 +5%；后半段的量是前半段的 10 倍以上，越做越多。",
      "长短期方向不一样：长期跌了很多（近 12 个月 -54%），最近在反弹（近 3 个月 +106%）——是趁反弹卖。不知道它的成本，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。",
      "持仓阶段：从能查到的最早一份公告算起约 8 个月，持股比例最高到过 12.8%；这次之后比最高点少了 17%（按股数算）。之前公告过 1 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 8% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「趁反弹减仓」（42%），依据：长期跌了很多、最近反弹时卖。其次是「普通减仓」17%、「获利了结」17%。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 73% 的情况下一份公告还是同方向，约 6% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「趁反弹减仓」（42%），依据：长期跌了很多、最近反弹时卖。其次是「普通减仓」16%、「获利了结」16%。",
      "怎么做的：在市场上卖。",
+     "前后三周它在 HLS 加仓：这边卖、那边买，整体并没有在撤。",
      "同一只股票上，名单里的 Australian Retirement Trust 最近一个月也在减仓：多家同向，信号更强。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
     ],
@@ -3442,17 +5368,17 @@
      {
       "k": "bounce",
       "name": "趁反弹减仓",
-      "p": 0.424
+      "p": 0.415
      },
      {
       "k": "base",
       "name": "普通减仓",
-      "p": 0.167
+      "p": 0.164
      },
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.167
+      "p": 0.164
      }
     ],
     "strength": 47,
@@ -3494,11 +5420,11 @@
      "期间公司有并购相关的公告（8/10「BET: BetMakers enters Scheme Implementation Deed with TAH」），从标题看这家公司是出手收购的一方（或者只是对方的公告），这里不据此下结论。",
      "逐笔看（15 个交易日）：买入的量有 52% 发生在股价下跌的日子（同期下跌的日子占 46%），这段时间股价 +22%。",
      "持仓阶段：从建仓算起约 6 个月，持股比例最高到过 5.38%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
-     "综合打分：几种目的的可能性接近，分不出主次，先按普通加仓看。最高的是「逢低买入」（31%）。其次是「整体加仓（资金流入）」28%、「普通加仓」21%。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：几种目的的可能性接近，分不出主次，先按普通加仓看。最高的是「逢低买入」（32%）。其次是「整体加仓（资金流入）」28%、「普通加仓」21%。",
      "怎么做的：在市场上分 15 个交易日慢慢买，不显眼。",
      "这个结论贴着边：「买之前股价跌了一轮」这条证据的分量差三成，结论就会变成「逢低加仓」。",
-     "前后三周它在 BM1、BMC、EMR、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 BM1、BMC、EMR、EWC（共 8 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -3510,7 +5436,7 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.313
+      "p": 0.32
      },
      {
       "k": "flow",
@@ -3634,8 +5560,8 @@
      "逐笔看（14 个交易日）：买入的量有 9% 发生在股价下跌的日子（同期下跌的日子占 26%），这段时间股价 +17%。",
      "它之前的平均买入成本约 $0.261，这次买入价约 $0.309，比成本高 18%：已经赚钱了还在加，是加码。",
      "持仓阶段：从建仓算起约 3 个月，持股比例最高到过 7.05%；这次之后是它在这只股票上持仓的新高。之前公告过 2 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「顺势追加」（37%），依据：买入的量集中在股价上涨的日子；已经赚钱了还在加；买的过程中股价一直在涨，它还在追。其次是「整体加仓（资金流入）」24%、「普通加仓」18%。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「顺势追加」（38%），依据：买入的量集中在股价上涨的日子；已经赚钱了还在加；买的过程中股价一直在涨，它还在追。其次是「整体加仓（资金流入）」25%、「普通加仓」19%。",
      "怎么做的：在市场上买。",
      "这个结论贴着边：「买入的量集中在股价上涨的日子」这条证据的分量差三成，结论就会变成「加仓」。",
      "前后三周它在 3PL、AMX、CYG、CYM（共 6 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
@@ -3651,17 +5577,17 @@
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.371
+      "p": 0.383
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.242
+      "p": 0.25
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.182
+      "p": 0.188
      }
     ],
     "strength": 56,
@@ -3705,8 +5631,8 @@
      "逐笔看（4 个交易日）：买入的量有 79% 发生在股价下跌的日子（同期下跌的日子占 80%），这段时间股价 -5%。",
      "它之前的平均买入成本约 $0.254，这次买入价约 $0.297，比成本高 17%：已经赚钱了还在加，是加码。",
      "持仓阶段：从建仓算起约 3 个月，持股比例最高到过 5.91%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「整体加仓（资金流入）」（39%），依据：同期在另外 6 只股票上也只买不卖。其次是「普通加仓」29%、「顺势追加」12%。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "综合打分：最像「整体加仓（资金流入）」（39%），依据：同期在另外 6 只股票上也只买不卖。其次是「普通加仓」30%、「顺势追加」12%。",
      "怎么做的：在市场上买，是同期最主要的买家之一。",
      "这个结论贴着边：「同期在另外 6 只股票上也只买不卖」这条证据的分量差三成，结论就会变成「加仓」。",
      "前后三周它在 3PL、AMX、CYG、CYM（共 6 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
@@ -3722,17 +5648,17 @@
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.388
+      "p": 0.393
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.291
+      "p": 0.295
      },
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.124
+      "p": 0.125
      }
     ],
     "strength": 66,
@@ -3772,7 +5698,7 @@
      "变动时股价约 $0.315。",
      "公司在 7/15「Prospectus」公告了融资：这次买入很可能主要是认购新股（参与融资，价格通常比市价低），不是在市场上抢筹。",
      "现有持仓的 100% 是最近 4 个月净买入的，属于快速建仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "折价：这批买入的均价约 $0.254，比同期股价的最低收盘价（$0.285）还低 11%——在市场上买不到这个价，是场外按折扣价拿的（配售、折价大宗或行权）。价格不是它在市场上挑的，谈不上“逢低”或“追涨”。",
      "综合打分：最像「参与融资」（92%），依据：公司同期公告了融资，而且买入量超过场内成交量或总股本明显增加；买入量超过同期全市场成交量，是一次性拿下的。",
      "怎么做的：多半是认购新股（配售）。至于为什么：撇开成交方式不看，动机上最像「整体加仓（资金流入）」（在各种动机里占 52%）。",
@@ -3844,7 +5770,7 @@
      "上一份公告时持有 4,662 万股，这次明细里净卖出 1,483 万股：估计还剩约 3,179 万股（约 4.7%，没算总股本的变化）。",
      "长短期方向不一样：长期跌了很多（近 12 个月 -54%），最近在反弹（近 3 个月 +106%）——是趁反弹卖。不知道它的成本，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。",
      "持仓阶段：从能查到的最早一份公告算起约 7 个月，持股比例最高到过 11.4%；这次之后比最高点至少少了 56%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 0 次买入、3 次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
      "综合打分：最像「分批减仓（一路在减）」（35%），依据：已经比最高点少了 56%；近 4 个月连续第 3 次减仓；之前已经减过，这次减到了 5% 以下。其次是「趁反弹减仓」28%、「普通减仓」11%。",
      "怎么做的：在市场上卖。",
      "这个结论贴着边：「长期跌了很多、最近反弹时卖」这条证据的分量差三成，结论就会变成「趁反弹减到 5% 以下」。",
@@ -3863,7 +5789,7 @@
      {
       "k": "wind",
       "name": "分批减仓（一路在减）",
-      "p": 0.346
+      "p": 0.347
      },
      {
       "k": "bounce",
@@ -3913,7 +5839,7 @@
      "变动时股价约 $2.96，之前近 1 个月 +7%、3 个月 +23%、6 个月 +53%、12 个月 +9%，处在一年区间（$1.83–$2.99）的高位。",
      "同期小盘股指数（Small Ordinaries）3 个月 -5%、12 个月 -16%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
      "持仓阶段：从首次越过 5% 披露线算起约 23 个月，持股比例最高到过 8.21%；这次之后比最高点少了 13%（按股数算）。之前公告过 4 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 8 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 32% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 50% 的情况下一份公告还是同方向，约 30% 会在 3 个月内掉头——样本还少，仅供参考。",
      "综合打分：最像「获利了结」（71%），依据：卖之前股价涨了一大段；股价在一年区间的高位；已经拿了一年半以上。其次是「仓位管理（涨多了减一点）」17%。",
      "怎么做的：在市场上卖。",
      "前后三周它在 KAR 加仓：这边卖、那边买，整体并没有在撤。",
@@ -4032,7 +5958,7 @@
     "action": "add_dip",
     "label": "逢低加仓",
     "tone": "bull",
-    "confidence": "中",
+    "confidence": "高",
     "reasons": [
      "持股比例 7.32% → 8.43%，持股数增加 1,678 万股（相当于原持仓的 15%）。",
      "这次披露的明细里（8/11–10/23，105 笔）：买入 1,756 万股（均价约 $8.97），卖出 78.0 万股（均价约 $8.45）。",
@@ -4040,8 +5966,8 @@
      "这是它近 4 个月在这只股票上连续第 2 次加仓。",
      "逐笔看（39 个交易日）：买入的量有 72% 发生在股价下跌的日子（同期下跌的日子占 62%），这段时间股价 -17%。",
      "持仓阶段：从建仓算起约 10 个月，持股比例最高到过 7.32%；这次之后是它在这只股票上持仓的新高。之前公告过 3 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「逢低买入」（74%），依据：股价在一年区间的低位；买之前股价跌了一轮；买的过程中股价一直在跌，它没有停。其次是「按计划持续建仓」10%、「普通加仓」9%。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「逢低买入」（75%），依据：股价在一年区间的低位；买之前股价跌了一轮；买的过程中股价一直在跌，它没有停。其次是「普通加仓」9%、「按计划持续建仓」9%。",
      "怎么做的：在市场上分 39 个交易日慢慢买，不显眼。",
      "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -4055,17 +5981,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.745
-     },
-     {
-      "k": "prog",
-      "name": "按计划持续建仓",
-      "p": 0.095
+      "p": 0.753
      },
      {
       "k": "base",
       "name": "普通加仓",
       "p": 0.093
+     },
+     {
+      "k": "prog",
+      "name": "按计划持续建仓",
+      "p": 0.087
      }
     ],
     "strength": 36,
@@ -4104,8 +6030,8 @@
      "它 11 天前的公告还是加仓，这么快就掉头。",
      "上一份公告时持有 6,286 万股，这次明细里净卖出 292 万股：估计还剩约 5,994 万股（约 4.8%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5.04%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "形式上只是刚好跌破 5% 线；综合打分：最像「止损或看法变差」（67%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「短线交易」17%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "形式上只是刚好跌破 5% 线；综合打分：最像「止损或看法变差」（68%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「短线交易」15%。",
      "怎么做的：在市场上卖。",
      "前后三周它在 AZJ、MP1、MTS、NWH（共 6 只） 加仓：这边卖、那边买，整体并没有在撤。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -4117,17 +6043,17 @@
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.672
+      "p": 0.685
      },
      {
       "k": "short",
       "name": "短线交易",
-      "p": 0.17
+      "p": 0.154
      },
      {
       "k": "base",
       "name": "普通减仓",
-      "p": 0.072
+      "p": 0.074
      }
     ],
     "strength": 8,
@@ -4171,14 +6097,13 @@
      "减掉的不到原持仓的一成多，属于小幅减仓。",
      "长短期方向不一样：长期跌了很多（近 12 个月 -56%），最近在反弹（近 3 个月 +12%）——是趁反弹卖。不知道它的成本，说不准是赚是亏，但不是“高位获利了结”，也不是“越跌越卖”。",
      "持仓阶段：从建仓算起约 31 个月，持股比例最高到过 19.31%。之前公告过 3 次买入、2 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
      "收购线：卖之前持股 19.31%，贴着 20% 的收购线；这次只减到 18.19%。贴着线的大股东小幅减持，常常只是给自己留出余地（比如准备参与下一次融资），不一定是看法变差。",
      "流动性：卖之前的持仓相当于这只股票约 127 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
-     "综合打分：最像「止损或看法变差」（33%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「换股调出」19%、「普通减仓」16%。",
+     "综合打分：最像「止损或看法变差」（36%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「普通减仓」18%、「趁反弹减仓」17%。",
      "怎么做的：在市场上卖。",
      "注意：这次只减了持仓的 5%，大头还留着，而且这个仓位在市场上本来就卖不动，卖之前又贴着 20% 收购线。“止损”是认错离场的意思，用在这里重了：更像是在股价不好的时候先降一点风险。所以把握最多算“中”。",
-     "这个结论贴着边：「卖之前股价跌了不少」这条证据的分量差三成，结论就会变成「减仓」。",
-     "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "前后三周它在 ELS 加仓：这边卖、那边买，像是换股（调仓）。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -4193,17 +6118,17 @@
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.326
-     },
-     {
-      "k": "swap",
-      "name": "换股调出",
-      "p": 0.189
+      "p": 0.365
      },
      {
       "k": "base",
       "name": "普通减仓",
-      "p": 0.164
+      "p": 0.184
+     },
+     {
+      "k": "bounce",
+      "name": "趁反弹减仓",
+      "p": 0.166
      }
     ],
     "strength": 30,
@@ -4246,7 +6171,7 @@
      "逐笔看（11 个交易日）：卖出的量有 19% 发生在股价下跌的日子（同期下跌的日子占 36%），这段时间股价 +8%。",
      "减掉的不到原持仓的一成多，属于小幅减仓。",
      "持仓阶段：从能查到的最早一份公告算起约 30 个月，持股比例最高到过 11.94%；这次之后比最高点少了 19%（按股数算）。之前公告过 1 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
      "综合打分：最像「获利了结」（84%），依据：卖之前股价涨了一大段；股价在一年区间的高位；卖出的量集中在股价上涨的日子（逢高卖）。",
      "怎么做的：在市场上卖，是同期最主要的卖家之一。",
      "前后三周它在 A4N、CAR、PLS、QAN（共 6 只） 加仓：这边卖、那边买，整体并没有在撤。",
@@ -4261,7 +6186,7 @@
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.844
+      "p": 0.845
      },
      {
       "k": "rebal",
@@ -4372,7 +6297,7 @@
      "逐笔看（53 个交易日）：卖出的量有 22% 发生在股价下跌的日子（同期下跌的日子占 40%），这段时间股价 +42%。",
      "上一份公告时持有 730 万股，这次明细里净卖出 33.7 万股：估计还剩约 696 万股（约 4.8%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 9 个月，持股比例最高到过 5.08%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
      "形式上只是刚好跌破 5% 线；综合打分：最像「获利了结」（69%），依据：卖之前股价涨了一大段；股价在一年区间的高位；卖出的量集中在股价上涨的日子（逢高卖）。其次是「仓位管理（涨多了减一点）」19%。",
      "怎么做的：在市场上分 53 个交易日慢慢卖，不显眼。",
      "前后三周它在 AZJ、MP1、MTS、NWH（共 6 只） 加仓：这边卖、那边买，整体并没有在撤。",
@@ -4388,12 +6313,12 @@
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.692
+      "p": 0.693
      },
      {
       "k": "rebal",
       "name": "仓位管理（涨多了减一点）",
-      "p": 0.191
+      "p": 0.192
      },
      {
       "k": "base",
@@ -4440,11 +6365,11 @@
      "这是它近 4 个月在这只股票上连续第 2 次加仓。",
      "逐笔看（13 个交易日）：买入的量有 95% 发生在股价下跌的日子（同期下跌的日子占 65%），这段时间股价 -17%；后半段的量是前半段的 4.1 倍，越做越多。",
      "持仓阶段：从建仓算起约 5 个月，持股比例最高到过 5.05%；这次之后是它在这只股票上持仓的新高。之前公告过 1 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
-     "综合打分：几种目的的可能性接近，分不出主次，先按普通加仓看。最高的是「逢低买入」（25%）。其次是「整体加仓（资金流入）」25%、「顺势追加」20%。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：几种目的的可能性接近，分不出主次，先按普通加仓看。最高的是「逢低买入」（26%）。其次是「整体加仓（资金流入）」25%、「顺势追加」20%。",
      "怎么做的：在市场上买，是同期最主要的买家之一。",
      "这个结论贴着边：「买入的量集中在股价下跌的日子」这条证据的分量差三成，结论就会变成「逢低加仓」。",
-     "前后三周它在 BM1、BMC、LIN、MIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "前后三周它在 BM1、BMC、EWC、LIN（共 8 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -4457,17 +6382,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.252
+      "p": 0.259
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.246
+      "p": 0.247
      },
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.203
+      "p": 0.2
      }
     ],
     "strength": 72,
@@ -4508,7 +6433,7 @@
      "这 4 个月里也卖了不少（卖出量是买入量的 77%），是边买边卖做上来的，不是一路只买。",
      "逐笔看（24 个交易日）：买入的量有 65% 发生在股价下跌的日子（同期下跌的日子占 51%），这段时间股价 -34%；后半段的量是前半段的 3.4 倍，越做越多。",
      "最近 4 个月净买入的只占现有持仓的 7%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
      "综合打分：最像「逢低买入」（70%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「整体加仓（资金流入）」17%、「普通加仓」8%。",
      "怎么做的：在市场上分 24 个交易日慢慢买，不显眼。",
      "前后三周它在 BM1、BMC、EMR、LIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
@@ -4525,17 +6450,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.698
+      "p": 0.702
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
-      "p": 0.174
+      "p": 0.171
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.085
+      "p": 0.084
      }
     ],
     "strength": 13,
@@ -4586,8 +6511,8 @@
      "买入发生在收购消息（9/16「RWC signs Scheme Implementation Deed with Brookfield」，从标题看这家公司是被收购的一方）之后：可能在赌收购成功，或者赌有人出更高的价。",
      "这是它近 4 个月在这只股票上连续第 4 次加仓。",
      "持仓阶段：从能查到的最早一份公告算起约 24 个月，持股比例最高到过 16.18%；这次之后是它在这只股票上持仓的新高。之前公告过 4 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「顺势追加」（59%），依据：近 3 个月股价在涨；股价在一年区间的高位。其次是「按计划持续建仓」20%、「普通加仓」11%。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「顺势追加」（60%），依据：近 3 个月股价在涨；股价在一年区间的高位。其次是「按计划持续建仓」18%、「普通加仓」11%。",
      "怎么做的：在市场上买，是同期最主要的买家之一。",
      "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -4602,17 +6527,17 @@
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.593
+      "p": 0.6
      },
      {
       "k": "prog",
       "name": "按计划持续建仓",
-      "p": 0.195
+      "p": 0.183
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.108
+      "p": 0.111
      }
     ],
     "strength": 66,
@@ -4654,8 +6579,8 @@
      "逐笔看（50 个交易日）：买入的量有 30% 发生在股价下跌的日子（同期下跌的日子占 53%），这段时间股价 -50%；后半段的量是前半段的 10 倍以上，越做越多。",
      "它之前的平均买入成本约 $2.60，这次买入价约 $3.59，比成本高 38%：已经赚钱了还在加，是加码。",
      "持仓阶段：从首次越过 5% 披露线算起约 35 个月，持股比例最高到过 17.54%；之前已经从最高点减掉过 32%，这次是往回买。之前公告过 11 次买入、5 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「逢低买入」（76%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「顺势追加」9%、「普通加仓」8%。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「逢低买入」（77%），依据：买之前股价跌了一轮；股价在一年区间的低位；买的过程中股价一直在跌，它没有停。其次是「顺势追加」9%、「普通加仓」8%。",
      "怎么做的：在市场上分 50 个交易日慢慢买，不显眼。",
      "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -4667,17 +6592,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.762
+      "p": 0.766
      },
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.087
+      "p": 0.086
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.085
+      "p": 0.084
      }
     ],
     "strength": 16,
@@ -4716,7 +6641,7 @@
      "这是它近 4 个月在这只股票上连续第 2 次减仓。",
      "上一份公告时持有 702 万股，这次明细里净卖出 5.0 万股：估计还剩约 697 万股（约 5.0%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 27 个月，持股比例最高到过 6.02%；这次之后比最高点至少少了 17%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 2 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 8% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 73% 的情况下一份公告还是同方向，约 6% 会在 3 个月内掉头——样本还少，仅供参考。",
      "形式上只是刚好跌破 5% 线；综合打分：最像「获利了结」（72%），依据：卖之前股价涨了一大段；股价在一年区间的高位；已经拿了一年半以上。其次是「仓位管理（涨多了减一点）」15%。",
      "怎么做的：在市场上卖。",
      "同一只股票上，名单里的 Australian Retirement Trust 最近一个月也在减仓：多家同向，信号更强。",
@@ -4732,12 +6657,12 @@
      {
       "k": "profit",
       "name": "获利了结",
-      "p": 0.721
+      "p": 0.717
      },
      {
       "k": "rebal",
       "name": "仓位管理（涨多了减一点）",
-      "p": 0.15
+      "p": 0.149
      },
      {
       "k": "base",
@@ -4822,7 +6747,7 @@
      "逐笔看（14 个交易日）：卖出的量有 24% 发生在股价下跌的日子（同期下跌的日子占 48%），这段时间股价 +25%。",
      "同一份明细里，卖出均价比买入均价高 30%，是赚钱卖的。",
      "持仓阶段：从能查到的最早一份公告算起约 20 个月，持股比例最高到过 8.74%；这次之后比最高点少了 18%（按股数算）。之前公告过 1 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
      "综合打分：最像「获利了结」（99%），依据：同一份明细里卖出均价比买入均价高；卖之前股价涨了一大段；股价在一年区间的高位。",
      "怎么做的：在市场上卖。",
      "前后三周它在 AZJ、MP1、MTS、NWH（共 5 只） 加仓：这边卖、那边买，整体并没有在撤。",
@@ -4889,8 +6814,8 @@
      "逐笔看（38 个交易日）：买入的量有 70% 发生在股价下跌的日子（同期下跌的日子占 54%），这段时间股价 -24%；后半段的量是前半段的 2.0 倍，越做越多。",
      "最近 4 个月净买入的只占现有持仓的 21%：早就有底仓，这次只是加到了 5% 披露线以上。",
      "长短期方向不一样：长期是涨的（近 6 个月 +94%），最近才回落（近 1 个月 -15%），股价也不在一年的低位——是在上涨途中的回调里买，和“跌了很久去抄底”不是一回事。",
-     "这家基金的习惯（按它过去 10 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 23% 会在 3 个月内掉头——样本还少，仅供参考。",
-     "综合打分：最像「回调买入（长期在涨）」（39%），依据：长期在涨、最近回落，股价不在低位。其次是「普通加仓」21%、「逢低买入」16%。",
+     "这家基金的习惯（按它过去 12 次有后续的动作统计）：约 52% 的情况下一份公告还是同方向，约 20% 会在 3 个月内掉头——经常做一段就反过来，单独一份公告的分量要打折。",
+     "综合打分：最像「回调买入（长期在涨）」（40%），依据：长期在涨、最近回落，股价不在低位。其次是「普通加仓」22%、「换股调入」14%。",
      "怎么做的：在市场上分 38 个交易日慢慢买，不显眼。",
      "前后三周它在 ANN、BAP、EOS、FPR（共 5 只） 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -4902,17 +6827,17 @@
      {
       "k": "pull",
       "name": "回调买入（长期在涨）",
-      "p": 0.386
+      "p": 0.395
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.213
+      "p": 0.218
      },
      {
-      "k": "dip",
-      "name": "逢低买入",
-      "p": 0.155
+      "k": "swap",
+      "name": "换股调入",
+      "p": 0.142
      }
     ],
     "strength": 29,
@@ -4986,7 +6911,7 @@
      "逐笔看（4 个交易日）：卖出的量有 14% 发生在股价下跌的日子（同期下跌的日子占 12%），这段时间股价 +7%。",
      "上一份公告时持有 1,898 万股，这次明细里净卖出 4.5 万股：估计还剩约 1,893 万股（约 5.0%，没算总股本的变化）。",
      "持仓阶段：从首次越过 5% 披露线算起约 1 个月，持股比例最高到过 5.01%。之前公告过 1 次买入、0 次减仓。这是它成为大股东以来第一次减仓。",
-     "这家基金的习惯（按它过去 8 次有后续的动作统计）：约 53% 的情况下一份公告还是同方向，约 32% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 9 次有后续的动作统计）：约 50% 的情况下一份公告还是同方向，约 30% 会在 3 个月内掉头——样本还少，仅供参考。",
      "形式上只是刚好跌破 5% 线；综合打分：最像「止损或看法变差」（47%），依据：卖之前股价跌了不少；股价在一年区间的低位。其次是「短线交易」30%、「普通减仓」13%。",
      "怎么做的：在市场上卖。",
      "前后三周它在 KAR 加仓：这边卖、那边买，整体并没有在撤。",
@@ -5054,24 +6979,26 @@
      "公司的发行文件对得上：10/5 按 $0.038 发行 6,794 万股新股（配售，Appendix 3B）；它的买入均价约 $0.038，就是在认购这次发行。",
      "逐笔看（12 个交易日）：买入的量有 4% 发生在股价下跌的日子（同期下跌的日子占 32%），这段时间股价 -18%；后半段的量是前半段的 0.2 倍，越做越少。",
      "最近 4 个月净买入的只占现有持仓的 34%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 6 次有后续的动作统计）：约 68% 的情况下一份公告还是同方向，约 22% 会在 3 个月内掉头——样本还少，仅供参考。",
+     "这家基金的习惯（按它过去 7 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 27% 会在 3 个月内掉头——样本还少，仅供参考。",
      "交易形状：这次买的量有 60% 集中在 9/29 一天，是平时日成交量的 9 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
      "综合打分：最像「参与融资」（99%），依据：公司的发行文件（Appendix 3B/2A）价格、日期都对得上；大部分是一天之内一次性拿下的；公司同期公告了融资。",
      "怎么做的：认购公司发的新股（公司的发行文件对得上）。至于为什么：撇开成交方式不看，动机上最像「整体加仓（资金流入）」（在各种动机里占 37%）。",
      "前后三周它在 3PL、AMX、CYG、LUX（共 5 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
+     "同一只股票上，名单里的 Thorney / Tiga Trading 最近一个月也在加仓：多家同向，信号更强。",
      "主动选股基金：基金经理自己挑股票，增减持通常反映对这家公司的看法。"
     ],
     "style": "主动选股基金",
     "tags": [
      "大宗",
      "参与融资",
-     "整体加仓"
+     "整体加仓",
+     "多家同向"
     ],
     "how": "认购公司发的新股（公司的发行文件对得上）",
     "why": {
      "k": "flow",
      "name": "整体加仓（资金流入）",
-     "p": 0.374
+     "p": 0.373
     },
     "purposes": [
      {
@@ -5090,7 +7017,7 @@
       "p": 0.003
      }
     ],
-    "strength": 70,
+    "strength": 80,
     "side": "buy"
    }
   },
@@ -5129,8 +7056,8 @@
      "这是它近 4 个月在这只股票上连续第 3 次加仓。",
      "逐笔看（15 个交易日）：买入的量有 95% 发生在股价下跌的日子（同期下跌的日子占 32%），这段时间股价 +8%；后半段的量是前半段的 3.4 倍，越做越多。",
      "持仓阶段：从能查到的最早一份公告算起约 24 个月，持股比例最高到过 14.68%；这次之后是它在这只股票上持仓的新高。之前公告过 3 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「顺势追加」（52%），依据：近 3 个月股价在涨；股价在一年区间的高位。其次是「按计划持续建仓」25%、「普通加仓」9%。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「顺势追加」（53%），依据：近 3 个月股价在涨；股价在一年区间的高位。其次是「按计划持续建仓」24%、「普通加仓」9%。",
      "怎么做的：在市场上分 15 个交易日慢慢买，不显眼。",
      "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
      "养老金：钱来自会员供款，持仓常是多个组合加在一起，不少买卖只是资产配置或资金进出，不一定代表看法。"
@@ -5145,17 +7072,17 @@
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.524
+      "p": 0.533
      },
      {
       "k": "prog",
       "name": "按计划持续建仓",
-      "p": 0.254
+      "p": 0.239
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.092
+      "p": 0.094
      }
     ],
     "strength": 39,
@@ -5197,8 +7124,8 @@
      "逐笔看（11 个交易日）：买入的量有 58% 发生在股价下跌的日子（同期下跌的日子占 46%），这段时间股价 -6%；后半段的量是前半段的 3.9 倍，越做越多。",
      "它之前的平均买入成本约 $0.645，这次买入价约 $0.414，比成本低 36%：在摊低成本。",
      "持仓阶段：从建仓算起约 8 个月，持股比例最高到过 11.22%；这次之后是它在这只股票上持仓的新高。之前公告过 3 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
-     "综合打分：最像「逢低买入」（87%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入价低于自己的成本。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
+     "综合打分：最像「逢低买入」（88%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入价低于自己的成本。",
      "怎么做的：在市场上买。",
      "前后三周它在 BM1、BMC、EMR、MIN（共 7 只） 也在加仓，没看到减仓：可能有新资金进来，在整体加仓。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
@@ -5213,17 +7140,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.874
-     },
-     {
-      "k": "prog",
-      "name": "按计划持续建仓",
-      "p": 0.042
+      "p": 0.879
      },
      {
       "k": "flow",
       "name": "整体加仓（资金流入）",
       "p": 0.041
+     },
+     {
+      "k": "prog",
+      "name": "按计划持续建仓",
+      "p": 0.039
      }
     ],
     "strength": 57,
@@ -5265,7 +7192,7 @@
      "公司的发行文件对得上：10/19 按 $0.660 发行 6,821 万股新股（新股发行，Appendix 3B），发行价比公告前一天的收盘价低 8%；它的买入均价约 $0.668，就是在认购这次发行。",
      "逐笔看（14 个交易日）：买入的量有 13% 发生在股价下跌的日子（同期下跌的日子占 45%），这段时间股价 -12%；后半段的量是前半段的 5.9 倍，越做越多。",
      "现有持仓里约 51% 是最近 4 个月净买入的。",
-     "这家基金的习惯（按它过去 24 次有后续的动作统计）：约 80% 的情况下一份公告还是同方向，约 10% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 27 次有后续的动作统计）：约 78% 的情况下一份公告还是同方向，约 9% 会在 3 个月内掉头——属于一般水平。",
      "交易形状：这次买的量有 75% 集中在 10/16 一天，是平时日成交量的 27 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
      "综合打分：最像「参与融资」（100%），依据：公司的发行文件（Appendix 3B/2A）价格、日期都对得上；明细里写的是配售/认购新股；大部分是一天之内一次性拿下的。",
      "怎么做的：认购公司发的新股（公司的发行文件对得上）。至于为什么：撇开成交方式不看，动机上最像「整体加仓（资金流入）」（在各种动机里占 52%）。",
@@ -5282,7 +7209,7 @@
     "why": {
      "k": "flow",
      "name": "整体加仓（资金流入）",
-     "p": 0.52
+     "p": 0.521
     },
     "purposes": [
      {
@@ -5343,12 +7270,12 @@
      "减掉的不到原持仓的一成多，属于小幅减仓。",
      "它之前的平均买入成本约 $0.183（按 2023/9/13 以来的公告累计，覆盖了卖出前持仓的 64%），这次卖出价约 $0.106，低了 42%：是亏钱卖的。",
      "持仓阶段：从能查到的最早一份公告算起约 35 个月，持股比例最高到过 19.04%；这次之后比最高点少了 12%（按股数算）。之前公告过 4 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
+     "这家基金的习惯（按它过去 87 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 16% 会在 3 个月内掉头——属于一般水平。",
      "流动性：卖之前的持仓相当于这只股票约 217 个交易日的全部成交量。这么大的仓位在市场上卖不动，只能分很多次慢慢减，或者找人整块接走——所以“卖得慢、每次卖得少”不代表不坚决。",
-     "综合打分：最像「止损或看法变差」（99%），依据：卖出价低于自己的买入成本；卖之前股价跌了不少；股价在一年区间的低位。",
+     "综合打分：最像「止损或看法变差」（100%），依据：卖出价低于自己的买入成本；卖之前股价跌了不少；股价在一年区间的低位。",
      "怎么做的：在市场上卖，是同期最主要的卖家之一。",
      "注意：这次只减了持仓的 6%，大头还留着，而且这个仓位在市场上本来就卖不动。“止损”是认错离场的意思，用在这里重了：更像是在股价不好的时候先降一点风险。所以把握最多算“中”。",
-     "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
+     "前后三周它在 ELS 加仓：这边卖、那边买，像是换股（调仓）。",
      "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
     ],
     "style": "多空对冲基金",
@@ -5362,17 +7289,17 @@
      {
       "k": "stop",
       "name": "止损或看法变差",
-      "p": 0.994
-     },
-     {
-      "k": "swap",
-      "name": "换股调出",
-      "p": 0.003
+      "p": 0.996
      },
      {
       "k": "base",
       "name": "普通减仓",
       "p": 0.002
+     },
+     {
+      "k": "swap",
+      "name": "换股调出",
+      "p": 0.001
      }
     ],
     "strength": 48,
@@ -5413,8 +7340,8 @@
      "变动时股价约 $23.80，之前近 1 个月 -1%、3 个月 -7%、6 个月 -9%、12 个月 -34%，处在一年区间（$21.39–$37.25）的低位。",
      "逐笔看（69 个交易日）：买入的量有 35% 发生在股价下跌的日子（同期下跌的日子占 50%），这段时间股价 -10%；后半段的量是前半段的 0.4 倍，越做越少。",
      "持仓阶段：从建仓算起约 10 个月，持股比例最高到过 9.15%；这次之后是它在这只股票上持仓的新高。之前公告过 4 次买入、0 次减仓。",
-     "这家基金的习惯（按它过去 41 次有后续的动作统计）：约 85% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
-     "综合打分：最像「逢低买入」（66%），依据：买之前股价跌了一轮；股价在一年区间的低位；这家基金习惯在股价弱的时候买。其次是「普通加仓」14%、「顺势追加」8%。",
+     "这家基金的习惯（按它过去 43 次有后续的动作统计）：约 83% 的情况下一份公告还是同方向，约 4% 会在 3 个月内掉头——一旦开始就倾向一路做下去。",
+     "综合打分：最像「逢低买入」（67%），依据：买之前股价跌了一轮；股价在一年区间的低位；这家基金习惯在股价弱的时候买。其次是「普通加仓」14%。",
      "怎么做的：在市场上分 69 个交易日慢慢买，不显眼。",
      "前后三周它在 CPU、PWH 减仓：有买有卖，属于正常调整。",
      "同一只股票上，名单里的 Colonial First State (CFS) 最近一个月却在减仓：机构之间看法不一。",
@@ -5429,17 +7356,17 @@
      {
       "k": "dip",
       "name": "逢低买入",
-      "p": 0.661
+      "p": 0.667
      },
      {
       "k": "base",
       "name": "普通加仓",
-      "p": 0.138
+      "p": 0.137
      },
      {
       "k": "mom",
       "name": "顺势追加",
-      "p": 0.08
+      "p": 0.079
      }
     ],
     "strength": 18,
@@ -5479,216 +7406,6 @@
     ],
     "style": "养老金",
     "tags": []
-   }
-  },
-  {
-   "id": "mk-2924-03150091-2A1704888",
-   "code": "EDU",
-   "company": "EDU HOLDINGS LTD",
-   "date": "2026-10-19",
-   "time": "17:01",
-   "headline": "Becoming a substantial holder",
-   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03150091-2A1704888",
-   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03150091-2A1704888",
-   "price_sensitive": false,
-   "type": "becoming",
-   "change_date": "2026-10-15",
-   "voting_power": [
-    5.02
-   ],
-   "lodged_code": "",
-   "holder": "Regal Funds Management",
-   "group": "主动基金",
-   "confidence": "高",
-   "ocr": false,
-   "sector": "Consumer Discretionary",
-   "insight": {
-    "action": "cross_up",
-    "label": "加仓越过 5% 线",
-    "tone": "bull",
-    "confidence": "中",
-    "reasons": [
-     "持股比例首次达到 5.02%，共 625 万股。",
-     "成为大股东前 4 个月（6/16–9/21，31 笔）：买入 151 万股（均价约 $1.13）。",
-     "变动时股价约 $0.710，之前近 1 个月 -37%、3 个月 -26%、6 个月 -17%、12 个月 -4%，处在一年区间（$0.555–$1.19）的低位。",
-     "同期小盘股指数（Small Ordinaries）3 个月 -4%、12 个月 -18%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
-     "这只股票平时波动就大（一天约 ±4.8%），上面这种幅度的跌在它身上算正常起伏，不当作“跌了一大段”。",
-     "逐笔看（29 个交易日）：买入的量有 42% 发生在股价下跌的日子（同期下跌的日子占 50%），这段时间股价 -9%。",
-     "最近 4 个月净买入的只占现有持仓的 24%：早就有底仓，这次只是加到了 5% 披露线以上。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
-     "买入位置：这批买入的均价约 $1.13，买入期间股价在 $0.905–$1.19 之间——买在了这段时间的高处，现在 $0.710，比均价低 37%。它是先买、之后才跌的，不是等跌下来才买。",
-     "综合打分：几种目的的可能性接近，分不出主次，先按普通加仓看。最高的是「逢低买入」（38%）。其次是「换股调入」33%、「普通加仓」19%。",
-     "怎么做的：在市场上分 29 个交易日慢慢买，不显眼。",
-     "前后三周它在 AI1、EQT、GTI、SPG（共 5 只） 减仓：像是把钱从那边挪到这只（调仓）。",
-     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
-    ],
-    "style": "多空对冲基金",
-    "tags": [
-     "买在高处",
-     "换股"
-    ],
-    "how": "在市场上分 29 个交易日慢慢买，不显眼",
-    "purposes": [
-     {
-      "k": "dip",
-      "name": "逢低买入",
-      "p": 0.377
-     },
-     {
-      "k": "swap",
-      "name": "换股调入",
-      "p": 0.33
-     },
-     {
-      "k": "base",
-      "name": "普通加仓",
-      "p": 0.186
-     }
-    ],
-    "strength": 41,
-    "side": "buy"
-   }
-  },
-  {
-   "id": "mk-2924-03150086-6A1349947",
-   "code": "TOR",
-   "company": "Torque Metals Ltd",
-   "date": "2026-10-19",
-   "time": "16:57",
-   "headline": "Becoming a substantial holder",
-   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03150086-6A1349947",
-   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03150086-6A1349947",
-   "price_sensitive": false,
-   "type": "becoming",
-   "change_date": "2026-10-15",
-   "voting_power": [
-    5.41
-   ],
-   "lodged_code": "",
-   "holder": "Regal Funds Management",
-   "group": "主动基金",
-   "confidence": "高",
-   "ocr": false,
-   "sector": "Materials",
-   "insight": {
-    "action": "build_dip",
-    "label": "逢低建仓",
-    "tone": "bull",
-    "confidence": "中",
-    "reasons": [
-     "持股比例首次达到 5.41%，共 4,093 万股。",
-     "成为大股东前 4 个月（6/25–10/15，9 笔）：买入 2,087 万股（均价约 $0.205）。",
-     "变动时股价约 $0.175，之前近 1 个月 -12%、3 个月 -19%、6 个月 -68%、12 个月 -39%，处在一年区间（$0.175–$0.550）的低位。",
-     "同期小盘股指数（Small Ordinaries）3 个月 -4%、12 个月 -18%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
-     "期间公司公告过融资（10/12「Update - Proposed issue of securities - TOR」），一部分买入可能来自认购新股。",
-     "逐笔看（9 个交易日）：买入的量有 85% 发生在股价下跌的日子（同期下跌的日子占 46%），这段时间股价 -38%；后半段的量是前半段的 5.1 倍，越做越多。",
-     "现有持仓里约 51% 是最近 4 个月净买入的。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
-     "交易形状：这次买的量有 76% 集中在 10/15 一天，是平时日成交量的 12 倍——是一次性拿下一大笔（接了别人的大宗，或认购新股），不是在市场上慢慢买。",
-     "综合打分：最像「逢低买入」（84%），依据：买之前股价跌了一轮；股价在一年区间的低位；买入的量集中在股价下跌的日子。",
-     "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
-     "注意：这份 603 里近 4 个月买的只占现有持仓的 51% 左右，其余是更早买的（603 不要求列出），那部分是什么价位、为什么买的看不出来；而且 603 只要求列买入，这期间有没有卖过也不一定看得到。所以把握最多算“中”。",
-     "前后三周它在 AI1、EQT、GTI、SPG（共 5 只） 减仓：像是把钱从那边挪到这只（调仓）。",
-     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
-    ],
-    "style": "多空对冲基金",
-    "tags": [
-     "大宗",
-     "换股"
-    ],
-    "how": "一次性的大宗交易，不是在市场上零散成交",
-    "purposes": [
-     {
-      "k": "dip",
-      "name": "逢低买入",
-      "p": 0.838
-     },
-     {
-      "k": "swap",
-      "name": "换股调入",
-      "p": 0.078
-     },
-     {
-      "k": "base",
-      "name": "普通加仓",
-      "p": 0.044
-     }
-    ],
-    "strength": 60,
-    "side": "buy"
-   }
-  },
-  {
-   "id": "mk-2924-03150085-3A704429",
-   "code": "EQT",
-   "company": "EQT Holdings Ltd",
-   "date": "2026-10-19",
-   "time": "16:56",
-   "headline": "Ceasing to be a substantial holder",
-   "url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03150085-3A704429",
-   "pdf_url": "https://asx.api.markitdigital.com/asx-research/1.0/file/2924-03150085-3A704429",
-   "price_sensitive": false,
-   "type": "ceasing",
-   "change_date": "2026-10-15",
-   "voting_power": [],
-   "lodged_code": "",
-   "holder": "Regal Funds Management",
-   "group": "主动基金",
-   "confidence": "高",
-   "ocr": false,
-   "sector": "Financials",
-   "insight": {
-    "action": "exit_profit",
-    "label": "减到 5% 以下，像获利了结",
-    "tone": "bear",
-    "confidence": "中",
-    "reasons": [
-     "持股比例降到 5% 以下（上一次披露是 6.41%）。之后的买卖不用再公告。",
-     "这次披露的明细里（8/24–10/15，26 笔）：买入 41.1 万股（均价约 $20.48），卖出 213 万股（均价约 $23.22）。",
-     "它卖出的量占了同期全市场成交量的 58%：是这段时间最主要的卖家之一，卖得很坚决。",
-     "变动时股价约 $22.31，之前近 1 个月 +3%、3 个月 +21%、6 个月 +12%、12 个月 +2%，处在一年区间（$15.19–$26.23）的中高位。",
-     "同期小盘股指数（Small Ordinaries）3 个月 -4%、12 个月 -18%：下面说这只股票“涨了/跌了”，看的是它比大盘多涨或多跌的部分。",
-     "卖出发生在收购消息（8/18「Takeover proposal from TPG Global」，消息出来后股价 +16%）之后：像是借收购带来的涨价退出，不等最终结果。",
-     "这是它近 4 个月在这只股票上连续第 2 次减仓。",
-     "上一份公告时持有 172 万股，这次明细里净卖出 172 万股：基本卖光了，是清仓。",
-     "持仓阶段：从首次越过 5% 披露线算起约 16 个月，持股比例最高到过 8.09%；这次之后比最高点至少少了 38%（按持股比例算，被增发摊薄的部分也算在里面）。之前公告过 3 次买入、1 次减仓。",
-     "这家基金的习惯（按它过去 66 次有后续的动作统计）：约 63% 的情况下一份公告还是同方向，约 15% 会在 3 个月内掉头——属于一般水平。",
-     "交易形状：这次卖的量有 100% 集中在 10/15 一天，是平时日成交量的 24 倍——是一次性卖给了接盘方（大宗交易），不是在市场上慢慢卖：卖得很干脆。",
-     "综合打分：最像「获利了结」（46%），依据：卖之前股价涨了一大段；借收购消息带来的涨价卖出；股价在一年区间的高位。其次是「借收购消息退出」19%、「换股调出」12%。",
-     "怎么做的：一次性的大宗交易，不是在市场上零散成交。",
-     "这个结论贴着边：「卖出发生在公司被收购的消息之后」这条证据的分量差三成，结论就会变成「收购消息后减到 5% 以下，借机退出」。",
-     "前后三周它在 EDU、ELS、TOR 加仓：这边卖、那边买，像是换股（调仓）。",
-     "多空对冲基金：既做多也做空，仓位变化快，一部分买卖可能是对冲或短线交易。"
-    ],
-    "style": "多空对冲基金",
-    "tags": [
-     "清仓",
-     "大宗",
-     "收购相关",
-     "连续减仓",
-     "已减三成",
-     "换股"
-    ],
-    "how": "一次性的大宗交易，不是在市场上零散成交",
-    "purposes": [
-     {
-      "k": "profit",
-      "name": "获利了结",
-      "p": 0.464
-     },
-     {
-      "k": "deal",
-      "name": "借收购消息退出",
-      "p": 0.188
-     },
-     {
-      "k": "swap",
-      "name": "换股调出",
-      "p": 0.122
-     }
-    ],
-    "strength": 80,
-    "side": "sell"
    }
   }
  ]
